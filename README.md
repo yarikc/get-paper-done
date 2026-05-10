@@ -129,6 +129,8 @@ This is an incremental refresh, not a full reset. Keep the existing artifacts, r
 
 `STATE.json` can still carry the saved next command and mode choice, such as `/gpd-outline --lite`, but `gpd status` will not let it skip structurally required artifacts. For example, a saved `/gpd-export` is ignored until a draft and review exist.
 
+After fact-check and review, `gpd status` also reads documented outcome fields. `FACT-CHECK.md` `Recommended Next Action` can send the paper back to research or revise. `REVIEW.md` verdicts of `Revise` or `Rework` route to `/gpd-revise`. A pending `FEEDBACK-PLAN.md` pauses at `/gpd-progress` until you approve, revise, or ignore the plan.
+
 ## Main Slash Commands
 
 The command files live in [commands/gpd](commands/gpd).

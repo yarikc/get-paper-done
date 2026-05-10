@@ -132,6 +132,64 @@ function testFactCheckChangeRoutesBackToReview() {
   assert.strictEqual(statusJson(paperDir).next, '/gpd-review --deep');
 }
 
+function testFactCheckRecommendedResearchRoutesBackToResearch() {
+  const paperDir = completePaper('fact-check-research');
+  writeArtifact(paperDir, 'FACT-CHECK.md', [
+    '# Fact And Claims Check',
+    '',
+    '## Recommended Next Action',
+    '',
+    '/gpd-research',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-research');
+}
+
+function testFactCheckRecommendedReviseRoutesToRevise() {
+  const paperDir = completePaper('fact-check-revise');
+  writeArtifact(paperDir, 'FACT-CHECK.md', [
+    '# Fact And Claims Check',
+    '',
+    '## Recommended Next Action',
+    '',
+    '/gpd-revise',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-revise');
+}
+
+function testReviewVerdictRoutesToRevise() {
+  const paperDir = completePaper('review-revise');
+  writeArtifact(paperDir, 'REVIEW.md', [
+    '# Review',
+    '',
+    '## Verdict',
+    '',
+    'Revise',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-revise');
+}
+
+function testPendingFeedbackPlanBlocksAutomaticRevise() {
+  const paperDir = completePaper('feedback-pending');
+  const state = readState(paperDir);
+  state.feedback.feedback_plan_status = 'Pending user approval';
+  state.suggested_next_command = '/gpd-revise';
+  writeState(paperDir, state);
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
+    '# Feedback Handling Plan',
+    '',
+    '**Status:** Pending user approval',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
+}
+
 testCleanCompletePaperUsesStateSuggestion();
 testBriefChangeRoutesBackToResearch();
 testStrategyChangeRoutesBackToResearch();
@@ -139,5 +197,9 @@ testResearchChangeRoutesBackToOutline();
 testOutlineChangeRoutesBackToDraft();
 testDraftChangeRoutesBackToFactCheck();
 testFactCheckChangeRoutesBackToReview();
+testFactCheckRecommendedResearchRoutesBackToResearch();
+testFactCheckRecommendedReviseRoutesToRevise();
+testReviewVerdictRoutesToRevise();
+testPendingFeedbackPlanBlocksAutomaticRevise();
 
 console.log('workflow scenario tests passed');

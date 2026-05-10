@@ -307,7 +307,9 @@ Suggested next command precedence:
 1. Missing setup artifacts and blocking strategy statuses route back to `/gpd-brief`.
 2. Upstream artifacts newer than downstream artifacts route backward for incremental refresh: brief/strategy to research, research to outline, outline to draft, draft to fact-check, and fact-check to review.
 3. A saved `STATE.json` `suggested_next_command` is used only when it is structurally plausible. It cannot skip required artifacts, such as exporting without a draft and review or drafting without an outline.
-4. If no saved command can be trusted, artifact presence determines the next command.
+4. Fact-check and review outcome fields can route backward: fact-check recommended next action may send the paper to research or revise, and review verdicts of `Revise` or `Rework` route to revision.
+5. Pending feedback plans pause at progress/status until the user approves, revises, or ignores the plan.
+6. If no saved command can be trusted and no content outcome applies, artifact presence determines the next command.
 
 Blocking conditions:
 

@@ -157,6 +157,49 @@ function parseStrategyFallback(strategyMarkdown) {
   };
 }
 
+function parseHeadingValue(markdown, heading) {
+  if (!markdown) return null;
+  const lines = markdown.split(/\r?\n/);
+  const target = `## ${heading.toLowerCase()}`;
+  for (let i = 0; i < lines.length; i += 1) {
+    if (lines[i].trim().toLowerCase() === target) {
+      for (let j = i + 1; j < lines.length; j += 1) {
+        const value = lines[j].trim();
+        if (value.startsWith('## ')) return null;
+        if (value) return stripMarkdownValue(value);
+      }
+    }
+  }
+  return null;
+}
+
+function artifactContent(paperDir, artifactName) {
+  return readIfExists(artifactPath(paperDir, artifactName));
+}
+
+function feedbackPlanPending(state) {
+  const feedback = state.machineState ? state.machineState.feedback : null;
+  if (
+    feedback
+    && typeof feedback.feedback_plan_status === 'string'
+    && feedback.feedback_plan_status.toLowerCase().includes('pending')
+  ) {
+    return true;
+  }
+
+  const markdown = artifactContent(state.paperDir, 'FEEDBACK-PLAN.md');
+  const status = parseMarkdownField(markdown, 'Status');
+  return status ? status.toLowerCase().includes('pending') : false;
+}
+
+function factCheckRecommendedAction(state) {
+  return parseHeadingValue(artifactContent(state.paperDir, 'FACT-CHECK.md'), 'Recommended Next Action');
+}
+
+function reviewVerdict(state) {
+  return parseHeadingValue(artifactContent(state.paperDir, 'REVIEW.md'), 'Verdict');
+}
+
 function artifactState(paperDir) {
   const meta = path.join(paperDir, '.paper');
   const artifactNames = [
@@ -220,12 +263,22 @@ function suggestedNext(state) {
   if (artifactNewerThan(state.paperDir, 'RESEARCH.json', 'OUTLINE.md')) return '/gpd-outline --deep';
   if (artifactNewerThan(state.paperDir, 'OUTLINE.md', 'DRAFT.md')) return '/gpd-draft';
   if (artifactNewerThan(state.paperDir, 'DRAFT.md', 'FACT-CHECK.md')) return '/gpd-fact-check --full';
+
+  const factCheckAction = factCheckRecommendedAction(state);
+  if (factCheckAction === '/gpd-research') return '/gpd-research';
+  if (factCheckAction === '/gpd-revise') return '/gpd-revise';
+
   if (
     artifactNewerThan(state.paperDir, 'DRAFT.md', 'REVIEW.md')
     || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
   ) {
     return '/gpd-review --deep';
   }
+  if (feedbackPlanPending(state)) return '/gpd-progress';
+
+  const verdict = reviewVerdict(state);
+  if (verdict === 'Revise' || verdict === 'Rework') return '/gpd-revise';
+
   const nextFromState = savedNextCommand(state);
   if (nextFromState && savedNextCommandIsPlausible(nextFromState, a)) {
     return nextFromState;

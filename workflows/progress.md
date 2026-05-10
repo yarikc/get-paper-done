@@ -109,10 +109,12 @@ Use this order:
 14. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
 15. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
 16. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
-17. `FEEDBACK-PLAN.md` exists and is pending approval → ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
-18. `REVIEW.md`, `FACT-CHECK.md`, or approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
-19. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
-20. Final exists → paper appears exported; recommend review only if new changes are planned.
+17. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-progress`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
+18. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
+19. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
+20. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
+21. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
+22. Final exists → paper appears exported; recommend review only if new changes are planned.
 
 Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
 
