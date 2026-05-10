@@ -234,7 +234,7 @@ The framework package is not the paper workspace. Paper-specific state and sourc
 
 ## Audience System
 
-Reusable author profiles can live in [profiles](profiles). The starter profile [profiles/yarik.md](profiles/yarik.md) captures Yarik's default writing voice and can be imported into a paper-specific `.paper/PERSONA.md`.
+Reusable author profiles can live in [profiles](profiles). The starter profile [profiles/head-data-ai-architecture.md](profiles/head-data-ai-architecture.md) captures a Head of Data and AI Architecture voice for regulated financial-services and enterprise technology contexts. It can be imported into a paper-specific `.paper/PERSONA.md`.
 
 Reusable audience personas live in [audiences](audiences):
 
@@ -358,7 +358,7 @@ The first command is optional but recommended when importing existing work. `--d
 Or from the AI runtime:
 
 ```text
-/gpd-import-paper --source "/path/to/current-paper-or-folder" --location ~/papers --slug lifecycle-framework --profile yarik
+/gpd-import-paper --source "/path/to/current-paper-or-folder" --location ~/papers --slug lifecycle-framework --profile head-data-ai-architecture
 ```
 
 Import is preservation-first. It creates a new paper directory, copies original material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and presents a post-import menu.

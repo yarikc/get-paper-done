@@ -5,7 +5,7 @@
 - **Project:** Get Paper Done
 - **Version:** 0.1 design baseline
 - **Status:** Prompt-first framework prototype
-- **Primary user:** Yarik Chinskiy
+- **Primary user:** Senior data and AI architecture leader in regulated enterprise environments
 - **Primary use cases:** newsletters, blog posts, position papers, white papers, executive strategy papers
 
 ## Problem
@@ -56,7 +56,7 @@ The primary user is a senior technology executive writing serious papers where:
 - generic prose is a failure
 - context overload materially reduces output quality
 
-The default reusable author profile is `profiles/yarik.md`, but every paper uses a local `.paper/PERSONA.md` as authoritative context.
+The default reusable author profile is `profiles/head-data-ai-architecture.md`, but every paper uses a local `.paper/PERSONA.md` as authoritative context.
 
 ## Workspace Model
 

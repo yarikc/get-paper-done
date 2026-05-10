@@ -70,7 +70,7 @@ function testListCommands() {
   assert(audiences.some((item) => item.slug === 'cxo-reader'));
 
   const profiles = JSON.parse(run(['list-profiles', '--json']));
-  assert(profiles.some((item) => item.slug === 'yarik'));
+  assert(profiles.some((item) => item.slug === 'head-data-ai-architecture'));
 }
 
 function testInitStatusValidate() {
