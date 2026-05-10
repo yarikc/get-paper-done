@@ -43,7 +43,7 @@ Users choose audiences, not agents. Run audience review through the single inter
 
 If multiple curated personas are selected, score each selected audience and include an audience conflict table that names the tension, audiences in conflict, priority rule, and recommended handling.
 
-Audience review must use the fixed rubric:
+Audience review must use the fixed seven-dimension rubric from `references/audience-review-rubric.md`. Each dimension is scored on a 1-5 scale:
 
 - thesis clarity
 - audience relevance

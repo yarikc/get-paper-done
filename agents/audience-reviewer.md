@@ -86,7 +86,7 @@ Track:
 
 ## 4. Score The Draft
 
-Use the fixed 1-5 rubric from `references/audience-review-rubric.md`.
+Use the fixed seven-dimension rubric from `references/audience-review-rubric.md`. Score each dimension on a 1-5 scale.
 
 Score:
 

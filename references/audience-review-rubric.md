@@ -1,6 +1,6 @@
 # Audience Review Rubric
 
-Use this fixed rubric when scoring outlines or drafts for audience fit.
+Use this fixed seven-dimension rubric when scoring outlines or drafts for audience fit.
 
 Score each dimension from 1 to 5.
 

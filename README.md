@@ -160,7 +160,7 @@ Audience review supports two modes:
 - **Lite:** early outline or brief review. Fast, blunt scoring and top fixes.
 - **Deep:** late-stage draft review. Adds reverse outline, objection mapping, and decision-gap analysis.
 
-Audience scoring uses a fixed 1-5 rubric:
+Audience review uses seven fixed dimensions, each scored on a 1-5 scale:
 
 - Thesis clarity
 - Audience relevance
