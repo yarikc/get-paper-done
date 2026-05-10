@@ -92,6 +92,42 @@ function artifactNewerThan(paperDir, upstream, downstream) {
   return upstreamMtime !== null && downstreamMtime !== null && upstreamMtime > downstreamMtime;
 }
 
+function savedNextCommand(state) {
+  if (
+    state.machineState
+    && state.machineState.version === CURRENT_STATE_VERSION
+    && typeof state.machineState.suggested_next_command === 'string'
+    && state.machineState.suggested_next_command.trim()
+  ) {
+    return state.machineState.suggested_next_command.trim();
+  }
+  return null;
+}
+
+function baseCommand(command) {
+  return command.trim().split(/\s+/)[0];
+}
+
+function savedNextCommandIsPlausible(command, artifacts) {
+  switch (baseCommand(command)) {
+    case '/gpd-export':
+      return artifacts['DRAFT.md'] && artifacts['REVIEW.md'];
+    case '/gpd-revise':
+      return artifacts['DRAFT.md'] && (
+        artifacts['REVIEW.md']
+        || artifacts['FACT-CHECK.md']
+        || artifacts['FEEDBACK-PLAN.md']
+      );
+    case '/gpd-review':
+    case '/gpd-fact-check':
+      return artifacts['DRAFT.md'];
+    case '/gpd-draft':
+      return artifacts['OUTLINE.md'];
+    default:
+      return true;
+  }
+}
+
 function stripMarkdownValue(value) {
   return value
     .trim()
@@ -190,13 +226,9 @@ function suggestedNext(state) {
   ) {
     return '/gpd-review --deep';
   }
-  if (
-    state.machineState
-    && state.machineState.version === CURRENT_STATE_VERSION
-    && typeof state.machineState.suggested_next_command === 'string'
-    && state.machineState.suggested_next_command.trim()
-  ) {
-    return state.machineState.suggested_next_command;
+  const nextFromState = savedNextCommand(state);
+  if (nextFromState && savedNextCommandIsPlausible(nextFromState, a)) {
+    return nextFromState;
   }
   if (!a['RESEARCH.json']) return '/gpd-research';
   if (!a['OUTLINE.md']) return '/gpd-outline --deep';
@@ -263,6 +295,13 @@ function validate(input = {}) {
   }
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
     issues.push({ severity: 'HIGH', issue: `Strategy blocks downstream work: ${state.primaryBlocker || state.strategyStatus}` });
+  }
+  const nextFromState = savedNextCommand(state);
+  if (nextFromState && !savedNextCommandIsPlausible(nextFromState, a)) {
+    issues.push({
+      severity: 'HIGH',
+      issue: `STATE.json suggested_next_command ${nextFromState} is incompatible with current artifacts`,
+    });
   }
   if (a['DRAFT.md'] && !a['OUTLINE.md']) issues.push({ severity: 'MEDIUM', issue: 'Draft exists before OUTLINE.md' });
   if (a['REVIEW.md'] && !a['DRAFT.md']) issues.push({ severity: 'HIGH', issue: 'REVIEW.md exists without DRAFT.md' });

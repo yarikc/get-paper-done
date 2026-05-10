@@ -114,6 +114,8 @@ Use this order:
 19. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
 20. Final exists → paper appears exported; recommend review only if new changes are planned.
 
+Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
+
 ## 5. Context Guidance
 
 Always include context guidance:

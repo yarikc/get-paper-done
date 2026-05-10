@@ -293,7 +293,7 @@ Existing curated personas are never used blindly. The workflow summarizes and su
 
 ## State And Blocking
 
-`STATE.md` is intentionally small and human-readable. `STATE.json` is the machine-readable companion and is the CLI source of truth when present. Both track:
+`STATE.md` is intentionally small and human-readable. `STATE.json` is the machine-readable companion and the preferred CLI state source when present. The CLI still checks hard gates, artifact freshness, and structural prerequisites before trusting a saved next command. Both state files track:
 
 - current stage
 - last completed stage
@@ -301,6 +301,13 @@ Existing curated personas are never used blindly. The workflow summarizes and su
 - feedback approval state
 - post-import choices when applicable
 - suggested next command
+
+Suggested next command precedence:
+
+1. Missing setup artifacts and blocking strategy statuses route back to `/gpd-brief`.
+2. Upstream artifacts newer than downstream artifacts route backward for incremental refresh: brief/strategy to research, research to outline, outline to draft, draft to fact-check, and fact-check to review.
+3. A saved `STATE.json` `suggested_next_command` is used only when it is structurally plausible. It cannot skip required artifacts, such as exporting without a draft and review or drafting without an outline.
+4. If no saved command can be trusted, artifact presence determines the next command.
 
 Blocking conditions:
 

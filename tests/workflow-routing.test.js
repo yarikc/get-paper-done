@@ -60,6 +60,7 @@ function testFreshInitRoutesToBrief() {
 function testStateSuggestedNextWinsAfterHardGatesPass() {
   const paperDir = initFixture('state-suggested-next');
   const state = readState(paperDir);
+  fs.writeFileSync(path.join(paperDir, '.paper', 'RESEARCH.json'), '{"research_plan":{},"source_registry":[],"evidence_matrix":[]}\n');
   state.status = 'Research Complete';
   state.current_stage = 'Research';
   state.last_completed_stage = 'Research';
@@ -73,6 +74,25 @@ function testStateSuggestedNextWinsAfterHardGatesPass() {
   writeState(paperDir, state);
 
   assert.strictEqual(statusJson(paperDir).next, '/gpd-outline --lite');
+}
+
+function testImpossibleStateSuggestedNextFallsBackToArtifacts() {
+  const paperDir = initFixture('impossible-state-next');
+  const state = readState(paperDir);
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  writeState(paperDir, state);
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-research');
+
+  const validation = runFail(['validate', '--paper', paperDir]);
+  assert.strictEqual(validation.status, 1);
+  assert(validation.stdout.includes('STATE.json suggested_next_command /gpd-export is incompatible with current artifacts'));
 }
 
 function testBlockedStrategyOverridesBadSuggestedNext() {
@@ -111,6 +131,7 @@ function testMalformedStrategyFallbackDoesNotBecomeRoutingState() {
 
 testFreshInitRoutesToBrief();
 testStateSuggestedNextWinsAfterHardGatesPass();
+testImpossibleStateSuggestedNextFallsBackToArtifacts();
 testBlockedStrategyOverridesBadSuggestedNext();
 testUnsupportedFutureStateVersionFailsValidation();
 testMalformedStrategyFallbackDoesNotBecomeRoutingState();

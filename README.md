@@ -127,6 +127,8 @@ Moving backward is normal. If you change an upstream artifact after downstream w
 
 This is an incremental refresh, not a full reset. Keep the existing artifacts, rerun the suggested stage, and let that stage update its artifact plus state. Use a full manual reset only when you intentionally want to discard an artifact rather than revise it.
 
+`STATE.json` can still carry the saved next command and mode choice, such as `/gpd-outline --lite`, but `gpd status` will not let it skip structurally required artifacts. For example, a saved `/gpd-export` is ignored until a draft and review exist.
+
 ## Main Slash Commands
 
 The command files live in [commands/gpd](commands/gpd).
