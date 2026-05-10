@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://get-paper-done.local/schemas/research.schema.json",
+  "title": "GPD Research",
+  "type": "object",
+  "required": [
+    "metadata",
+    "research_plan",
+    "research_brief",
+    "source_registry",
+    "evidence_matrix",
+    "synthesis_matrix",
+    "contradictions",
+    "open_questions",
+    "draft_support_notes",
+    "facts_safe_to_use",
+    "claims_to_soften",
+    "claims_to_drop_or_reframe"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["topic", "scope", "depth", "source_mode", "created_at", "updated_at"],
+      "properties": {
+        "topic": { "type": "string" },
+        "scope": { "type": "string" },
+        "depth": { "type": "string" },
+        "source_mode": { "type": "string" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      }
+    },
+    "research_plan": {
+      "type": "object",
+      "required": [
+        "inferred_research_questions",
+        "depth_rationale",
+        "source_mode_rationale",
+        "user_feedback"
+      ],
+      "properties": {
+        "inferred_research_questions": { "type": "array" },
+        "depth_rationale": { "type": "string" },
+        "source_mode_rationale": { "type": "string" },
+        "user_feedback": { "type": "string" }
+      }
+    },
+    "research_brief": {
+      "type": "object",
+      "required": ["executive_summary", "key_findings"],
+      "properties": {
+        "executive_summary": { "type": "string" },
+        "key_findings": { "type": "array" }
+      }
+    },
+    "source_registry": { "type": "array" },
+    "evidence_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim_id",
+          "claim",
+          "claim_type",
+          "research_questions",
+          "supporting_sources",
+          "contradicting_sources",
+          "strength_of_support",
+          "confidence",
+          "recommended_handling",
+          "notes"
+        ],
+        "properties": {
+          "claim_id": { "type": "string" },
+          "claim": { "type": "string" },
+          "claim_type": {
+            "type": "string",
+            "enum": [
+              "factual",
+              "causal",
+              "strategic_judgment",
+              "technical_mechanism",
+              "market_trend",
+              "recommendation"
+            ]
+          },
+          "research_questions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "supporting_sources": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "contradicting_sources": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "strength_of_support": {
+            "type": "string",
+            "enum": ["strong", "moderate", "weak", "none"]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["high", "medium", "low"]
+          },
+          "recommended_handling": {
+            "type": "string",
+            "enum": ["keep", "support_more", "soften", "narrow", "caveat", "drop"]
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "synthesis_matrix": {
+      "type": "object",
+      "required": ["themes", "rows"],
+      "properties": {
+        "themes": { "type": "array" },
+        "rows": { "type": "array" }
+      }
+    },
+    "contradictions": { "type": "array" },
+    "open_questions": { "type": "array" },
+    "draft_support_notes": { "type": "array" },
+    "facts_safe_to_use": { "type": "array" },
+    "claims_to_soften": { "type": "array" },
+    "claims_to_drop_or_reframe": { "type": "array" }
+  }
+}

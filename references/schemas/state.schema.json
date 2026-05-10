@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://get-paper-done.local/schemas/state.schema.json",
+  "title": "GPD State",
+  "type": "object",
+  "required": [
+    "version",
+    "status",
+    "current_stage",
+    "last_completed_stage",
+    "last_activity",
+    "suggested_next_command",
+    "blocked_by",
+    "strategy",
+    "feedback",
+    "post_import_choices"
+  ],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "status": { "type": "string", "minLength": 1 },
+    "current_stage": { "type": "string", "minLength": 1 },
+    "last_completed_stage": { "type": "string", "minLength": 1 },
+    "last_activity": { "type": "string", "minLength": 1 },
+    "suggested_next_command": { "type": "string", "minLength": 1 },
+    "blocked_by": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "strategy": {
+      "type": "object",
+      "required": [
+        "status",
+        "blocking_issues",
+        "primary_blocker",
+        "block_severity",
+        "required_unblock_action"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["Go", "Revise Before Drafting", "No-Go"]
+        },
+        "blocking_issues": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "primary_blocker": {
+          "type": "string",
+          "enum": ["none", "thesis_weak", "audience_unclear", "missing_outcome"]
+        },
+        "block_severity": {
+          "type": "string",
+          "enum": ["None", "Medium", "High"]
+        },
+        "required_unblock_action": {
+          "type": "string",
+          "enum": ["none", "brief_revision"]
+        }
+      }
+    },
+    "feedback": {
+      "type": "object",
+      "required": ["feedback_plan_status", "approved_handling"],
+      "properties": {
+        "feedback_plan_status": { "type": "string" },
+        "approved_handling": { "type": "string" }
+      }
+    },
+    "post_import_choices": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

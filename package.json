@@ -8,7 +8,7 @@
   },
   "scripts": {
     "check": "node bin/gpd.js install claude --dry-run --target /tmp/gpd-install-check && node bin/gpd.js install codex --dry-run --target /tmp/gpd-install-check-codex && node bin/gpd.js version && npm test",
-    "test": "node tests/gpd-cli.test.js"
+    "test": "node tests/gpd-cli.test.js && node tests/artifact-contracts.test.js && node tests/workflow-consistency.test.js"
   },
   "keywords": [
     "ai",

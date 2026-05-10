@@ -13,6 +13,8 @@ const {
   printStatus,
   validate,
   printValidation,
+  validateArtifact,
+  printArtifactValidation,
   listMarkdownItems,
 } = require('./lib/workspace');
 
@@ -27,6 +29,7 @@ Commands:
   import                       Import an existing paper folder/file into a workspace
   status                       Show current paper workspace state
   validate                     Validate current paper workspace state
+  validate-artifact            Validate one GPD artifact contract
   list-audiences               List reusable audience personas
   list-profiles                List reusable author profiles
   version                      Print GPD version
@@ -39,6 +42,7 @@ Options:
   --title TITLE                Paper title for init/import
   --source PATH                Source folder/file for import
   --paper DIR                  Existing paper directory for status/validate
+  --path FILE                  Artifact path for validate-artifact
   --json                       Print JSON for list/status/validate
   --dry-run                    Show planned changes without writing
   --no-backup                  Do not back up changed installed files
@@ -52,6 +56,7 @@ Examples:
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
   gpd validate
+  gpd validate-artifact --path ~/papers/metadata-strategy/.paper/STATE.json
   gpd list-audiences
 `);
 }
@@ -99,6 +104,9 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--paper') {
       args.paper = argv[i + 1];
+      i += 1;
+    } else if (arg === '--path') {
+      args.path = argv[i + 1];
       i += 1;
     } else {
       throw new Error(`Unknown option: ${arg}`);
@@ -171,6 +179,16 @@ function main(argv) {
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printValidation(result);
     if (!result.ok) process.exitCode = 1;
+    return;
+  }
+
+  if (command === 'validate-artifact') {
+    const args = parseWorkspaceOptions(rest);
+    if (!args.path) throw new Error('Missing required option: --path');
+    const issues = validateArtifact(args.path);
+    if (args.json) console.log(JSON.stringify({ path: args.path, issues, ok: issues.length === 0 }, null, 2));
+    else printArtifactValidation(args.path, issues);
+    if (issues.length > 0) process.exitCode = 1;
     return;
   }
 

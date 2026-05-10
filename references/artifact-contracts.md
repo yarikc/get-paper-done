@@ -1,0 +1,118 @@
+# Artifact Contracts
+
+GPD artifacts are written by prompts and consumed by later prompts plus CLI validation. These contracts define the minimum structure needed for downstream stages to work. They are structural contracts, not quality judgments.
+
+## JSON Artifacts
+
+JSON artifacts must parse and conform to the schemas in `references/schemas/`.
+
+| Artifact | Schema | Purpose |
+|----------|--------|---------|
+| `.paper/STATE.json` | `references/schemas/state.schema.json` | Machine-readable workspace state, blockers, feedback state, and next command. |
+| `.paper/config.json` | `references/schemas/config.schema.json` | Paper workflow configuration and feature toggles. |
+| `.paper/RESEARCH.json` | `references/schemas/research.schema.json` | Canonical structured research, source registry, evidence matrix, synthesis, gaps, and draft support notes. |
+
+## Markdown Artifacts
+
+Markdown artifacts must contain the headings and table columns listed below when the artifact exists as a completed stage output.
+
+### `STRATEGY.md`
+
+Required headings:
+
+- `# Strategy Review`
+- `## Strategic Readiness`
+- `## Strategy Blockers`
+- `## Thesis Package`
+- `### Thesis Tests`
+- `## Strategic Gaps`
+- `## Recommended Shape`
+- `## Block / Override`
+
+Required tables:
+
+- Thesis Tests: `Test`, `Pass?`, `Notes`
+- Strategic Gaps: `ID`, `Type`, `Description`, `Why It Matters`, `Fix Instruction`
+
+### `OUTLINE.md`
+
+Required headings:
+
+- `# Outline`
+- `## Mode`
+- `## Structure Verdict`
+- `## Reader Journey`
+- `## Section Architecture`
+- `## Objection Map`
+- `## Drafting Risks`
+
+Required tables:
+
+- Section Architecture: `Section`, `Objective`, `Reader State In`, `Reader State Out`, `Main Claim`, `Evidence Hooks`, `Evidence Strength`, `Reader Questions`, `Objection Handled`, `Approx Length`, `Transition To Next`, `Keep/Cut`
+- Objection Map: `Objection`, `Where Addressed`, `Handling`
+
+### `FACT-CHECK.md`
+
+Required headings:
+
+- `# Fact And Claims Check`
+- `## Mode`
+- `## Claims Risk Verdict`
+- `## Claim Inventory`
+- `## Claim Issues`
+- `## Source Gaps`
+- `## Synthesis Integrity`
+- `## Systemic Risk Report`
+- `## Recommended Next Action`
+
+Required tables:
+
+- Claim Inventory: `Claim ID`, `Claim`, `Type`, `Location`, `Risk`, `Check Status`
+- Claim Issues: `Severity`, `Claim ID`, `Claim`, `Issue`, `Evidence Status`, `Source(s)`, `Recommended Fix`, `Suggested Wording`
+- Source Gaps: `Gap`, `Source Type Needed`, `Blocks Publication?`
+
+### `REVIEW.md`
+
+Required headings:
+
+- `# Review`
+- `## Verdict`
+- `## Scores`
+- `## Required Fixes`
+- `## Audience Review Scorecard`
+- `## Unsupported Or Risky Claims`
+- `## Revision Plan`
+- `## Done Checklist`
+
+Required tables:
+
+- Scores: `Dimension`, `Score`, `Notes`
+- Audience Review Scorecard: `Dimension`, `Score`, `Why`, `Actionable Rewrite Instruction If 3 Or Below`
+- Unsupported Or Risky Claims: `Claim`, `Issue`, `Recommended Fix`
+
+Audience Review Scorecard must include exactly these seven dimensions:
+
+- Thesis clarity
+- Audience relevance
+- Evidence sufficiency
+- Objection handling
+- Jargon appropriateness
+- Decision usefulness
+- Structural flow
+
+### `FEEDBACK-PLAN.md`
+
+Required headings:
+
+- `# Feedback Handling Plan`
+- `## Summary`
+- `## Proposed Handling`
+- `## Incorporate`
+- `## Ignore`
+- `## Defer`
+- `## User Decisions Needed`
+- `## Approval Gate`
+
+Required tables:
+
+- Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `Affected Artifact`

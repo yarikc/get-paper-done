@@ -53,13 +53,13 @@
     {
       "claim_id": "C1",
       "claim": "",
-      "claim_type": "factual | causal | strategic_judgment | technical_mechanism | market_trend | recommendation",
+      "claim_type": "factual",
       "research_questions": ["RQ1"],
       "supporting_sources": ["S1"],
       "contradicting_sources": [],
-      "strength_of_support": "strong | moderate | weak | none",
-      "confidence": "high | medium | low",
-      "recommended_handling": "keep | support_more | soften | narrow | caveat | drop",
+      "strength_of_support": "weak",
+      "confidence": "medium",
+      "recommended_handling": "support_more",
       "notes": ""
     }
   ],

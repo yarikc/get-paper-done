@@ -16,6 +16,10 @@ const {
   validate,
   printValidation,
 } = require('./state');
+const {
+  validateArtifact,
+  printArtifactValidation,
+} = require('./validate');
 
 module.exports = {
   slugify,
@@ -25,5 +29,7 @@ module.exports = {
   printStatus,
   validate,
   printValidation,
+  validateArtifact,
+  printArtifactValidation,
   listMarkdownItems,
 };

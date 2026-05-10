@@ -1,0 +1,194 @@
+'use strict';
+
+const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { execFileSync, spawnSync } = require('child_process');
+
+const repoRoot = path.resolve(__dirname, '..');
+const gpd = path.join(repoRoot, 'bin', 'gpd.js');
+
+function run(args, options = {}) {
+  return execFileSync(process.execPath, [gpd, ...args], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    ...options,
+  });
+}
+
+function runFail(args, options = {}) {
+  return spawnSync(process.execPath, [gpd, ...args], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    ...options,
+  });
+}
+
+function tempDir(name) {
+  return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
+}
+
+function testTemplateArtifactsPassContracts() {
+  for (const file of [
+    'templates/state.json',
+    'templates/config.json',
+    'templates/research.json',
+    'templates/strategy.md',
+    'templates/outline.md',
+    'templates/fact-check.md',
+    'templates/review.md',
+    'templates/feedback-plan.md',
+  ]) {
+    const output = run(['validate-artifact', '--path', path.join(repoRoot, file)]);
+    assert(output.includes('validation: ok'), file);
+  }
+}
+
+function testJsonSchemaFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-json-test');
+  const badState = path.join(dir, 'STATE.json');
+  fs.writeFileSync(badState, JSON.stringify({
+    version: 1,
+    status: 'Initialized',
+    current_stage: 'Strategy Gate',
+    last_completed_stage: 'Setup',
+    last_activity: new Date().toISOString(),
+    suggested_next_command: '/gpd-brief',
+    blocked_by: [],
+    strategy: {
+      blocking_issues: [],
+      primary_blocker: 'none',
+      block_severity: 'None',
+      required_unblock_action: 'none',
+    },
+    feedback: {
+      feedback_plan_status: 'Not created',
+      approved_handling: '',
+    },
+    post_import_choices: [],
+  }, null, 2));
+
+  const result = runFail(['validate-artifact', '--path', badState]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('STATE.json: $.strategy.status is required'));
+}
+
+function testStateEnumFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-state-enum-test');
+  const badState = path.join(dir, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'state.json'), 'utf8'));
+  state.strategy.primary_blocker = 'thesis_typo';
+  state.strategy.required_unblock_action = 'rewrite_the_thing';
+  fs.writeFileSync(badState, JSON.stringify(state, null, 2));
+
+  const result = runFail(['validate-artifact', '--path', badState]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('STATE.json: $.strategy.primary_blocker must be one of none, thesis_weak, audience_unclear, missing_outcome'));
+  assert(result.stdout.includes('STATE.json: $.strategy.required_unblock_action must be one of none, brief_revision'));
+}
+
+function testResearchEnumFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-research-enum-test');
+  const badResearch = path.join(dir, 'RESEARCH.json');
+  const research = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'research.json'), 'utf8'));
+  research.evidence_matrix[0].claim_type = 'vibes';
+  research.evidence_matrix[0].strength_of_support = 'pretty_good';
+  research.evidence_matrix[0].recommended_handling = 'wing_it';
+  fs.writeFileSync(badResearch, JSON.stringify(research, null, 2));
+
+  const result = runFail(['validate-artifact', '--path', badResearch]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].claim_type must be one of factual, causal, strategic_judgment, technical_mechanism, market_trend, recommendation'));
+  assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].strength_of_support must be one of strong, moderate, weak, none'));
+  assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].recommended_handling must be one of keep, support_more, soften, narrow, caveat, drop'));
+}
+
+function testMarkdownContractFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-md-test');
+  const badReview = path.join(dir, 'REVIEW.md');
+  const review = fs.readFileSync(path.join(repoRoot, 'templates', 'review.md'), 'utf8')
+    .replace('| Structural flow | [1-5] | [why] | [instruction or "-"] |\n', '');
+  fs.writeFileSync(badReview, review);
+
+  const result = runFail(['validate-artifact', '--path', badReview]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('REVIEW.md: Audience Review Scorecard missing dimension "Structural flow"'));
+}
+
+function testMarkdownContractRejectsUnexpectedAudienceDimension() {
+  const dir = tempDir('gpd-artifact-md-extra-test');
+  const badReview = path.join(dir, 'REVIEW.md');
+  const review = fs.readFileSync(path.join(repoRoot, 'templates', 'review.md'), 'utf8')
+    .replace(
+      '| Structural flow | [1-5] | [why] | [instruction or "-"] |\n',
+      '| Structural flow | [1-5] | [why] | [instruction or "-"] |\n| Extra dimension | [1-5] | [why] | [instruction or "-"] |\n',
+    );
+  fs.writeFileSync(badReview, review);
+
+  const result = runFail(['validate-artifact', '--path', badReview]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('REVIEW.md: Audience Review Scorecard has unexpected dimension "Extra dimension"'));
+}
+
+function testMarkdownContractRejectsMalformedHeading() {
+  const dir = tempDir('gpd-artifact-md-heading-test');
+  const badReview = path.join(dir, 'REVIEW.md');
+  const review = fs.readFileSync(path.join(repoRoot, 'templates', 'review.md'), 'utf8')
+    .replace('# Review\n', '# Review Notes\n');
+  fs.writeFileSync(badReview, review);
+
+  const result = runFail(['validate-artifact', '--path', badReview]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('REVIEW.md: Missing heading "# Review"'));
+}
+
+function testUnknownArtifactFailsCli() {
+  const result = runFail(['validate-artifact', '--path', path.join(repoRoot, 'README.md')]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('README.md: No artifact contract found'));
+}
+
+function testPaperValidationIncludesArtifactContracts() {
+  const dir = tempDir('gpd-paper-contract-test');
+  run(['init', '--location', dir, '--slug', 'contract-paper']);
+  const paperDir = path.join(dir, 'contract-paper');
+  fs.writeFileSync(path.join(paperDir, '.paper', 'config.json'), JSON.stringify({
+    mode: 'interactive',
+    paper_type: 'blog',
+    default_length: {
+      newsletter: '800-1200 words',
+      blog: '1200-1800 words',
+      position_paper: '1800-3000 words',
+      white_paper: '3000-6000 words',
+    },
+    citation_style: 'inline_links',
+    research: {
+      web_allowed: true,
+      require_source_table: 'yes',
+      flag_unsupported_claims: true,
+    },
+    review: {
+      audience_fit: true,
+      opposition_review: true,
+      fact_check: true,
+      persona_consistency: true,
+    },
+  }, null, 2));
+
+  const result = runFail(['validate', '--paper', paperDir]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('config.json: $.research.require_source_table expected boolean, got string'));
+}
+
+testTemplateArtifactsPassContracts();
+testJsonSchemaFailureIsActionable();
+testStateEnumFailureIsActionable();
+testResearchEnumFailureIsActionable();
+testMarkdownContractFailureIsActionable();
+testMarkdownContractRejectsUnexpectedAudienceDimension();
+testMarkdownContractRejectsMalformedHeading();
+testUnknownArtifactFailsCli();
+testPaperValidationIncludesArtifactContracts();
+
+console.log('artifact contract tests passed');

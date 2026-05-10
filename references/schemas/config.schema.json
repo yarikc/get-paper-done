@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://get-paper-done.local/schemas/config.schema.json",
+  "title": "GPD Paper Config",
+  "type": "object",
+  "required": [
+    "mode",
+    "paper_type",
+    "default_length",
+    "citation_style",
+    "research",
+    "review"
+  ],
+  "properties": {
+    "mode": { "type": "string", "minLength": 1 },
+    "paper_type": { "type": "string", "minLength": 1 },
+    "default_length": {
+      "type": "object",
+      "required": ["newsletter", "blog", "position_paper", "white_paper"],
+      "properties": {
+        "newsletter": { "type": "string", "minLength": 1 },
+        "blog": { "type": "string", "minLength": 1 },
+        "position_paper": { "type": "string", "minLength": 1 },
+        "white_paper": { "type": "string", "minLength": 1 }
+      }
+    },
+    "citation_style": { "type": "string", "minLength": 1 },
+    "research": {
+      "type": "object",
+      "required": ["web_allowed", "require_source_table", "flag_unsupported_claims"],
+      "properties": {
+        "web_allowed": { "type": "boolean" },
+        "require_source_table": { "type": "boolean" },
+        "flag_unsupported_claims": { "type": "boolean" }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": [
+        "audience_fit",
+        "opposition_review",
+        "fact_check",
+        "persona_consistency"
+      ],
+      "properties": {
+        "audience_fit": { "type": "boolean" },
+        "opposition_review": { "type": "boolean" },
+        "fact_check": { "type": "boolean" },
+        "persona_consistency": { "type": "boolean" }
+      }
+    }
+  }
+}

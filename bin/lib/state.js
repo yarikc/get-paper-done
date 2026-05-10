@@ -7,6 +7,9 @@ const {
   expandHome,
   writeFile,
 } = require('./common');
+const {
+  validatePaperArtifacts,
+} = require('./validate');
 
 const allowedStrategyStatuses = new Set(['Go', 'Revise Before Drafting', 'No-Go']);
 
@@ -112,6 +115,7 @@ function artifactState(paperDir) {
     'FEEDBACK-PLAN.md',
     'STATE.md',
     'STATE.json',
+    'config.json',
   ];
   const artifacts = {};
   for (const name of artifactNames) {
@@ -208,6 +212,7 @@ function validate(input = {}) {
   }
   if (a['DRAFT.md'] && !a['OUTLINE.md']) issues.push({ severity: 'MEDIUM', issue: 'Draft exists before OUTLINE.md' });
   if (a['REVIEW.md'] && !a['DRAFT.md']) issues.push({ severity: 'HIGH', issue: 'REVIEW.md exists without DRAFT.md' });
+  issues.push(...validatePaperArtifacts(state.paperDir, a));
   return { ...state, issues, ok: issues.length === 0 };
 }
 
