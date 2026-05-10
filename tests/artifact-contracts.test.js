@@ -108,6 +108,40 @@ function testResearchEnumFailureIsActionable() {
   assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].recommended_handling must be one of keep, support_more, soften, narrow, caveat, drop'));
 }
 
+function testResearchSourceRegistryFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-research-source-test');
+  const badResearch = path.join(dir, 'RESEARCH.json');
+  const research = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'research.json'), 'utf8'));
+  research.source_registry[0].source_type = 'newsletter_thread';
+  research.source_registry[0].authority = 'legendary';
+  research.source_registry[0].stance = 'cheerleading';
+  research.source_registry[0].unexpected = true;
+  fs.writeFileSync(badResearch, JSON.stringify(research, null, 2));
+
+  const result = runFail(['validate-artifact', '--path', badResearch]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].source_type must be one of official, academic, industry, news, analyst, blog, user_provided, other'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].authority must be one of high, medium, low'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].stance must be one of supportive, neutral, critical, mixed'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].unexpected is not allowed'));
+}
+
+function testResearchSynthesisMatrixFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-research-synthesis-test');
+  const badResearch = path.join(dir, 'RESEARCH.json');
+  const research = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'research.json'), 'utf8'));
+  research.synthesis_matrix.rows[0].pattern = 'handwave';
+  research.synthesis_matrix.rows[0].source_summaries.S2 = 42;
+  research.synthesis_matrix.rows[0].extra = 'not allowed';
+  fs.writeFileSync(badResearch, JSON.stringify(research, null, 2));
+
+  const result = runFail(['validate-artifact', '--path', badResearch]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('RESEARCH.json: $.synthesis_matrix.rows[0].source_summaries.S2 expected string, got number'));
+  assert(result.stdout.includes('RESEARCH.json: $.synthesis_matrix.rows[0].pattern must be one of agreement, disagreement, mixed, gap'));
+  assert(result.stdout.includes('RESEARCH.json: $.synthesis_matrix.rows[0].extra is not allowed'));
+}
+
 function testMarkdownContractFailureIsActionable() {
   const dir = tempDir('gpd-artifact-md-test');
   const badReview = path.join(dir, 'REVIEW.md');
@@ -233,6 +267,8 @@ testTemplateArtifactsPassContracts();
 testJsonSchemaFailureIsActionable();
 testStateEnumFailureIsActionable();
 testResearchEnumFailureIsActionable();
+testResearchSourceRegistryFailureIsActionable();
+testResearchSynthesisMatrixFailureIsActionable();
 testMarkdownContractFailureIsActionable();
 testMarkdownContractRejectsUnexpectedAudienceDimension();
 testMarkdownContractRejectsMalformedHeading();

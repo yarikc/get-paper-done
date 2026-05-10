@@ -39,13 +39,13 @@
       "id": "S1",
       "title": "",
       "url_or_path": "",
-      "source_type": "official | academic | industry | news | analyst | blog | user_provided | other",
-      "authority": "high | medium | low",
-      "freshness": "recent | moderate | old | unknown",
-      "relevance": "high | medium | low",
-      "specificity": "high | medium | low",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
       "bias_or_agenda": "",
-      "stance": "supportive | neutral | critical | mixed",
+      "stance": "supportive",
       "notes": ""
     }
   ],
@@ -71,7 +71,7 @@
         "source_summaries": {
           "S1": ""
         },
-        "pattern": "agreement | disagreement | mixed | gap",
+        "pattern": "mixed",
         "implication": ""
       }
     ]

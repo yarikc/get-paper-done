@@ -1,6 +1,9 @@
 # Project Review
 
 Review date: 2026-05-10
+Last reviewed: 2026-05-10
+
+This file is the current project-health snapshot. The forward plan lives in [../ROADMAP.md](../ROADMAP.md).
 
 ## Summary Rating
 

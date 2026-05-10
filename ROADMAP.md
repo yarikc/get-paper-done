@@ -2,17 +2,17 @@
 
 Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
 
+Last reviewed: 2026-05-10
+
+This file is the forward plan. The current ratings, risk snapshot, and review findings live in [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). When the review changes, update that snapshot first and adjust this roadmap only when the plan itself changes.
+
 ## Current Assessment
 
-- **Framework design:** 8.9/10
-- **Installable tool maturity:** 7.7/10
-- **Documentation:** 8.2/10
-- **Test coverage:** 7.6/10
-- **Release readiness:** 7.2/10
-- **Overall project:** 8.4/10
-- **Researcher agent:** 9.0/10
+- Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
+- Current overall rating: 8.7/10 as of 2026-05-10
+- Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update CLI, workspace helpers, and first-pass tests are in place. The system still needs real-world validation, examples, richer import helpers, deeper validation helpers, external review wrapping, release guidance, and one-by-one agent calibration.
+The artifact model, command surface, install/update CLI, workspace helpers, artifact contracts, workflow consistency tests, routing scenario tests, and content-aware status routing are in place. The system still needs real-world validation, examples, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
