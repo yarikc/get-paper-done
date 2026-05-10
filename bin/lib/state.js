@@ -76,6 +76,22 @@ function readJsonIfExists(filePath) {
   }
 }
 
+function artifactPath(paperDir, artifactName) {
+  return path.join(paperDir, '.paper', artifactName);
+}
+
+function artifactMtimeMs(paperDir, artifactName) {
+  const fullPath = artifactPath(paperDir, artifactName);
+  if (!fs.existsSync(fullPath)) return null;
+  return fs.statSync(fullPath).mtimeMs;
+}
+
+function artifactNewerThan(paperDir, upstream, downstream) {
+  const upstreamMtime = artifactMtimeMs(paperDir, upstream);
+  const downstreamMtime = artifactMtimeMs(paperDir, downstream);
+  return upstreamMtime !== null && downstreamMtime !== null && upstreamMtime > downstreamMtime;
+}
+
 function stripMarkdownValue(value) {
   return value
     .trim()
@@ -159,6 +175,21 @@ function suggestedNext(state) {
   if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) return '/gpd-brief';
   if (!a['STRATEGY.md']) return '/gpd-brief';
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') return '/gpd-brief';
+  if (
+    artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
+    || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
+  ) {
+    return '/gpd-research';
+  }
+  if (artifactNewerThan(state.paperDir, 'RESEARCH.json', 'OUTLINE.md')) return '/gpd-outline --deep';
+  if (artifactNewerThan(state.paperDir, 'OUTLINE.md', 'DRAFT.md')) return '/gpd-draft';
+  if (artifactNewerThan(state.paperDir, 'DRAFT.md', 'FACT-CHECK.md')) return '/gpd-fact-check --full';
+  if (
+    artifactNewerThan(state.paperDir, 'DRAFT.md', 'REVIEW.md')
+    || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
+  ) {
+    return '/gpd-review --deep';
+  }
   if (
     state.machineState
     && state.machineState.version === CURRENT_STATE_VERSION

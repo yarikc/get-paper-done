@@ -98,16 +98,21 @@ Use this order:
 3. `BRIEF.md` exists but thesis/claims/audience are visibly placeholder-like → `/gpd-brief`.
 4. `STRATEGY.md` missing → `/gpd-brief` to run the strategy gate before research, outline, or drafting.
 5. `STRATEGY.md` exists and says `Revise Before Drafting` or `No-Go` → `/gpd-brief`; include the `Strategy Blockers` primary blocker in the explanation.
-6. `RESEARCH.json` missing or lacks the structured evidence package → `/gpd-research`.
-7. `OUTLINE.md` missing → `/gpd-outline --deep` when `RESEARCH.json` or `STRATEGY.md` exists, the paper is serious/researched/high-stakes, or target length is about 1,200+ words; otherwise `/gpd-outline --lite`.
-8. `DRAFT.md` missing → `/gpd-draft`.
-9. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
-10. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
-11. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
-12. `FEEDBACK-PLAN.md` exists and is pending approval → ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
-13. `REVIEW.md`, `FACT-CHECK.md`, or approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
-14. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
-15. Final exists → paper appears exported; recommend review only if new changes are planned.
+6. `BRIEF.md` or `STRATEGY.md` is newer than `RESEARCH.json` → `/gpd-research` for incremental research refresh.
+7. `RESEARCH.json` is newer than `OUTLINE.md` → `/gpd-outline --deep` for outline refresh.
+8. `OUTLINE.md` is newer than `DRAFT.md` → `/gpd-draft` for draft refresh.
+9. `DRAFT.md` is newer than `FACT-CHECK.md` → `/gpd-fact-check --full` for claim refresh.
+10. `DRAFT.md` or `FACT-CHECK.md` is newer than `REVIEW.md` → `/gpd-review --deep` for review refresh.
+11. `RESEARCH.json` missing or lacks the structured evidence package → `/gpd-research`.
+12. `OUTLINE.md` missing → `/gpd-outline --deep` when `RESEARCH.json` or `STRATEGY.md` exists, the paper is serious/researched/high-stakes, or target length is about 1,200+ words; otherwise `/gpd-outline --lite`.
+13. `DRAFT.md` missing → `/gpd-draft`.
+14. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
+15. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
+16. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
+17. `FEEDBACK-PLAN.md` exists and is pending approval → ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
+18. `REVIEW.md`, `FACT-CHECK.md`, or approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
+19. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
+20. Final exists → paper appears exported; recommend review only if new changes are planned.
 
 ## 5. Context Guidance
 

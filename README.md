@@ -115,6 +115,18 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
 
+Moving backward is normal. If you change an upstream artifact after downstream work exists, `gpd status` routes back to the earliest stage that needs refresh before trusting the saved next command in `STATE.json`:
+
+| Change detected | Suggested command |
+|-----------------|-------------------|
+| `BRIEF.md` or `STRATEGY.md` newer than `RESEARCH.json` | `/gpd-research` |
+| `RESEARCH.json` newer than `OUTLINE.md` | `/gpd-outline --deep` |
+| `OUTLINE.md` newer than `DRAFT.md` | `/gpd-draft` |
+| `DRAFT.md` newer than `FACT-CHECK.md` | `/gpd-fact-check --full` |
+| `FACT-CHECK.md` newer than `REVIEW.md` | `/gpd-review --deep` |
+
+This is an incremental refresh, not a full reset. Keep the existing artifacts, rerun the suggested stage, and let that stage update its artifact plus state. Use a full manual reset only when you intentionally want to discard an artifact rather than revise it.
+
 ## Main Slash Commands
 
 The command files live in [commands/gpd](commands/gpd).
