@@ -16,6 +16,36 @@ The artifact model, command surface, install/update CLI, workspace helpers, arti
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
+Active execution checklist: GitHub Issue #2.
+
+## Planning Sources Of Truth
+
+To avoid spreading todos across docs and issues:
+
+| Surface | Owns | Does not own |
+|---------|------|--------------|
+| GitHub issues | Execution tracking, acceptance checklists, closure state | Narrative project health or long-form design rationale |
+| `ROADMAP.md` | Milestone order, next slices, dependency reasoning | Detailed ratings or issue-by-issue status logs |
+| `docs/PROJECT-REVIEW.md` | Current rating, risk snapshot, review findings | Forward execution backlog |
+| GitHub Issue #2 | Active one-paper diagnostic checklist and friction-log execution | Long-term roadmap or design rationale |
+| `rfc/*.md` | Design decisions and accepted/deferred scope | Day-to-day task tracking after implementation starts |
+
+Current issue alignment:
+
+- `#3` and `#4`: implementation complete in pushed commits; close or mark done in GitHub after final review.
+- `#2`: active umbrella for layered workflow/agent testing; current next slice is the one-paper diagnostic trial plus realistic examples.
+- `#1`: broader test/evaluation program; remains open until examples, real-paper fixtures, and semantic checks exist.
+- `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
+
+## Active Milestone: One-Paper Diagnostic And Examples
+
+Next work should validate behavior under real use before adding more RFC surface area.
+
+1. Use GitHub Issue #2 as the active one-paper diagnostic checklist and friction log.
+2. Run one realistic paper through the workflow and record the stage-by-stage friction log.
+3. Turn the trial output into at least one realistic `examples/` workspace.
+4. Add example validation tests: no placeholders, artifact contracts pass, and `gpd status` returns the expected next command.
+5. Use trial findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
 
 ## Completed Design Simplifications
 

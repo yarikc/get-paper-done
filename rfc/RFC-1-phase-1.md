@@ -1,9 +1,10 @@
 # RFC-1 Phase 1: Artifact Contracts And Static Validation
 
-- **Status:** Draft
+- **Status:** Implemented
 - **Parent RFC:** [RFC-1: Research-Driven Improvement Plan](RFC-1.md)
 - **Scope:** Get Paper Done artifact reliability, validation, and static consistency tests
 - **Decision:** Implement this phase before external review orchestration, parallel review suites, or judge-bias mechanics.
+- **Implemented in:** `9bc4ba1`, `e7ae451`, `bef683c`, `519b9ad`, `845736b`
 
 ## Summary
 
@@ -12,6 +13,20 @@ Phase 1 narrows RFC-1 to the lowest-regret foundation: make GPD artifacts struct
 GPD is a prompt-first, file-backed writing workflow. Its main reliability risk is not that the CLI cannot run; it is that an AI stage can produce an artifact that looks plausible but is missing the structure downstream stages expect. This phase adds artifact contracts, JSON schema validation, markdown structural checks, and static workflow consistency tests.
 
 This phase deliberately does **not** implement the external review runner, parallel review suite, binary scoring, cross-model judge rules, or provider orchestration. Those features should wait until artifact contracts are stable.
+
+## Implementation Result
+
+Implemented as the current validation foundation:
+
+- JSON schemas for `STATE.json`, `config.json`, and `RESEARCH.json`.
+- Nested schema checks for `RESEARCH.json` evidence, source registry, and synthesis rows.
+- Markdown structural contracts for strategy, outline, fact-check, review, and feedback-plan artifacts.
+- `gpd validate-artifact`.
+- `gpd validate` integration with artifact contracts.
+- Static workflow consistency tests for command/workflow references, required readings, templates, agents, command flag parity, command-reference closure, and protected audience scorecard dimensions.
+- Routing scenario tests for backward artifact refresh, saved next command hardening, and content-aware fact-check/review/feedback-plan outcomes.
+
+Remaining work from the parent RFC is now outside Phase 1 and should be tracked through GitHub issues plus the roadmap.
 
 ## Why This Phase First
 
