@@ -1,0 +1,64 @@
+<purpose>
+Check the current draft for unsupported, stale, exaggerated, contradicted, ambiguous, or risky claims.
+</purpose>
+
+<required_reading>
+- .paper/PROJECT.md
+- .paper/config.json if present
+- .paper/BRIEF.md
+- .paper/STRATEGY.md if present
+- .paper/AUDIENCE.md
+- .paper/RESEARCH.json if present
+- .paper/RESEARCH.md if present
+- .paper/DRAFT.md
+- .paper/REVIEW.md if present
+- .paper/FACT-CHECK.md if present
+- templates/fact-check.md
+</required_reading>
+
+<process>
+
+Read the required context. Prefer `.paper/RESEARCH.json` over `.paper/RESEARCH.md`. Do not load raw `.paper/sources/` or `original/` broadly; open only specific files needed to verify a specific claim.
+
+Parse mode flags:
+
+- `--risk-scan`: fast pass over high-risk claims only.
+- `--full`: check every material claim. Default for serious, publishable, executive, technical, market, regulatory, or 1,200+ word papers.
+- `--publication`: final pre-export pass for claims that would damage credibility if wrong, stale, overstated, or uncited.
+- `--source-audit`: verify source quality and citation-source alignment without checking every prose claim.
+
+If no mode is specified, use `--full` when `.paper/DRAFT.md` exists and the paper is serious, technical, executive-facing, public, or publication-bound. Otherwise use `--risk-scan`.
+
+Extract a claim inventory from `.paper/DRAFT.md`. Assign IDs such as `FC1`, classify each material claim, and mark risk HIGH/MEDIUM/LOW.
+
+Check claims against `.paper/RESEARCH.json` when present:
+
+- `evidence_matrix`
+- `source_registry`
+- `contradictions`
+- `facts_safe_to_use`
+- `claims_to_soften`
+- `claims_to_drop_or_reframe`
+- `draft_support_notes`
+
+Use web research only when allowed by `.paper/config.json` and only for current, time-sensitive, legal/regulatory, product-specific, market-specific, named-entity-specific, numerical, quote/attribution, or high-risk claims. If web research is not allowed or unavailable, mark those claims `needs_current_verification`.
+
+Evaluate each checked claim for support status, freshness, precision, context integrity, risk, and quantitative integrity. Do not treat a citation as sufficient unless it supports the specific wording of the claim.
+
+After claim-level checking, add a synthesis integrity assessment:
+
+- whether the conclusion or recommendation is supported by the verified claims
+- whether the draft is somewhat or materially overextended
+- the largest gap between evidence and conclusion
+- repeated factual risk patterns across the paper
+- publication readiness from a factual-risk perspective
+
+Write `.paper/FACT-CHECK.md` using `templates/fact-check.md`.
+
+Update `.paper/STATE.md` and `.paper/STATE.json`:
+
+- If HIGH issues require new evidence, set suggested next command to `/gpd-research`.
+- If HIGH or MEDIUM issues can be fixed by softening/removing/reframing claims, set suggested next command to `/gpd-revise`.
+- If no blocking issues remain, set suggested next command to `/gpd-review` or `/gpd-export` depending on review status.
+
+</process>

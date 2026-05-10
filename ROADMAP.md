@@ -1,0 +1,492 @@
+# Get Paper Done Upgrade Plan
+
+Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
+
+## Current Assessment
+
+- **Framework design:** 8.9/10
+- **Installable tool maturity:** 7.7/10
+- **Documentation:** 8.2/10
+- **Test coverage:** 7.6/10
+- **Release readiness:** 7.2/10
+- **Overall project:** 8.4/10
+- **Researcher agent:** 9.0/10
+
+The artifact model, command surface, install/update CLI, workspace helpers, and first-pass tests are in place. The system still needs real-world validation, examples, richer import helpers, deeper validation helpers, external review wrapping, release guidance, and one-by-one agent calibration.
+
+Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
+Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
+
+## Completed Design Simplifications
+
+- Renamed project to Get Paper Done.
+- Simplified import so it preserves originals and creates only minimal artifacts.
+- Added paper location prompt and per-paper directory creation.
+- Added `/gpd-progress` and `/gpd-status` as read-only continuity commands.
+- Deferred `/gpd-next` to preserve explicit context-break stages.
+- Added hard research compression rule.
+- Added curated reusable audiences.
+- Collapsed specialized audience review wrappers into one `audience-reviewer`.
+- Added short aliases: `/gpd-new`, `/gpd-import`, `/gpd-status`.
+- Simplified `STATE.md` to human-readable stage/blocker/approval/next-action state and added `STATE.json` as the machine-readable CLI state companion.
+- Split `PROJECT.md` from `BRIEF.md`: project identity vs argument detail.
+- Simplified review flags to `--lite`, `--deep`, `--external`, and `--models`.
+- Added external feedback planning and approval gate.
+- Upgraded researcher to infer research questions, present a plan, support depth/source modes, and write canonical `RESEARCH.json`.
+- Upgraded strategist into a challenge-first gatekeeper that can block research, outline, and drafting with `Revise Before Drafting` or `No-Go`, plus normalized `Strategy Blockers` for machine-routable "why not Go" decisions.
+- Added install/update CLI for Claude and Codex with runtime-neutral command placeholders, install manifest, update backups, dry-run, doctor, and version commands.
+
+---
+
+## Track A: Framework Quality To 9/10
+
+### 1. Run A Real Paper Through The Full Flow
+
+Use an existing paper project as the first test case.
+
+Flow:
+
+1. `/gpd-import-paper`
+2. `/gpd-brief`
+3. `paper-strategist` gate via `.paper/STRATEGY.md`
+4. `/gpd-research --standard` with plan approval
+5. `/gpd-outline`
+6. `/gpd-review --lite` if the outline or imported draft needs early reader-fit triage
+7. `/gpd-draft` or preserve imported draft
+8. `/gpd-fact-check --full`
+9. `/gpd-review --deep --external`
+10. `/gpd-revise`
+11. `/gpd-fact-check --publication` if factual claims changed during revision
+12. `/gpd-export`
+
+Deliverables:
+
+- `examples/imported-paper/`
+- notes on friction points
+- before/after artifact comparison
+- list of workflow edits required
+
+Success criteria:
+
+- The workflow can ingest messy existing material without losing context.
+- The next command recommendation is correct at each stage.
+- The generated artifacts are useful, not ceremonial.
+- `RESEARCH.json` is useful downstream without loading raw source material.
+- `FACT-CHECK.md` catches unsupported, stale, overstated, or risky material claims before export.
+
+### 2. Harden The Import Workflow
+
+Current import flow is conceptually strong but untested.
+
+Needed:
+
+- define canonical draft selection rules more concretely
+- add size limits and explicit user confirmation for large folders
+- add import classification categories
+- add handling for `.docx`, `.pdf`, Markdown, plain text, diagrams, and spreadsheets
+- specify how to preserve version history and choose latest draft
+
+Deliverables:
+
+- updated `workflows/import-paper.md`
+- updated `templates/import-report.md`
+- import checklist in `references/writing-artifacts.md`
+
+Success criteria:
+
+- Import can handle a folder with drafts, specs, research, reviews, and references.
+- Original files are preserved unchanged in `original/`.
+- `.paper/IMPORT.md` explains what was copied, skipped, inferred, and unknown.
+
+### 3. Strengthen Audience System
+
+Current curated audiences are useful but should be validated against real drafts.
+
+Needed:
+
+- refine the four curated personas after real use
+- add conflict-resolution examples for multi-audience papers
+- validate that users choose audience personas while internal review logic handles routing
+- add audience selection examples to docs
+
+Deliverables:
+
+- improved `audiences/*.md`
+- examples of multi-audience `.paper/AUDIENCE.md`
+- tighter `audience-review-rubric.md`
+
+Success criteria:
+
+- Audience reviews produce specific, actionable changes.
+- Low scores always produce rewrite instructions.
+- Multi-audience scoring does not become vague or contradictory.
+
+### 4. Improve Review And Feedback Planning
+
+Current review design is strong but needs sharper feedback handling.
+
+Needed:
+
+- add examples of `EXTERNAL-REVIEWS.md`
+- add examples of `FEEDBACK-PLAN.md`
+- define how conflicting model feedback is resolved
+- require feedback to map to affected artifact
+- add approval state to `STATE.md` and `STATE.json`
+
+Deliverables:
+
+- sample review artifacts
+- stronger `templates/feedback-plan.md`
+- stronger `workflows/review.md`
+- stronger `workflows/revise.md`
+
+Success criteria:
+
+- Review never silently changes the draft.
+- Every feedback item is classified: incorporate, ignore, defer, ask user.
+- User can approve plan before revision.
+
+### 5. Add Framework Examples
+
+The project needs reference examples.
+
+Create:
+
+- `examples/new-paper-minimal/`
+- `examples/imported-paper/`
+- `examples/multi-audience-paper/`
+- `examples/external-review/`
+
+Success criteria:
+
+- A new user can inspect examples and understand the intended artifact quality.
+- Examples reveal how much detail belongs in each file.
+
+### 6. Improve And Calibrate Agents
+
+The agent set now has stronger prompts, but most agents still need one-by-one review with the user: explain purpose, inspect behavior, rate, simplify, and tune.
+
+Reviewed so far:
+
+- `audience-reviewer`: simplified to one internal reviewer; supports Lite review of brief/outline without requiring a draft, Deep draft review, separate multi-audience scoring, and an explicit conflict table when selected audiences disagree.
+- `paper-researcher`: upgraded with strategy-aware claim framing, inferred research questions, plan approval, depth/source modes, source registry, evidence matrix, synthesis matrix, contradictions, draft support notes, and canonical `RESEARCH.json`.
+- `paper-strategist`: upgraded to challenge thesis, paper job, reader promise, posture, decision usefulness, and scope; can block downstream work and preserves/supersedes prior `STRATEGY.md` state when rerun.
+- `paper-outliner`: upgraded into an argument architect with Lite for early/short/import triage and Deep as default for serious, researched, executive, technical, multi-audience, publishable, high-stakes, or 1,200+ word papers. It supports `outline_only` / `outline_plus_skeleton`, strategy-gate awareness, explicit missing-strategy handling, provisional-outline handling, reader-state transitions with strict cell format, evidence-strength marking, reader-question mapping, approximate length allocation, transition logic, and objection placement. Deep mode adds structure-selection rubric, draft-readiness scoring, reader jump analysis, evidence/objection load checks, and severity-scored structural anti-patterns tied to the anti-fluff profile.
+- `paper-drafter`: upgraded into a controlled prose engine with `section_draft`, `full_draft`, and `redraft_from_comments` modes; section-by-section is default for serious or long papers. It preserves approved thesis, posture, scope, and existing sections; builds a section intent map with reader-state transitions and length/density targets; applies style controls; reads relevant strategy/review/feedback artifacts; and marks evidence gaps, placeholders, author decisions, assumptions, structure issues, and redraft change logs instead of hiding them in prose.
+- `paper-editor`: upgraded into a voice-preserving line-and-structure editor with plan-first default, `editorial_review`, `section_edit`, `full_edit`, `style_pass`, and `final_polish` modes plus `light_edit`, `standard_edit`, and `heavy_edit` intensity. It edits in layers: structure, clarity, rhythm/flow, tone consistency, and publication readiness. It stops on pending feedback or strategy blocks, applies drift checks, preserves thesis/evidence/scope/audience/persona/decision ask, checks publication readiness, and records change logs for draft modifications.
+- `paper-fact-checker`: upgraded into an editorial fact-checker and claims-risk auditor with `risk_scan`, `full_claim_check`, `publication_check`, and `source_audit` modes. It creates `FACT-CHECK.md`, inventories material claims, checks source alignment, distinguishes unsupported/false/not-checked/current-verification-needed/misleading-in-context, evaluates support/freshness/precision/context/risk/quantitative integrity, assesses whether the conclusion outruns verified support, reports systemic factual risk patterns, respects audience proof standards and source policy, and routes fixes to research or revision.
+- `opposition-reviewer`: upgraded into a steelman opposition reviewer with Lite/Deep modes, scope modes, strongest good-faith opposition framing, opposition model, strongest fair opposing case, fatal/serious/moderate/minor objection audit, argument resilience scorecard, audience-impact mapping, claim stress tests, existing-defense check, weak-assumption table, overclaiming/strawman risks, alternative explanations, deep-mode opposition map, assumption failure test, alternative strategy test, pre-mortem, narrowing plan, and routing to brief/research/fact-check/outline/revision.
+
+Current ratings:
+
+- `audience-reviewer`: 8.8/10 pending real multi-audience calibration
+- `paper-researcher`: 9.0/10 pending messy-import calibration
+- `paper-strategist`: 9.1/10 pending real-use calibration
+- `paper-outliner`: 9.3/10 pending calibration on a real imported or strategy-heavy paper
+- `paper-drafter`: 9.1/10 pending real-use calibration
+- `paper-editor`: 9.1/10 pending real-use calibration
+- `paper-fact-checker`: 9.2/10 pending real-use calibration
+- `opposition-reviewer`: 9.2/10 pending real adversarial-review calibration
+
+Remaining one-by-one agent reviews:
+
+1. Revisit `paper-fact-checker` after a real publication check
+2. Revisit `paper-editor` after a real final-polish pass
+3. Revisit `paper-drafter` after a real section-by-section draft
+4. Revisit `audience-reviewer` after a real multi-audience draft
+5. Revisit `paper-researcher` after one messy imported paper
+6. Revisit `paper-strategist` after a real strategic block/override decision
+7. Revisit `paper-outliner` after a real imported or strategy-heavy paper
+8. Revisit `opposition-reviewer` after a real adversarial review
+
+Review protocol for each agent:
+
+- explain what the agent does
+- explain how it operates
+- identify where it can fail
+- ask for user preferences
+- update the prompt
+- rate the result
+- simplify where possible
+
+Agent-specific open questions:
+
+- `opposition-reviewer`: does the decision-relevant adversarial posture catch the objections that matter without bloating the paper?
+- `paper-fact-checker`: does full material-claim inventory create too much review overhead on real papers?
+- `paper-editor`: does plan-first editing add too much friction during real final polish?
+- `audience-reviewer`: does the conflict table produce useful choices on real multi-audience drafts?
+- `paper-researcher`: after real use, is `RESEARCH.json` too heavy, too sparse, or exactly useful?
+
+Deliverables:
+
+- improved agent prompts in `agents/*.md`
+- agent-specific examples under `examples/agents/`
+- tighter shared rubrics where needed
+- agent checklist added to docs
+- current rating for each agent
+
+Success criteria:
+
+- Agents produce operational feedback, not generic commentary.
+- Each agent has a fixed output shape.
+- Each agent knows what not to do.
+- Audience Review Lite and Deep examples demonstrate expected quality.
+- Curated audience files catch persona-specific failure modes through the single audience reviewer.
+
+---
+
+## Track B: Installable Tool To 9/10
+
+### 1. Add A Real CLI Helper
+
+Initial install/update CLI exists. The CLI now also has first-pass workspace helpers for init/import/status/validate/listing.
+
+Implemented:
+
+```bash
+gpd install claude
+gpd install codex
+gpd update claude
+gpd update codex
+gpd doctor claude
+gpd doctor codex
+gpd version
+gpd init
+gpd import --source <path> --location <path> --slug <name>
+gpd status
+gpd validate
+gpd list-audiences
+gpd list-profiles
+```
+
+Still needed:
+
+- richer `gpd import` classification and conversion support
+- local project install mode
+- external review runner
+- broader validation rules
+
+Deliverables:
+
+- `bin/gpd.js` for install/update/doctor/version and workspace helpers
+- shared installer in `bin/lib/installer.js`
+- split workspace helpers across `bin/lib/workspace.js`, `bin/lib/init.js`, `bin/lib/import.js`, `bin/lib/state.js`, and `bin/lib/common.js`
+- neutral `@{{GPD_RUNTIME_ROOT}}` source references plus command-reference rewriting for Claude/Codex targets
+- install manifest
+- backup of changed installed files during update
+- command routing for init/import/status/validate
+- path handling helpers for paper workspaces
+- JSON output mode for status, validate, audience listing, and profile listing
+
+Success criteria:
+
+- CLI can install/update Claude and Codex runtime assets safely.
+- CLI can create directories and copy/import files safely.
+- Agent workflows can call CLI helpers instead of hand-rolling shell logic.
+
+### 2. Build Safe Import Copy Logic
+
+First-pass copy behavior is implemented in `gpd import`.
+
+Implemented:
+
+- recursive copy with ignore rules
+- max file size skip
+- binary file handling
+- dry-run mode
+- no overwrite without confirmation
+- `.paper/IMPORT.md` generation
+
+Still needed:
+
+- richer import manifest details
+- `.docx`, `.pdf`, spreadsheet, and diagram conversion/indexing helpers
+- canonical draft ranking beyond filename and modified time
+- large folder summary before copy
+
+Deliverables:
+
+- `bin/lib/workspace.js`
+- `bin/lib/init.js`
+- `bin/lib/import.js`
+- `bin/lib/state.js`
+- tests for import copy behavior
+
+Success criteria:
+
+- `gpd import --dry-run` shows what would be copied.
+- `gpd import` creates `original/` and `.paper/IMPORT.md`.
+- dangerous/unrelated directories are skipped.
+
+### 3. Add Tests
+
+Initial CLI tests now exist.
+
+Implemented:
+
+- installer install/update/doctor test
+- command reference rewriting test
+- update backup correctness test
+- import dry-run test
+- import copy test with fixture folder
+- varied import classification fixture test
+- audience persona discovery test
+- profile discovery test
+- init/status/validate smoke test
+- malformed input tests for unreadable/missing import source, missing required files, and malformed `STRATEGY.md`
+- init footgun regression test for no `--slug`, no `--title`, and no `--location`
+- CI workflow that runs `npm run check`
+
+Still needed:
+
+- slug generation test
+- template presence test
+- workflow consistency tests
+
+Deliverables:
+
+- `tests/`
+- `npm test`
+
+Success criteria:
+
+- `npm test` validates core file operations.
+- Basic regressions are caught before changing workflows.
+
+### 4. Improve Installer
+
+Installer now supports Claude and Codex runtime targets through `gpd install` / `gpd update`, dry-run mode, backups, command-reference rewriting, install manifest, and `gpd doctor`. Tests cover install, update, doctor, command-reference rewriting, and backup correctness.
+
+Remaining:
+
+- support local project install
+- validate install result
+
+Deliverables:
+
+- improved `bin/gpd.js`
+- improved `bin/install.js`
+- `bin/lib/installer.js`
+- install docs
+
+Success criteria:
+
+- User knows exactly what was installed and where.
+- Install can be repeated safely.
+
+### 5. External Review Runner
+
+The workflow documents model invocation, but this should be wrapped.
+
+Add:
+
+```bash
+gpd review-external
+gpd review-external --models claude,gemini,codex
+```
+
+Needed:
+
+- CLI detection
+- current-runtime skip logic
+- timeouts
+- error capture
+- output normalization
+- temp prompt generation
+- write `.paper/EXTERNAL-REVIEWS.md`
+
+Deliverables:
+
+- `bin/lib/external-review.js`
+- tests for detection and output assembly
+
+Success criteria:
+
+- External review works without hand-copying shell commands.
+- Failures are recorded but do not abort all reviews.
+
+### 6. Validation Command
+
+Add:
+
+```bash
+gpd validate
+```
+
+Checks:
+
+- required `.paper/` files exist
+- `AUDIENCE.md` has selected personas or custom audience
+- `BRIEF.md` has thesis and claims
+- `RESEARCH.json` has source registry, evidence matrix, contradictions, and source gaps
+- `RESEARCH.md` exists as a short index when `RESEARCH.json` exists
+- `DRAFT.md` exists before review
+- `FACT-CHECK.md` exists before export when the draft contains factual, current, technical, market, regulatory, numerical, or publication-sensitive claims
+- `FEEDBACK-PLAN.md` approval state is clear
+
+Success criteria:
+
+- User can run one command to know what is missing.
+- Agent can use validation to recommend next step.
+
+### 7. Release And Update Workflow
+
+Install/update now works from the current local package, but release mechanics are still manual.
+
+Needed:
+
+- changelog file and release notes convention
+- version bump process
+- release checklist
+- documented update path: pull or install new package, then `gpd update claude` / `gpd update codex`
+- optional package publishing plan
+- compatibility notes for changed commands, templates, agents, and references
+
+Deliverables:
+
+- `CHANGELOG.md`
+- release checklist in docs
+- package versioning guidance
+- update verification checklist
+
+Success criteria:
+
+- A new release can be cut without relying on memory.
+- User can see what changed before updating installed runtimes.
+- `gpd update` has a clear role in the release process.
+
+---
+
+## Priority Order
+
+1. Run one real paper through the current workflow.
+2. Harden import based on that run.
+3. Add examples from the real paper run.
+4. Expand validation coverage beyond setup/sequencing checks.
+5. Add workflow consistency and template coverage tests.
+6. Wrap external review runner.
+7. Add release/update documentation.
+8. Add local project install support.
+
+---
+
+## Definition Of 9/10
+
+### Framework 9/10
+
+- Real paper has been run end-to-end.
+- Import, audience, research, review, and revise flows have been corrected from real use.
+- `RESEARCH.json` proves useful as the canonical evidence artifact.
+- Examples exist and show intended artifact quality.
+- Audience reviews produce operational feedback, not generic critique.
+- Agent prompts are calibrated one by one with examples, ratings, and fixed output shapes.
+- Feedback planning prevents accidental rewrites.
+
+### Tool 9/10
+
+- CLI handles install/update/doctor/version and eventually init/import/status/validate.
+- Import copy behavior is safe and tested.
+- Installer is repeatable and clear.
+- External model review is wrapped in a helper command.
+- Release/update process has changelog and verification checklist.
+- `npm test` covers core operations.

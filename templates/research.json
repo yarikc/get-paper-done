@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "topic": "",
+    "scope": "",
+    "depth": "standard",
+    "source_mode": "provided_first | provided_only | web_first | web_only",
+    "created_at": "",
+    "updated_at": ""
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "",
+        "mapped_claims": ["C1"],
+        "why_it_matters": "",
+        "planned_source_types": ["official", "academic", "industry", "news", "analyst", "blog"],
+        "search_queries": []
+      }
+    ],
+    "depth_rationale": "",
+    "source_mode_rationale": "",
+    "user_feedback": ""
+  },
+  "research_brief": {
+    "executive_summary": "",
+    "key_findings": [
+      {
+        "id": "K1",
+        "finding": "",
+        "confidence": "high | medium | low",
+        "why_it_matters": "",
+        "sources": ["S1"]
+      }
+    ]
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "",
+      "url_or_path": "",
+      "source_type": "official | academic | industry | news | analyst | blog | user_provided | other",
+      "authority": "high | medium | low",
+      "freshness": "recent | moderate | old | unknown",
+      "relevance": "high | medium | low",
+      "specificity": "high | medium | low",
+      "bias_or_agenda": "",
+      "stance": "supportive | neutral | critical | mixed",
+      "notes": ""
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "",
+      "claim_type": "factual | causal | strategic_judgment | technical_mechanism | market_trend | recommendation",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong | moderate | weak | none",
+      "confidence": "high | medium | low",
+      "recommended_handling": "keep | support_more | soften | narrow | caveat | drop",
+      "notes": ""
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": [],
+    "rows": [
+      {
+        "theme": "",
+        "source_summaries": {
+          "S1": ""
+        },
+        "pattern": "agreement | disagreement | mixed | gap",
+        "implication": ""
+      }
+    ]
+  },
+  "contradictions": [
+    {
+      "id": "C1",
+      "issue": "",
+      "sources_in_tension": ["S1"],
+      "possible_explanations": [],
+      "stronger_source_for_this_paper": "",
+      "recommended_handling": ""
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q1",
+      "question": "",
+      "why_open": "",
+      "suggested_next_search": "",
+      "blocks_drafting": false
+    }
+  ],
+  "draft_support_notes": [
+    {
+      "section": "",
+      "recommended_evidence": ["S1"],
+      "how_to_use": "",
+      "strength_of_language": "strong | moderate | cautious",
+      "cautions": "",
+      "missing_support": ""
+    }
+  ],
+  "facts_safe_to_use": [
+    {
+      "fact": "",
+      "sources": ["S1"],
+      "confidence": "high | medium | low"
+    }
+  ],
+  "claims_to_soften": [
+    {
+      "claim": "",
+      "why": "",
+      "suggested_wording": ""
+    }
+  ],
+  "claims_to_drop_or_reframe": [
+    {
+      "claim": "",
+      "why": "",
+      "recommended_reframe": ""
+    }
+  ]
+}

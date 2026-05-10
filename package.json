@@ -1,0 +1,27 @@
+{
+  "name": "get-paper-done",
+  "version": "0.1.0",
+  "description": "A file-based AI workflow for newsletters, blogs, position papers, and white papers.",
+  "bin": {
+    "gpd": "bin/gpd.js",
+    "get-paper-done": "bin/gpd.js"
+  },
+  "scripts": {
+    "check": "node bin/gpd.js install claude --dry-run --target /tmp/gpd-install-check && node bin/gpd.js install codex --dry-run --target /tmp/gpd-install-check-codex && node bin/gpd.js version && npm test",
+    "test": "node tests/gpd-cli.test.js"
+  },
+  "keywords": [
+    "ai",
+    "writing",
+    "newsletter",
+    "blog",
+    "white-paper",
+    "position-paper",
+    "prompt-engineering"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
