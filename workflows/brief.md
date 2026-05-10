@@ -54,6 +54,16 @@ The strategy gate must also populate `Strategy Blockers`. Use normalized blocker
 
 Use `none` when status is `Go`.
 
+Set `Required unblock action` to one of:
+
+- `none`
+- `brief_revision`
+- `audience_revision`
+- `thesis_revision`
+- `scope_narrowing`
+- `research_plan`
+- `user_override`
+
 Update `.paper/STATE.md` and `.paper/STATE.json` with suggested next command:
 
 - `/gpd-research` if claims need support

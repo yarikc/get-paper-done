@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 
 const { root, expandHome } = require('./common');
+const {
+  allowedStrategyStatuses,
+  allowedStrategyBlockers,
+  allowedUnblockActions,
+} = require('./contracts');
 
 const jsonArtifactSchemas = {
   'STATE.json': 'state.schema.json',
@@ -165,6 +170,49 @@ function schemaPathForArtifact(filePath) {
   return schemaName ? path.join(root, 'references', 'schemas', schemaName) : null;
 }
 
+const supportedSchemaKeywords = new Set([
+  '$id',
+  '$schema',
+  'additionalProperties',
+  'description',
+  'enum',
+  'items',
+  'minimum',
+  'minLength',
+  'pattern',
+  'properties',
+  'required',
+  'title',
+  'type',
+]);
+
+function validateSchemaDefinition(schema, location = '$') {
+  const errors = [];
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return errors;
+
+  for (const key of Object.keys(schema)) {
+    if (!supportedSchemaKeywords.has(key)) {
+      errors.push(`${location} uses unsupported JSON Schema keyword "${key}"`);
+    }
+  }
+
+  if (schema.properties && typeof schema.properties === 'object' && !Array.isArray(schema.properties)) {
+    for (const [key, childSchema] of Object.entries(schema.properties)) {
+      errors.push(...validateSchemaDefinition(childSchema, `${location}.properties.${key}`));
+    }
+  }
+
+  if (schema.items && typeof schema.items === 'object') {
+    errors.push(...validateSchemaDefinition(schema.items, `${location}.items`));
+  }
+
+  if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+    errors.push(...validateSchemaDefinition(schema.additionalProperties, `${location}.additionalProperties`));
+  }
+
+  return errors;
+}
+
 function typeName(value) {
   if (Array.isArray(value)) return 'array';
   if (value === null) return 'null';
@@ -191,6 +239,13 @@ function validateJsonSchemaValue(value, schema, location = '$') {
 
   if (schema.type === 'string' && schema.minLength && value.length < schema.minLength) {
     errors.push(`${location} must have length >= ${schema.minLength}`);
+  }
+
+  if (schema.type === 'string' && schema.pattern) {
+    const pattern = new RegExp(schema.pattern);
+    if (!pattern.test(value)) {
+      errors.push(`${location} must match pattern ${schema.pattern}`);
+    }
   }
 
   if (schema.type === 'integer') {
@@ -220,6 +275,20 @@ function validateJsonSchemaValue(value, schema, location = '$') {
         errors.push(...validateJsonSchemaValue(value[key], childSchema, `${location}.${key}`));
       }
     }
+
+    if (schema.additionalProperties === false) {
+      for (const key of Object.keys(value)) {
+        if (!Object.prototype.hasOwnProperty.call(properties, key)) {
+          errors.push(`${location}.${key} is not allowed`);
+        }
+      }
+    } else if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+      for (const key of Object.keys(value)) {
+        if (!Object.prototype.hasOwnProperty.call(properties, key)) {
+          errors.push(...validateJsonSchemaValue(value[key], schema.additionalProperties, `${location}.${key}`));
+        }
+      }
+    }
   }
 
   return errors;
@@ -235,6 +304,10 @@ function validateJsonArtifact(filePath) {
   if (parsed.error) return [issue('HIGH', artifact, `Malformed JSON: ${parsed.error}`)];
 
   const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+  const schemaErrors = validateSchemaDefinition(schema);
+  if (schemaErrors.length > 0) {
+    return schemaErrors.map((message) => issue('HIGH', path.basename(schemaPath), message));
+  }
   return validateJsonSchemaValue(parsed.data, schema).map((message) => issue('HIGH', artifact, message));
 }
 
@@ -326,6 +399,45 @@ function validateAudienceScorecard(markdown) {
   return issues;
 }
 
+function extractMarkdownField(markdown, label) {
+  const target = `**${label.toLowerCase()}:**`;
+  for (const line of markdown.split(/\r?\n/)) {
+    const trimmed = line.trim().replace(/^-+\s*/, '');
+    if (trimmed.toLowerCase().startsWith(target)) {
+      return trimmed.slice(target.length).replace(/`/g, '').trim();
+    }
+  }
+  return null;
+}
+
+function isPlaceholderValue(value) {
+  if (!value) return false;
+  return /^\[.*\]$/.test(value.trim());
+}
+
+function validateEnumField(markdown, artifact, label, allowedValues) {
+  const value = extractMarkdownField(markdown, label);
+  if (!value) return [issue('HIGH', artifact, `Missing field "${label}"`)];
+  if (isPlaceholderValue(value) || !allowedValues.includes(value)) {
+    return [issue('HIGH', artifact, `$.${label} must be one of ${allowedValues.join(', ')}`)];
+  }
+  return [];
+}
+
+function isTemplateFile(filePath) {
+  const relative = path.relative(root, filePath).split(path.sep).join('/');
+  return relative.startsWith('templates/');
+}
+
+function validateStrategyValues(markdown, filePath) {
+  if (isTemplateFile(filePath)) return [];
+  return [
+    ...validateEnumField(markdown, 'STRATEGY.md', 'Status', allowedStrategyStatuses),
+    ...validateEnumField(markdown, 'STRATEGY.md', 'Primary blocker', allowedStrategyBlockers),
+    ...validateEnumField(markdown, 'STRATEGY.md', 'Required unblock action', allowedUnblockActions),
+  ];
+}
+
 function validateMarkdownArtifact(filePath) {
   const basename = path.basename(filePath);
   const artifact = artifactNameAliases[basename] || basename;
@@ -350,6 +462,9 @@ function validateMarkdownArtifact(filePath) {
 
   if (artifact === 'REVIEW.md') {
     issues.push(...validateAudienceScorecard(markdown));
+  }
+  if (artifact === 'STRATEGY.md') {
+    issues.push(...validateStrategyValues(markdown, filePath));
   }
 
   return issues;
@@ -398,4 +513,6 @@ module.exports = {
   validatePaperArtifacts,
   printArtifactValidation,
   parseTables,
+  validateJsonSchemaValue,
+  validateSchemaDefinition,
 };

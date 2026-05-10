@@ -182,6 +182,8 @@ Run the strategy gate before setting the next command. `STRATEGY.md` must declar
 - `Block severity`: `None`, `Medium`, or `High`
 - `Required unblock action`: `none`, `brief_revision`, `audience_revision`, `thesis_revision`, `scope_narrowing`, `research_plan`, or `user_override`
 
+Valid blocker values are `none`, `scope_too_broad`, `thesis_weak`, `audience_unclear`, `audience_conflict`, `evidence_gap`, `weak_ask`, `poor_posture`, `missing_outcome`, `reader_promise_weak`, and `decision_usefulness_weak`.
+
 If the strategy gate returns `Revise Before Drafting` or `No-Go`, set suggested next command to `/gpd-brief` in both `STATE.md` and `STATE.json`, and do not suggest research, outline, or drafting unless the user explicitly overrides the strategy block.
 
 Set suggested next command:

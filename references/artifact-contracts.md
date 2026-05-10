@@ -12,6 +12,20 @@ JSON artifacts must parse and conform to the schemas in `references/schemas/`.
 | `.paper/config.json` | `references/schemas/config.schema.json` | Paper workflow configuration and feature toggles. |
 | `.paper/RESEARCH.json` | `references/schemas/research.schema.json` | Canonical structured research, source registry, evidence matrix, synthesis, gaps, and draft support notes. |
 
+The in-repo schema validator intentionally supports a small JSON Schema subset:
+
+- `type`
+- `required`
+- `properties`
+- `additionalProperties`
+- `enum`
+- `minLength`
+- `minimum`
+- `pattern`
+- `items`
+
+Schemas using unsupported keywords fail validation so authors do not assume semantics that the CLI does not enforce.
+
 ## Markdown Artifacts
 
 Markdown artifacts must contain the headings and table columns listed below when the artifact exists as a completed stage output.
@@ -33,6 +47,14 @@ Required tables:
 
 - Thesis Tests: `Test`, `Pass?`, `Notes`
 - Strategic Gaps: `ID`, `Type`, `Description`, `Why It Matters`, `Fix Instruction`
+
+Completed `.paper/STRATEGY.md` artifacts must also use valid values:
+
+- `Status`: `Go`, `Revise Before Drafting`, or `No-Go`
+- `Primary blocker`: one of the blocker values in `references/schemas/state.schema.json`
+- `Required unblock action`: one of the unblock-action values in `references/schemas/state.schema.json`
+
+Bracketed placeholder values are invalid in completed strategy artifacts.
 
 ### `OUTLINE.md`
 

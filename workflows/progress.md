@@ -4,6 +4,8 @@ Report paper status, artifact completeness, suggested next command, and context-
 
 <process>
 
+If `--json` is present, return the same status fields in a compact JSON object when the active runtime supports structured output. If structured output is not available, keep the normal Markdown format and include a note that `--json` could not be honored by the slash-command runtime.
+
 ## 1. Locate Paper Workspace
 
 If `.paper/` is missing:

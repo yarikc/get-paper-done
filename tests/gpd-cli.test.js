@@ -112,6 +112,28 @@ function testStateJsonIsStatusSourceOfTruth() {
   assert(validation.stdout.includes('Strategy blocks downstream work'));
 }
 
+function testStateJsonSuggestedNextIsStatusSourceOfTruth() {
+  const dir = tempDir('gpd-state-next-test');
+  run(['init', '--location', dir, '--slug', 'state-next']);
+  const paperDir = path.join(dir, 'state-next');
+  const statePath = path.join(paperDir, '.paper', 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Research Complete';
+  state.current_stage = 'Research';
+  state.last_completed_stage = 'Research';
+  state.suggested_next_command = '/gpd-outline --lite';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(status.next, '/gpd-outline --lite');
+}
+
 function testInitWithoutSlugUsesSubdirectory() {
   const dir = tempDir('gpd-init-default-test');
   run(['init', '--location', dir]);
@@ -218,12 +240,24 @@ function testMalformedInputs() {
   const malformedJson = runFail(['validate', '--paper', stateJsonPaper]);
   assert.strictEqual(malformedJson.status, 1);
   assert(malformedJson.stdout.includes('Malformed STATE.json'));
+
+  const versionDir = tempDir('gpd-unsupported-state-version');
+  run(['init', '--location', versionDir, '--slug', 'future-state']);
+  const versionPaper = path.join(versionDir, 'future-state');
+  const statePath = path.join(versionPaper, '.paper', 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.version = 2;
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  const unsupportedVersion = runFail(['validate', '--paper', versionPaper]);
+  assert.strictEqual(unsupportedVersion.status, 1);
+  assert(unsupportedVersion.stdout.includes('Unsupported STATE.json version 2; run gpd update or migrate'));
 }
 
 testInstallerInstallDoctorRewriteAndBackup();
 testListCommands();
 testInitStatusValidate();
 testStateJsonIsStatusSourceOfTruth();
+testStateJsonSuggestedNextIsStatusSourceOfTruth();
 testInitWithoutSlugUsesSubdirectory();
 testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();

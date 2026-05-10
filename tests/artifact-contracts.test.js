@@ -8,6 +8,10 @@ const { execFileSync, spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
+const {
+  validateJsonSchemaValue,
+  validateSchemaDefinition,
+} = require('../bin/lib/validate');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -84,8 +88,8 @@ function testStateEnumFailureIsActionable() {
 
   const result = runFail(['validate-artifact', '--path', badState]);
   assert.strictEqual(result.status, 1);
-  assert(result.stdout.includes('STATE.json: $.strategy.primary_blocker must be one of none, thesis_weak, audience_unclear, missing_outcome'));
-  assert(result.stdout.includes('STATE.json: $.strategy.required_unblock_action must be one of none, brief_revision'));
+  assert(result.stdout.includes('STATE.json: $.strategy.primary_blocker must be one of none, scope_too_broad, thesis_weak, audience_unclear'));
+  assert(result.stdout.includes('STATE.json: $.strategy.required_unblock_action must be one of none, brief_revision, audience_revision'));
 }
 
 function testResearchEnumFailureIsActionable() {
@@ -143,6 +147,50 @@ function testMarkdownContractRejectsMalformedHeading() {
   assert(result.stdout.includes('REVIEW.md: Missing heading "# Review"'));
 }
 
+function testStrategyValueFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-strategy-value-test');
+  const badStrategy = path.join(dir, 'STRATEGY.md');
+  const strategy = fs.readFileSync(path.join(repoRoot, 'templates', 'strategy.md'), 'utf8');
+  fs.writeFileSync(badStrategy, strategy);
+
+  const result = runFail(['validate-artifact', '--path', badStrategy]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('STRATEGY.md: $.Status must be one of Go, Revise Before Drafting, No-Go'));
+  assert(result.stdout.includes('STRATEGY.md: $.Primary blocker must be one of none, scope_too_broad, thesis_weak'));
+  assert(result.stdout.includes('STRATEGY.md: $.Required unblock action must be one of none, brief_revision, audience_revision'));
+}
+
+function testJsonSchemaAdditionalPropertiesAndPatternAreEnforced() {
+  const schema = {
+    type: 'object',
+    additionalProperties: false,
+    required: ['command'],
+    properties: {
+      command: {
+        type: 'string',
+        pattern: '^/gpd-[a-z-]+$',
+      },
+    },
+  };
+
+  const errors = validateJsonSchemaValue({
+    command: 'draft',
+    extra: true,
+  }, schema);
+
+  assert(errors.includes('$.command must match pattern ^/gpd-[a-z-]+$'));
+  assert(errors.includes('$.extra is not allowed'));
+}
+
+function testUnsupportedSchemaKeywordFailsSchemaDefinition() {
+  const errors = validateSchemaDefinition({
+    type: 'object',
+    oneOf: [],
+  });
+
+  assert(errors.includes('$ uses unsupported JSON Schema keyword "oneOf"'));
+}
+
 function testUnknownArtifactFailsCli() {
   const result = runFail(['validate-artifact', '--path', path.join(repoRoot, 'README.md')]);
   assert.strictEqual(result.status, 1);
@@ -188,6 +236,9 @@ testResearchEnumFailureIsActionable();
 testMarkdownContractFailureIsActionable();
 testMarkdownContractRejectsUnexpectedAudienceDimension();
 testMarkdownContractRejectsMalformedHeading();
+testStrategyValueFailureIsActionable();
+testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();
+testUnsupportedSchemaKeywordFailsSchemaDefinition();
 testUnknownArtifactFailsCli();
 testPaperValidationIncludesArtifactContracts();
 

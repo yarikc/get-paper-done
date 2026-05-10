@@ -3,6 +3,12 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const {
+  CURRENT_STATE_VERSION,
+  allowedStrategyStatuses,
+  allowedStrategyBlockers,
+  allowedUnblockActions,
+} = require('../bin/lib/contracts');
 
 const repoRoot = path.resolve(__dirname, '..');
 
@@ -55,6 +61,41 @@ function extractRequiredReading(markdown) {
     .map((line) => line.slice(2).replace(/\s+if present$/i, '').trim());
 }
 
+function extractFlags(markdown) {
+  return new Set(markdown.match(/--[A-Za-z0-9][A-Za-z0-9-]*/g) || []);
+}
+
+function extractWorkflowRefs(markdown) {
+  return extractExecutionRefs(markdown).filter((ref) => ref.startsWith('workflows/'));
+}
+
+function commandNameFromFile(commandFile) {
+  return `/gpd-${path.basename(commandFile, '.md')}`;
+}
+
+function extractCommandRefs(markdown) {
+  const refs = new Set();
+  const regex = /\/gpd-[a-z0-9-]+/g;
+  let match = regex.exec(markdown);
+  while (match) {
+    const next = markdown[match.index + match[0].length];
+    if (next !== '.') refs.add(match[0]);
+    match = regex.exec(markdown);
+  }
+  return refs;
+}
+
+function arrayEqual(actual, expected, label) {
+  assert.deepStrictEqual(actual, expected, `${label} drifted from bin/lib/contracts.js`);
+}
+
+function assertContainsAll(file, values, label) {
+  const markdown = read(file);
+  for (const value of values) {
+    assert(markdown.includes(value), `${file} is missing ${label} value ${value}`);
+  }
+}
+
 function testCommandReferencesExistAndStayRuntimeNeutral() {
   for (const commandFile of list('commands/gpd')) {
     const markdown = read(commandFile);
@@ -63,6 +104,36 @@ function testCommandReferencesExistAndStayRuntimeNeutral() {
     assert(refs.length > 0, `${commandFile} should reference execution context`);
     for (const ref of refs) {
       assert(fileExists(ref), `${commandFile} references missing ${ref}`);
+    }
+  }
+}
+
+function testCommandWorkflowFlagParity() {
+  for (const commandFile of list('commands/gpd')) {
+    const commandMarkdown = read(commandFile);
+    const workflowRefs = extractWorkflowRefs(commandMarkdown);
+    assert(workflowRefs.length > 0, `${commandFile} should reference a workflow`);
+
+    const commandFlags = extractFlags(commandMarkdown);
+    if (commandFlags.size === 0) continue;
+
+    const workflowMarkdown = workflowRefs.map(read).join('\n');
+    const workflowFlags = extractFlags(workflowMarkdown);
+    for (const flag of commandFlags) {
+      assert(
+        workflowFlags.has(flag),
+        `${commandFile} documents ${flag}, but ${workflowRefs.join(', ')} does not`,
+      );
+    }
+  }
+}
+
+function testReferencedCommandsExist() {
+  const commandSet = new Set(list('commands/gpd').map(commandNameFromFile));
+  for (const workflowFile of list('workflows')) {
+    const markdown = read(workflowFile);
+    for (const command of extractCommandRefs(markdown)) {
+      assert(commandSet.has(command), `${workflowFile} references missing command ${command}`);
     }
   }
 }
@@ -80,6 +151,47 @@ function testWorkflowRequiredReadingReferencesExist() {
       }
     }
   }
+}
+
+function testStrategyEnumsStayCentralizedAndDocumented() {
+  const schema = JSON.parse(read('references/schemas/state.schema.json'));
+  const strategy = schema.properties.strategy.properties;
+
+  arrayEqual(schema.properties.version.enum, [CURRENT_STATE_VERSION], 'STATE schema version enum');
+  arrayEqual(strategy.status.enum, allowedStrategyStatuses, 'strategy.status enum');
+  arrayEqual(strategy.blocking_issues.items.enum, allowedStrategyBlockers, 'strategy.blocking_issues enum');
+  arrayEqual(strategy.primary_blocker.enum, allowedStrategyBlockers, 'strategy.primary_blocker enum');
+  arrayEqual(strategy.required_unblock_action.enum, allowedUnblockActions, 'strategy.required_unblock_action enum');
+
+  const statusDocs = [
+    'agents/paper-strategist.md',
+    'workflows/brief.md',
+    'workflows/new-paper.md',
+    'workflows/import-paper.md',
+    'references/writing-artifacts.md',
+    'templates/strategy.md',
+  ];
+  const blockerDocs = [
+    'agents/paper-strategist.md',
+    'workflows/brief.md',
+    'workflows/new-paper.md',
+    'workflows/import-paper.md',
+    'references/writing-artifacts.md',
+    'templates/strategy.md',
+    'templates/import-report.md',
+  ];
+  const unblockActionDocs = [
+    'agents/paper-strategist.md',
+    'workflows/brief.md',
+    'workflows/new-paper.md',
+    'workflows/import-paper.md',
+    'references/writing-artifacts.md',
+    'templates/strategy.md',
+  ];
+
+  for (const file of statusDocs) assertContainsAll(file, allowedStrategyStatuses, 'strategy status');
+  for (const file of blockerDocs) assertContainsAll(file, allowedStrategyBlockers, 'strategy blocker');
+  for (const file of unblockActionDocs) assertContainsAll(file, allowedUnblockActions, 'unblock action');
 }
 
 function testReferencedTemplatesAndAgentsExist() {
@@ -119,7 +231,10 @@ function testAudienceScorecardDimensionsAreProtected() {
 }
 
 testCommandReferencesExistAndStayRuntimeNeutral();
+testCommandWorkflowFlagParity();
+testReferencedCommandsExist();
 testWorkflowRequiredReadingReferencesExist();
+testStrategyEnumsStayCentralizedAndDocumented();
 testReferencedTemplatesAndAgentsExist();
 testAudienceScorecardDimensionsAreProtected();
 

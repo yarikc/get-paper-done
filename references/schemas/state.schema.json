@@ -3,6 +3,7 @@
   "$id": "https://get-paper-done.local/schemas/state.schema.json",
   "title": "GPD State",
   "type": "object",
+  "additionalProperties": false,
   "required": [
     "version",
     "status",
@@ -16,18 +17,23 @@
     "post_import_choices"
   ],
   "properties": {
-    "version": { "type": "integer", "minimum": 1 },
+    "version": { "type": "integer", "enum": [1] },
     "status": { "type": "string", "minLength": 1 },
     "current_stage": { "type": "string", "minLength": 1 },
     "last_completed_stage": { "type": "string", "minLength": 1 },
     "last_activity": { "type": "string", "minLength": 1 },
-    "suggested_next_command": { "type": "string", "minLength": 1 },
+    "suggested_next_command": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/gpd-[a-z0-9-]+(?:\\s+.*)?$"
+    },
     "blocked_by": {
       "type": "array",
       "items": { "type": "string" }
     },
     "strategy": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
         "status",
         "blocking_issues",
@@ -42,11 +48,38 @@
         },
         "blocking_issues": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string",
+            "enum": [
+              "none",
+              "scope_too_broad",
+              "thesis_weak",
+              "audience_unclear",
+              "audience_conflict",
+              "evidence_gap",
+              "weak_ask",
+              "poor_posture",
+              "missing_outcome",
+              "reader_promise_weak",
+              "decision_usefulness_weak"
+            ]
+          }
         },
         "primary_blocker": {
           "type": "string",
-          "enum": ["none", "thesis_weak", "audience_unclear", "missing_outcome"]
+          "enum": [
+            "none",
+            "scope_too_broad",
+            "thesis_weak",
+            "audience_unclear",
+            "audience_conflict",
+            "evidence_gap",
+            "weak_ask",
+            "poor_posture",
+            "missing_outcome",
+            "reader_promise_weak",
+            "decision_usefulness_weak"
+          ]
         },
         "block_severity": {
           "type": "string",
@@ -54,12 +87,21 @@
         },
         "required_unblock_action": {
           "type": "string",
-          "enum": ["none", "brief_revision"]
+          "enum": [
+            "none",
+            "brief_revision",
+            "audience_revision",
+            "thesis_revision",
+            "scope_narrowing",
+            "research_plan",
+            "user_override"
+          ]
         }
       }
     },
     "feedback": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["feedback_plan_status", "approved_handling"],
       "properties": {
         "feedback_plan_status": { "type": "string" },

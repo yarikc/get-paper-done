@@ -23,12 +23,12 @@ If `.paper/STRATEGY.md` is missing:
 
 Prefer `RESEARCH.json` when present; use `RESEARCH.md` only as a summary/index. If both research artifacts are missing, proceed only if the brief does not require sourced claims.
 
-Default to `outline_only`. If the user requests `outline_plus_skeleton`, skeleton mode, or a drafting scaffold, include a light skeleton draft after the outline. The skeleton must use headings, topic sentences, support bullets, evidence placeholders, objection placeholders, and transition notes only; it must not become polished prose.
+Default to `outline_only`. If the user requests `--outline-plus-skeleton`, `outline_plus_skeleton`, skeleton mode, or a drafting scaffold, include a light skeleton draft after the outline. The skeleton must use headings, topic sentences, support bullets, evidence placeholders, objection placeholders, and transition notes only; it must not become polished prose.
 
 Depth mode affects the produced sections:
 
-- Lite produces the core outline only. Use it for early shaping, short pieces under about 1,200 words, or first-pass triage of messy imported drafts.
-- Deep produces the core outline plus `Deep Mode Additions`. Use it by default when `RESEARCH.json` or `.paper/STRATEGY.md` exists, for executive/technical/multi-audience/publishable papers, for pieces about 1,200 words or longer, or when stakes are high.
+- `--lite` produces the core outline only. Use it for early shaping, short pieces under about 1,200 words, or first-pass triage of messy imported drafts.
+- `--deep` produces the core outline plus `Deep Mode Additions`. Use it by default when `RESEARCH.json` or `.paper/STRATEGY.md` exists, for executive/technical/multi-audience/publishable papers, for pieces about 1,200 words or longer, or when stakes are high.
 
 Create `.paper/OUTLINE.md` with:
 

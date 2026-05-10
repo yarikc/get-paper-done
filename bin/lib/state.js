@@ -10,8 +10,14 @@ const {
 const {
   validatePaperArtifacts,
 } = require('./validate');
+const {
+  CURRENT_STATE_VERSION,
+  allowedStrategyStatuses,
+  allowedStrategyBlockers,
+} = require('./contracts');
 
-const allowedStrategyStatuses = new Set(['Go', 'Revise Before Drafting', 'No-Go']);
+const allowedStrategyStatusSet = new Set(allowedStrategyStatuses);
+const allowedStrategyBlockerSet = new Set(allowedStrategyBlockers);
 
 function defaultMachineState(input = {}) {
   const strategyStatus = input.strategyStatus || 'Revise Before Drafting';
@@ -73,8 +79,6 @@ function readJsonIfExists(filePath) {
 function stripMarkdownValue(value) {
   return value
     .trim()
-    .replace(/^\[/, '')
-    .replace(/\]$/, '')
     .replace(/`/g, '')
     .trim();
 }
@@ -92,9 +96,11 @@ function parseMarkdownField(markdown, label) {
 }
 
 function parseStrategyFallback(strategyMarkdown) {
+  const strategyStatus = parseMarkdownField(strategyMarkdown, 'Status');
+  const primaryBlocker = parseMarkdownField(strategyMarkdown, 'Primary blocker');
   return {
-    strategyStatus: parseMarkdownField(strategyMarkdown, 'Status'),
-    primaryBlocker: parseMarkdownField(strategyMarkdown, 'Primary blocker'),
+    strategyStatus: allowedStrategyStatusSet.has(strategyStatus) ? strategyStatus : null,
+    primaryBlocker: allowedStrategyBlockerSet.has(primaryBlocker) ? primaryBlocker : null,
     source: 'STRATEGY.md',
   };
 }
@@ -153,6 +159,14 @@ function suggestedNext(state) {
   if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) return '/gpd-brief';
   if (!a['STRATEGY.md']) return '/gpd-brief';
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') return '/gpd-brief';
+  if (
+    state.machineState
+    && state.machineState.version === CURRENT_STATE_VERSION
+    && typeof state.machineState.suggested_next_command === 'string'
+    && state.machineState.suggested_next_command.trim()
+  ) {
+    return state.machineState.suggested_next_command;
+  }
   if (!a['RESEARCH.json']) return '/gpd-research';
   if (!a['OUTLINE.md']) return '/gpd-outline --deep';
   if (!a['DRAFT.md']) return '/gpd-draft';
@@ -193,10 +207,19 @@ function validate(input = {}) {
   if (state.stateJsonError) {
     issues.push({ severity: 'HIGH', issue: `Malformed STATE.json: ${state.stateJsonError}` });
   }
+  if (
+    state.machineState
+    && state.machineState.version !== CURRENT_STATE_VERSION
+  ) {
+    issues.push({
+      severity: 'HIGH',
+      issue: `Unsupported STATE.json version ${state.machineState.version}; run gpd update or migrate`,
+    });
+  }
   if (!a['STATE.json']) {
     issues.push({ severity: 'MEDIUM', issue: 'Missing STATE.json; using legacy STRATEGY.md parsing fallback' });
   }
-  if (a['STRATEGY.md'] && !allowedStrategyStatuses.has(state.strategyStatus)) {
+  if (a['STRATEGY.md'] && !allowedStrategyStatusSet.has(state.strategyStatus)) {
     const source = state.artifacts['STATE.json'] ? 'STATE.json' : 'STRATEGY.md';
     issues.push({ severity: 'HIGH', issue: `Malformed ${source}: missing or invalid strategy status` });
   }

@@ -164,12 +164,16 @@ Artifact derivation rules:
 
 - `.paper/DRAFT.md`: should contain the current imported draft, converted to Markdown if possible. Preserve content; do not rewrite during import.
 - `.paper/BRIEF.md`: extract document type, title, target audience, thesis, opposing view, likely claims, constraints, and known gaps. Mark uncertainty clearly.
-- `.paper/STRATEGY.md`: run the strategy gate from imported context. If thesis, reader promise, paper job, scope, or desired outcome is unclear, set status to `Revise Before Drafting` and populate `Strategy Blockers` with the normalized blocker list and primary blocker.
+- `.paper/STRATEGY.md`: run the strategy gate from imported context. Status must be `Go`, `Revise Before Drafting`, or `No-Go`. If thesis, reader promise, paper job, scope, or desired outcome is unclear, set status to `Revise Before Drafting` and populate `Strategy Blockers` with the normalized blocker list and primary blocker.
 - `.paper/PROJECT.md`: state what this paper appears to be and what outcome it appears to seek. Keep it short; do not duplicate the full thesis, claims, or objections from `BRIEF.md`.
 - `.paper/STATE.md` and `.paper/STATE.json`: set current position based on import quality and record post-import choices plus any suggested choice.
 - `.paper/IMPORT.md`: record copied files, skipped files, canonical draft, classification, assumptions, and post-import options.
 
 Do not silently invent missing information. Mark unknowns as open questions.
+
+Use only normalized strategy blocker values: `none`, `scope_too_broad`, `thesis_weak`, `audience_unclear`, `audience_conflict`, `evidence_gap`, `weak_ask`, `poor_posture`, `missing_outcome`, `reader_promise_weak`, and `decision_usefulness_weak`.
+
+Use only normalized unblock actions: `none`, `brief_revision`, `audience_revision`, `thesis_revision`, `scope_narrowing`, `research_plan`, and `user_override`.
 
 If the imported source contains research/reference material, record where it is in `original/` and summarize the categories in `.paper/IMPORT.md`. Do not compress research into `.paper/RESEARCH.json` or `.paper/RESEARCH.md` during import; route to `/gpd-research` so research compression happens in a fresh context.
 
