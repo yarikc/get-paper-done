@@ -164,7 +164,17 @@ function paragraphBlocks(markdown) {
   return String(markdown || '')
     .split(/\n\s*\n/)
     .map((block) => block.trim())
-    .filter((block) => block && !block.startsWith('#') && !block.startsWith('|') && !block.startsWith('- '));
+    .filter((block) => {
+      if (!block) return false;
+      return ![
+        /^#/,
+        /^\|/,
+        /^[-*+]\s+/,
+        /^\d+\.\s+/,
+        /^>/,
+        /^```/,
+      ].some((pattern) => pattern.test(block));
+    });
 }
 
 function looksLikeSaturatedParallelProse(paragraph) {
@@ -187,15 +197,17 @@ function validateProseSaturationInArtifact(paperDir, artifactName) {
     .filter((index) => index !== null);
   if (saturatedIndexes.length < 2) return [];
 
-  const hasCluster = saturatedIndexes.some((index, position) => (
+  const hasLocalCluster = saturatedIndexes.some((index, position) => (
     position >= 2 && index - saturatedIndexes[position - 2] <= 2
   ));
-  if (!hasCluster) return [];
+  const hasArtifactDensity = saturatedIndexes.length >= 4
+    && saturatedIndexes.length / paragraphs.length >= 0.16;
+  if (!hasLocalCluster && !hasArtifactDensity) return [];
 
   return [issue(
     'MEDIUM',
     artifactName,
-    'contains repeated list-heavy paragraphs; revise saturated parallel structures into sharper causal or example-based prose',
+    'contains repeated list-heavy paragraphs across the artifact; revise saturated parallel structures into sharper causal or example-based prose',
   )];
 }
 

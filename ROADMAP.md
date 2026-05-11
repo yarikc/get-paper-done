@@ -34,9 +34,10 @@ Current issue alignment:
 
 - `#2`: active umbrella for layered workflow/agent testing; one-paper diagnostic trial is now represented as `examples/data-products-ai-scaling` with regression coverage. The next slice is an imported or messy-paper example.
 - `#1`: broader test/evaluation program; remains open until imported-paper fixtures and deeper semantic checks exist.
-- `#6`: focused semantic-validation execution plan; first deterministic gate slice exists, deferred gates remain tracked there.
-- `#7`: active prompt/validator calibration from example feedback; current slice addresses reasoning-spine independence, audience-conflict specificity, fact-check source alignment, missing safe-claim sources, and concrete recommendation examples.
-- `#8`: active cycle-3 example and semantic-warning calibration; current slice addresses example-wide semantic gates, recommendation specificity, list-heavy prose warnings, and compact broken-fixture coverage.
+- `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
+- `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
+- `#8`: closed cycle-3 example and semantic-warning calibration; it added example-wide semantic gates, recommendation specificity, list-heavy prose warnings, and compact broken-fixture coverage.
+- `#9`: second-paper trial with pre-registered hypotheses; next cross-paper validation signal before more same-example prompt or validator tuning.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
 ## Active Milestone: One-Paper Diagnostic And Examples
@@ -50,8 +51,10 @@ Next work should validate behavior under real use before adding more RFC surface
 5. Completed: added example validation tests for semantic validation, export cleanliness, and completed-workflow routing on a normalized checkout copy.
 6. Completed: converted the next feedback pass into prompt rules, semantic gates, and example repairs for reasoning spine, audience conflict specificity, fact-check/source alignment, and concrete recommendations.
 7. Completed: added example-wide semantic gate script, compact broken semantic fixture, recommendation-specificity warnings, list-heavy prose warnings, and cleaned the completed example opening prose.
-8. Add one imported or messy-paper example to validate import-to-revision behavior.
-9. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
+8. Complete feedback-4 prep: expand the example README, tighten artifact-level prose-density warnings, repair the completed example, and track the second-paper trial in GitHub.
+9. Run a second paper with a different failure profile and pre-registered validation hypotheses before adding more same-example validators.
+10. Add one imported or messy-paper example to validate import-to-revision behavior.
+11. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
 
 ## Completed Design Simplifications
 

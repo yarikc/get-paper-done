@@ -502,11 +502,11 @@ function testProseSaturationWarns() {
     '',
     '## Opening',
     '',
-    'Teams repeatedly find, understand, access, trust, and govern the same data while also debating ownership, quality, lineage, access, controls, and policy expectations.',
+    'Teams must resolve identity, access, ownership, lineage, quality, policy, metadata, support, and change, and they must do it before the model can be trusted.',
     '',
-    'The visible investment goes into model platforms, orchestration frameworks, vector stores, evaluation tooling, and application teams, but each use case still has to answer what source is authoritative, who owns meaning, what quality can be trusted, what access is allowed, and what controls apply.',
+    'The visible investment goes into model platforms, orchestration frameworks, vector stores, evaluation tooling, application teams, operating dashboards, and delivery squads, and each use case still has to answer what source is authoritative.',
     '',
-    'The resulting program asks what owners exist, what contracts apply, what metrics matter, what controls run, and what support path exists before leaders can trust it as more than another platform label.',
+    'The resulting program names owners, contracts, metrics, controls, support paths, escalation rules, publication checks, and review cadences, and it does so before leaders can trust the label.',
     '',
   ].join('\n'));
 
@@ -515,6 +515,90 @@ function testProseSaturationWarns() {
     item.severity === 'MEDIUM'
     && item.issue.includes('contains repeated list-heavy paragraphs')
   )));
+}
+
+function testDistributedProseSaturationWarns() {
+  const paperDir = makePaper('semantic-distributed-prose-saturation');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'The first section explains the main decision in plain language. It keeps the mechanism visible without turning the opening into a catalog.',
+    '',
+    'Teams repeatedly find, understand, access, trust, and govern the same data while also debating ownership, quality, lineage, access, controls, and policy expectations.',
+    '',
+    'The second section gives the reader one concrete example. It does not need a long inventory to make the point.',
+    '',
+    'The visible investment goes into model platforms, orchestration frameworks, vector stores, evaluation tooling, and application teams, but each use case still has to answer what source is authoritative, who owns meaning, what quality can be trusted, what access is allowed, and what controls apply.',
+    '',
+    'The third section narrows the scope. It describes the operating decision and leaves supporting detail to the evidence table.',
+    '',
+    'The resulting program asks what owners exist, what contracts apply, what metrics matter, what controls run, and what support path exists before leaders can trust it as more than another platform label.',
+    '',
+    'The fourth section moves from diagnosis to recommendation. It uses short sentences to avoid repeating the same cadence.',
+    '',
+    'A launch plan often names discovery, access, lineage, quality monitoring, metadata, policy enforcement, publication workflow, funding rules, and staffing models, and then forgets the actual use case.',
+    '',
+    'The closing paragraph returns to the decision. It names the proof point and avoids another parallel list.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('contains repeated list-heavy paragraphs')
+  )));
+}
+
+function testStructuredListsDoNotCountAsSaturatedProse() {
+  const paperDir = makePaper('semantic-structured-list-saturation-pass');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'The section introduces a checklist and then returns to normal prose.',
+    '',
+    '1. The product needs identity, access, ownership, lineage, quality, policy, metadata, support, and change, and the team should validate it before launch.',
+    '',
+    '2. The platform includes discovery, access, lineage, quality monitoring, metadata, policy enforcement, publication workflow, funding rules, and staffing, and then names a use case.',
+    '',
+    '* The operating model defines owners, contracts, metrics, controls, support paths, escalation rules, publication checks, and review cadences, and it does so before launch.',
+    '',
+    '- The rollout names fraud, support, claims, regulatory reporting, onboarding, and retention, and it still has to prove actual consumption.',
+    '',
+    '> A quoted review note can contain discovery, access, lineage, quality monitoring, metadata, policy enforcement, and publication workflow without being draft prose.',
+    '',
+    '```',
+    'discovery, access, lineage, quality monitoring, metadata, policy enforcement, publication workflow',
+    '```',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('contains repeated list-heavy paragraphs')));
+}
+
+function testSparseEnumerationDoesNotWarn() {
+  const paperDir = makePaper('semantic-sparse-enumeration-pass');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'The platform needs identity, access, lineage, quality monitoring, metadata, policy enforcement, and publication workflow. This paragraph is a necessary inventory rather than a repeated prose pattern.',
+    '',
+    'The rest of the section explains why the decision matters. It uses direct causal prose and does not repeat the same list structure.',
+    '',
+    'A later paragraph names owners, contracts, metrics, controls, support paths, escalation rules, publication checks, and review cadences, but it is not dense enough across the artifact to deserve a warning.',
+    '',
+    'The closing paragraph returns to the decision. It names the next action and does not rely on another enumeration.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('contains repeated list-heavy paragraphs')));
 }
 
 function testBriefEvidencePlaceholdersFailAfterResearch() {
@@ -649,5 +733,8 @@ testGenericRecommendationSpecificityWarns();
 testNumberedRecommendationSpecificityWarns();
 testConcreteRecommendationSpecificityPasses();
 testProseSaturationWarns();
+testDistributedProseSaturationWarns();
+testStructuredListsDoNotCountAsSaturatedProse();
+testSparseEnumerationDoesNotWarn();
 
 console.log('semantic gate tests passed');

@@ -10,4 +10,12 @@ The example is intended to show the expected shape and quality of a completed `.
 - `gpd validate --semantic` passes cleanly
 - `exports/FINAL.md` is the generated handoff artifact
 
-The example is not intended as publication advice or as a complete public white paper. A public version would still need publication-grade citations, direct outcome evidence, and organization-specific legal/compliance review.
+## Known Limitations
+
+This example is a regression and reference artifact, not proof that GPD generalizes across all paper types. It was produced from one internal strategy-paper trial and then repaired based on review feedback. It is useful for inspecting artifact shape, state progression, semantic gates, and export expectations; it is not a substitute for a broader cross-paper evaluation set.
+
+The paper itself is also not publication advice or a complete public white paper. A public version would still need publication-grade citations, direct outcome evidence, organization-specific legal/compliance review, and a named organizational context.
+
+## Calibration Notes
+
+The example is intentionally included in automated validation so future changes do not regress a completed workflow. The feedback files that drove its calibration are kept as local review inputs under `docs/feedback*.md` when present; they are not part of the installable framework.

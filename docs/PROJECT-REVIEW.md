@@ -9,7 +9,7 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 **Overall: 8.9/10**
 
-Get Paper Done is a coherent, useful writing workflow framework with a practical CLI wrapper and a stronger documentation surface than the initial release. The project now has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, one completed diagnostic paper run, one realistic completed example workspace, and semantic gates calibrated from that example's feedback.
+Get Paper Done is a coherent, useful writing workflow framework with a practical CLI wrapper and a stronger documentation surface than the initial release. The project now has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, one completed diagnostic paper run, one realistic completed example workspace, and semantic gates calibrated from that example's feedback. The next credibility step is cross-paper validation rather than continued tuning against the same example.
 
 It is close but still not a 9/10 tool. The core workflow has only one realistic example, an imported-paper example is still missing, semantic validation is stronger but still example-calibrated rather than broadly proven, import remains preservation-first rather than extraction-rich, and external review is still prompt/workflow-driven rather than a wrapped CLI capability.
 
@@ -36,9 +36,9 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 - `gpd status` no longer lets saved `STATE.json` next commands skip structurally required artifacts.
 - `gpd status` now recognizes `.paper/exports/FINAL.md`, detects stale exports, and routes completed exports to `/gpd-progress`.
 - `gpd export` provides a deterministic CLI path for internal Markdown export after a `Ready` review verdict.
-- `gpd validate --semantic` now catches stale BRIEF evidence placeholders, planned source-type gaps, missing counterevidence rationale, export metadata leakage, STATE drift, weak low-score review instructions, reasoning-spine restatement, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatch for strategic or recommendation claims, generic recommendations without concrete examples, and repeated list-heavy prose.
+- `gpd validate --semantic` now catches stale BRIEF evidence placeholders, planned source-type gaps, missing counterevidence rationale, export metadata leakage, STATE drift, weak low-score review instructions, reasoning-spine restatement, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatch for strategic or recommendation claims, generic recommendations without concrete examples, and clustered or artifact-dense list-heavy prose.
 - `examples/data-products-ai-scaling` gives users and tests a realistic completed workspace.
-- The completed example has been repaired after feedback so the reasoning spine is independent, audience conflicts are anchored to paper-specific sections or claims, recommendation sections name concrete candidate use cases, list-heavy opening prose is reduced, and fact-check safe claims align with `RESEARCH.json`.
+- The completed example has been repaired after feedback so the reasoning spine is independent, audience conflicts are anchored to paper-specific sections or claims, recommendation sections name concrete candidate use cases, list-heavy prose density is reduced, and fact-check safe claims align with `RESEARCH.json`.
 - Import is preservation-first and does not silently convert or overwrite downstream artifacts.
 - The strategy gate gives the system a useful way to stop weak papers before research or drafting.
 - The README now explains the actual user workflow instead of only listing commands.
@@ -48,7 +48,7 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 1. Real-paper behavior has one complete example, but not enough breadth. The next test should import a messy existing paper and run it through brief, strategy, research, outline, draft, fact-check, review, revise, and export.
 2. Example coverage is still one-sided. New users can inspect a completed new-paper style workspace, but not an imported-paper workspace.
 3. Import classification is useful but shallow. Current import preserves and catalogs material, but does not deeply extract `.docx`, PDFs, spreadsheets, diagrams, citations, or version history.
-4. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but it still cannot judge full argument quality, citation fidelity, or prose distinctiveness.
+4. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but the gates remain calibrated from one paper and still cannot judge full argument quality, citation fidelity, or prose distinctiveness.
 5. State enum policy is now intentionally tighter and centrally tested. That prevents typo drift, but future blocker/action additions must go through the shared contract and workflow consistency tests.
 6. External review is workflow-documented but not tool-wrapped. Users still need runtime/model-specific manual steps for multi-model review.
 7. Release readiness remains private-repo oriented. The install flow assumes local `npm link`; a public or team-facing release needs clearer versioning and update guarantees.
@@ -57,7 +57,7 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 
 1. Add one imported-paper example workspace with realistic preserved original material and downstream artifacts.
 2. Add richer fixture workspaces with realistic artifact bodies, not just minimal routing signals.
-3. Continue adding semantic checks only where real examples show deterministic, low-noise failure modes.
+3. Run a second paper with a different failure profile and pre-register expected validator behavior before adding more same-example semantic checks.
 4. Harden `gpd import` around canonical draft selection, large-folder previews, document extraction, and richer manifest details.
 5. Add fixture-based end-to-end tests that validate representative completed workspaces with real artifact bodies.
 6. Expand semantic lint-style checks only where they are concrete enough to be useful; defer noisy heuristics until examples exist.
