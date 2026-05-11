@@ -115,7 +115,7 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
 
-Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, weak rewrite instructions in low-scoring review rows, thesis-restating reasoning spines, generic audience-conflict rows, missing safe-claim sources, and fact-check source/evidence mismatches for strategic or recommendation claims. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
+Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, weak rewrite instructions in low-scoring review rows, thesis-restating reasoning spines, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatches for strategic or recommendation claims, generic recommendations without concrete examples, and repeated list-heavy prose. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
 
 Run semantic validation before treating a paper as example-quality, publication-ready, or ready for long-term handoff.
 
@@ -238,7 +238,7 @@ The framework package is not the paper workspace. Paper-specific state and sourc
 
 A completed reference workspace is available at [examples/data-products-ai-scaling](examples/data-products-ai-scaling).
 
-It shows a full internal strategy-paper flow with brief, strategy gate, research, outline, draft, fact-check, review, and export artifacts. The example is included in the test suite: `tests/example-fixtures.test.js` validates semantic gates, export cleanliness, and completed-workflow routing on a normalized checkout copy.
+It shows a full internal strategy-paper flow with brief, strategy gate, research, outline, draft, fact-check, review, and export artifacts. The example is included in the test suite: `tests/example-fixtures.test.js` validates semantic gates, export cleanliness, and completed-workflow routing on a normalized checkout copy. `npm run gate:examples` runs semantic validation across all example workspaces and requires zero warnings.
 
 ## Core Artifacts
 

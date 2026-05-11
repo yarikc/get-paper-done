@@ -9,7 +9,8 @@
   "scripts": {
     "check": "node bin/gpd.js install claude --dry-run --target /tmp/gpd-install-check && node bin/gpd.js install codex --dry-run --target /tmp/gpd-install-check-codex && node bin/gpd.js version && npm test",
     "gate:cheap": "node tests/semantic-gates.test.js",
-    "test": "node tests/gpd-cli.test.js && node tests/artifact-contracts.test.js && node tests/workflow-consistency.test.js && node tests/workflow-routing.test.js && node tests/workflow-scenarios.test.js && node tests/semantic-gates.test.js && node tests/example-fixtures.test.js"
+    "gate:examples": "node tests/examples-gate.test.js",
+    "test": "node tests/gpd-cli.test.js && node tests/artifact-contracts.test.js && node tests/workflow-consistency.test.js && node tests/workflow-routing.test.js && node tests/workflow-scenarios.test.js && node tests/semantic-gates.test.js && node tests/example-fixtures.test.js && node tests/examples-gate.test.js && node tests/broken-fixture.test.js"
   },
   "keywords": [
     "ai",

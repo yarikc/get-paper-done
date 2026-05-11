@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "topic": "Broken semantic paper",
+    "scope": "test",
+    "depth": "standard",
+    "source_mode": "web_first",
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "What evidence supports the recommendation?",
+        "mapped_claims": ["C1"],
+        "why_it_matters": "The claim drives the paper recommendation.",
+        "planned_source_types": ["official", "academic"],
+        "search_queries": ["data products AI scaling evidence"]
+      }
+    ],
+    "depth_rationale": "Standard internal strategy paper.",
+    "source_mode_rationale": "Needs external support.",
+    "user_feedback": "None"
+  },
+  "research_brief": {
+    "executive_summary": "Sparse research.",
+    "key_findings": []
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "Official source",
+      "url_or_path": "https://example.com/official",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "None",
+      "stance": "supportive",
+      "notes": "Broad official guidance."
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "Domain ownership improves meaning.",
+      "claim_type": "technical_mechanism",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Mechanism support only."
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": [],
+    "rows": []
+  },
+  "contradictions": [],
+  "open_questions": [],
+  "draft_support_notes": [],
+  "facts_safe_to_use": [],
+  "claims_to_soften": [],
+  "claims_to_drop_or_reframe": []
+}

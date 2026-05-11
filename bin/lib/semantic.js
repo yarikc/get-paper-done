@@ -160,6 +160,45 @@ function sourceIds(value) {
   return [...String(value || '').matchAll(/\bS\d+\b/g)].map((match) => match[0]);
 }
 
+function paragraphBlocks(markdown) {
+  return String(markdown || '')
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter((block) => block && !block.startsWith('#') && !block.startsWith('|') && !block.startsWith('- '));
+}
+
+function looksLikeSaturatedParallelProse(paragraph) {
+  const text = paragraph.replace(/\s+/g, ' ').trim();
+  if (text.length < 80) return false;
+
+  const commaCount = (text.match(/,/g) || []).length;
+  const repeatedWhatHow = (text.match(/\b(what|how|who|where|which)\b/gi) || []).length;
+  const repeatedOrAnd = (text.match(/\b(and|or)\b/gi) || []).length;
+  return (commaCount >= 4 && repeatedOrAnd >= 2) || repeatedWhatHow >= 4;
+}
+
+function validateProseSaturationInArtifact(paperDir, artifactName) {
+  const markdown = readIfExists(metaPath(paperDir, artifactName));
+  if (!markdown) return [];
+
+  const paragraphs = paragraphBlocks(markdown);
+  const saturatedIndexes = paragraphs
+    .map((paragraph, index) => (looksLikeSaturatedParallelProse(paragraph) ? index : null))
+    .filter((index) => index !== null);
+  if (saturatedIndexes.length < 2) return [];
+
+  const hasCluster = saturatedIndexes.some((index, position) => (
+    position >= 2 && index - saturatedIndexes[position - 2] <= 2
+  ));
+  if (!hasCluster) return [];
+
+  return [issue(
+    'MEDIUM',
+    artifactName,
+    'contains repeated list-heavy paragraphs; revise saturated parallel structures into sharper causal or example-based prose',
+  )];
+}
+
 function validateBriefClaimEvidence(paperDir) {
   const issues = [];
   const brief = readIfExists(metaPath(paperDir, 'BRIEF.md'));
@@ -349,6 +388,41 @@ function validateReviewRewriteInstructions(paperDir) {
   return issues;
 }
 
+function recommendationSection(markdown) {
+  const lines = String(markdown || '').split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i].trim();
+    if (!/^##\s+(?:Section\s+\d+\s+-\s+)?Recommendations?\s*$/i.test(line)) continue;
+
+    const rest = lines.slice(i + 1).join('\n');
+    const next = rest.search(/\n##\s+/);
+    return next === -1 ? rest : rest.slice(0, next);
+  }
+  return '';
+}
+
+function hasConcreteRecommendationExample(section) {
+  return /\b(for example|such as|examples include|candidate use cases|first candidates|first wave should include)\b/i.test(section);
+}
+
+function validateRecommendationSpecificityInArtifact(paperDir, artifactName) {
+  const markdown = readIfExists(metaPath(paperDir, artifactName));
+  if (!markdown) return [];
+
+  const section = recommendationSection(markdown);
+  if (!section.trim()) return [];
+
+  const recommendsUseCases = /\b(priority|high-value|initial|first wave)\s+(ai\s+)?use cases?\b/i.test(section)
+    || /\buse cases?\s+(actually need|to inspect|to choose|to fund)\b/i.test(section);
+  if (!recommendsUseCases || hasConcreteRecommendationExample(section)) return [];
+
+  return [issue(
+    'MEDIUM',
+    artifactName,
+    'recommendation names use cases generically; add concrete candidate use cases, metrics, or failure signals',
+  )];
+}
+
 const genericConflictTerms = [
   'executive ask',
   'technical proof',
@@ -482,6 +556,10 @@ function validateSemanticPaper(paperDir) {
     ...validateExportMetadataLeak(paperDir),
     ...validateStateDrift(paperDir),
     ...validateReviewRewriteInstructions(paperDir),
+    ...validateRecommendationSpecificityInArtifact(paperDir, 'DRAFT.md'),
+    ...validateRecommendationSpecificityInArtifact(paperDir, 'exports/FINAL.md'),
+    ...validateProseSaturationInArtifact(paperDir, 'DRAFT.md'),
+    ...validateProseSaturationInArtifact(paperDir, 'exports/FINAL.md'),
     ...validateAudienceConflictSpecificity(paperDir),
     ...validateFactCheckSafeSourceAlignment(paperDir),
   ];

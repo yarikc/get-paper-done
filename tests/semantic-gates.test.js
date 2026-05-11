@@ -444,6 +444,79 @@ function testFactCheckSafeSourceAlignmentWarnsOnMissingSources() {
   )));
 }
 
+function testGenericRecommendationSpecificityWarns() {
+  const paperDir = makePaper('semantic-recommendation-specificity');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Recommendation',
+    '',
+    'The immediate next move is to choose a small set of high-value AI use cases and build the data products those use cases actually need.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('recommendation names use cases generically')
+  )));
+}
+
+function testNumberedRecommendationSpecificityWarns() {
+  const paperDir = makePaper('semantic-numbered-recommendation-specificity');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Section 5 - Recommendation',
+    '',
+    'The immediate next move is to choose a small set of high-value AI use cases and build the data products those use cases actually need.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('recommendation names use cases generically')
+  )));
+}
+
+function testConcreteRecommendationSpecificityPasses() {
+  const paperDir = makePaper('semantic-recommendation-specificity-pass');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Recommendation',
+    '',
+    'The immediate next move is to choose a small set of high-value AI use cases and build the data products those use cases actually need. Candidate use cases should be named before funding approval, such as customer-support intent classification, fraud alert enrichment, regulatory reporting copilots, or claims triage.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('recommendation names use cases generically')));
+}
+
+function testProseSaturationWarns() {
+  const paperDir = makePaper('semantic-prose-saturation');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Opening',
+    '',
+    'Teams repeatedly find, understand, access, trust, and govern the same data while also debating ownership, quality, lineage, access, controls, and policy expectations.',
+    '',
+    'The visible investment goes into model platforms, orchestration frameworks, vector stores, evaluation tooling, and application teams, but each use case still has to answer what source is authoritative, who owns meaning, what quality can be trusted, what access is allowed, and what controls apply.',
+    '',
+    'The resulting program asks what owners exist, what contracts apply, what metrics matter, what controls run, and what support path exists before leaders can trust it as more than another platform label.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('contains repeated list-heavy paragraphs')
+  )));
+}
+
 function testBriefEvidencePlaceholdersFailAfterResearch() {
   const paperDir = makePaper('semantic-brief-stale');
   writeBrief(paperDir, 'Needs research across official sources.');
@@ -572,5 +645,9 @@ testGenericAudienceConflictWarns();
 testFactCheckSafeSourceAlignmentWarns();
 testFactCheckSafeSourceAlignmentNormalizesTypeLabels();
 testFactCheckSafeSourceAlignmentWarnsOnMissingSources();
+testGenericRecommendationSpecificityWarns();
+testNumberedRecommendationSpecificityWarns();
+testConcreteRecommendationSpecificityPasses();
+testProseSaturationWarns();
 
 console.log('semantic gate tests passed');

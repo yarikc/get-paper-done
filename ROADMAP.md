@@ -36,6 +36,7 @@ Current issue alignment:
 - `#1`: broader test/evaluation program; remains open until imported-paper fixtures and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; first deterministic gate slice exists, deferred gates remain tracked there.
 - `#7`: active prompt/validator calibration from example feedback; current slice addresses reasoning-spine independence, audience-conflict specificity, fact-check source alignment, missing safe-claim sources, and concrete recommendation examples.
+- `#8`: active cycle-3 example and semantic-warning calibration; current slice addresses example-wide semantic gates, recommendation specificity, list-heavy prose warnings, and compact broken-fixture coverage.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
 ## Active Milestone: One-Paper Diagnostic And Examples
@@ -48,8 +49,9 @@ Next work should validate behavior under real use before adding more RFC surface
 4. Completed: turned the refreshed trial output into `examples/data-products-ai-scaling`.
 5. Completed: added example validation tests for semantic validation, export cleanliness, and completed-workflow routing on a normalized checkout copy.
 6. Completed: converted the next feedback pass into prompt rules, semantic gates, and example repairs for reasoning spine, audience conflict specificity, fact-check/source alignment, and concrete recommendations.
-7. Add one imported or messy-paper example to validate import-to-revision behavior.
-8. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
+7. Completed: added example-wide semantic gate script, compact broken semantic fixture, recommendation-specificity warnings, list-heavy prose warnings, and cleaned the completed example opening prose.
+8. Add one imported or messy-paper example to validate import-to-revision behavior.
+9. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
 
 ## Completed Design Simplifications
 

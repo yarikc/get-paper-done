@@ -2,11 +2,11 @@
 
 ## The AI Scaling Bottleneck Is Data Repeatability
 
-Enterprise AI programs do not scale through model tooling alone. They scale when teams can repeatedly find, understand, access, trust, and govern the data that models and agents depend on.
+Enterprise AI programs do not scale through model tooling alone. They scale when teams have a repeatable path from data need to governed use.
 
-This paper recommends funding a focused first wave of domain-aligned data products for priority AI use cases, built on a common governed platform with named owners, explicit consumption contracts, and shared controls. The thesis is not that data products automatically improve AI outcomes. The thesis is narrower: they can reduce recurring data friction in AI delivery when domain-owned meaning is paired with platform-managed governance, access, quality, lineage, and policy controls.
+This paper recommends funding a focused first wave of domain-aligned data products for priority AI use cases. Each product should have a named owner, a consumption contract, and platform-managed controls. The thesis is not that data products automatically improve AI outcomes. The narrower claim is that they can reduce recurring data friction when domain-owned meaning is paired with common governance and quality controls.
 
-That is where many enterprise AI strategies are weaker than they look. The visible investment goes into model platforms, orchestration frameworks, vector stores, evaluation tooling, and application teams. Those investments matter. But each use case still has to answer the same basic data questions: what source is authoritative, who owns the meaning, what quality can be trusted, what access is allowed, what lineage exists, and what controls apply when the data becomes part of an AI-enabled decision flow.
+That is where many enterprise AI strategies are weaker than they look. The visible investment often goes into model platforms and application teams. Those investments matter, but each use case still has to resolve data authority, ownership, quality, access, lineage, and control before the model can be trusted in an AI-enabled decision flow.
 
 If those answers are recreated one use case at a time, AI delivery remains bespoke. Teams can build prototypes, but scaling becomes slow and risky because every new use case reopens the same data discovery, permissioning, interpretation, and validation work.
 
@@ -16,13 +16,13 @@ The practical implication is straightforward. An enterprise cannot make AI repea
 
 ## Domain-Aligned Data Products Are An Operating Pattern, Not A Label
 
-The useful version of a data product is not a dataset with a nicer catalog description. It is an owned, documented, governed, and consumable interface between a domain that understands the data and the teams that need to use it.
+The useful version of a data product is not a dataset with a nicer catalog description. It is an owned interface between a domain that understands the data and the teams that need to use it.
 
-For AI delivery, that distinction matters. AI teams do not only need tables, files, or embeddings. They need to know what the data means, how current it is, what quality expectations apply, what transformations were performed, what policies constrain use, and who can answer when the data behaves unexpectedly. A domain-aligned data product should make those questions easier to answer repeatedly.
+For AI delivery, that distinction matters. AI teams do not only need raw tables or embeddings. They need to know whether a source is fit for the job, how recently it changed, and who can explain unexpected behavior. A domain-aligned data product should make those answers repeatable instead of forcing each AI team to rediscover them.
 
-This is where domain alignment helps. Central platform teams rarely understand every business concept, exception, and quality issue deeply enough to own meaning across the enterprise. Domain teams are closer to the business context. They are better positioned to define semantics, quality expectations, source-system caveats, and consumption rules for data they understand.
+This is where domain alignment helps. Central platform teams rarely understand every business concept deeply enough to own meaning across the enterprise. Domain teams are closer to the business context, so they are better positioned to define semantics and source-system caveats for data they understand.
 
-But domain ownership is not enough. Without clear consumption contracts, domain-aligned data products become local assets with local assumptions. A product needs a stable interface, metadata, ownership, data-quality expectations, access patterns, lineage, policy constraints, and support expectations. Otherwise, the enterprise has simply renamed datasets as products.
+But domain ownership is not enough. Without clear consumption contracts, domain-aligned data products become local assets with local assumptions. A product needs a stable interface and enough metadata for consumers to judge whether it is usable. It also needs clear support expectations so consumers know where accountability sits when the data changes or fails.
 
 The paper's thesis depends on this distinction. Domain-aligned data products can reduce recurring AI delivery friction only when product language is backed by ownership and contracts. If the term becomes branding, it will not survive technical scrutiny.
 
@@ -30,13 +30,13 @@ For leaders, the decision is therefore not whether to rename existing datasets. 
 
 ## The Common Platform Keeps Local Product Sprawl In Check
 
-Domain alignment only works if it is constrained by a common platform. Without that constraint, the enterprise trades one bottleneck for another problem: many local data products with inconsistent metadata, access rules, quality signals, lineage, semantics, and support patterns.
+Domain alignment only works if it is constrained by a common platform. Without that constraint, the enterprise trades one bottleneck for another: many local data products that cannot be discovered, compared, governed, or reused consistently.
 
 The common platform should not own every business definition. That would recreate the centralization problem domain alignment is meant to solve. Instead, the platform should provide the shared capabilities that make domain-owned products discoverable, inspectable, governed, and reusable.
 
-Those capabilities include identity and access management, cataloging, metadata standards, lineage, quality monitoring, policy enforcement, observability, publication workflows, contract templates, and consumption patterns. They also include the operating rules for what qualifies as a product rather than a raw internal dataset.
+Those capabilities should cover the shared control plane for product publication and use. At minimum, the platform needs identity and access management, cataloging, lineage, quality monitoring, policy enforcement, and product-contract templates. It also needs the operating rules for what qualifies as a product rather than a raw internal dataset.
 
-The platform's job is to make the paved road easier than local invention. A domain should not have to design its own access pattern, lineage model, quality dashboard, or policy integration every time it publishes a product. At the same time, the platform should not force every domain through a slow central team for semantic decisions the domain is better qualified to make.
+The platform's job is to make the paved road easier than local invention. A domain should not have to redesign access, lineage, quality reporting, or policy integration every time it publishes a product. At the same time, the platform should not force every domain through a slow central team for semantic decisions the domain is better qualified to make.
 
 This is the balance the architecture must strike:
 

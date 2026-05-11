@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "status": "Ready",
+  "current_stage": "Review",
+  "last_completed_stage": "Review",
+  "last_activity": "2026-05-11T00:00:00.000Z",
+  "suggested_next_command": "/gpd-export",
+  "blocked_by": [],
+  "strategy": {
+    "status": "Go",
+    "blocking_issues": [],
+    "primary_blocker": "none",
+    "block_severity": "None",
+    "required_unblock_action": "none"
+  },
+  "feedback": {
+    "feedback_plan_status": "Not created",
+    "approved_handling": ""
+  },
+  "post_import_choices": []
+}
