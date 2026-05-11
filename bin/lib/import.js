@@ -13,7 +13,6 @@ const {
 } = require('./common');
 const {
   defaultMachineState,
-  writeStateJson,
 } = require('./state');
 const {
   writeSetupArtifacts,
@@ -114,12 +113,28 @@ function walkSource(sourcePath, maxBytes = maxDefaultFileBytes) {
   return { source, files, skipped };
 }
 
-function selectCanonicalDraft(files) {
+function isTextDraftCandidate(file) {
+  return /\.(md|txt)$/i.test(file.rel);
+}
+
+function selectCanonicalDraft(files, sourceIsFile = false) {
   const candidates = files.filter((file) => file.classification === 'draft');
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) {
+    if (sourceIsFile && files.length === 1 && isTextDraftCandidate(files[0])) {
+      return {
+        ...files[0],
+        selectionRationale: 'Single imported Markdown/text file treated as the working draft.',
+      };
+    }
+    return null;
+  }
   return candidates
     .map((file) => ({ file, mtime: fs.statSync(file.abs).mtimeMs }))
-    .sort((a, b) => b.mtime - a.mtime)[0].file;
+    .sort((a, b) => b.mtime - a.mtime)
+    .map((candidate) => ({
+      ...candidate.file,
+      selectionRationale: 'Most recently modified imported draft-like file.',
+    }))[0];
 }
 
 function reportPathLabel(value) {
@@ -176,7 +191,7 @@ ${skippedRows}
 ## Canonical Draft
 
 - **Selected draft:** ${canonicalDraft ? `original/${canonicalDraft.rel.split(path.sep).join('/')}` : 'None selected'}
-- **Selection rationale:** ${canonicalDraft ? 'Most recently modified imported draft-like file.' : 'No obvious draft-like file was found.'}
+- **Selection rationale:** ${canonicalDraft ? canonicalDraft.selectionRationale : 'No obvious draft-like file was found.'}
 
 ## Deferred Artifacts
 
@@ -244,7 +259,8 @@ function importPaper(input = {}) {
   ensureNotExistingPaper(paperDir);
 
   const scan = walkSource(input.source, input.maxFileBytes || maxDefaultFileBytes);
-  const canonicalDraft = selectCanonicalDraft(scan.files);
+  const sourceIsFile = fs.statSync(scan.source).isFile();
+  const canonicalDraft = selectCanonicalDraft(scan.files, sourceIsFile);
 
   mkdirp(paperDir, dryRun);
   mkdirp(path.join(paperDir, 'original'), dryRun);
@@ -257,26 +273,27 @@ function importPaper(input = {}) {
   }
 
   const title = input.title || input.slug || path.basename(paperDir);
-  writeSetupArtifacts(
-    paperDir,
-    title,
-    'Imported material needs confirmed thesis, audience, reader promise, scope, and desired outcome.',
-    dryRun,
-  );
-  writeStateJson(paperDir, defaultMachineState({
+  const machineState = defaultMachineState({
     postImportChoices: [
       '/gpd-research',
       '/gpd-outline --lite',
       '/gpd-review --external',
     ],
-  }), dryRun);
+  });
+  writeSetupArtifacts(
+    paperDir,
+    title,
+    'Imported material needs confirmed thesis, audience, reader promise, scope, and desired outcome.',
+    dryRun,
+    machineState,
+  );
   writeFile(
     path.join(paperDir, '.paper', 'IMPORT.md'),
     importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft),
     dryRun,
   );
 
-  if (canonicalDraft && canonicalDraft.abs.endsWith('.md')) {
+  if (canonicalDraft && isTextDraftCandidate(canonicalDraft)) {
     const draft = fs.readFileSync(canonicalDraft.abs, 'utf8');
     writeFile(path.join(paperDir, '.paper', 'DRAFT.md'), draft, dryRun);
   }

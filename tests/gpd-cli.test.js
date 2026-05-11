@@ -94,6 +94,11 @@ function testInitStatusValidate() {
   });
   assert.strictEqual(validation.status, 1);
   assert(validation.stdout.includes('Strategy blocks downstream work'));
+
+  const semanticValidation = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(semanticValidation.status, 1);
+  assert(!semanticValidation.stdout.includes('STATE.md: Status'));
+  assert(!semanticValidation.stdout.includes('STATE.md: Suggested next command'));
 }
 
 function testStateJsonIsStatusSourceOfTruth() {
@@ -183,6 +188,11 @@ function testImportDryRunAndCopy() {
   assert(report.includes('Absolute local source and destination paths are intentionally omitted'));
   assert(!report.includes(source));
   assert(!report.includes(target));
+
+  const semanticValidation = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(semanticValidation.status, 1);
+  assert(!semanticValidation.stdout.includes('STATE.md: Status'));
+  assert(!semanticValidation.stdout.includes('STATE.md: Suggested next command'));
 }
 
 function testImportClassifications() {
@@ -207,6 +217,26 @@ function testImportClassifications() {
   assert(report.includes('| strategy-spec.md | original/strategy-spec.md | spec |'));
   assert(report.includes('| chart.png | original/chart.png | asset |'));
   assert(report.includes('| random.md | original/random.md | notes |'));
+}
+
+function testSingleMarkdownImportIsCanonicalDraft() {
+  const sourceDir = tempDir('gpd-import-single-source');
+  const source = path.join(sourceDir, 'Directional_Outline_v0.5-latest.md');
+  fs.writeFileSync(source, '# Directional Outline\n\nCurrent working draft.\n');
+
+  const target = tempDir('gpd-import-single-target');
+  run(['import', '--source', source, '--location', target, '--slug', 'single-import']);
+  const paperDir = path.join(target, 'single-import');
+
+  assert(fs.existsSync(path.join(paperDir, '.paper', 'DRAFT.md')));
+  assert.strictEqual(
+    fs.readFileSync(path.join(paperDir, '.paper', 'DRAFT.md'), 'utf8'),
+    '# Directional Outline\n\nCurrent working draft.\n',
+  );
+
+  const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
+  assert(report.includes('**Selected draft:** original/Directional_Outline_v0.5-latest.md'));
+  assert(report.includes('Single imported Markdown/text file treated as the working draft.'));
 }
 
 function testImportWithoutSlugUsesSourceName() {
@@ -377,6 +407,7 @@ testInitWithoutSlugUsesSubdirectory();
 testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();
 testImportClassifications();
+testSingleMarkdownImportIsCanonicalDraft();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
 testExportCommandRequiresReadyReview();

@@ -13,6 +13,7 @@ const {
 } = require('./common');
 const {
   defaultMachineState,
+  writeStateMarkdown,
   writeStateJson,
 } = require('./state');
 
@@ -29,7 +30,7 @@ function strategyReplacements(title, reason) {
   };
 }
 
-function writeSetupArtifacts(paperDir, title, reason, dryRun) {
+function writeSetupArtifacts(paperDir, title, reason, dryRun, machineState = defaultMachineState()) {
   const replacements = strategyReplacements(title, reason);
   const files = [
     ['project.md', 'PROJECT.md'],
@@ -37,7 +38,6 @@ function writeSetupArtifacts(paperDir, title, reason, dryRun) {
     ['audience.md', 'AUDIENCE.md'],
     ['brief.md', 'BRIEF.md'],
     ['strategy.md', 'STRATEGY.md'],
-    ['state.md', 'STATE.md'],
   ];
 
   for (const [template, dest] of files) {
@@ -48,7 +48,8 @@ function writeSetupArtifacts(paperDir, title, reason, dryRun) {
     );
   }
   writeFile(path.join(paperDir, '.paper', 'config.json'), readTemplate('config.json'), dryRun);
-  writeStateJson(paperDir, defaultMachineState(), dryRun);
+  writeStateMarkdown(paperDir, machineState, dryRun);
+  writeStateJson(paperDir, machineState, dryRun);
 }
 
 function initPaper(input = {}) {

@@ -56,6 +56,61 @@ function writeStateJson(paperDir, state, dryRun) {
   );
 }
 
+function stateMarkdown(state) {
+  const blockedBy = Array.isArray(state.blocked_by) && state.blocked_by.length > 0
+    ? state.blocked_by.map((blocker) => `- ${blocker}`).join('\n')
+    : '- None';
+  const postImportChoices = Array.isArray(state.post_import_choices) && state.post_import_choices.length > 0
+    ? state.post_import_choices.map((choice) => `- \`${choice}\``).join('\n')
+    : '- None';
+  const feedback = state.feedback || {};
+  return [
+    '# Paper State',
+    '',
+    '## Current Position',
+    '',
+    `- **Status:** ${state.status}`,
+    `- **Current stage:** ${state.current_stage}`,
+    `- **Last completed stage:** ${state.last_completed_stage}`,
+    `- **Last activity:** ${state.last_activity}`,
+    `- **Suggested next command:** \`${state.suggested_next_command}\``,
+    '',
+    '## Blocked By',
+    '',
+    blockedBy,
+    '',
+    '## Decisions',
+    '',
+    '- None recorded',
+    '',
+    '## Open Questions',
+    '',
+    '- Confirm or repair the brief before downstream work if the strategy gate is blocked.',
+    '',
+    '## Feedback Handling',
+    '',
+    `- **Feedback plan status:** ${feedback.feedback_plan_status || 'Not created'}`,
+    `- **Approved handling:** ${feedback.approved_handling || ''}`,
+    '',
+    '## Post-Import Choices',
+    '',
+    postImportChoices,
+    '',
+    '## Next Action',
+    '',
+    `Run \`${state.suggested_next_command}\` next.`,
+    '',
+  ].join('\n');
+}
+
+function writeStateMarkdown(paperDir, state, dryRun) {
+  writeFile(
+    path.join(paperDir, '.paper', 'STATE.md'),
+    stateMarkdown(state),
+    dryRun,
+  );
+}
+
 function findPaperDir(start = process.cwd()) {
   let current = path.resolve(expandHome(start));
   if (fs.existsSync(path.join(current, '.paper'))) return current;
@@ -398,6 +453,7 @@ function printValidation(result) {
 module.exports = {
   defaultMachineState,
   writeStateJson,
+  writeStateMarkdown,
   findPaperDir,
   status,
   printStatus,
