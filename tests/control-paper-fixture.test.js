@@ -46,16 +46,20 @@ function testFixtureIsAnonymized() {
 function testExpectedFindingsDocumentKnownGap() {
   const expected = fs.readFileSync(path.join(fixtureDir, 'EXPECTED-FINDINGS.md'), 'utf8');
   assert(expected.includes('Current semantic baseline'));
-  assert(expected.includes('intentionally documented as a gap'));
+  assert(expected.includes('Baseline commit'));
+  assert(expected.includes('MEDIUM warning'));
 }
 
-function testStandaloneDraftCurrentlyPassesSemanticValidation() {
+function testStandaloneDraftWarnsAboutMissingSourceMapping() {
   const issues = validateSemanticPaper(paperDir);
-  assert.deepStrictEqual(issues, []);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('source-sensitive imported draft has no RESEARCH.json')
+  )));
 }
 
 testFixtureIsAnonymized();
 testExpectedFindingsDocumentKnownGap();
-testStandaloneDraftCurrentlyPassesSemanticValidation();
+testStandaloneDraftWarnsAboutMissingSourceMapping();
 
 console.log('control paper fixture tests passed');

@@ -4,8 +4,8 @@ Status: pre-registered control fixture.
 
 Current semantic baseline:
 
-- `validateSemanticPaper()` returns zero issues when this fixture is evaluated as a standalone draft.
-- That is intentionally documented as a gap, not a success condition.
+- Baseline commit `a143851` documented that `validateSemanticPaper()` returned zero issues when this fixture was evaluated as a standalone draft.
+- The first validator improvement should turn that gap into a MEDIUM warning about missing source mapping for source-sensitive imported claims.
 
 Expected human/GPD findings:
 
@@ -23,4 +23,3 @@ Expected future automated findings:
 - Define-before-reuse warning for recurring terms that are not defined near first use.
 - Audience-conflict warning before review artifacts exist.
 - Standalone imported-draft warning when source-sensitive claims appear without source mapping.
-

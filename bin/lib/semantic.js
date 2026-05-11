@@ -236,6 +236,53 @@ function validateBriefClaimEvidence(paperDir) {
   return issues;
 }
 
+function validateStandaloneSourceSensitiveDraft(paperDir) {
+  const draft = readIfExists(metaPath(paperDir, 'DRAFT.md'));
+  if (!draft) return [];
+  if (readIfExists(metaPath(paperDir, 'RESEARCH.json')) || readIfExists(metaPath(paperDir, 'FACT-CHECK.md'))) {
+    return [];
+  }
+  if (hasSourceId(draft)) return [];
+
+  const normalized = normalizeText(draft);
+  const sourceSensitiveTerms = [
+    'regulatory',
+    'regulated',
+    'supervisory',
+    'compliance',
+    'cyber',
+    'security',
+    'vulnerability',
+    'operational resilience',
+    'third party',
+    'model risk',
+    'audit',
+    'decommissioning',
+  ];
+  const strategicClaimTerms = [
+    'expects',
+    'expected',
+    'must',
+    'requires',
+    'require',
+    'accelerate',
+    'evidence',
+    'readiness',
+    'production',
+    'live signals',
+  ];
+  const sourceSensitiveHits = sourceSensitiveTerms.filter((term) => normalized.includes(term));
+  const strategicClaimHits = strategicClaimTerms.filter((term) => normalized.includes(term));
+
+  if (sourceSensitiveHits.length < 2 || strategicClaimHits.length < 2) return [];
+
+  return [issue(
+    'MEDIUM',
+    'DRAFT.md',
+    'source-sensitive imported draft has no RESEARCH.json, FACT-CHECK.md, or source IDs; run research/fact-check before treating regulatory, security, or operating-model claims as supported',
+  )];
+}
+
 function validateStrategyReasoningSpine(paperDir) {
   const strategy = readIfExists(metaPath(paperDir, 'STRATEGY.md'));
   if (!strategy) return [];
@@ -562,6 +609,7 @@ function validateFactCheckSafeSourceAlignment(paperDir) {
 function validateSemanticPaper(paperDir) {
   return [
     ...validateBriefClaimEvidence(paperDir),
+    ...validateStandaloneSourceSensitiveDraft(paperDir),
     ...validateStrategyReasoningSpine(paperDir),
     ...validateResearchSourceCoverage(paperDir),
     ...validateResearchCounterevidence(paperDir),

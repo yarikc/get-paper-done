@@ -601,6 +601,40 @@ function testSparseEnumerationDoesNotWarn() {
   assert(!issues.some((item) => item.issue.includes('contains repeated list-heavy paragraphs')));
 }
 
+function testStandaloneSourceSensitiveDraftWarns() {
+  const paperDir = makePaper('semantic-standalone-source-sensitive');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'Regulatory expectations require operational resilience evidence. Security readiness and vulnerability exposure should be assessed from production live signals before leaders accept the operating model.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('source-sensitive imported draft has no RESEARCH.json')
+  )));
+}
+
+function testStandaloneSourceSensitiveDraftPassesWithResearch() {
+  const paperDir = makePaper('semantic-standalone-source-sensitive-pass');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch());
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'Regulatory expectations require operational resilience evidence. Security readiness and vulnerability exposure should be assessed from production live signals before leaders accept the operating model.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('source-sensitive imported draft has no RESEARCH.json')));
+}
+
 function testBriefEvidencePlaceholdersFailAfterResearch() {
   const paperDir = makePaper('semantic-brief-stale');
   writeBrief(paperDir, 'Needs research across official sources.');
@@ -736,5 +770,7 @@ testProseSaturationWarns();
 testDistributedProseSaturationWarns();
 testStructuredListsDoNotCountAsSaturatedProse();
 testSparseEnumerationDoesNotWarn();
+testStandaloneSourceSensitiveDraftWarns();
+testStandaloneSourceSensitiveDraftPassesWithResearch();
 
 console.log('semantic gate tests passed');
