@@ -283,6 +283,52 @@ function validateStandaloneSourceSensitiveDraft(paperDir) {
   )];
 }
 
+function isPlaceholderText(value) {
+  const text = String(value || '').trim();
+  return !text || /^\[[^\]]+\]$/.test(text) || /^(none|n\/a|not applicable)$/i.test(text);
+}
+
+function meaningfulSection(markdown, heading) {
+  const section = sectionBetween(markdown, heading)
+    .replace(/\[[^\]]+\]/g, '')
+    .replace(/[#*_`|:-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!section) return false;
+  if (/^(none|n\/a|not applicable|single audience)$/i.test(section)) return false;
+  return section.length >= 24;
+}
+
+function hasNonPlaceholderSecondaryAudienceRow(audience) {
+  const table = parseFirstTable(sectionBetween(audience, '## Audience Set'));
+  return table.rows.some((row) => {
+    const cells = Object.values(row).map((cell) => String(cell || '').trim());
+    if (cells.every(isPlaceholderText)) return false;
+    return /\b(secondary|tertiary|peer|technical|operator|reviewer|approver)\b/i.test(cells.join(' '));
+  });
+}
+
+function validateMixedAudienceNeedsReview(paperDir) {
+  const audience = readIfExists(metaPath(paperDir, 'AUDIENCE.md'));
+  const draft = readIfExists(metaPath(paperDir, 'DRAFT.md'));
+  if (!audience || !draft) return [];
+  if (readIfExists(metaPath(paperDir, 'REVIEW.md'))) return [];
+
+  const declaresMultipleAudiences = (
+    meaningfulSection(audience, '## Secondary Audience')
+    || meaningfulSection(audience, '## Audience Tension')
+    || meaningfulSection(audience, '## Audience Conflict')
+    || hasNonPlaceholderSecondaryAudienceRow(audience)
+  );
+  if (!declaresMultipleAudiences) return [];
+
+  return [issue(
+    'MEDIUM',
+    'AUDIENCE.md',
+    'mixed-audience draft has no REVIEW.md; run audience review before treating audience fit or conflict handling as resolved',
+  )];
+}
+
 function validateStrategyReasoningSpine(paperDir) {
   const strategy = readIfExists(metaPath(paperDir, 'STRATEGY.md'));
   if (!strategy) return [];
@@ -610,6 +656,7 @@ function validateSemanticPaper(paperDir) {
   return [
     ...validateBriefClaimEvidence(paperDir),
     ...validateStandaloneSourceSensitiveDraft(paperDir),
+    ...validateMixedAudienceNeedsReview(paperDir),
     ...validateStrategyReasoningSpine(paperDir),
     ...validateResearchSourceCoverage(paperDir),
     ...validateResearchCounterevidence(paperDir),

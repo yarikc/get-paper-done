@@ -58,8 +58,17 @@ function testStandaloneDraftWarnsAboutMissingSourceMapping() {
   )));
 }
 
+function testMixedAudienceDraftWarnsAboutMissingReview() {
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('mixed-audience draft has no REVIEW.md')
+  )));
+}
+
 testFixtureIsAnonymized();
 testExpectedFindingsDocumentKnownGap();
 testStandaloneDraftWarnsAboutMissingSourceMapping();
+testMixedAudienceDraftWarnsAboutMissingReview();
 
 console.log('control paper fixture tests passed');

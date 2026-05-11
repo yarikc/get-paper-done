@@ -635,6 +635,81 @@ function testStandaloneSourceSensitiveDraftPassesWithResearch() {
   assert(!issues.some((item) => item.issue.includes('source-sensitive imported draft has no RESEARCH.json')));
 }
 
+function testMixedAudienceDraftWarnsWithoutReview() {
+  const paperDir = makePaper('semantic-mixed-audience-review');
+  writeArtifact(paperDir, 'AUDIENCE.md', [
+    '# Audience',
+    '',
+    '## Primary Audience',
+    '',
+    'Senior decision sponsor.',
+    '',
+    '## Secondary Audience',
+    '',
+    'Peer architecture collaborators.',
+    '',
+    '## Audience Tension',
+    '',
+    'The senior sponsor needs a concise decision frame. Peer collaborators need operating detail.',
+    '',
+  ].join('\n'));
+  writeArtifact(paperDir, 'DRAFT.md', '# Draft\n\n## Body\n\nThe decision needs support.\n');
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('mixed-audience draft has no REVIEW.md')
+  )));
+}
+
+function testMixedAudienceDraftPassesWithReview() {
+  const paperDir = makePaper('semantic-mixed-audience-review-pass');
+  writeArtifact(paperDir, 'AUDIENCE.md', [
+    '# Audience',
+    '',
+    '## Primary Audience',
+    '',
+    'Senior decision sponsor.',
+    '',
+    '## Secondary Audience',
+    '',
+    'Peer architecture collaborators.',
+    '',
+    '## Audience Tension',
+    '',
+    'The senior sponsor needs a concise decision frame. Peer collaborators need operating detail.',
+    '',
+  ].join('\n'));
+  writeReview(paperDir, 4, 'No required rewrite.');
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('mixed-audience draft has no REVIEW.md')));
+}
+
+function testSingleAudienceDraftDoesNotRequireReview() {
+  const paperDir = makePaper('semantic-single-audience-no-review');
+  writeArtifact(paperDir, 'AUDIENCE.md', [
+    '# Audience',
+    '',
+    '## Primary Audience',
+    '',
+    'Senior decision sponsor.',
+    '',
+  ].join('\n'));
+  writeArtifact(paperDir, 'DRAFT.md', '# Draft\n\n## Body\n\nThe decision needs support.\n');
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('mixed-audience draft has no REVIEW.md')));
+}
+
+function testPlaceholderAudienceTemplateDoesNotRequireReview() {
+  const paperDir = makePaper('semantic-placeholder-audience-no-review');
+  writeArtifact(paperDir, 'DRAFT.md', '# Draft\n\n## Body\n\nThe decision needs support.\n');
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('mixed-audience draft has no REVIEW.md')));
+}
+
 function testBriefEvidencePlaceholdersFailAfterResearch() {
   const paperDir = makePaper('semantic-brief-stale');
   writeBrief(paperDir, 'Needs research across official sources.');
@@ -772,5 +847,9 @@ testStructuredListsDoNotCountAsSaturatedProse();
 testSparseEnumerationDoesNotWarn();
 testStandaloneSourceSensitiveDraftWarns();
 testStandaloneSourceSensitiveDraftPassesWithResearch();
+testMixedAudienceDraftWarnsWithoutReview();
+testMixedAudienceDraftPassesWithReview();
+testSingleAudienceDraftDoesNotRequireReview();
+testPlaceholderAudienceTemplateDoesNotRequireReview();
 
 console.log('semantic gate tests passed');
