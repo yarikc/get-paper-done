@@ -176,6 +176,13 @@ function testImportDryRunAndCopy() {
   assert(fs.existsSync(path.join(paperDir, '.paper', 'IMPORT.md')));
   assert(fs.existsSync(path.join(paperDir, '.paper', 'DRAFT.md')));
   assert(!fs.existsSync(path.join(paperDir, 'original', '.git', 'config')));
+
+  const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
+  assert(report.includes(`**Source label:** ${path.basename(source)}`));
+  assert(report.includes('**Destination label:** imported'));
+  assert(report.includes('Absolute local source and destination paths are intentionally omitted'));
+  assert(!report.includes(source));
+  assert(!report.includes(target));
 }
 
 function testImportClassifications() {

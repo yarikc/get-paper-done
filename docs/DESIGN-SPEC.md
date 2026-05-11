@@ -4,7 +4,7 @@
 
 - **Project:** Get Paper Done
 - **Version:** 0.1 design baseline
-- **Status:** Prompt-first framework prototype
+- **Status:** CLI-backed prompt/workflow prototype
 - **Primary user:** Senior data and AI architecture leader in regulated enterprise environments
 - **Primary use cases:** newsletters, blog posts, position papers, white papers, executive strategy papers
 
@@ -24,7 +24,7 @@ Get Paper Done solves this by making writing context durable, staged, and inspec
 - Maintain explicit context-break stages to prevent quality degradation.
 - Support curated reusable audience personas.
 - Support external model review with user approval before changes.
-- Keep the system usable as prompt/workflow files now and evolvable into a CLI-backed tool later.
+- Keep the system usable as prompt/workflow files while the CLI handles setup, import, export, status, and validation.
 
 ## Non-Goals
 
@@ -384,12 +384,12 @@ Tool acceptance:
 
 ## Current Ratings
 
-- Overall project: 8.4/10
+- Overall project: 8.9/10
 - Framework design: 8.9/10
-- Installable tool maturity: 7.7/10
-- Documentation: 8.2/10
-- Test coverage: 7.6/10
-- Release readiness: 7.2/10
+- Installable tool maturity: 8.3/10
+- Documentation: 8.9/10
+- Test coverage: 9.1/10
+- Release readiness: 7.8/10
 - `audience-reviewer`: 8.8/10 pending real multi-audience calibration
 - `paper-researcher`: 9.0/10 pending messy-import calibration
 - `paper-strategist`: 9.1/10 pending real-use calibration

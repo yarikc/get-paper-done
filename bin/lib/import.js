@@ -122,6 +122,10 @@ function selectCanonicalDraft(files) {
     .sort((a, b) => b.mtime - a.mtime)[0].file;
 }
 
+function reportPathLabel(value) {
+  return path.basename(path.resolve(expandHome(value)));
+}
+
 function importReport(input, copied, skipped, canonicalDraft) {
   const copiedRows = copied.length === 0
     ? '| - | - | - | - |'
@@ -141,8 +145,9 @@ function importReport(input, copied, skipped, canonicalDraft) {
   return `# Import Report
 
 **Imported at:** ${new Date().toISOString()}
-**Source:** ${input.source}
-**Destination:** ${input.paperDir}
+**Source label:** ${reportPathLabel(input.source)}
+**Destination label:** ${reportPathLabel(input.paperDir)}
+**Path policy:** Absolute local source and destination paths are intentionally omitted from this report.
 
 ## Import Summary
 
