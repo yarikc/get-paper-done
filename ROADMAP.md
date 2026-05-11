@@ -2,17 +2,17 @@
 
 Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
 
-Last reviewed: 2026-05-10
+Last reviewed: 2026-05-11
 
 This file is the forward plan. The current ratings, risk snapshot, and review findings live in [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). When the review changes, update that snapshot first and adjust this roadmap only when the plan itself changes.
 
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current overall rating: 8.7/10 as of 2026-05-10
+- Current overall rating: 8.8/10 as of 2026-05-11
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update CLI, workspace helpers, artifact contracts, workflow consistency tests, routing scenario tests, and content-aware status routing are in place. The system still needs real-world validation, examples, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, workflow consistency tests, routing scenario tests, content-aware status routing, and export-state detection are in place. The system still needs broader real-world validation, examples, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,8 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#3` and `#4`: implementation complete in pushed commits; close or mark done in GitHub after final review.
-- `#2`: active umbrella for layered workflow/agent testing; current next slice is the one-paper diagnostic trial plus realistic examples.
+- `#2`: active umbrella for layered workflow/agent testing; one-paper diagnostic trial is complete through internal export, and the next slice is turning useful trial output into realistic examples/regression fixtures.
 - `#1`: broader test/evaluation program; remains open until examples, real-paper fixtures, and semantic checks exist.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
@@ -42,7 +41,7 @@ Current issue alignment:
 Next work should validate behavior under real use before adding more RFC surface area.
 
 1. Use GitHub Issue #2 as the active one-paper diagnostic checklist and friction log.
-2. Run one realistic paper through the workflow and record the stage-by-stage friction log.
+2. Completed: run one realistic paper through setup, strategy, research, outline, draft, fact-check, review, revision, and export.
 3. Turn the trial output into at least one realistic `examples/` workspace.
 4. Add example validation tests: no placeholders, artifact contracts pass, and `gpd status` returns the expected next command.
 5. Use trial findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
@@ -65,6 +64,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Upgraded researcher to infer research questions, present a plan, support depth/source modes, and write canonical `RESEARCH.json`.
 - Upgraded strategist into a challenge-first gatekeeper that can block research, outline, and drafting with `Revise Before Drafting` or `No-Go`, plus normalized `Strategy Blockers` for machine-routable "why not Go" decisions.
 - Added install/update CLI for Claude and Codex with runtime-neutral command placeholders, install manifest, update backups, dry-run, doctor, and version commands.
+- Added deterministic `gpd export` and structural `exports/FINAL.md` status awareness.
 
 ---
 

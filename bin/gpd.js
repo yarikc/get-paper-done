@@ -9,6 +9,8 @@ const {
 const {
   initPaper,
   importPaper,
+  exportPaper,
+  printExport,
   status,
   printStatus,
   validate,
@@ -27,6 +29,7 @@ Commands:
   doctor [claude|codex]        Validate an installed runtime
   init                         Create a new paper workspace
   import                       Import an existing paper folder/file into a workspace
+  export                       Export reviewed draft to .paper/exports/FINAL.md
   status                       Show current paper workspace state
   validate                     Validate current paper workspace state
   validate-artifact            Validate one GPD artifact contract
@@ -44,6 +47,7 @@ Options:
   --paper DIR                  Existing paper directory for status/validate
   --path FILE                  Artifact path for validate-artifact
   --json                       Print JSON for list/status/validate
+  --force                      Allow export when REVIEW.md is not Ready
   --dry-run                    Show planned changes without writing
   --no-backup                  Do not back up changed installed files
 
@@ -54,6 +58,7 @@ Examples:
   gpd doctor codex
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
+  gpd export --paper ~/papers/metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
   gpd validate
   gpd validate-artifact --path ~/papers/metadata-strategy/.paper/STATE.json
@@ -90,6 +95,7 @@ function parseWorkspaceOptions(argv) {
     const arg = argv[i];
     if (arg === '--dry-run') args.dryRun = true;
     else if (arg === '--json') args.json = true;
+    else if (arg === '--force') args.force = true;
     else if (arg === '--location') {
       args.location = argv[i + 1];
       i += 1;
@@ -162,6 +168,14 @@ function main(argv) {
 
   if (command === 'import') {
     importPaper(parseWorkspaceOptions(rest));
+    return;
+  }
+
+  if (command === 'export') {
+    const args = parseWorkspaceOptions(rest);
+    const result = exportPaper(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printExport(result);
     return;
   }
 

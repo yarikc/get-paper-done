@@ -214,6 +214,114 @@ function testImportWithoutSlugUsesSourceName() {
   assert(!fs.existsSync(path.join(target, '.paper')));
 }
 
+function testExportCommandWritesFinalAndState() {
+  const dir = tempDir('gpd-export-test');
+  run(['init', '--location', dir, '--slug', 'exportable', '--title', 'Exportable Paper']);
+  const paperDir = path.join(dir, 'exportable');
+  const meta = path.join(paperDir, '.paper');
+
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), [
+    '# Draft',
+    '',
+    '## Working Title',
+    '',
+    'Exportable Paper',
+    '',
+    '## Section 1 - Opening',
+    '',
+    'Final body.',
+    '',
+    '## Draft Notes',
+    '',
+    '- Internal note.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+
+  const output = run(['export', '--paper', paperDir]);
+  assert(output.includes('exports/FINAL.md'));
+
+  const finalPath = path.join(meta, 'exports', 'FINAL.md');
+  assert(fs.existsSync(finalPath));
+  const final = fs.readFileSync(finalPath, 'utf8');
+  assert(final.includes('# Exportable Paper'));
+  assert(final.includes('## Opening'));
+  assert(final.includes('Final body.'));
+  assert(!final.includes('Draft Notes'));
+
+  const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  assert.strictEqual(updatedState.status, 'Exported');
+  assert.strictEqual(updatedState.suggested_next_command, '/gpd-progress');
+  const stateMarkdown = fs.readFileSync(path.join(meta, 'STATE.md'), 'utf8');
+  assert(stateMarkdown.includes('**Status:** Exported'));
+  assert(stateMarkdown.includes('**Suggested next command:** `/gpd-progress`'));
+
+  const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
+  assert.strictEqual(status.next, '/gpd-progress');
+}
+
+function testExportCommandRequiresReadyReview() {
+  const dir = tempDir('gpd-export-not-ready-test');
+  run(['init', '--location', dir, '--slug', 'not-ready', '--title', 'Not Ready']);
+  const paperDir = path.join(dir, 'not-ready');
+  const meta = path.join(paperDir, '.paper');
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nBody.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nRevise\n');
+
+  const failed = runFail(['export', '--paper', paperDir]);
+  assert.strictEqual(failed.status, 1);
+  assert(failed.stderr.includes('REVIEW.md verdict is Revise'));
+  assert(!fs.existsSync(path.join(meta, 'exports', 'FINAL.md')));
+}
+
+function testExportCommandHonorsStatusRouting() {
+  const dir = tempDir('gpd-export-routing-test');
+  run(['init', '--location', dir, '--slug', 'needs-revise', '--title', 'Needs Revise']);
+  const paperDir = path.join(dir, 'needs-revise');
+  const meta = path.join(paperDir, '.paper');
+
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'RESEARCH.json'), '{"research_plan":{},"source_registry":[],"evidence_matrix":[]}\n');
+  fs.writeFileSync(path.join(meta, 'OUTLINE.md'), '# Outline\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nBody.\n');
+  fs.writeFileSync(path.join(meta, 'FACT-CHECK.md'), '# Fact And Claims Check\n\n## Recommended Next Action\n\n/gpd-revise\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+
+  const failed = runFail(['export', '--paper', paperDir]);
+  assert.strictEqual(failed.status, 1);
+  assert(failed.stderr.includes('Current paper state recommends /gpd-revise'));
+  assert(!fs.existsSync(path.join(meta, 'exports', 'FINAL.md')));
+}
+
 function testMalformedInputs() {
   const missingSource = runFail(['import', '--source', path.join(tempDir('gpd-missing-source'), 'missing'), '--location', tempDir('gpd-missing-source-target')]);
   assert.notStrictEqual(missingSource.status, 0);
@@ -263,6 +371,9 @@ testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();
 testImportClassifications();
 testImportWithoutSlugUsesSourceName();
+testExportCommandWritesFinalAndState();
+testExportCommandRequiresReadyReview();
+testExportCommandHonorsStatusRouting();
 testMalformedInputs();
 
 console.log('gpd cli tests passed');

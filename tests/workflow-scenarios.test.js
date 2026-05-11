@@ -90,6 +90,25 @@ function testCleanCompletePaperUsesStateSuggestion() {
   assert.strictEqual(statusJson(paperDir).next, '/gpd-export');
 }
 
+function testExportedPaperRoutesToProgress() {
+  const paperDir = completePaper('exported');
+  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n');
+  touchArtifact(paperDir, 'exports/FINAL.md', 20);
+
+  const status = statusJson(paperDir);
+  assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
+  assert.strictEqual(status.next, '/gpd-progress');
+}
+
+function testStaleExportRoutesBackToExport() {
+  const paperDir = completePaper('stale-export');
+  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n');
+  touchArtifact(paperDir, 'exports/FINAL.md', 20);
+  touchArtifact(paperDir, 'REVIEW.md', 30);
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-export');
+}
+
 function testBriefChangeRoutesBackToResearch() {
   const paperDir = completePaper('brief-refresh');
   touchArtifact(paperDir, 'BRIEF.md', 20);
@@ -191,6 +210,8 @@ function testPendingFeedbackPlanBlocksAutomaticRevise() {
 }
 
 testCleanCompletePaperUsesStateSuggestion();
+testExportedPaperRoutesToProgress();
+testStaleExportRoutesBackToExport();
 testBriefChangeRoutesBackToResearch();
 testStrategyChangeRoutesBackToResearch();
 testResearchChangeRoutesBackToOutline();

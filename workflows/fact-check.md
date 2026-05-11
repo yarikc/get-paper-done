@@ -31,6 +31,8 @@ If no mode is specified, use `--full` when `.paper/DRAFT.md` exists and the pape
 
 Extract a claim inventory from `.paper/DRAFT.md`. Assign IDs such as `FC1`, classify each material claim, and mark risk HIGH/MEDIUM/LOW.
 
+Include headings, section titles, captions, tables, callouts, and summary bullets in the claim inventory when they make factual or causal claims. A cautious paragraph can still be undermined by an over-strong heading.
+
 Check claims against `.paper/RESEARCH.json` when present:
 
 - `evidence_matrix`
@@ -44,6 +46,8 @@ Check claims against `.paper/RESEARCH.json` when present:
 Use web research only when allowed by `.paper/config.json` and only for current, time-sensitive, legal/regulatory, product-specific, market-specific, named-entity-specific, numerical, quote/attribution, or high-risk claims. If web research is not allowed or unavailable, mark those claims `needs_current_verification`.
 
 Evaluate each checked claim for support status, freshness, precision, context integrity, risk, and quantitative integrity. Do not treat a citation as sufficient unless it supports the specific wording of the claim.
+
+For `source_registry` entries and cited source IDs, verify that URLs or file paths resolve to the intended source when practical. Record stale, redirected-to-wrong-page, inaccessible, or mismatched source links in `Source Alignment Notes` or `Source Gaps`, even if the draft prose itself is otherwise supportable.
 
 After claim-level checking, add a synthesis integrity assessment:
 

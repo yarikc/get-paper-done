@@ -67,6 +67,8 @@ Write `.paper/REVIEW.md` with:
 - audience conflict table when multiple audiences are selected
 - revision plan
 
+If `.paper/REVIEW.md` already exists, the new review must clearly supersede the prior verdict and evaluate the current draft, not preserve stale findings from an earlier revision. If the draft has changed since the prior review, explicitly account for whether prior required fixes were resolved.
+
 Use review stance first. Do not praise before identifying the highest-impact issues.
 
 ## 2. External Review Flag Detection

@@ -217,6 +217,7 @@ function artifactState(paperDir) {
     'STATE.md',
     'STATE.json',
     'config.json',
+    'exports/FINAL.md',
   ];
   const artifacts = {};
   for (const name of artifactNames) {
@@ -278,6 +279,16 @@ function suggestedNext(state) {
 
   const verdict = reviewVerdict(state);
   if (verdict === 'Revise' || verdict === 'Rework') return '/gpd-revise';
+  if (a['exports/FINAL.md']) {
+    if (
+      artifactNewerThan(state.paperDir, 'DRAFT.md', 'exports/FINAL.md')
+      || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'exports/FINAL.md')
+      || artifactNewerThan(state.paperDir, 'REVIEW.md', 'exports/FINAL.md')
+    ) {
+      return '/gpd-export';
+    }
+    return '/gpd-progress';
+  }
 
   const nextFromState = savedNextCommand(state);
   if (nextFromState && savedNextCommandIsPlausible(nextFromState, a)) {

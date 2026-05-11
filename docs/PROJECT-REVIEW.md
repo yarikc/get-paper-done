@@ -1,26 +1,26 @@
 # Project Review
 
-Review date: 2026-05-10
-Last reviewed: 2026-05-10
+Review date: 2026-05-11
+Last reviewed: 2026-05-11
 
 This file is the current project-health snapshot. The forward plan lives in [../ROADMAP.md](../ROADMAP.md).
 
 ## Summary Rating
 
-**Overall: 8.7/10**
+**Overall: 8.8/10**
 
-Get Paper Done is a coherent, useful writing workflow framework with a practical CLI wrapper and a stronger documentation surface than the initial release. The project now has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, and CLI support for validating individual artifacts.
+Get Paper Done is a coherent, useful writing workflow framework with a practical CLI wrapper and a stronger documentation surface than the initial release. The project now has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, and one completed diagnostic paper run.
 
-It is still not a 9/10 tool. The core workflow has not yet been calibrated against real messy papers, complete examples are missing, import remains preservation-first rather than extraction-rich, and external review is still prompt/workflow-driven rather than a wrapped CLI capability.
+It is still not a 9/10 tool. The core workflow has only one diagnostic trial, complete examples are missing, import remains preservation-first rather than extraction-rich, and external review is still prompt/workflow-driven rather than a wrapped CLI capability.
 
 ## Ratings
 
 | Area | Rating | Rationale |
 |------|--------|-----------|
-| Framework design | 8.8/10 | Strong staged model, explicit paper memory, research compression, strategy gate, audience system, and feedback approval. Still needs real-paper calibration before the design can be trusted as more than a strong spec. |
-| Installable tool maturity | 8.1/10 | CLI covers install/update/doctor/init/import/status/validate plus `validate-artifact`. Runtime install is clearer and asset copying is tested. Missing external-review runner, richer import extraction, and local package/release hardening. |
-| Documentation | 8.7/10 | README now explains the core idea, CLI vs slash commands, setup, state changes, gates, backward routing, import, and artifact contracts. Still needs concrete walkthroughs, screenshots/examples, and a complete sample paper workspace. |
-| Test coverage | 8.7/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, malformed headings, workflow reference consistency, backward/incremental refresh, and content-aware routing from fact-check, review, and feedback-plan artifacts. Still missing real paper fixtures and end-to-end paper runs. |
+| Framework design | 8.8/10 | Strong staged model, explicit paper memory, research compression, strategy gate, audience system, and feedback approval. One diagnostic paper run completed; still needs broader messy-paper calibration. |
+| Installable tool maturity | 8.3/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`. Runtime install is clearer and asset copying is tested. Missing external-review runner, richer import extraction, and local package/release hardening. |
+| Documentation | 8.8/10 | README now explains the core idea, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, and artifact contracts. Still needs concrete walkthroughs, screenshots/examples, and a complete sample paper workspace. |
+| Test coverage | 8.8/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, and export state detection. Still missing real paper fixtures and end-to-end paper runs. |
 | Release readiness | 7.8/10 | Package metadata, changelog, CI, license, dry-run install checks, and package dry-run are in place. Needs release checklist, versioning/update compatibility policy, and a tighter public/private distribution story. |
 
 ## What Works
@@ -34,13 +34,15 @@ It is still not a 9/10 tool. The core workflow has not yet been calibrated again
 - Scenario routing tests now protect backward movement when upstream artifacts change after downstream work exists.
 - Content-aware routing tests now cover fact-check recommended next action, review revise/rework verdicts, and pending feedback-plan approval.
 - `gpd status` no longer lets saved `STATE.json` next commands skip structurally required artifacts.
+- `gpd status` now recognizes `.paper/exports/FINAL.md`, detects stale exports, and routes completed exports to `/gpd-progress`.
+- `gpd export` provides a deterministic CLI path for internal Markdown export after a `Ready` review verdict.
 - Import is preservation-first and does not silently convert or overwrite downstream artifacts.
 - The strategy gate gives the system a useful way to stop weak papers before research or drafting.
 - The README now explains the actual user workflow instead of only listing commands.
 
 ## Main Risks
 
-1. Real-paper behavior is still unproven. The prompts are well designed, but the true test is importing a messy existing paper and running it through brief, strategy, research, outline, draft, fact-check, review, revise, and export.
+1. Real-paper behavior has one complete diagnostic trial, but not enough breadth. The next test should import a messy existing paper and run it through brief, strategy, research, outline, draft, fact-check, review, revise, and export.
 2. Examples are missing. New users can understand the concepts, but they cannot yet inspect a complete high-quality paper workspace.
 3. Import classification is useful but shallow. Current import preserves and catalogs material, but does not deeply extract `.docx`, PDFs, spreadsheets, diagrams, citations, or version history.
 4. Validation is structurally stronger but still not semantic. It catches malformed artifacts and contract drift, but it cannot tell whether `BRIEF.md` has a strong thesis, whether `RESEARCH.json` has good evidence, or whether a review is insightful.

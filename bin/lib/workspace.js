@@ -11,6 +11,10 @@ const {
   importPaper,
 } = require('./import');
 const {
+  exportPaper,
+  printExport,
+} = require('./export');
+const {
   status,
   printStatus,
   validate,
@@ -25,6 +29,8 @@ module.exports = {
   slugify,
   initPaper,
   importPaper,
+  exportPaper,
+  printExport,
   status,
   printStatus,
   validate,

@@ -24,7 +24,7 @@ GPD has two command layers:
 
 | Layer | Examples | What it is for |
 |-------|----------|----------------|
-| CLI commands | `gpd install`, `gpd init`, `gpd import`, `gpd status`, `gpd validate` | Local setup, installing runtime assets, creating/importing paper folders, and validating state. |
+| CLI commands | `gpd install`, `gpd init`, `gpd import`, `gpd export`, `gpd status`, `gpd validate` | Local setup, installing runtime assets, creating/importing/exporting paper folders, and validating state. |
 | Slash commands | `/gpd-brief`, `/gpd-research`, `/gpd-outline`, `/gpd-draft` | The actual AI writing workflow inside Claude or Codex. |
 
 Use the CLI for filesystem-safe setup. Use slash commands for strategy, research, outlining, drafting, review, and revision.
@@ -111,7 +111,7 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 | Fact-check | `/gpd-fact-check` | `FACT-CHECK.md`, state | Flags unsupported, stale, exaggerated, contradicted, or risky claims before review/export. |
 | Review | `/gpd-review` | `REVIEW.md`, optionally `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md` | Local review uses fixed rubrics. External review proposes feedback handling but does not edit the draft. |
 | Revise | `/gpd-revise` | `DRAFT.md`, state | Applies approved feedback or a controlled editorial pass. Routes back to fact-check/review when needed. |
-| Export | `/gpd-export` | `.paper/exports/` | Final handoff after review and revision state is clean. |
+| Export | `/gpd-export` or `gpd export` | `.paper/exports/FINAL.md`, state | Final handoff after review and revision state is clean. CLI export requires `REVIEW.md` verdict `Ready` unless `--force` is used. |
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
 
@@ -124,10 +124,12 @@ Moving backward is normal. If you change an upstream artifact after downstream w
 | `OUTLINE.md` newer than `DRAFT.md` | `/gpd-draft` |
 | `DRAFT.md` newer than `FACT-CHECK.md` | `/gpd-fact-check --full` |
 | `FACT-CHECK.md` newer than `REVIEW.md` | `/gpd-review --deep` |
+| `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` newer than `exports/FINAL.md` | `/gpd-export` |
+| `exports/FINAL.md` exists and is current | `/gpd-progress` |
 
 This is an incremental refresh, not a full reset. Keep the existing artifacts, rerun the suggested stage, and let that stage update its artifact plus state. Use a full manual reset only when you intentionally want to discard an artifact rather than revise it.
 
-`STATE.json` can still carry the saved next command and mode choice, such as `/gpd-outline --lite`, but `gpd status` will not let it skip structurally required artifacts. For example, a saved `/gpd-export` is ignored until a draft and review exist.
+`STATE.json` can still carry the saved next command and mode choice, such as `/gpd-outline --lite`, but `gpd status` will not let it skip structurally required artifacts. For example, a saved `/gpd-export` is ignored until a draft and review exist. Once `.paper/exports/FINAL.md` exists and is newer than the draft, fact-check, and review, `gpd status` treats the paper as exported and routes to `/gpd-progress`.
 
 After fact-check and review, `gpd status` also reads documented outcome fields. `FACT-CHECK.md` `Recommended Next Action` can send the paper back to research or revise. `REVIEW.md` verdicts of `Revise` or `Rework` route to `/gpd-revise`. A pending `FEEDBACK-PLAN.md` pauses at `/gpd-progress` until you approve, revise, or ignore the plan.
 
@@ -148,7 +150,7 @@ The command files live in [commands/gpd](commands/gpd).
 | `/gpd-review` | Review for thesis, evidence, audience fit, tone, and structure. |
 | `/gpd-review --external` | Ask available external AI CLIs/local models to review, then create a feedback handling plan. |
 | `/gpd-revise` | Apply approved feedback or run a controlled layered editorial pass with drift checks. |
-| `/gpd-export` | Prepare final Markdown for publication or handoff. |
+| `/gpd-export` | Prepare final Markdown for publication or handoff inside the AI runtime. |
 
 Short aliases:
 

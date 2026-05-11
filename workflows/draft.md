@@ -46,6 +46,7 @@ Drafting rules:
 - obey persona directives
 - meet the audience at the right expertise level
 - make the thesis clear
+- for `strategy_paper` and decision/recommendation papers, the opening must establish the problem, state the thesis, and name the requested decision or next move within the first 1 to 3 paragraphs
 - support claims using `RESEARCH.json` when present, with `RESEARCH.md` as a summary/index
 - address the strongest likely objection
 - stay within the requested length range unless the brief says otherwise
@@ -57,6 +58,8 @@ Drafting rules:
 - mark upstream structure problems as `[STRUCTURE ISSUE: ...]`
 - include a change log in `redraft_from_comments` mode
 - avoid generic filler and meta-explanations about the writing process
+
+For strategy papers and decision memos, do not let the opening become only scene-setting. If the paper is asking leaders to fund, approve, choose, prioritize, or adopt a direction, state that ask before detailed mechanism sections begin.
 
 Update `.paper/STATE.md` and `.paper/STATE.json` with the next suggested command:
 
