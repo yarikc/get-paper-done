@@ -66,9 +66,18 @@ function testMixedAudienceDraftWarnsAboutMissingReview() {
   )));
 }
 
+function testDraftWarnsAboutUndefinedRecurringTerms() {
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('recurring term "lifecycle" appears repeatedly before being defined')
+  )));
+}
+
 testFixtureIsAnonymized();
 testExpectedFindingsDocumentKnownGap();
 testStandaloneDraftWarnsAboutMissingSourceMapping();
 testMixedAudienceDraftWarnsAboutMissingReview();
+testDraftWarnsAboutUndefinedRecurringTerms();
 
 console.log('control paper fixture tests passed');

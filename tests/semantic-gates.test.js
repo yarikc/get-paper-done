@@ -710,6 +710,60 @@ function testPlaceholderAudienceTemplateDoesNotRequireReview() {
   assert(!issues.some((item) => item.issue.includes('mixed-audience draft has no REVIEW.md')));
 }
 
+function testRecurringTermWarnsWhenNotDefinedNearFirstUse() {
+  const paperDir = makePaper('semantic-define-before-reuse');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'The lifecycle needs clearer ownership. Lifecycle choices should be visible to teams.',
+    '',
+    'Lifecycle work also affects modernization planning. A shared lifecycle view keeps the decision path visible.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('recurring term "lifecycle" appears repeatedly before being defined')
+  )));
+}
+
+function testRecurringTermPassesWhenDefinedNearFirstUse() {
+  const paperDir = makePaper('semantic-define-before-reuse-pass');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'Lifecycle means the managed path from intake through operation, modernization, and retirement.',
+    '',
+    'The lifecycle needs clearer ownership. Lifecycle choices should be visible to teams.',
+    '',
+    'Lifecycle work also affects modernization planning.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('recurring term "lifecycle" appears repeatedly before being defined')));
+}
+
+function testLowRepetitionTermDoesNotRequireDefinition() {
+  const paperDir = makePaper('semantic-define-before-reuse-low-repeat');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'The lifecycle needs clearer ownership. Lifecycle choices should be visible to teams.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('appears repeatedly before being defined')));
+}
+
 function testBriefEvidencePlaceholdersFailAfterResearch() {
   const paperDir = makePaper('semantic-brief-stale');
   writeBrief(paperDir, 'Needs research across official sources.');
@@ -851,5 +905,8 @@ testMixedAudienceDraftWarnsWithoutReview();
 testMixedAudienceDraftPassesWithReview();
 testSingleAudienceDraftDoesNotRequireReview();
 testPlaceholderAudienceTemplateDoesNotRequireReview();
+testRecurringTermWarnsWhenNotDefinedNearFirstUse();
+testRecurringTermPassesWhenDefinedNearFirstUse();
+testLowRepetitionTermDoesNotRequireDefinition();
 
 console.log('semantic gate tests passed');

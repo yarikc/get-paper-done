@@ -7,6 +7,7 @@ Current semantic baseline:
 - Baseline commit `a143851` documented that `validateSemanticPaper()` returned zero issues when this fixture was evaluated as a standalone draft.
 - The first validator improvement should turn that gap into a MEDIUM warning about missing source mapping for source-sensitive imported claims.
 - The next validator improvement should warn when a mixed-audience imported draft has no audience review artifact.
+- The next validator improvement should warn when recurring terms appear repeatedly before a near-first-use definition.
 
 Expected human/GPD findings:
 
@@ -21,6 +22,6 @@ Expected human/GPD findings:
 Expected future automated findings:
 
 - Profile-rule drift warning for overconfident readiness language.
-- Define-before-reuse warning for recurring terms that are not defined near first use.
+- Define-before-reuse warning for recurring terms that are not defined near first use. Implemented as a MEDIUM recurring-term warning.
 - Audience-conflict warning before review artifacts exist. Implemented as a MEDIUM mixed-audience review warning.
 - Standalone imported-draft warning when source-sensitive claims appear without source mapping.

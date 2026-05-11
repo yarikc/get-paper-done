@@ -329,6 +329,72 @@ function validateMixedAudienceNeedsReview(paperDir) {
   )];
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function escapedPhraseSource(value) {
+  return escapeRegExp(value).replace(/\s+/g, '\\s+');
+}
+
+const definitionTerms = [
+  'lifecycle',
+  'readiness',
+  'operational readiness',
+  'lifecycle decision',
+  'maturity tier',
+  'domain owner',
+  'technology domain owner',
+  'production telemetry',
+  'live signals',
+  'reference blueprint',
+  'federation',
+  'decommissioning',
+  'retirement debt',
+];
+
+function termPattern(term) {
+  return new RegExp(`\\b${escapedPhraseSource(term)}s?\\b`, 'gi');
+}
+
+function termDefinitionPattern(term) {
+  const source = escapedPhraseSource(term);
+  return new RegExp([
+    `\\b${source}s?\\s+(?:is|are|means|mean|refers\\s+to|describes|captures|defined\\s+as)\\b`,
+    `\\b(?:a|an|the)\\s+${source}s?\\s+(?:is|are|means|mean|refers\\s+to|describes|captures)\\b`,
+    `\\b${source}s?\\s*[:=-]\\s+\\S+`,
+    `\\*\\*${source}s?\\*\\*\\s*[:=-]?\\s+\\S+`,
+  ].join('|'), 'i');
+}
+
+function termOccurrences(markdown, term) {
+  return [...String(markdown || '').matchAll(termPattern(term))].map((match) => match.index);
+}
+
+function isDefinedNearFirstUse(markdown, term, firstIndex) {
+  const nearFirstUse = markdown.slice(Math.max(0, firstIndex - 80), firstIndex + 700);
+  return termDefinitionPattern(term).test(nearFirstUse);
+}
+
+function validateDefineBeforeReuseInDraft(paperDir) {
+  const draft = readIfExists(metaPath(paperDir, 'DRAFT.md'));
+  if (!draft) return [];
+
+  const issues = [];
+  for (const term of definitionTerms) {
+    const occurrences = termOccurrences(draft, term);
+    if (occurrences.length < 4) continue;
+    if (isDefinedNearFirstUse(draft, term, occurrences[0])) continue;
+    issues.push(issue(
+      'MEDIUM',
+      'DRAFT.md',
+      `recurring term "${term}" appears repeatedly before being defined; define it near first use or replace vague repetition with concrete meaning`,
+    ));
+  }
+
+  return issues.slice(0, 3);
+}
+
 function validateStrategyReasoningSpine(paperDir) {
   const strategy = readIfExists(metaPath(paperDir, 'STRATEGY.md'));
   if (!strategy) return [];
@@ -657,6 +723,7 @@ function validateSemanticPaper(paperDir) {
     ...validateBriefClaimEvidence(paperDir),
     ...validateStandaloneSourceSensitiveDraft(paperDir),
     ...validateMixedAudienceNeedsReview(paperDir),
+    ...validateDefineBeforeReuseInDraft(paperDir),
     ...validateStrategyReasoningSpine(paperDir),
     ...validateResearchSourceCoverage(paperDir),
     ...validateResearchCounterevidence(paperDir),
