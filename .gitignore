@@ -1,5 +1,5 @@
 node_modules/
 .DS_Store
-.paper/
+/.paper/
 agents/.claude/
 docs/feedback.md

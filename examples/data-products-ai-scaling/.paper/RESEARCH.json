@@ -1,0 +1,463 @@
+{
+  "metadata": {
+    "topic": "Domain-aligned data products on a common governed platform as an enterprise AI scaling pattern",
+    "scope": "Internal strategy paper for CxO and distinguished architect readers in a regulated enterprise context",
+    "depth": "standard",
+    "source_mode": "web_first",
+    "created_at": "2026-05-11T13:30:00.000Z",
+    "updated_at": "2026-05-11T19:35:00.000Z"
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "What evidence supports the claim that AI scaling depends on trusted, governed, reusable data rather than model tooling alone?",
+        "mapped_claims": ["C1"],
+        "why_it_matters": "This is the executive-level investment premise.",
+        "planned_source_types": ["official", "academic", "industry"],
+        "search_queries": ["enterprise AI data quality governance trusted data", "NIST AI RMF data quality governance"]
+      },
+      {
+        "id": "RQ2",
+        "question": "How do data mesh and data product sources define domain ownership, product thinking, and platform responsibilities?",
+        "mapped_claims": ["C2", "C3"],
+        "why_it_matters": "The paper must avoid vague use of data product language.",
+        "planned_source_types": ["official", "industry", "blog"],
+        "search_queries": ["data mesh domain ownership data products common platform", "domain aligned data products governance platform"]
+      },
+      {
+        "id": "RQ3",
+        "question": "What counterarguments show that domain-aligned data products can increase fragmentation or governance burden?",
+        "mapped_claims": ["C2", "C3", "C4"],
+        "why_it_matters": "The strongest objection must be handled honestly for architect credibility.",
+        "planned_source_types": ["industry", "analyst", "blog"],
+        "search_queries": ["data mesh challenges fragmentation governance", "data products operating model challenges"]
+      }
+    ],
+    "depth_rationale": "Standard depth is enough for this internal strategy example, but evidence must include official guidance, practitioner framing, and standards context.",
+    "source_mode_rationale": "No user-provided source pack exists yet, so web-first research is appropriate.",
+    "user_feedback": "BRIEF.md claim evidence cites source IDs. Planned academic, blog, analyst, and industry source types are represented in the source registry; practitioner-oriented material is encoded under allowed source types."
+  },
+  "research_brief": {
+    "executive_summary": "The research supports a bounded version of the thesis: domain-aligned data products can help enterprise AI scaling when paired with shared governance, metadata, access, quality, and platform services. The evidence is strongest for mechanism and operating-model logic, not for direct quantified AI outcome improvement. The paper should avoid claiming that data products automatically scale AI and should instead argue that they reduce recurring data friction when supported by common controls and platform capabilities.",
+    "key_findings": [
+      {
+        "id": "K1",
+        "finding": "Data mesh and data-product sources consistently emphasize domain ownership plus product thinking, but not domain autonomy without standards.",
+        "confidence": "high",
+        "why_it_matters": "This supports the paper's balance between domain alignment and common platform governance.",
+        "sources": ["S1", "S2", "S4", "S8", "S12", "S13", "S15"]
+      },
+      {
+        "id": "K2",
+        "finding": "Official and standards sources treat data quality, lineage, governance, and monitoring as important AI risk and reliability concerns.",
+        "confidence": "high",
+        "why_it_matters": "This supports the claim that AI scaling depends on data controls as well as model tooling.",
+        "sources": ["S9", "S10", "S11"]
+      },
+      {
+        "id": "K3",
+        "finding": "The evidence does not prove a simple causal claim that data products improve AI business outcomes.",
+        "confidence": "medium",
+        "why_it_matters": "The paper should frame the thesis as a strategic operating-model judgment, not a measured universal fact.",
+        "sources": ["S1", "S4", "S9"]
+      },
+      {
+        "id": "K4",
+        "finding": "Academic, analyst, and practitioner-oriented industry sources reinforce that data products, data mesh, and data fabric remain socio-technical operating-model choices, not purely technical installs.",
+        "confidence": "medium",
+        "why_it_matters": "This strengthens the recommendation to start with high-value use cases and explicit governance rather than a broad taxonomy rollout.",
+        "sources": ["S12", "S14", "S15"]
+      }
+    ]
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "Microsoft Cloud Adoption Framework: What is a data mesh?",
+      "url_or_path": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/cloud-scale-analytics/architectures/what-is-data-mesh",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Cloud-platform framing; Microsoft architecture perspective.",
+      "stance": "supportive",
+      "notes": "Useful for domain-aligned data ownership and data product framing."
+    },
+    {
+      "id": "S2",
+      "title": "Microsoft Cloud Adoption Framework: Data domains",
+      "url_or_path": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/cloud-scale-analytics/architectures/data-domains",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Azure-centered enterprise architecture guidance.",
+      "stance": "supportive",
+      "notes": "Useful for domain ownership, federated responsibilities, and operating model."
+    },
+    {
+      "id": "S3",
+      "title": "Microsoft Cloud Adoption Framework: Data mesh for financial institutions",
+      "url_or_path": "https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/scenarios/cloud-scale-analytics/architectures/data-mesh-financial-institutions",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Azure scenario guidance; may simplify institution-specific constraints.",
+      "stance": "supportive",
+      "notes": "Directly relevant to regulated financial services context."
+    },
+    {
+      "id": "S4",
+      "title": "Google Cloud: Architecture and functions in a data mesh",
+      "url_or_path": "https://cloud.google.com/architecture/data-mesh",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Google Cloud framing.",
+      "stance": "supportive",
+      "notes": "Useful for shared platform functions, data product ownership, governance, and discovery."
+    },
+    {
+      "id": "S5",
+      "title": "Google Cloud: Build data products in a data mesh",
+      "url_or_path": "https://cloud.google.com/architecture/data-mesh/build-data-products",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Google Cloud implementation guidance.",
+      "stance": "supportive",
+      "notes": "Useful for the mechanics of data products as consumer-facing assets."
+    },
+    {
+      "id": "S6",
+      "title": "AWS: What is a data mesh?",
+      "url_or_path": "https://aws.amazon.com/what-is/data-mesh/",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "moderate",
+      "relevance": "medium",
+      "specificity": "medium",
+      "bias_or_agenda": "AWS explanatory content.",
+      "stance": "supportive",
+      "notes": "Useful for simple executive explanation, less useful for deep operating-model critique."
+    },
+    {
+      "id": "S7",
+      "title": "AWS Prescriptive Guidance: Data mesh principles",
+      "url_or_path": "https://docs.aws.amazon.com/prescriptive-guidance/latest/data-mesh-principles/data-mesh-principles.html",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "AWS implementation framing.",
+      "stance": "supportive",
+      "notes": "Useful for domain ownership, federated governance, and self-serve platform language."
+    },
+    {
+      "id": "S8",
+      "title": "Thoughtworks: Data mesh",
+      "url_or_path": "https://www.thoughtworks.com/en-us/what-we-do/data-and-ai/data-mesh",
+      "source_type": "industry",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Originator/advocate perspective; useful but not neutral.",
+      "stance": "supportive",
+      "notes": "Useful for principles and terminology; should be balanced with practical challenges."
+    },
+    {
+      "id": "S9",
+      "title": "NIST AI Risk Management Framework 1.0",
+      "url_or_path": "https://www.nist.gov/itl/ai-risk-management-framework",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Risk-management framework rather than data platform architecture guidance.",
+      "stance": "neutral",
+      "notes": "Useful for grounding AI scaling in risk, data quality, validation, governance, and monitoring concerns."
+    },
+    {
+      "id": "S10",
+      "title": "ISO/IEC 5259-3: Artificial intelligence - Data quality for analytics and machine learning",
+      "url_or_path": "https://www.iso.org/standard/81092.html",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "medium",
+      "specificity": "medium",
+      "bias_or_agenda": "Standards summary; full standard may require access.",
+      "stance": "neutral",
+      "notes": "Useful for showing that ML data quality is a recognized standards concern."
+    },
+    {
+      "id": "S11",
+      "title": "ISO/IEC 5259-5: Artificial intelligence - Data quality governance framework",
+      "url_or_path": "https://www.iso.org/standard/84150.html",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Standards summary; full standard may require access.",
+      "stance": "neutral",
+      "notes": "Useful for connecting data quality governance to AI/ML systems."
+    },
+    {
+      "id": "S12",
+      "title": "Data products, data mesh, and data fabric",
+      "url_or_path": "https://link.springer.com/article/10.1007/s12599-024-00876-5",
+      "source_type": "academic",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Conceptual academic synthesis; stronger for definitions and research gaps than for implementation proof.",
+      "stance": "neutral",
+      "notes": "Useful for distinguishing data products, data mesh, and data fabric and for framing unresolved organizational questions."
+    },
+    {
+      "id": "S13",
+      "title": "How to Move Beyond a Monolithic Data Lake to a Distributed Data Mesh",
+      "url_or_path": "https://martinfowler.com/articles/data-monolith-to-mesh.html",
+      "source_type": "blog",
+      "authority": "medium",
+      "freshness": "old",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Originating advocacy article; useful for principles but should not be treated as neutral evidence.",
+      "stance": "supportive",
+      "notes": "Useful for the original data mesh argument, domain ownership, product thinking, self-serve platform, and federated governance."
+    },
+    {
+      "id": "S14",
+      "title": "Gartner: What is Data Fabric?",
+      "url_or_path": "https://www.gartner.com/en/data-analytics/topics/data-fabric",
+      "source_type": "analyst",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "medium",
+      "specificity": "medium",
+      "bias_or_agenda": "Analyst framing; focused on data fabric rather than data mesh.",
+      "stance": "critical",
+      "notes": "Useful as counterweight showing that metadata-assisted integration and fabric patterns may solve some problems differently than domain-aligned mesh programs."
+    },
+    {
+      "id": "S15",
+      "title": "Thoughtworks: Data Mesh in practice - Getting off to the right start",
+      "url_or_path": "https://www.thoughtworks.com/en-us/insights/articles/data-mesh-in-practice-getting-off-to-the-right-start",
+      "source_type": "industry",
+      "authority": "medium",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Practitioner/consulting perspective; example-led and favorable to data mesh.",
+      "stance": "supportive",
+      "notes": "Useful for practical adoption lessons and for reinforcing that data mesh requires operating-model, process, and technology changes."
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "AI scaling is constrained by data ownership, quality, semantics, access, lineage, and control gaps, not only by model tooling.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S9", "S10", "S11", "S12"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "caveat",
+      "notes": "Sources support data quality and governance importance for AI, but do not prove that these are always the primary scaling bottleneck."
+    },
+    {
+      "claim_id": "C2",
+      "claim": "Domain-aligned data products improve AI delivery only when ownership and consumption contracts are explicit.",
+      "claim_type": "technical_mechanism",
+      "research_questions": ["RQ2", "RQ3"],
+      "supporting_sources": ["S1", "S2", "S4", "S5", "S7", "S12", "S13", "S15"],
+      "contradicting_sources": ["S8", "S14"],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "support_more",
+      "notes": "Mechanism is well supported by architecture guidance, but empirical outcome evidence remains thin."
+    },
+    {
+      "claim_id": "C3",
+      "claim": "A common governed platform is what keeps domain alignment from becoming fragmentation.",
+      "claim_type": "technical_mechanism",
+      "research_questions": ["RQ2", "RQ3"],
+      "supporting_sources": ["S1", "S4", "S5", "S7", "S12", "S13", "S15"],
+      "contradicting_sources": ["S14"],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Multiple official sources emphasize shared platform and federated governance functions."
+    },
+    {
+      "claim_id": "C4",
+      "claim": "The pattern should be adopted incrementally around high-value AI use cases, not rolled out as a broad taxonomy exercise.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ3"],
+      "supporting_sources": ["S4", "S7", "S9", "S12", "S15"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "caveat",
+      "notes": "This remains a pragmatic adoption recommendation, now supported by practitioner and academic sources, but it is not quantified outcome evidence."
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": ["domain ownership", "common platform", "AI data risk", "fragmentation risk"],
+    "rows": [
+      {
+        "theme": "Domain ownership needs shared constraints",
+        "source_summaries": {
+          "S1": "Frames data mesh around domains and data products.",
+          "S2": "Explains domain responsibilities in an enterprise analytics architecture.",
+          "S4": "Connects domain-owned data products to shared mesh functions.",
+          "S12": "Clarifies data products, data mesh, and data fabric as related but distinct concepts.",
+          "S15": "Frames successful practice as socio-technical change, not just architecture."
+        },
+        "pattern": "agreement",
+        "implication": "The paper can argue for domain alignment, but only with explicit platform and governance boundaries."
+      },
+      {
+        "theme": "AI depends on data quality and governance",
+        "source_summaries": {
+          "S9": "AI risk management emphasizes governance and risk controls.",
+          "S10": "AI/ML data quality is a standards topic.",
+          "S11": "AI/ML data quality governance is a standards topic."
+        },
+        "pattern": "agreement",
+        "implication": "The AI scaling argument should include risk and data-quality controls, not just speed or reuse."
+      },
+      {
+        "theme": "Outcome evidence is weaker than mechanism evidence",
+        "source_summaries": {
+          "S1": "Provides architecture rationale but not quantified AI outcome evidence.",
+          "S4": "Provides architecture functions and data product guidance.",
+          "S8": "Advocacy-oriented source; useful for principles but not neutral proof.",
+          "S12": "Academic synthesis highlights unresolved questions around value capture and operating models.",
+          "S15": "Practitioner source supports adoption discipline but not universal AI outcome proof."
+        },
+        "pattern": "gap",
+        "implication": "Avoid claiming proven business outcome lift; argue that the pattern addresses known prerequisites and failure modes."
+      }
+    ]
+  },
+  "contradictions": [
+    {
+      "id": "CON1",
+      "issue": "Domain alignment can improve ownership but can also increase inconsistency if standards and incentives are weak.",
+      "sources_in_tension": ["S1", "S4", "S8", "S14", "S15"],
+      "possible_explanations": ["Different maturity assumptions", "Architecture guidance underweights organizational incentives"],
+      "stronger_source_for_this_paper": "S4",
+      "recommended_handling": "Address as the central counterargument, not a footnote."
+    },
+    {
+      "id": "CON2",
+      "issue": "Official platform guidance supports the mechanism but may overstate how easily enterprises can implement it.",
+      "sources_in_tension": ["S1", "S4", "S7", "S12", "S15"],
+      "possible_explanations": ["Vendor guidance simplifies operating-model change", "Architecture patterns omit funding and accountability friction"],
+      "stronger_source_for_this_paper": "S9",
+      "recommended_handling": "Use risk-aware language and require pilot-based adoption."
+    }
+  ],
+  "open_questions": [
+    {
+      "id": "Q1",
+      "question": "What public case studies show data products directly improving AI delivery outcomes?",
+      "why_open": "Current sources mostly support mechanism, not direct outcome causality.",
+      "suggested_next_search": "data products AI use case case study enterprise",
+      "blocks_drafting": false
+    },
+    {
+      "id": "Q2",
+      "question": "Which data-product controls are mandatory in regulated financial-services environments?",
+      "why_open": "Specific obligations depend on jurisdiction, policy, and use case.",
+      "suggested_next_search": "financial services AI data governance model risk data quality controls",
+      "blocks_drafting": false
+    },
+    {
+      "id": "Q3",
+      "question": "What are the strongest practitioner critiques of data mesh or data-product programs?",
+      "why_open": "The argument now has stronger practitioner framing, but still lacks a failure postmortem from an organization reporting that a data-product program increased fragmentation.",
+      "suggested_next_search": "data mesh challenges failure modes fragmentation governance",
+      "blocks_drafting": false
+    }
+  ],
+  "draft_support_notes": [
+    {
+      "section": "Opening problem",
+      "recommended_evidence": ["S9", "S10", "S11"],
+      "how_to_use": "Ground the AI scaling problem in data quality, governance, and risk, not just platform efficiency.",
+      "strength_of_language": "cautious",
+      "cautions": "Do not claim data quality is always the primary bottleneck.",
+      "missing_support": "Quantified enterprise AI delivery outcome evidence."
+    },
+    {
+      "section": "Mechanism",
+      "recommended_evidence": ["S1", "S2", "S4", "S5", "S7", "S12", "S13", "S15"],
+      "how_to_use": "Explain domain ownership, data product interfaces, discovery, access, lineage, quality, and governance as a connected mechanism.",
+      "strength_of_language": "moderate",
+      "cautions": "Avoid turning this into a generic data mesh explainer.",
+      "missing_support": "Concrete examples of consumption contracts in AI use cases."
+    },
+    {
+      "section": "Counterargument",
+      "recommended_evidence": ["S8", "S1", "S4", "S12", "S14", "S15"],
+      "how_to_use": "State the fragmentation risk directly and answer it with shared platform services and governance constraints.",
+      "strength_of_language": "strong",
+      "cautions": "Do not dismiss the objection; it is the paper's main credibility test.",
+      "missing_support": "A concrete practitioner postmortem where a data-product program increased fragmentation."
+    }
+  ],
+  "facts_safe_to_use": [
+    {
+      "fact": "Major cloud providers publish architecture guidance for data mesh and data-product patterns.",
+      "sources": ["S1", "S4", "S6", "S7"],
+      "confidence": "high"
+    },
+    {
+      "fact": "NIST publishes an AI Risk Management Framework that can be used to ground AI governance and risk discussion.",
+      "sources": ["S9"],
+      "confidence": "high"
+    },
+    {
+      "fact": "ISO has standards in the 5259 series focused on AI/ML data quality and data quality governance.",
+      "sources": ["S10", "S11"],
+      "confidence": "high"
+    }
+  ],
+  "claims_to_soften": [
+    {
+      "claim": "Domain-aligned data products enable AI scaling.",
+      "why": "The evidence supports enabling conditions and mechanisms, not guaranteed outcomes.",
+      "suggested_wording": "Domain-aligned data products can reduce recurring data friction in AI delivery when paired with shared platform controls and clear ownership."
+    },
+    {
+      "claim": "The common platform prevents fragmentation.",
+      "why": "A platform can reduce fragmentation, but governance, incentives, and adoption determine whether it succeeds.",
+      "suggested_wording": "A common governed platform is the control layer that can keep domain alignment from becoming fragmentation."
+    }
+  ],
+  "claims_to_drop_or_reframe": [
+    {
+      "claim": "The foundation is in place for enterprise AI scaling.",
+      "why": "No direct evidence about any specific organization's readiness exists in this example.",
+      "recommended_reframe": "The architecture and operating-model foundation required for AI scaling can be built incrementally around high-value use cases."
+    }
+  ]
+}

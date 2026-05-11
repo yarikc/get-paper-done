@@ -234,6 +234,12 @@ gpd version
 
 The framework package is not the paper workspace. Paper-specific state and source material live in the paper directory. That separation is what lets you update GPD without touching active papers.
 
+## Examples
+
+A completed reference workspace is available at [examples/data-products-ai-scaling](examples/data-products-ai-scaling).
+
+It shows a full internal strategy-paper flow with brief, strategy gate, research, outline, draft, fact-check, review, and export artifacts. The example is included in the test suite: `tests/example-fixtures.test.js` validates semantic gates, export cleanliness, and completed-workflow routing on a normalized checkout copy.
+
 ## Core Artifacts
 
 | Artifact | Responsibility |
