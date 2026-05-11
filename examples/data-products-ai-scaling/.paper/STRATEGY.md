@@ -46,9 +46,9 @@
 
 ### Reasoning Spine
 
-1. AI scaling depends on repeatable access to trusted, governed, fit-for-purpose data.
-2. Domain-aligned data products create ownership and meaning close to the business context.
-3. Shared platform services and controls prevent domain ownership from turning into fragmented local silos.
+1. Repeated AI use cases reopen the same discovery, access, interpretation, and validation work when data inputs are not packaged as stable product interfaces.
+2. AI risk and data-quality standards make governance, lineage, and quality expectations defensibility requirements rather than optional platform hygiene.
+3. A centralized platform-only model cannot own domain meaning at enterprise scale, while pure federation cannot sustain shared controls; the paper needs both accountabilities.
 
 ## Argument Posture
 

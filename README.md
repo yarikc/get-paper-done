@@ -115,7 +115,7 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
 
-Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, and weak rewrite instructions in low-scoring review rows. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
+Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, weak rewrite instructions in low-scoring review rows, thesis-restating reasoning spines, generic audience-conflict rows, missing safe-claim sources, and fact-check source/evidence mismatches for strategic or recommendation claims. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
 
 Run semantic validation before treating a paper as example-quality, publication-ready, or ready for long-term handoff.
 

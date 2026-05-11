@@ -9,9 +9,9 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 **Overall: 8.9/10**
 
-Get Paper Done is a coherent, useful writing workflow framework with a practical CLI wrapper and a stronger documentation surface than the initial release. The project now has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, first-pass semantic validation, deterministic internal export, one completed diagnostic paper run, and one realistic completed example workspace.
+Get Paper Done is a coherent, useful writing workflow framework with a practical CLI wrapper and a stronger documentation surface than the initial release. The project now has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, one completed diagnostic paper run, one realistic completed example workspace, and semantic gates calibrated from that example's feedback.
 
-It is close but still not a 9/10 tool. The core workflow has only one realistic example, an imported-paper example is still missing, semantic validation has only been proven on one refreshed trial/example, import remains preservation-first rather than extraction-rich, and external review is still prompt/workflow-driven rather than a wrapped CLI capability.
+It is close but still not a 9/10 tool. The core workflow has only one realistic example, an imported-paper example is still missing, semantic validation is stronger but still example-calibrated rather than broadly proven, import remains preservation-first rather than extraction-rich, and external review is still prompt/workflow-driven rather than a wrapped CLI capability.
 
 ## Ratings
 
@@ -20,7 +20,7 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 | Framework design | 8.9/10 | Strong staged model, explicit paper memory, research compression, strategy gate, audience system, and feedback approval. One diagnostic paper run has been converted into a reusable example; still needs broader messy-paper calibration. |
 | Installable tool maturity | 8.3/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`. Runtime install is clearer and asset copying is tested. Missing external-review runner, richer import extraction, and local package/release hardening. |
 | Documentation | 8.9/10 | README now explains the core idea, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and points to a completed example. Still needs a walkthrough and imported-paper example. |
-| Test coverage | 9.0/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, export state detection, first-pass semantic gates, and a realistic completed example fixture. Still missing imported-paper fixtures and deeper semantic checks. |
+| Test coverage | 9.1/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, export state detection, semantic gates calibrated from a completed example, and a realistic completed example fixture. Still missing imported-paper fixtures and broader fixture diversity. |
 | Release readiness | 7.8/10 | Package metadata, changelog, CI, license, dry-run install checks, and package dry-run are in place. Needs release checklist, versioning/update compatibility policy, and a tighter public/private distribution story. |
 
 ## What Works
@@ -36,8 +36,9 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 - `gpd status` no longer lets saved `STATE.json` next commands skip structurally required artifacts.
 - `gpd status` now recognizes `.paper/exports/FINAL.md`, detects stale exports, and routes completed exports to `/gpd-progress`.
 - `gpd export` provides a deterministic CLI path for internal Markdown export after a `Ready` review verdict.
-- `gpd validate --semantic` now catches stale BRIEF evidence placeholders, planned source-type gaps, missing counterevidence rationale, export metadata leakage, STATE drift, and weak low-score review instructions.
+- `gpd validate --semantic` now catches stale BRIEF evidence placeholders, planned source-type gaps, missing counterevidence rationale, export metadata leakage, STATE drift, weak low-score review instructions, reasoning-spine restatement, generic audience-conflict rows, missing safe-claim sources, and fact-check source/evidence mismatch for strategic or recommendation claims.
 - `examples/data-products-ai-scaling` gives users and tests a realistic completed workspace.
+- The completed example has been repaired after feedback so the reasoning spine is independent, audience conflicts are anchored to paper-specific sections or claims, recommendation sections name concrete candidate use cases, and fact-check safe claims align with `RESEARCH.json`.
 - Import is preservation-first and does not silently convert or overwrite downstream artifacts.
 - The strategy gate gives the system a useful way to stop weak papers before research or drafting.
 - The README now explains the actual user workflow instead of only listing commands.
@@ -47,7 +48,7 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 1. Real-paper behavior has one complete example, but not enough breadth. The next test should import a messy existing paper and run it through brief, strategy, research, outline, draft, fact-check, review, revise, and export.
 2. Example coverage is still one-sided. New users can inspect a completed new-paper style workspace, but not an imported-paper workspace.
 3. Import classification is useful but shallow. Current import preserves and catalogs material, but does not deeply extract `.docx`, PDFs, spreadsheets, diagrams, citations, or version history.
-4. Semantic validation is only first-pass. It catches concrete lint-style failures, but it still cannot judge full argument quality, citation fidelity, or prose distinctiveness.
+4. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but it still cannot judge full argument quality, citation fidelity, or prose distinctiveness.
 5. State enum policy is now intentionally tighter and centrally tested. That prevents typo drift, but future blocker/action additions must go through the shared contract and workflow consistency tests.
 6. External review is workflow-documented but not tool-wrapped. Users still need runtime/model-specific manual steps for multi-model review.
 7. Release readiness remains private-repo oriented. The install flow assumes local `npm link`; a public or team-facing release needs clearer versioning and update guarantees.
@@ -56,7 +57,7 @@ It is close but still not a 9/10 tool. The core workflow has only one realistic 
 
 1. Add one imported-paper example workspace with realistic preserved original material and downstream artifacts.
 2. Add richer fixture workspaces with realistic artifact bodies, not just minimal routing signals.
-3. Add deeper semantic checks only where the completed example shows deterministic failure modes.
+3. Continue adding semantic checks only where real examples show deterministic, low-noise failure modes.
 4. Harden `gpd import` around canonical draft selection, large-folder previews, document extraction, and richer manifest details.
 5. Add fixture-based end-to-end tests that validate representative completed workspaces with real artifact bodies.
 6. Expand semantic lint-style checks only where they are concrete enough to be useful; defer noisy heuristics until examples exist.
@@ -72,4 +73,4 @@ npm test
 npm run check
 ```
 
-Both passed after the artifact-contract and README updates.
+Both passed after the feedback-calibration validator and artifact-contract updates.

@@ -82,7 +82,11 @@ Required headings:
 - `## Claims Risk Verdict`
 - `## Claim Inventory`
 - `## Claim Issues`
+- `## Claims Safe To Keep`
+- `## Claims To Soften`
+- `## Claims To Remove Or Verify Before Publication`
 - `## Source Gaps`
+- `## Source Alignment Notes`
 - `## Synthesis Integrity`
 - `## Systemic Risk Report`
 - `## Recommended Next Action`
@@ -91,6 +95,9 @@ Required tables:
 
 - Claim Inventory: `Claim ID`, `Claim`, `Type`, `Location`, `Risk`, `Check Status`
 - Claim Issues: `Severity`, `Claim ID`, `Claim`, `Issue`, `Evidence Status`, `Source(s)`, `Recommended Fix`, `Suggested Wording`
+- Claims Safe To Keep: `Claim ID`, `Claim`, `Why Safe`, `Source(s)`
+- Claims To Soften: `Claim ID`, `Current Wording`, `Suggested Wording`, `Why`
+- Claims To Remove Or Verify Before Publication: `Claim ID`, `Claim`, `Action`, `Why`
 - Source Gaps: `Gap`, `Source Type Needed`, `Blocks Publication?`
 
 ### `REVIEW.md`

@@ -2,4 +2,4 @@ node_modules/
 .DS_Store
 /.paper/
 agents/.claude/
-docs/feedback.md
+docs/feedback*.md

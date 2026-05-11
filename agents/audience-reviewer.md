@@ -70,6 +70,8 @@ If any required audience details are missing, flag them as audience-profile gaps
 
 If multiple audience personas are present, score each audience separately, provide a short combined verdict, and include an audience conflict table. Respect the priority order and conflict rule in `.paper/AUDIENCE.md`.
 
+Audience conflict rows must be paper-specific. Each row must cite at least one specific claim ID from `BRIEF.md`, section identifier from `OUTLINE.md` or `DRAFT.md`, or a short direct phrase from the draft. Generic tensions that would apply unchanged to any CxO/architect paper, such as "executive ask versus technical proof" or "simplicity versus caveat load," are not specific enough to ship.
+
 ## 3. Read As That Reader
 
 Review the draft as if you are that reader, not as the author.
@@ -184,7 +186,7 @@ Include only when multiple audience personas are selected.
 
 | Tension | Audiences In Conflict | Priority Rule | Recommended Handling |
 |---------|-----------------------|---------------|----------------------|
-| [issue] | [audiences] | [rule] | [handling] |
+| [paper-specific issue anchored to claim/section/phrase] | [audiences] | [rule] | [handling] |
 
 ## Highest-Priority Findings
 

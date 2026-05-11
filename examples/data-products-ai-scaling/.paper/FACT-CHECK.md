@@ -39,7 +39,7 @@ Medium
 | Claim ID | Claim | Why Safe | Source(s) |
 |----------|-------|----------|-----------|
 | FC2 | Domain-aligned data products help only when ownership and contracts are explicit. | Official architecture, academic, original blog, and practitioner sources support ownership, product thinking, consumption interfaces, and platform/governance responsibilities. | S1, S2, S4, S5, S7, S12, S13, S15 |
-| FC4 | Data-product programs should measure reuse and friction reduction, not product count. | This is framed as an operating recommendation and aligns with the paper's bounded thesis. | S1, S4, S7 |
+| FC4 | Data-product programs should measure reuse and friction reduction, not product count. | This is an inferential operating recommendation supported by data-product and data-mesh adoption framing, not a directly evidenced empirical metric standard. | S12, S15 |
 | FC6 | Product metadata, quality expectations, lineage, and access controls need to support downstream AI risk assessment. | NIST and ISO support the risk/data-quality logic; the draft does not claim these standards prescribe data-product architecture. | S9, S10, S11 |
 | FC8 | A focused first wave of domain-aligned data products can reduce recurring data friction when paired with governed platform controls. | The revised opening states this as a bounded recommendation rather than proven outcome causality. | S1, S4, S7, S9, S10, S11, S12, S15 |
 

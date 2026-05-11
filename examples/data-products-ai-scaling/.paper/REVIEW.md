@@ -43,9 +43,9 @@ The revised draft is ready for internal export. The opening now states the reque
 
 | Tension | Audiences In Conflict | Priority Rule | Recommended Handling |
 |---------|-----------------------|---------------|----------------------|
-| Executive ask versus technical proof | CxO reader and distinguished architect / engineer | CxO decision usefulness wins, but major claims must survive architect scrutiny. | Keep the ask in the opening and keep technical proof concise. |
-| Simplicity versus caveat load | CxO reader and distinguished architect / engineer | Do not hide evidence limits that affect the recommendation. | Preserve the distinction between mechanism evidence and direct outcome evidence. |
-| Platform investment versus domain accountability | CxO reader and domain/platform architects | The paper must approve both together or neither is credible. | Keep platform controls and domain ownership paired throughout. |
+| Claim 4 / Section 6 incremental adoption could read as underfunding the platform | CxO reader and distinguished architect / engineer | CxO decision usefulness wins, but architects need to see standards work is not deferred. | In Section 6, keep use-case-first adoption but name the platform standards that must be funded in the same wave. |
+| Section 1 caveat that data products do not automatically improve AI outcomes may weaken the executive ask | CxO reader and distinguished architect / engineer | Do not hide evidence limits that affect the recommendation. | Preserve the caveat, then immediately state the narrower fundable decision. |
+| Section 5 platform/domain responsibility split could be read as unfunded domain work | CxO reader and domain/platform architects | The paper must approve both together or neither is credible. | Keep the responsibility table and state that platform funding and domain stewardship capacity are one decision package. |
 
 ## Suggested Improvements
 

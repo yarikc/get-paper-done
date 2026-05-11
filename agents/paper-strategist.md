@@ -90,6 +90,10 @@ If the thesis is vague, multi-purpose, not debatable, mis-scoped, unsupported, o
 
 Provide one recommended thesis. If there are materially different viable strategic directions, provide up to two alternatives and explain the trade-off.
 
+The Reasoning Spine must provide independent support for the thesis, not a decomposition of the thesis. Each reason should answer a distinct "because": usually one mechanism reason, one evidence or standards reason, and one counterfactual or operating-model observation. If the thesis says "X requires Y because Y1, Y2, Y3," do not use `Y1`, `Y2`, and `Y3` as the Reasoning Spine. Those are thesis components, not reasons.
+
+Before emitting the Reasoning Spine, test each item: could the thesis still be defended if this reason were removed and the other reasons remained? If no, the item is probably part of the thesis rather than an independent support. Replace it with a reason external to the thesis wording.
+
 ## 5. Choose The Argument Posture
 
 Recommend the primary posture:
@@ -151,6 +155,8 @@ Populate `Strategy Blockers` as the operational "why not Go" schema:
 - `Required unblock action`: use one of `none`, `brief_revision`, `audience_revision`, `thesis_revision`, `scope_narrowing`, `research_plan`, or `user_override`.
 
 Strategic Gaps explain the blockers and give fix instructions. Do not rely on prose `Reason` alone for blocked routing.
+
+Do not let Reasoning Spine items merely restate the thesis clauses or reuse the same noun phrases as the thesis. The spine must support the thesis from outside its wording.
 
 ## 9. Recommend Artifact Changes
 

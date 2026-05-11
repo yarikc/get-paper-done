@@ -89,6 +89,77 @@ function hasSourceId(value) {
   return /\bS\d+\b/.test(value);
 }
 
+const stopwords = new Set([
+  'a',
+  'an',
+  'and',
+  'are',
+  'as',
+  'at',
+  'be',
+  'because',
+  'by',
+  'for',
+  'from',
+  'has',
+  'have',
+  'in',
+  'into',
+  'is',
+  'it',
+  'its',
+  'not',
+  'of',
+  'on',
+  'or',
+  'rather',
+  'than',
+  'that',
+  'the',
+  'their',
+  'this',
+  'to',
+  'when',
+  'with',
+]);
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenize(value) {
+  return normalizeText(value)
+    .split(' ')
+    .filter((token) => token.length > 2 && !stopwords.has(token));
+}
+
+function tokenCoverage(needle, haystack) {
+  const needleTokens = tokenize(needle);
+  if (needleTokens.length === 0) return 0;
+  const haystackTokens = new Set(tokenize(haystack));
+  const matches = needleTokens.filter((token) => haystackTokens.has(token));
+  return matches.length / needleTokens.length;
+}
+
+function parseNumberedItems(markdown) {
+  return markdown
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .map((line) => {
+      const match = line.match(/^\d+\.\s+(.+)$/);
+      return match ? match[1].trim() : null;
+    })
+    .filter(Boolean);
+}
+
+function sourceIds(value) {
+  return [...String(value || '').matchAll(/\bS\d+\b/g)].map((match) => match[0]);
+}
+
 function validateBriefClaimEvidence(paperDir) {
   const issues = [];
   const brief = readIfExists(metaPath(paperDir, 'BRIEF.md'));
@@ -111,6 +182,34 @@ function validateBriefClaimEvidence(paperDir) {
       `${heading.replace(/^###\s*/, '')} evidence field must cite source IDs like S1 or use [deferred: reason] after research exists`,
     ));
   }
+  return issues;
+}
+
+function validateStrategyReasoningSpine(paperDir) {
+  const strategy = readIfExists(metaPath(paperDir, 'STRATEGY.md'));
+  if (!strategy) return [];
+
+  const thesis = parseMarkdownField(strategy, 'Recommended thesis') || parseMarkdownField(strategy, 'Current thesis');
+  if (!thesis) return [];
+
+  const spine = sectionBetween(strategy, '### Reasoning Spine');
+  const items = parseNumberedItems(spine);
+  const thesisNormalized = normalizeText(thesis);
+  const issues = [];
+
+  for (const item of items) {
+    const itemNormalized = normalizeText(item);
+    const itemIsSubstring = itemNormalized.length > 20 && thesisNormalized.includes(itemNormalized);
+    const coverage = tokenCoverage(item, thesis);
+    if (itemIsSubstring || coverage >= 0.6) {
+      issues.push(issue(
+        'MEDIUM',
+        'STRATEGY.md',
+        `Reasoning Spine item "${item}" appears to decompose or restate the thesis instead of independently supporting it`,
+      ));
+    }
+  }
+
   return issues;
 }
 
@@ -250,14 +349,141 @@ function validateReviewRewriteInstructions(paperDir) {
   return issues;
 }
 
+const genericConflictTerms = [
+  'executive ask',
+  'technical proof',
+  'simplicity',
+  'caveat load',
+  'platform investment',
+  'domain accountability',
+  'depth',
+  'brevity',
+  'generality',
+  'specificity',
+  'technical detail',
+  'strategic clarity',
+  'mechanism',
+  'evidence',
+  'actionability',
+];
+
+function hasConflictAnchor(row) {
+  const text = Object.values(row).join(' ');
+  return /(?:\bC\d+\b|\bClaim\s+\d+\b|\bSection\s+\d+\b|\b§\s*\d+|["“][^"”]{12,}["”])/i.test(text);
+}
+
+function isGenericConflict(row) {
+  const tension = String(row.Tension || '').toLowerCase();
+  if (!/\b(versus|vs\.?)\b/.test(tension)) return false;
+  const matchedTerms = genericConflictTerms.filter((term) => tension.includes(term));
+  return matchedTerms.length >= 2;
+}
+
+function validateAudienceConflictSpecificity(paperDir) {
+  const review = readIfExists(metaPath(paperDir, 'REVIEW.md'));
+  if (!review) return [];
+
+  const section = sectionBetween(review, '## Audience Conflict Table');
+  const table = parseFirstTable(section);
+  if (!table.rows.length) return [];
+
+  return table.rows
+    .filter((row) => isGenericConflict(row) && !hasConflictAnchor(row))
+    .map((row) => issue(
+      'MEDIUM',
+      'REVIEW.md',
+      `Audience Conflict Table row "${row.Tension || 'unknown'}" is generic; anchor it to a claim ID, section, or draft phrase`,
+    ));
+}
+
+function bestEvidenceMatch(claim, evidenceRows) {
+  let best = { row: null, score: 0 };
+  for (const row of evidenceRows) {
+    const score = Math.max(
+      tokenCoverage(claim, row.claim),
+      tokenCoverage(row.claim, claim),
+    );
+    if (score > best.score) best = { row, score };
+  }
+  return best;
+}
+
+function normalizeClaimType(value) {
+  return normalizeText(value).replace(/\s+/g, '_');
+}
+
+function isStrategicSafeClaimType(value) {
+  const normalized = normalizeClaimType(value);
+  return normalized === 'recommendation'
+    || normalized === 'strategic_judgment'
+    || normalized === 'market_trend'
+    || normalized.includes('recommendation')
+    || normalized.includes('strategic_judgment')
+    || normalized.includes('market_trend');
+}
+
+function validateFactCheckSafeSourceAlignment(paperDir) {
+  const factCheck = readIfExists(metaPath(paperDir, 'FACT-CHECK.md'));
+  const parsed = readJsonIfExists(metaPath(paperDir, 'RESEARCH.json'));
+  if (!factCheck || !parsed.data || !Array.isArray(parsed.data.evidence_matrix)) return [];
+
+  const inventory = parseFirstTable(sectionBetween(factCheck, '## Claim Inventory'));
+  const safe = parseFirstTable(sectionBetween(factCheck, '## Claims Safe To Keep'));
+  if (!inventory.rows.length || !safe.rows.length) return [];
+
+  const typeById = new Map(inventory.rows.map((row) => [row['Claim ID'], row.Type]));
+  const issues = [];
+
+  for (const row of safe.rows) {
+    const claimId = row['Claim ID'];
+    const claimType = typeById.get(claimId);
+    if (!isStrategicSafeClaimType(claimType)) continue;
+
+    const citedSources = sourceIds(row['Source(s)']);
+    if (citedSources.length === 0) {
+      issues.push(issue(
+        'MEDIUM',
+        'FACT-CHECK.md',
+        `Safe-to-keep claim "${claimId}" has no source IDs`,
+      ));
+      continue;
+    }
+
+    const best = bestEvidenceMatch(row.Claim, parsed.data.evidence_matrix);
+    if (!best.row || best.score < 0.35) {
+      issues.push(issue(
+        'MEDIUM',
+        'FACT-CHECK.md',
+        `Safe-to-keep claim "${claimId}" does not map clearly to a RESEARCH.json evidence_matrix row`,
+      ));
+      continue;
+    }
+
+    const supportingSources = Array.isArray(best.row.supporting_sources) ? best.row.supporting_sources : [];
+    const hasSupportingCitation = citedSources.some((sourceId) => supportingSources.includes(sourceId));
+    if (!hasSupportingCitation) {
+      issues.push(issue(
+        'MEDIUM',
+        'FACT-CHECK.md',
+        `Safe-to-keep claim "${claimId}" cites sources that are not supporting_sources for the closest evidence_matrix claim "${best.row.claim_id || 'unknown'}"`,
+      ));
+    }
+  }
+
+  return issues;
+}
+
 function validateSemanticPaper(paperDir) {
   return [
     ...validateBriefClaimEvidence(paperDir),
+    ...validateStrategyReasoningSpine(paperDir),
     ...validateResearchSourceCoverage(paperDir),
     ...validateResearchCounterevidence(paperDir),
     ...validateExportMetadataLeak(paperDir),
     ...validateStateDrift(paperDir),
     ...validateReviewRewriteInstructions(paperDir),
+    ...validateAudienceConflictSpecificity(paperDir),
+    ...validateFactCheckSafeSourceAlignment(paperDir),
   ];
 }
 

@@ -316,6 +316,30 @@
       "confidence": "medium",
       "recommended_handling": "caveat",
       "notes": "This remains a pragmatic adoption recommendation, now supported by practitioner and academic sources, but it is not quantified outcome evidence."
+    },
+    {
+      "claim_id": "C5",
+      "claim": "Data-product programs should measure reuse and friction reduction, not product count.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ3"],
+      "supporting_sources": ["S12", "S15"],
+      "contradicting_sources": [],
+      "strength_of_support": "weak",
+      "confidence": "low",
+      "recommended_handling": "caveat",
+      "notes": "This is an inferential operating recommendation supported by data-product and data-mesh adoption framing, not a directly evidenced empirical metric standard."
+    },
+    {
+      "claim_id": "C6",
+      "claim": "Product metadata, quality expectations, lineage, and access controls need to support downstream AI risk assessment.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S9", "S10", "S11"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "caveat",
+      "notes": "NIST and ISO sources support data governance and quality logic for AI risk, but they do not prescribe this exact data-product architecture."
     }
   ],
   "synthesis_matrix": {

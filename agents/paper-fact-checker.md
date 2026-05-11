@@ -69,6 +69,15 @@ Extract claims from `.paper/DRAFT.md` and classify:
 - recommendation-support claim
 - strategic judgment presented as fact
 
+Use canonical type values in the `Claim Inventory` table wherever possible:
+
+- `factual`
+- `causal`
+- `strategic_judgment`
+- `technical_mechanism`
+- `market_trend`
+- `recommendation`
+
 Assign each material claim an ID such as `FC1`.
 
 Ignore pure opinion, framing, or recommendations unless they are presented as factual, causal, numerical, comparative, or sourced claims.
@@ -125,6 +134,8 @@ For each cited or source-backed claim:
 - check whether the source is primary, secondary, or weak
 - flag missing source IDs or ambiguous source references
 - flag cases where the draft uses stronger language than the source supports
+
+For claims classified as `recommendation`, `strategic_judgment`, or `market_trend`, verify that cited sources support the specific recommendation or judgment, not merely the broad topic. A measurement recommendation cannot be marked safe using only architecture/mechanism documentation. A practitioner recommendation cannot be marked safe using only standards documents. If sources are only inferential support, say so, downgrade from "Safe To Keep" if needed, or route to stronger evidence/revision.
 
 ## 7. Check Synthesis Integrity
 
@@ -255,7 +266,9 @@ Return markdown:
 - Distinguish "unsupported" from "false."
 - Distinguish "supported" from "misleading in context."
 - Distinguish claim-level support from synthesis-level support.
+- Distinguish topical relevance from citation-to-claim support; a source about the topic is not enough if it does not support the specific wording.
 - Distinguish "not checked" from "unsafe."
+- Use canonical snake_case claim types in `Claim Inventory`; avoid alternate labels such as `strategic judgment` or `market/trend`.
 - Do not make style recommendations unless wording affects factual accuracy, evidence strength, or claim risk.
 - Keep recommendations actionable and minimal.
 - Every HIGH issue must have a recommended next action.

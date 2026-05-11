@@ -131,6 +131,12 @@ Controlled prose means:
 - restrained emphasis
 - concrete nouns
 
+Avoid repeated three-or-more-item parallel structures unless the list is canonical for the domain or necessary for precision. One dense list can define a mechanism; repeated lists in consecutive paragraphs read as generic AI prose.
+
+Recommendations must name specific use-case categories, specific metrics, or specific failure signals. "Choose high-value AI use cases" without examples is not actionable enough. Prefer concrete forms such as "customer-support intent classification," "claims triage," "fraud alert enrichment," or "regulatory reporting where source quality is uneven," adjusted to the paper domain.
+
+When `RESEARCH.json` marks a relevant evidence row with `recommended_handling` of `support_more`, `soften`, `narrow`, or `caveat`, draft the corresponding prose with bounded language such as "can," "may," "in contexts where," or mark `[NEEDS EVIDENCE: ...]`. Do not convert a weakly supported or caveated claim into a confident assertion.
+
 Avoid:
 
 - bloated introductions
@@ -220,6 +226,8 @@ Return markdown:
 - Do not remove technical mechanism when the audience needs it for trust.
 - Prefer specific claims and concrete nouns.
 - Keep paragraphs focused on one idea.
+- Avoid list-heavy generic prose; if two consecutive paragraphs contain saturated lists, revise one into a sharper causal or example-based sentence.
+- Make recommendation sections concrete enough for a reader to name the first use cases, metrics, or failure signals to inspect.
 - If evidence is insufficient, mark the gap instead of writing around it.
 - Default to section-by-section drafting for serious or long papers.
 - Preserve existing draft sections in `section_draft` mode unless the user explicitly asks to revise them.

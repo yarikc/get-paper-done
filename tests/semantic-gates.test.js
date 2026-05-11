@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFileSync, spawnSync } = require('child_process');
+const { validateSemanticPaper } = require('../bin/lib/semantic');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
@@ -265,6 +266,184 @@ function semanticJson(paperDir) {
   return JSON.parse(run(['validate', '--paper', paperDir, '--semantic', '--json']));
 }
 
+function testReasoningSpineRestatementWarns() {
+  const paperDir = makePaper('semantic-spine');
+  writeArtifact(paperDir, 'STRATEGY.md', [
+    '# Strategy Review',
+    '',
+    '## Strategic Readiness',
+    '',
+    '**Status:** Go',
+    '',
+    '## Strategy Blockers',
+    '',
+    '- **Blocking issues:** none',
+    '- **Primary blocker:** none',
+    '- **Block severity:** None',
+    '- **Required unblock action:** none',
+    '',
+    '## Thesis Package',
+    '',
+    '- **Recommended thesis:** Enterprise AI scaling requires trusted data, domain ownership, and shared controls.',
+    '',
+    '### Thesis Tests',
+    '',
+    '| Test | Pass? | Notes |',
+    '|------|-------|-------|',
+    '| Debatable | Yes | Notes |',
+    '',
+    '### Reasoning Spine',
+    '',
+    '1. AI scaling requires trusted data.',
+    '2. Domain ownership creates meaning.',
+    '3. Shared controls reduce fragmentation.',
+    '',
+    '## Strategic Gaps',
+    '',
+    '| ID | Type | Description | Why It Matters | Fix Instruction |',
+    '|----|------|-------------|----------------|-----------------|',
+    '| none | none | none | none | none |',
+    '',
+    '## Recommended Shape',
+    '',
+    'Shape.',
+    '',
+    '## Block / Override',
+    '',
+    'None.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => item.severity === 'MEDIUM' && item.issue.includes('Reasoning Spine item')));
+}
+
+function testGenericAudienceConflictWarns() {
+  const paperDir = makePaper('semantic-conflict');
+  writeReview(paperDir, 4, '-');
+  const reviewPath = artifactPath(paperDir, 'REVIEW.md');
+  fs.appendFileSync(reviewPath, [
+    '',
+    '## Audience Conflict Table',
+    '',
+    '| Tension | Audiences In Conflict | Priority Rule | Recommended Handling |',
+    '|---------|-----------------------|---------------|----------------------|',
+    '| Executive ask versus technical proof | CxO and architect | Decision usefulness wins | Keep concise |',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => item.severity === 'MEDIUM' && item.issue.includes('Audience Conflict Table row')));
+}
+
+function testFactCheckSafeSourceAlignmentWarns() {
+  const paperDir = makePaper('semantic-fact-alignment');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch({
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'Domain ownership improves data product meaning.',
+        claim_type: 'technical_mechanism',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S1'],
+        contradicting_sources: ['S2'],
+        strength_of_support: 'moderate',
+        confidence: 'medium',
+        recommended_handling: 'keep',
+        notes: 'Notes',
+      },
+    ],
+  }));
+  writeArtifact(paperDir, 'FACT-CHECK.md', [
+    '# Fact And Claims Check',
+    '',
+    '## Claim Inventory',
+    '',
+    '| Claim ID | Claim | Type | Location | Risk | Check Status |',
+    '|----------|-------|------|----------|------|--------------|',
+    '| FC4 | Data-product programs should measure reuse and friction reduction, not product count. | recommendation | Section 4 | LOW | checked |',
+    '',
+    '## Claims Safe To Keep',
+    '',
+    '| Claim ID | Claim | Why Safe | Source(s) |',
+    '|----------|-------|----------|-----------|',
+    '| FC4 | Data-product programs should measure reuse and friction reduction, not product count. | Good advice. | S1 |',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => item.severity === 'MEDIUM' && item.issue.includes('Safe-to-keep claim "FC4"')));
+}
+
+function testFactCheckSafeSourceAlignmentNormalizesTypeLabels() {
+  const paperDir = makePaper('semantic-fact-type-label');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch({
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'Market demand for governed AI data products is increasing.',
+        claim_type: 'market_trend',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S2'],
+        contradicting_sources: [],
+        strength_of_support: 'weak',
+        confidence: 'low',
+        recommended_handling: 'caveat',
+        notes: 'Notes',
+      },
+    ],
+  }));
+  writeArtifact(paperDir, 'FACT-CHECK.md', [
+    '# Fact And Claims Check',
+    '',
+    '## Claim Inventory',
+    '',
+    '| Claim ID | Claim | Type | Location | Risk | Check Status |',
+    '|----------|-------|------|----------|------|--------------|',
+    '| FC9 | Market demand for governed AI data products is increasing. | market/trend | Section 2 | MEDIUM | checked |',
+    '',
+    '## Claims Safe To Keep',
+    '',
+    '| Claim ID | Claim | Why Safe | Source(s) |',
+    '|----------|-------|----------|-----------|',
+    '| FC9 | Market demand for governed AI data products is increasing. | Broadly supported. | S1 |',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('cites sources that are not supporting_sources')
+  )));
+}
+
+function testFactCheckSafeSourceAlignmentWarnsOnMissingSources() {
+  const paperDir = makePaper('semantic-fact-missing-sources');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch());
+  writeArtifact(paperDir, 'FACT-CHECK.md', [
+    '# Fact And Claims Check',
+    '',
+    '## Claim Inventory',
+    '',
+    '| Claim ID | Claim | Type | Location | Risk | Check Status |',
+    '|----------|-------|------|----------|------|--------------|',
+    '| FC5 | Start with high-value AI use cases rather than a taxonomy rollout. | recommendation | Section 6 | LOW | checked |',
+    '',
+    '## Claims Safe To Keep',
+    '',
+    '| Claim ID | Claim | Why Safe | Source(s) |',
+    '|----------|-------|----------|-----------|',
+    '| FC5 | Start with high-value AI use cases rather than a taxonomy rollout. | Good advice. | - |',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('Safe-to-keep claim "FC5" has no source IDs')
+  )));
+}
+
 function testBriefEvidencePlaceholdersFailAfterResearch() {
   const paperDir = makePaper('semantic-brief-stale');
   writeBrief(paperDir, 'Needs research across official sources.');
@@ -388,5 +567,10 @@ testExportMetadataLeakFails();
 testStateMarkdownJsonDriftFails();
 testWeakReviewInstructionFails();
 testConcreteReviewInstructionPasses();
+testReasoningSpineRestatementWarns();
+testGenericAudienceConflictWarns();
+testFactCheckSafeSourceAlignmentWarns();
+testFactCheckSafeSourceAlignmentNormalizesTypeLabels();
+testFactCheckSafeSourceAlignmentWarnsOnMissingSources();
 
 console.log('semantic gate tests passed');

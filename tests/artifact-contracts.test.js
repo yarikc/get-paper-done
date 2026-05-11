@@ -193,6 +193,19 @@ function testMarkdownContractRejectsMalformedHeading() {
   assert(result.stdout.includes('REVIEW.md: Missing heading "# Review"'));
 }
 
+function testFactCheckContractRequiresSafeClaimSections() {
+  const dir = tempDir('gpd-artifact-fact-check-heading-test');
+  const badFactCheck = path.join(dir, 'FACT-CHECK.md');
+  const factCheck = fs.readFileSync(path.join(repoRoot, 'templates', 'fact-check.md'), 'utf8')
+    .replace(/## Claims Safe To Keep[\s\S]*?(?=## Claims To Soften)/, '');
+  fs.writeFileSync(badFactCheck, factCheck);
+
+  const result = runFail(['validate-artifact', '--path', badFactCheck]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('FACT-CHECK.md: Missing heading "## Claims Safe To Keep"'));
+  assert(result.stdout.includes('FACT-CHECK.md: Missing table with columns: Claim ID, Claim, Why Safe, Source(s)'));
+}
+
 function testStrategyValueFailureIsActionable() {
   const dir = tempDir('gpd-artifact-strategy-value-test');
   const badStrategy = path.join(dir, 'STRATEGY.md');
@@ -285,6 +298,7 @@ testResearchSynthesisMatrixFailureIsActionable();
 testMarkdownContractFailureIsActionable();
 testMarkdownContractRejectsUnexpectedAudienceDimension();
 testMarkdownContractRejectsMalformedHeading();
+testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
 testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();
 testUnsupportedSchemaKeywordFailsSchemaDefinition();
