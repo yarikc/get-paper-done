@@ -39,7 +39,41 @@
         "user_feedback"
       ],
       "properties": {
-        "inferred_research_questions": { "type": "array" },
+        "inferred_research_questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "question",
+              "mapped_claims",
+              "why_it_matters",
+              "planned_source_types",
+              "search_queries"
+            ],
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "mapped_claims": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "why_it_matters": { "type": "string" },
+              "planned_source_types": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["official", "academic", "industry", "news", "analyst", "blog", "user_provided", "other"]
+                }
+              },
+              "search_queries": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
         "depth_rationale": { "type": "string" },
         "source_mode_rationale": { "type": "string" },
         "user_feedback": { "type": "string" }

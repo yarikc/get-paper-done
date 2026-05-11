@@ -11,6 +11,9 @@ const {
   validatePaperArtifacts,
 } = require('./validate');
 const {
+  validateSemanticPaper,
+} = require('./semantic');
+const {
   CURRENT_STATE_VERSION,
   allowedStrategyStatuses,
   allowedStrategyBlockers,
@@ -370,12 +373,23 @@ function validate(input = {}) {
   if (a['DRAFT.md'] && !a['OUTLINE.md']) issues.push({ severity: 'MEDIUM', issue: 'Draft exists before OUTLINE.md' });
   if (a['REVIEW.md'] && !a['DRAFT.md']) issues.push({ severity: 'HIGH', issue: 'REVIEW.md exists without DRAFT.md' });
   issues.push(...validatePaperArtifacts(state.paperDir, a));
-  return { ...state, issues, ok: issues.length === 0 };
+  const structuralIssueCount = issues.length;
+  if (input.semantic) {
+    issues.push(...validateSemanticPaper(state.paperDir));
+  }
+  const hasHighIssue = issues.some((item) => item.severity === 'HIGH');
+  return {
+    ...state,
+    issues,
+    semantic: Boolean(input.semantic),
+    ok: structuralIssueCount === 0 && !hasHighIssue,
+  };
 }
 
 function printValidation(result) {
   printStatus(result);
   console.log(`validation: ${result.ok ? 'ok' : 'issues found'}`);
+  if (result.semantic) console.log('semantic validation: enabled');
   for (const issue of result.issues) {
     console.log(`- ${issue.severity}: ${issue.issue}`);
   }

@@ -108,6 +108,18 @@ function testResearchEnumFailureIsActionable() {
   assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].recommended_handling must be one of keep, support_more, soften, narrow, caveat, drop'));
 }
 
+function testResearchPlanSourceTypeFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-research-plan-source-test');
+  const badResearch = path.join(dir, 'RESEARCH.json');
+  const research = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'research.json'), 'utf8'));
+  research.research_plan.inferred_research_questions[0].planned_source_types = ['official', 'practitioner'];
+  fs.writeFileSync(badResearch, JSON.stringify(research, null, 2));
+
+  const result = runFail(['validate-artifact', '--path', badResearch]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('RESEARCH.json: $.research_plan.inferred_research_questions[0].planned_source_types[1] must be one of official, academic, industry, news, analyst, blog, user_provided, other'));
+}
+
 function testResearchSourceRegistryFailureIsActionable() {
   const dir = tempDir('gpd-artifact-research-source-test');
   const badResearch = path.join(dir, 'RESEARCH.json');
@@ -267,6 +279,7 @@ testTemplateArtifactsPassContracts();
 testJsonSchemaFailureIsActionable();
 testStateEnumFailureIsActionable();
 testResearchEnumFailureIsActionable();
+testResearchPlanSourceTypeFailureIsActionable();
 testResearchSourceRegistryFailureIsActionable();
 testResearchSynthesisMatrixFailureIsActionable();
 testMarkdownContractFailureIsActionable();

@@ -115,7 +115,8 @@ Use this order:
 20. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
 21. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
 22. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
-23. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
+23. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
+24. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
 
 Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
 

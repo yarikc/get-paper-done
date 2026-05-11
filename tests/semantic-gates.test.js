@@ -1,0 +1,392 @@
+'use strict';
+
+const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { execFileSync, spawnSync } = require('child_process');
+
+const repoRoot = path.resolve(__dirname, '..');
+const gpd = path.join(repoRoot, 'bin', 'gpd.js');
+
+function run(args, options = {}) {
+  return execFileSync(process.execPath, [gpd, ...args], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    ...options,
+  });
+}
+
+function runFail(args, options = {}) {
+  return spawnSync(process.execPath, [gpd, ...args], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    ...options,
+  });
+}
+
+function tempDir(name) {
+  return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
+}
+
+function artifactPath(paperDir, name) {
+  return path.join(paperDir, '.paper', name);
+}
+
+function writeArtifact(paperDir, name, content) {
+  const fullPath = artifactPath(paperDir, name);
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+  fs.writeFileSync(fullPath, content);
+}
+
+function writeJsonArtifact(paperDir, name, data) {
+  writeArtifact(paperDir, name, `${JSON.stringify(data, null, 2)}\n`);
+}
+
+function readState(paperDir) {
+  return JSON.parse(fs.readFileSync(artifactPath(paperDir, 'STATE.json'), 'utf8'));
+}
+
+function writeState(paperDir, state) {
+  writeJsonArtifact(paperDir, 'STATE.json', state);
+}
+
+function makePaper(slug = 'semantic') {
+  const dir = tempDir(`gpd-${slug}`);
+  run(['init', '--location', dir, '--slug', slug, '--title', slug]);
+  const paperDir = path.join(dir, slug);
+  const state = readState(paperDir);
+  state.status = 'Ready';
+  state.current_stage = 'Research';
+  state.last_completed_stage = 'Research';
+  state.suggested_next_command = '/gpd-outline --deep';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  writeState(paperDir, state);
+  writeArtifact(paperDir, 'STATE.md', [
+    '# State',
+    '',
+    '- **Status:** Ready',
+    '- **Current stage:** Research',
+    '- **Last completed stage:** Research',
+    '- **Suggested next command:** `/gpd-outline --deep`',
+    '- **Blocked by:** None',
+    '',
+  ].join('\n'));
+  return paperDir;
+}
+
+function baseResearch(overrides = {}) {
+  return {
+    metadata: {
+      topic: 'Semantic gates',
+      scope: 'Test',
+      depth: 'standard',
+      source_mode: 'web_first',
+      created_at: '2026-05-11T00:00:00.000Z',
+      updated_at: '2026-05-11T00:00:00.000Z',
+    },
+    research_plan: {
+      inferred_research_questions: [
+        {
+          id: 'RQ1',
+          question: 'Question',
+          mapped_claims: ['C1'],
+          why_it_matters: 'Reason',
+          planned_source_types: ['official', 'academic'],
+          search_queries: ['query'],
+        },
+      ],
+      depth_rationale: 'Rationale',
+      source_mode_rationale: 'Rationale',
+      user_feedback: 'None',
+    },
+    research_brief: {
+      executive_summary: 'Summary',
+      key_findings: [],
+    },
+    source_registry: [
+      {
+        id: 'S1',
+        title: 'Official source',
+        url_or_path: 'https://example.com/source',
+        source_type: 'official',
+        authority: 'high',
+        freshness: 'recent',
+        relevance: 'high',
+        specificity: 'high',
+        bias_or_agenda: 'None',
+        stance: 'supportive',
+        notes: 'Notes',
+      },
+      {
+        id: 'S2',
+        title: 'Academic source',
+        url_or_path: 'https://example.com/academic',
+        source_type: 'academic',
+        authority: 'high',
+        freshness: 'recent',
+        relevance: 'high',
+        specificity: 'high',
+        bias_or_agenda: 'None',
+        stance: 'critical',
+        notes: 'Notes',
+      },
+    ],
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'Claim',
+        claim_type: 'strategic_judgment',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S1'],
+        contradicting_sources: ['S2'],
+        strength_of_support: 'moderate',
+        confidence: 'medium',
+        recommended_handling: 'keep',
+        notes: 'Notes',
+      },
+    ],
+    synthesis_matrix: {
+      themes: [],
+      rows: [],
+    },
+    contradictions: [],
+    open_questions: [],
+    draft_support_notes: [],
+    facts_safe_to_use: [],
+    claims_to_soften: [],
+    claims_to_drop_or_reframe: [],
+    ...overrides,
+  };
+}
+
+function writeBrief(paperDir, evidenceValue) {
+  writeArtifact(paperDir, 'BRIEF.md', [
+    '# Brief',
+    '',
+    '### Claim 1: Test claim',
+    '',
+    '- **What evidence supports it:** ' + evidenceValue,
+    '',
+  ].join('\n'));
+}
+
+function writeOutline(paperDir) {
+  writeArtifact(paperDir, 'OUTLINE.md', [
+    '# Outline',
+    '',
+    '## Mode',
+    '',
+    '- **Depth:** Lite',
+    '',
+    '## Structure Verdict',
+    '',
+    'Usable.',
+    '',
+    '## Reader Journey',
+    '',
+    '- In: Question',
+    '- Out: Answer',
+    '',
+    '## Section Architecture',
+    '',
+    '| Section | Objective | Reader State In | Reader State Out | Main Claim | Evidence Hooks | Evidence Strength | Reader Questions | Objection Handled | Approx Length | Transition To Next | Keep/Cut |',
+    '|---------|-----------|-----------------|------------------|------------|----------------|-------------------|------------------|-------------------|---------------|--------------------|----------|',
+    '| 1. Opening | Explain | Question | Answer | Claim | S1 | Moderate | Why? | None | 200 | End | Keep |',
+    '',
+    '## Objection Map',
+    '',
+    '| Objection | Where Addressed | Handling |',
+    '|-----------|-----------------|----------|',
+    '| None | Section 1 | None |',
+    '',
+    '## Drafting Risks',
+    '',
+    '- None',
+    '',
+  ].join('\n'));
+}
+
+function writeReview(paperDir, score = 4, instruction = '-') {
+  writeOutline(paperDir);
+  writeArtifact(paperDir, 'DRAFT.md', '# Draft\n\n## Draft Body\n\nBody.\n');
+  writeArtifact(paperDir, 'REVIEW.md', [
+    '# Review',
+    '',
+    '## Verdict',
+    '',
+    'Ready',
+    '',
+    '## Scores',
+    '',
+    '| Dimension | Score | Notes |',
+    '|-----------|-------|-------|',
+    '| Thesis clarity | 4 | Good |',
+    '',
+    '## Required Fixes',
+    '',
+    '- None',
+    '',
+    '## Audience Review Scorecard',
+    '',
+    '| Dimension | Score | Why | Actionable Rewrite Instruction If 3 Or Below |',
+    '|-----------|-------|-----|----------------------------------------------|',
+    `| Evidence sufficiency | ${score} | Why | ${instruction} |`,
+    '| Thesis clarity | 4 | Why | - |',
+    '| Audience relevance | 4 | Why | - |',
+    '| Objection handling | 4 | Why | - |',
+    '| Jargon appropriateness | 4 | Why | - |',
+    '| Decision usefulness | 4 | Why | - |',
+    '| Structural flow | 4 | Why | - |',
+    '',
+    '## Unsupported Or Risky Claims',
+    '',
+    '| Claim | Issue | Recommended Fix |',
+    '|-------|-------|-----------------|',
+    '| None | None | None |',
+    '',
+    '## Revision Plan',
+    '',
+    '1. None',
+    '',
+    '## Done Checklist',
+    '',
+    '- [x] Done',
+    '',
+  ].join('\n'));
+}
+
+function semanticJson(paperDir) {
+  return JSON.parse(run(['validate', '--paper', paperDir, '--semantic', '--json']));
+}
+
+function testBriefEvidencePlaceholdersFailAfterResearch() {
+  const paperDir = makePaper('semantic-brief-stale');
+  writeBrief(paperDir, 'Needs research across official sources.');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch());
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('BRIEF.md'));
+  assert(result.stdout.includes('must cite source IDs'));
+}
+
+function testBriefEvidenceSourceIdsPass() {
+  const paperDir = makePaper('semantic-brief-pass');
+  writeBrief(paperDir, 'Supported by S1 and S2.');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch());
+
+  const result = semanticJson(paperDir);
+  assert.strictEqual(result.ok, true);
+}
+
+function testSourceCoverageWarnsWithoutFailing() {
+  const paperDir = makePaper('semantic-source-coverage');
+  writeBrief(paperDir, 'Supported by S1.');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch({
+    source_registry: [
+      {
+        id: 'S1',
+        title: 'Official source',
+        url_or_path: 'https://example.com/source',
+        source_type: 'official',
+        authority: 'high',
+        freshness: 'recent',
+        relevance: 'high',
+        specificity: 'high',
+        bias_or_agenda: 'None',
+        stance: 'supportive',
+        notes: 'Notes',
+      },
+    ],
+  }));
+
+  const result = semanticJson(paperDir);
+  assert.strictEqual(result.ok, true);
+  assert(result.issues.some((item) => item.severity === 'MEDIUM' && item.issue.includes('planned source types missing')));
+}
+
+function testCounterevidenceWarnsWithoutFailing() {
+  const paperDir = makePaper('semantic-counterevidence');
+  writeBrief(paperDir, 'Supported by S1 and S2.');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch({
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'Claim',
+        claim_type: 'strategic_judgment',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S1'],
+        contradicting_sources: [],
+        strength_of_support: 'moderate',
+        confidence: 'medium',
+        recommended_handling: 'keep',
+        notes: 'Notes',
+      },
+    ],
+  }));
+
+  const result = semanticJson(paperDir);
+  assert.strictEqual(result.ok, true);
+  assert(result.issues.some((item) => item.severity === 'MEDIUM' && item.issue.includes('no contradicting_sources')));
+}
+
+function testExportMetadataLeakFails() {
+  const paperDir = makePaper('semantic-export-leak');
+  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n\n## Draft Notes\n\nInternal.\n');
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('exports/FINAL.md'));
+  assert(result.stdout.includes('internal metadata'));
+}
+
+function testStateMarkdownJsonDriftFails() {
+  const paperDir = makePaper('semantic-state-drift');
+  writeArtifact(paperDir, 'STATE.md', [
+    '# State',
+    '',
+    '- **Status:** Old',
+    '- **Suggested next command:** `/gpd-draft`',
+    '',
+  ].join('\n'));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('STATE.md'));
+  assert(result.stdout.includes('does not match STATE.json'));
+}
+
+function testWeakReviewInstructionFails() {
+  const paperDir = makePaper('semantic-review-instruction');
+  writeReview(paperDir, 3, 'Keep as internal strategy or add later if publishing.');
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('REVIEW.md'));
+  assert(result.stdout.includes('lacks a concrete rewrite instruction'));
+}
+
+function testConcreteReviewInstructionPasses() {
+  const paperDir = makePaper('semantic-review-pass');
+  writeReview(paperDir, 3, 'Rewrite Section 1 to cite S1 and add one sentence explaining why the evidence is sufficient.');
+
+  const result = semanticJson(paperDir);
+  assert.strictEqual(result.ok, true);
+}
+
+testBriefEvidencePlaceholdersFailAfterResearch();
+testBriefEvidenceSourceIdsPass();
+testSourceCoverageWarnsWithoutFailing();
+testCounterevidenceWarnsWithoutFailing();
+testExportMetadataLeakFails();
+testStateMarkdownJsonDriftFails();
+testWeakReviewInstructionFails();
+testConcreteReviewInstructionPasses();
+
+console.log('semantic gate tests passed');

@@ -20,6 +20,14 @@ If `FACT-CHECK.md` is missing and the draft contains factual, current, technical
 
 If `FACT-CHECK.md` has HIGH issues or claims marked "verify before publication", warn the user and ask whether to export anyway. Do not silently export unresolved high-risk claims.
 
+Before final handoff, recommend running:
+
+```text
+gpd validate --semantic --paper <paper-dir>
+```
+
+If semantic validation reports HIGH issues, do not treat the export as final until the affected upstream artifact has been refreshed. MEDIUM issues require explicit user acknowledgement before example/publication use.
+
 Create `.paper/exports/FINAL.md` with:
 
 - final title

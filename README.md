@@ -115,6 +115,10 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
 
+Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, and weak rewrite instructions in low-scoring review rows. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
+
+Run semantic validation before treating a paper as example-quality, publication-ready, or ready for long-term handoff.
+
 Moving backward is normal. If you change an upstream artifact after downstream work exists, `gpd status` routes back to the earliest stage that needs refresh before trusting the saved next command in `STATE.json`:
 
 | Change detected | Suggested command |
@@ -187,6 +191,7 @@ Create, inspect, and validate paper workspaces:
 gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
 gpd status --paper ~/papers/metadata-strategy
 gpd validate --paper ~/papers/metadata-strategy
+gpd validate --semantic --paper ~/papers/metadata-strategy
 gpd validate-artifact --path ~/papers/metadata-strategy/.paper/RESEARCH.json
 gpd list-audiences
 gpd list-profiles
@@ -407,10 +412,11 @@ GPD includes structural validation for known paper artifacts:
 
 ```bash
 gpd validate --paper ~/papers/metadata-strategy
+gpd validate --semantic --paper ~/papers/metadata-strategy
 gpd validate-artifact --path ~/papers/metadata-strategy/.paper/RESEARCH.json
 ```
 
-Contracts live in [references/artifact-contracts.md](references/artifact-contracts.md) and [references/schemas](references/schemas). They check structure, required headings/tables, JSON shape, and drift-prone enum values. They do not judge whether the writing is good.
+Contracts live in [references/artifact-contracts.md](references/artifact-contracts.md) and [references/schemas](references/schemas). They check structure, required headings/tables, JSON shape, and drift-prone enum values. Semantic validation adds deterministic lint-style quality gates, but it still does not replace human review.
 
 ## Updating Installed Runtimes
 

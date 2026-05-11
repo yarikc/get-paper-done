@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current overall rating: 8.8/10 as of 2026-05-11
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, workflow consistency tests, routing scenario tests, content-aware status routing, and export-state detection are in place. The system still needs broader real-world validation, examples, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, workflow consistency tests, routing scenario tests, content-aware status routing, and export-state detection are in place. The system still needs broader real-world validation, examples, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,8 +32,9 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; one-paper diagnostic trial is complete through internal export, and the next slice is turning useful trial output into realistic examples/regression fixtures.
-- `#1`: broader test/evaluation program; remains open until examples, real-paper fixtures, and semantic checks exist.
+- `#2`: active umbrella for layered workflow/agent testing; one-paper diagnostic trial is complete through internal export and now passes semantic gates cleanly. The next slice is turning useful trial output into realistic examples/regression fixtures.
+- `#1`: broader test/evaluation program; remains open until examples, real-paper fixtures, and deeper semantic checks exist.
+- `#6`: focused semantic-validation execution plan; first deterministic gate slice exists, deferred gates remain tracked there.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
 ## Active Milestone: One-Paper Diagnostic And Examples
@@ -42,9 +43,10 @@ Next work should validate behavior under real use before adding more RFC surface
 
 1. Use GitHub Issue #2 as the active one-paper diagnostic checklist and friction log.
 2. Completed: run one realistic paper through setup, strategy, research, outline, draft, fact-check, review, revision, and export.
-3. Turn the trial output into at least one realistic `examples/` workspace.
-4. Add example validation tests: no placeholders, artifact contracts pass, and `gpd status` returns the expected next command.
-5. Use trial findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
+3. Completed: refreshed the trial output so `gpd validate --semantic` passes with no semantic issues.
+4. Turn the refreshed trial output into at least one realistic `examples/` workspace.
+5. Add example validation tests: no placeholders, artifact contracts pass, semantic validation passes cleanly, and `gpd status` returns the expected next command.
+6. Use trial findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
 
 ## Completed Design Simplifications
 
@@ -65,6 +67,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Upgraded strategist into a challenge-first gatekeeper that can block research, outline, and drafting with `Revise Before Drafting` or `No-Go`, plus normalized `Strategy Blockers` for machine-routable "why not Go" decisions.
 - Added install/update CLI for Claude and Codex with runtime-neutral command placeholders, install manifest, update backups, dry-run, doctor, and version commands.
 - Added deterministic `gpd export` and structural `exports/FINAL.md` status awareness.
+- Added first-pass `gpd validate --semantic` gates for empty-but-well-formed artifact failures.
 
 ---
 

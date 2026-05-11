@@ -47,6 +47,7 @@ Options:
   --paper DIR                  Existing paper directory for status/validate
   --path FILE                  Artifact path for validate-artifact
   --json                       Print JSON for list/status/validate
+  --semantic                   Include deterministic semantic gates in validate
   --force                      Allow export when REVIEW.md is not Ready
   --dry-run                    Show planned changes without writing
   --no-backup                  Do not back up changed installed files
@@ -61,6 +62,7 @@ Examples:
   gpd export --paper ~/papers/metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
   gpd validate
+  gpd validate --semantic --paper ~/papers/metadata-strategy
   gpd validate-artifact --path ~/papers/metadata-strategy/.paper/STATE.json
   gpd list-audiences
 `);
@@ -95,6 +97,7 @@ function parseWorkspaceOptions(argv) {
     const arg = argv[i];
     if (arg === '--dry-run') args.dryRun = true;
     else if (arg === '--json') args.json = true;
+    else if (arg === '--semantic') args.semantic = true;
     else if (arg === '--force') args.force = true;
     else if (arg === '--location') {
       args.location = argv[i + 1];
