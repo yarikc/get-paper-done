@@ -46,6 +46,13 @@
       "specificity": "high",
       "bias_or_agenda": "",
       "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "Explain whether this source directly supports the exact claim wording, partially supports it, is only topically related, contradicts it, or has not been checked."
+        }
+      ],
       "notes": ""
     }
   ],

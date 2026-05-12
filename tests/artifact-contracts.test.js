@@ -127,6 +127,8 @@ function testResearchSourceRegistryFailureIsActionable() {
   research.source_registry[0].source_type = 'newsletter_thread';
   research.source_registry[0].authority = 'legendary';
   research.source_registry[0].stance = 'cheerleading';
+  research.source_registry[0].claim_support[0].support = 'vibes';
+  research.source_registry[0].claim_support[0].unexpected = true;
   research.source_registry[0].unexpected = true;
   fs.writeFileSync(badResearch, JSON.stringify(research, null, 2));
 
@@ -135,6 +137,8 @@ function testResearchSourceRegistryFailureIsActionable() {
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].source_type must be one of official, academic, industry, news, analyst, blog, user_provided, other'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].authority must be one of high, medium, low'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].stance must be one of supportive, neutral, critical, mixed'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].claim_support[0].support must be one of direct, partial, topical_only, contradicts, not_checked'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].claim_support[0].unexpected is not allowed'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].unexpected is not allowed'));
 }
 

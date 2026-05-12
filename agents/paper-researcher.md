@@ -142,6 +142,16 @@ For every weak or challenged claim, recommend one of:
 - move to caveat
 - drop
 
+For every cited source that may support a material claim, record `source_registry[*].claim_support` entries. Use:
+
+- `direct` when the source supports the exact claim wording.
+- `partial` when the source supports a narrower version of the claim.
+- `topical_only` when the source is about the broad topic but does not support the claim wording.
+- `contradicts` when the source challenges the claim.
+- `not_checked` when the source has not been checked against that claim.
+
+Do not put a source in `evidence_matrix[*].supporting_sources` for a claim when its claim-support entry is only `topical_only`, `contradicts`, or `not_checked`.
+
 ## 8. Write Or Return Research
 
 When instructed to write, update `.paper/RESEARCH.json` using `templates/research.json` and write `.paper/RESEARCH.md` as a short index using `templates/research.md`.

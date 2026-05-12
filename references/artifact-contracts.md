@@ -10,7 +10,7 @@ JSON artifacts must parse and conform to the schemas in `references/schemas/`.
 |----------|--------|---------|
 | `.paper/STATE.json` | `references/schemas/state.schema.json` | Machine-readable workspace state, blockers, feedback state, and next command. |
 | `.paper/config.json` | `references/schemas/config.schema.json` | Paper workflow configuration and feature toggles. |
-| `.paper/RESEARCH.json` | `references/schemas/research.schema.json` | Canonical structured research, source registry, evidence matrix, synthesis, gaps, and draft support notes. |
+| `.paper/RESEARCH.json` | `references/schemas/research.schema.json` | Canonical structured research, source registry, claim-support metadata, evidence matrix, synthesis, gaps, and draft support notes. |
 
 The in-repo schema validator intentionally supports a small JSON Schema subset:
 

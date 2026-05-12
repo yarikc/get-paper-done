@@ -51,6 +51,8 @@ For numerical, statistical, benchmark, percentage, cost, ROI, timing, or multipl
 
 For `source_registry` entries and cited source IDs, verify that URLs or file paths resolve to the intended source when practical. Record stale, redirected-to-wrong-page, inaccessible, or mismatched source links in `Source Alignment Notes` or `Source Gaps`, even if the draft prose itself is otherwise supportable.
 
+When `.paper/RESEARCH.json` includes `source_registry[*].claim_support`, use it as a claim-source fidelity map. A source marked `topical_only`, `contradicts`, or `not_checked` for the closest evidence claim cannot justify a `Claims Safe To Keep` row. Move the claim to `Claims To Soften`, `Claims To Remove Or Verify Before Publication`, or route back to `/gpd-research`.
+
 After claim-level checking, add a synthesis integrity assessment:
 
 - whether the conclusion or recommendation is supported by the verified claims

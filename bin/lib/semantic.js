@@ -727,6 +727,58 @@ function validateFactCheckSafeSourceAlignment(paperDir) {
   return issues;
 }
 
+function claimSupportEntryFor(source, claimId) {
+  const supportEntries = source && Array.isArray(source.claim_support) ? source.claim_support : [];
+  return supportEntries.find((entry) => entry.claim_id === claimId) || null;
+}
+
+function validateFactCheckClaimSupportMetadata(paperDir) {
+  const factCheck = readIfExists(metaPath(paperDir, 'FACT-CHECK.md'));
+  const parsed = readJsonIfExists(metaPath(paperDir, 'RESEARCH.json'));
+  if (!factCheck || !parsed.data || !Array.isArray(parsed.data.evidence_matrix)) return [];
+
+  const sourcesById = sourceRegistryById(parsed.data);
+  const hasClaimSupportMetadata = [...sourcesById.values()].some((source) => Array.isArray(source.claim_support));
+  if (!hasClaimSupportMetadata) return [];
+
+  const safe = parseFirstTable(sectionBetween(factCheck, '## Claims Safe To Keep'));
+  if (!safe.rows.length) return [];
+
+  const issues = [];
+  for (const row of safe.rows) {
+    const citedSources = uniqueSourceIds(row['Source(s)']);
+    if (citedSources.length === 0) continue;
+
+    const best = bestEvidenceMatch(row.Claim, parsed.data.evidence_matrix);
+    if (!best.row || best.score < 0.25 || !best.row.claim_id) continue;
+
+    for (const sourceId of citedSources) {
+      const source = sourcesById.get(sourceId);
+      if (!source || !Array.isArray(source.claim_support)) continue;
+
+      const supportEntry = claimSupportEntryFor(source, best.row.claim_id);
+      if (!supportEntry) {
+        issues.push(issue(
+          'MEDIUM',
+          'FACT-CHECK.md',
+          `Safe-to-keep claim "${row['Claim ID'] || 'unknown'}" cites ${sourceId}, but source_registry has no claim_support entry for evidence claim "${best.row.claim_id}"`,
+        ));
+        continue;
+      }
+
+      if (!['direct', 'partial'].includes(supportEntry.support)) {
+        issues.push(issue(
+          'MEDIUM',
+          'FACT-CHECK.md',
+          `Safe-to-keep claim "${row['Claim ID'] || 'unknown'}" cites ${sourceId}, but source_registry marks support for evidence claim "${best.row.claim_id}" as ${supportEntry.support}`,
+        ));
+      }
+    }
+  }
+
+  return issues;
+}
+
 const quantitativePatterns = [
   /\b\d+(?:\.\d+)?\s*(?:-|–|to)\s*\d+(?:\.\d+)?\s*(?:%|percent|percentage points?)(?![a-z])/i,
   /\b\d+(?:\.\d+)?\s*(?:%|percent|percentage points?)(?![a-z])/i,
@@ -891,6 +943,7 @@ function validateSemanticPaper(paperDir) {
     ...validateProseSaturationInArtifact(paperDir, 'exports/FINAL.md'),
     ...validateAudienceConflictSpecificity(paperDir),
     ...validateFactCheckSafeSourceAlignment(paperDir),
+    ...validateFactCheckClaimSupportMetadata(paperDir),
     ...validateQuantitativeClaimSupport(paperDir),
   ];
 }

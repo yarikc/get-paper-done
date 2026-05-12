@@ -98,7 +98,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `AUDIENCE.md` | Selected readers, priority order, conflict rule, objections, proof standard |
 | `BRIEF.md` | Thesis, claims, opposing view, reader promise, scope, definition of done |
 | `STRATEGY.md` | Strategic readiness gate, paper job, posture, decision usefulness, scope |
-| `RESEARCH.json` | Canonical source registry, evidence matrix, synthesis, contradictions, gaps |
+| `RESEARCH.json` | Canonical source registry, claim-support metadata, evidence matrix, synthesis, contradictions, gaps |
 | `RESEARCH.md` | Human-readable index to `RESEARCH.json` |
 | `OUTLINE.md` | Argument architecture, reader journey, section architecture, evidence placement, objection handling, mode-specific diagnostics |
 | `DRAFT.md` | Current draft body, section drafting state, and draft notes |
@@ -403,7 +403,7 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Add real public-source citation fidelity checks after the synthetic external and quantitative fixtures.
+1. Run live public-source citation verification on a real paper now that deterministic claim-support metadata exists.
 2. Harden import based on real use, especially canonical draft selection and richer source extraction.
 3. Add release/update documentation and compatibility policy.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.

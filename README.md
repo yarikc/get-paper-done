@@ -115,7 +115,7 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
 
-Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, source-sensitive imported drafts without source mapping, mixed-audience drafts missing audience review, recurring draft terms used repeatedly before definition, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, weak rewrite instructions in low-scoring review rows, thesis-restating reasoning spines, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatches for strategic or recommendation claims, precise quantitative claims without source/context/support, generic recommendations without concrete examples, and clustered or artifact-dense list-heavy prose. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
+Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, source-sensitive imported drafts without source mapping, mixed-audience drafts missing audience review, recurring draft terms used repeatedly before definition, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, weak rewrite instructions in low-scoring review rows, thesis-restating reasoning spines, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatches for strategic or recommendation claims, safe claims that cite sources marked only topically related in research claim-support metadata, precise quantitative claims without source/context/support, generic recommendations without concrete examples, and clustered or artifact-dense list-heavy prose. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings.
 
 Run semantic validation before treating a paper as example-quality, publication-ready, or ready for long-term handoff.
 
@@ -255,7 +255,7 @@ The examples are included in the test suite. `tests/example-fixtures.test.js` va
 | `AUDIENCE.md` | Selected readers, priority order, conflict rules, objections, proof standard. |
 | `BRIEF.md` | Thesis, claims, opposing view, reader promise, scope, definition of done. |
 | `STRATEGY.md` | Strategic readiness gate, paper job, posture, decision usefulness, scope. |
-| `RESEARCH.json` | Canonical source registry, evidence matrix, synthesis, contradictions, gaps. |
+| `RESEARCH.json` | Canonical source registry, claim-support metadata, evidence matrix, synthesis, contradictions, gaps. |
 | `RESEARCH.md` | Short human-readable index to `RESEARCH.json`. |
 | `OUTLINE.md` | Argument architecture, reader journey, section architecture, evidence placement, objection handling. |
 | `DRAFT.md` | Current draft body, section drafting state, and draft notes. |

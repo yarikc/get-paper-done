@@ -444,6 +444,132 @@ function testFactCheckSafeSourceAlignmentWarnsOnMissingSources() {
   )));
 }
 
+function publicSourceFidelityResearch() {
+  return baseResearch({
+    research_plan: {
+      inferred_research_questions: [
+        {
+          id: 'RQ1',
+          question: 'Which public source directly supports the LLM prompt-injection claim?',
+          mapped_claims: ['C1'],
+          why_it_matters: 'The test distinguishes exact source support from topical relevance.',
+          planned_source_types: ['official', 'industry'],
+          search_queries: ['NIST AI RMF voluntary OWASP LLM prompt injection'],
+        },
+      ],
+      depth_rationale: 'Public-source fidelity test.',
+      source_mode_rationale: 'Uses stable public source records.',
+      user_feedback: 'None',
+    },
+    source_registry: [
+      {
+        id: 'S1',
+        title: 'NIST AI Risk Management Framework',
+        url_or_path: 'https://www.nist.gov/itl/ai-risk-management-framework',
+        source_type: 'official',
+        authority: 'high',
+        freshness: 'recent',
+        relevance: 'medium',
+        specificity: 'medium',
+        bias_or_agenda: 'Official framework source for AI risk management.',
+        stance: 'neutral',
+        claim_support: [
+          {
+            claim_id: 'C1',
+            support: 'topical_only',
+            rationale: 'Relevant to AI risk management generally, but not direct support for the LLM prompt-injection wording.',
+          },
+        ],
+        notes: 'Topically related public source.',
+      },
+      {
+        id: 'S2',
+        title: 'OWASP Top 10 for Large Language Model Applications',
+        url_or_path: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/',
+        source_type: 'industry',
+        authority: 'high',
+        freshness: 'recent',
+        relevance: 'high',
+        specificity: 'high',
+        bias_or_agenda: 'Security-practitioner project source.',
+        stance: 'supportive',
+        claim_support: [
+          {
+            claim_id: 'C1',
+            support: 'direct',
+            rationale: 'Directly identifies prompt injection as an LLM application risk.',
+          },
+        ],
+        notes: 'Direct public source for the prompt-injection claim.',
+      },
+    ],
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'Prompt injection is a security risk for large language model applications.',
+        claim_type: 'factual',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S1', 'S2'],
+        contradicting_sources: [],
+        strength_of_support: 'strong',
+        confidence: 'high',
+        recommended_handling: 'keep',
+        notes: 'S2 is direct support; S1 is topically related only and should not be used alone.',
+      },
+    ],
+    contradictions: [
+      {
+        claim_id: 'C1',
+        issue: 'One source is topically related but not exact support.',
+        source_ids: ['S1'],
+        handling: 'Use S2 for the exact claim.',
+      },
+    ],
+  });
+}
+
+function writePublicSourceFidelityFactCheck(paperDir, sourceIdsForSafeClaim) {
+  writeArtifact(paperDir, 'FACT-CHECK.md', [
+    '# Fact And Claims Check',
+    '',
+    '## Claim Inventory',
+    '',
+    '| Claim ID | Claim | Type | Location | Risk | Check Status |',
+    '|----------|-------|------|----------|------|--------------|',
+    '| FC1 | Prompt injection is a security risk for large language model applications. | factual | Section 1 | MEDIUM | checked |',
+    '',
+    '## Claims Safe To Keep',
+    '',
+    '| Claim ID | Claim | Why Safe | Source(s) |',
+    '|----------|-------|----------|-----------|',
+    `| FC1 | Prompt injection is a security risk for large language model applications. | Public source supports the wording. | ${sourceIdsForSafeClaim} |`,
+    '',
+  ].join('\n'));
+}
+
+function testPublicSourceTopicalOnlyCitationWarns() {
+  const paperDir = makePaper('semantic-public-source-topical-only');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', publicSourceFidelityResearch());
+  writePublicSourceFidelityFactCheck(paperDir, 'S1');
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('Safe-to-keep claim "FC1" cites S1')
+    && item.issue.includes('topical_only')
+  )));
+}
+
+function testPublicSourceDirectCitationPasses() {
+  const paperDir = makePaper('semantic-public-source-direct-pass');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', publicSourceFidelityResearch());
+  writePublicSourceFidelityFactCheck(paperDir, 'S2');
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('claim_support')));
+  assert(!issues.some((item) => item.issue.includes('topical_only')));
+}
+
 function testGenericRecommendationSpecificityWarns() {
   const paperDir = makePaper('semantic-recommendation-specificity');
   writeArtifact(paperDir, 'DRAFT.md', [
@@ -961,6 +1087,8 @@ testGenericAudienceConflictWarns();
 testFactCheckSafeSourceAlignmentWarns();
 testFactCheckSafeSourceAlignmentNormalizesTypeLabels();
 testFactCheckSafeSourceAlignmentWarnsOnMissingSources();
+testPublicSourceTopicalOnlyCitationWarns();
+testPublicSourceDirectCitationPasses();
 testGenericRecommendationSpecificityWarns();
 testNumberedRecommendationSpecificityWarns();
 testConcreteRecommendationSpecificityPasses();

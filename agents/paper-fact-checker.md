@@ -137,6 +137,7 @@ For each cited or source-backed claim:
 - check whether the source is primary, secondary, or weak
 - flag missing source IDs or ambiguous source references
 - flag cases where the draft uses stronger language than the source supports
+- when `RESEARCH.json` includes `source_registry[*].claim_support`, treat `topical_only`, `contradicts`, and `not_checked` as unsafe for `Claims Safe To Keep`
 
 For claims classified as `recommendation`, `strategic_judgment`, or `market_trend`, verify that cited sources support the specific recommendation or judgment, not merely the broad topic. A measurement recommendation cannot be marked safe using only architecture/mechanism documentation. A practitioner recommendation cannot be marked safe using only standards documents. If sources are only inferential support, say so, downgrade from "Safe To Keep" if needed, or route to stronger evidence/revision.
 

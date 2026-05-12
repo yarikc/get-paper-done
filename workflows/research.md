@@ -117,6 +117,7 @@ For each major claim, explicitly classify:
 - **Supporting evidence:** evidence that strengthens the claim
 - **Opposing evidence:** evidence that challenges, narrows, or complicates the claim
 - **Illustrative evidence:** examples or anecdotes useful for explanation but not sufficient as proof
+- **Claim-source fidelity:** whether each source directly supports the exact claim wording, partially supports it, is only topically related, contradicts it, or has not been checked
 - **Confidence:** high, medium, or low
 - **Implication:** how the evidence changes the thesis, caveats, or recommendations
 
