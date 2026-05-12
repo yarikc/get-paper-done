@@ -240,8 +240,9 @@ Completed reference workspaces are available under [examples](examples):
 
 - [examples/data-products-ai-scaling](examples/data-products-ai-scaling) shows a full internal strategy-paper flow from a clean paper workspace.
 - [examples/technology-lifecycle-management](examples/technology-lifecycle-management) shows an imported-paper recovery flow where the private source draft is withheld and the completed artifacts are anonymized.
+- [examples/weekly-platform-update](examples/weekly-platform-update) shows a lite internal update flow that intentionally skips research and fact-check artifacts when the paper is low-risk and does not make source-sensitive claims.
 
-Both examples include brief, strategy gate, research, outline, draft, fact-check, review, and export artifacts. They are included in the test suite: `tests/example-fixtures.test.js` validates semantic gates and completed-workflow routing on normalized checkout copies, and `npm run gate:examples` runs semantic validation across all example workspaces with zero warnings required.
+The examples are included in the test suite. `tests/example-fixtures.test.js` validates semantic gates and completed-workflow routing on normalized checkout copies, including the lite fixture's absence of research and fact-check artifacts. `npm run gate:examples` runs semantic validation across all example workspaces with zero warnings required.
 
 ## Core Artifacts
 

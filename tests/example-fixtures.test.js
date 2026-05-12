@@ -43,6 +43,7 @@ function normalizeWorkflowMtimes(paperDir) {
 
   orderedArtifacts.forEach((artifact, index) => {
     const artifactPath = path.join(paperDir, '.paper', artifact);
+    if (!fs.existsSync(artifactPath)) return;
     const time = new Date(base + index * 1000);
     fs.utimesSync(artifactPath, time, time);
   });
@@ -111,8 +112,26 @@ function testDataProductsExampleHasNoTrialOnlyArtifacts() {
   }
 }
 
+function testWeeklyPlatformUpdateKeepsLiteShape() {
+  const exampleDir = path.join(examplesRoot, 'weekly-platform-update');
+  assert(fs.existsSync(path.join(exampleDir, '.paper')));
+  assert(!fs.existsSync(path.join(exampleDir, '.paper', 'RESEARCH.json')));
+  assert(!fs.existsSync(path.join(exampleDir, '.paper', 'RESEARCH.md')));
+  assert(!fs.existsSync(path.join(exampleDir, '.paper', 'FACT-CHECK.md')));
+
+  const validation = JSON.parse(run(['validate', '--paper', exampleDir, '--semantic', '--json']));
+  assert.strictEqual(validation.ok, true);
+  assert.deepStrictEqual(validation.issues, []);
+
+  const config = JSON.parse(fs.readFileSync(path.join(exampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'lite');
+  assert.strictEqual(config.research.require_source_table, false);
+  assert.strictEqual(config.review.fact_check, false);
+}
+
 testExamplesValidateCleanly();
 testExamplesRouteToProgressAfterNormalizedCheckout();
 testDataProductsExampleHasNoTrialOnlyArtifacts();
+testWeeklyPlatformUpdateKeepsLiteShape();
 
 console.log('example fixture tests passed');

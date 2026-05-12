@@ -1,0 +1,24 @@
+{
+  "mode": "lite",
+  "paper_type": "update",
+  "default_length": {
+    "newsletter": "800-1200 words",
+    "blog": "1200-1800 words",
+    "position_paper": "1800-3000 words",
+    "white_paper": "3000-6000 words",
+    "update": "150-250 words",
+    "memo": "800-1200 words"
+  },
+  "citation_style": "none",
+  "research": {
+    "web_allowed": false,
+    "require_source_table": false,
+    "flag_unsupported_claims": false
+  },
+  "review": {
+    "audience_fit": true,
+    "opposition_review": false,
+    "fact_check": false,
+    "persona_consistency": true
+  }
+}

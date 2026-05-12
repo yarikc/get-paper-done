@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.0/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, two realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, and export-state detection are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, three realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, and export-state detection are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,7 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; clean-paper and imported-paper examples are now represented under `examples/` with regression coverage. The next slice is broader fixture diversity.
+- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, and lite update examples are now represented under `examples/` with regression coverage. The next slice is evidence-heavy fixture diversity.
 - `#1`: broader test/evaluation program; remains open until more fixture diversity and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
@@ -56,7 +56,8 @@ Next work should validate behavior under real use before adding more RFC surface
 9. Completed: ran a second paper with a different failure profile and pre-registered validation hypotheses before adding more same-example validators.
 10. Completed: built the anonymized control-paper fixture from the non-GPD lifecycle-paper sequence, preserving the failure pattern while removing identifying names, titles, companies, and local paths.
 11. Completed: added an anonymized imported-paper example at `examples/technology-lifecycle-management`.
-12. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, or Issue #5 hooks should come next.
+12. Completed: added a lite internal update example at `examples/weekly-platform-update` to prove low-risk papers do not need forced research or fact-check artifacts.
+13. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, Issue #5 hooks, or an evidence-heavy external example should come next.
 
 ## Completed Design Simplifications
 
@@ -80,6 +81,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added first-pass `gpd validate --semantic` gates for empty-but-well-formed artifact failures.
 - Added `examples/data-products-ai-scaling` plus regression coverage for a realistic completed clean-paper workspace.
 - Added `examples/technology-lifecycle-management` plus regression coverage for an anonymized imported-paper recovery workspace.
+- Added `examples/weekly-platform-update` plus regression coverage for a lite internal update workspace without research or fact-check artifacts.
 
 ---
 
