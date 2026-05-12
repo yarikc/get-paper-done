@@ -9,10 +9,10 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.0/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
+- Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, four realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, and controlled quantitative-claim semantic coverage are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, a full quantitative paper/example trial, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, five realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, and quantitative-claim semantic coverage are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, real public-source numerical citation fidelity, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,7 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, and evidence-heavy external examples are now represented under `examples/` with regression coverage. Controlled quantitative-claim semantic tests now exist; the remaining slice is a full quantitative paper/example trial.
+- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, and short quantitative examples are now represented under `examples/` with regression coverage. Remaining example diversity should focus on real public-source citation fidelity or messy import depth, not more synthetic numeric coverage.
 - `#1`: broader test/evaluation program; remains open until more fixture diversity and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
@@ -59,7 +59,8 @@ Next work should validate behavior under real use before adding more RFC surface
 12. Completed: added a lite internal update example at `examples/weekly-platform-update` to prove low-risk papers do not need forced research or fact-check artifacts.
 13. Completed: added an evidence-heavy external example at `examples/responsible-ai-controls` with synthetic source registry, counterevidence, fact-check, audience review, and bounded public claims.
 14. Completed: added controlled quantitative-claim semantic coverage and fact-check guidance so precise numbers require source IDs, baseline/denominator/timeframe context, and strong enough research support.
-15. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, Issue #5 hooks, or a full quantitative-claim example should come next.
+15. Completed: added `examples/platform-review-cycle-metrics`, a short synthetic quantitative memo that exercises baseline, sample, timeframe, source IDs, fact-check handling, review, export, and zero-warning semantic validation.
+16. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, Issue #5 hooks, real-source citation fidelity, or release hardening should come next.
 
 ## Completed Design Simplifications
 
@@ -86,6 +87,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added `examples/weekly-platform-update` plus regression coverage for a lite internal update workspace without research or fact-check artifacts.
 - Added `examples/responsible-ai-controls` plus regression coverage for an external evidence-heavy workspace with required research and fact-check artifacts.
 - Added `validateQuantitativeClaimSupport` with regression coverage for unsupported precise numerical claims and supported numerical claims with baseline, sample, timeframe, source IDs, and strong research support.
+- Added `examples/platform-review-cycle-metrics` plus regression coverage for a short quantitative internal memo with baseline, denominator, timeframe, and fact-check evidence shape.
 
 ---
 

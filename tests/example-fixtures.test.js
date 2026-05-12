@@ -11,6 +11,7 @@ const gpd = path.join(repoRoot, 'bin', 'gpd.js');
 const examplesRoot = path.join(repoRoot, 'examples');
 const dataProductsExampleDir = path.join(examplesRoot, 'data-products-ai-scaling');
 const responsibleAiExampleDir = path.join(examplesRoot, 'responsible-ai-controls');
+const quantitativeExampleDir = path.join(examplesRoot, 'platform-review-cycle-metrics');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -160,10 +161,48 @@ function testResponsibleAiControlsKeepsExternalEvidenceShape() {
   assert(factCheck.includes('/gpd-review'));
 }
 
+function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
+  assert(fs.existsSync(path.join(quantitativeExampleDir, '.paper', 'RESEARCH.json')));
+  assert(fs.existsSync(path.join(quantitativeExampleDir, '.paper', 'FACT-CHECK.md')));
+
+  const validation = JSON.parse(run(['validate', '--paper', quantitativeExampleDir, '--semantic', '--json']));
+  assert.strictEqual(validation.ok, true);
+  assert.deepStrictEqual(validation.issues, []);
+  assert.strictEqual(validation.next, '/gpd-progress');
+
+  const config = JSON.parse(fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'standard');
+  assert.strictEqual(config.classification.purpose, 'decision_memo');
+  assert.strictEqual(config.classification.risk, 'internal_high');
+  assert.strictEqual(config.review.fact_check, true);
+
+  const research = JSON.parse(fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
+  const strongMetricRows = research.evidence_matrix.filter((row) => (
+    row.claim_type === 'factual'
+    && row.strength_of_support === 'strong'
+    && row.recommended_handling === 'keep'
+    && row.claim.includes('sampled review packets')
+  ));
+  assert(strongMetricRows.length >= 2);
+  assert(research.claims_to_drop_or_reframe.some((item) => item.claim.includes('enterprise ROI')));
+
+  const factCheck = fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'FACT-CHECK.md'), 'utf8');
+  assert(factCheck.includes('## Quantitative Claims'));
+  assert(factCheck.includes('10 days to 7 days'));
+  assert(factCheck.includes('20 sampled review packets over one quarter'));
+  assert(factCheck.includes('The pilot proves enterprise ROI'));
+
+  const final = fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
+  assert(final.includes('30% reduction across 20 sampled review packets (S1, S2)'));
+  assert(final.includes('33% reduction across the same 20 sampled review packets over one quarter (S1, S3)'));
+  assert(!final.includes('proves enterprise ROI'));
+}
+
 testExamplesValidateCleanly();
 testExamplesRouteToProgressAfterNormalizedCheckout();
 testDataProductsExampleHasNoTrialOnlyArtifacts();
 testWeeklyPlatformUpdateKeepsLiteShape();
 testResponsibleAiControlsKeepsExternalEvidenceShape();
+testPlatformReviewCycleMetricsKeepsQuantitativeShape();
 
 console.log('example fixture tests passed');

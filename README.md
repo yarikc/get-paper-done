@@ -242,6 +242,7 @@ Completed reference workspaces are available under [examples](examples):
 - [examples/technology-lifecycle-management](examples/technology-lifecycle-management) shows an imported-paper recovery flow where the private source draft is withheld and the completed artifacts are anonymized.
 - [examples/weekly-platform-update](examples/weekly-platform-update) shows a lite internal update flow that intentionally skips research and fact-check artifacts when the paper is low-risk and does not make source-sensitive claims.
 - [examples/responsible-ai-controls](examples/responsible-ai-controls) shows an external, evidence-heavy explainer with flagship-style research, counterevidence, fact-check, audience review, and bounded publication claims.
+- [examples/platform-review-cycle-metrics](examples/platform-review-cycle-metrics) shows a short quantitative internal memo with baseline, sample, timeframe, source IDs, fact-check handling, and bounded numerical claims.
 
 The examples are included in the test suite. `tests/example-fixtures.test.js` validates semantic gates and completed-workflow routing on normalized checkout copies, including the lite fixture's absence of research and fact-check artifacts and the external fixture's required evidence path. `npm run gate:examples` runs semantic validation across all example workspaces with zero warnings required.
 

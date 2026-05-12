@@ -384,11 +384,11 @@ Tool acceptance:
 
 ## Current Ratings
 
-- Overall project: 8.9/10
-- Framework design: 9.1/10
+- Overall project: 9.1/10 as a writing framework; 8.6/10 as an installable private-repo tool
+- Framework design: 9.2/10
 - Installable tool maturity: 8.4/10
 - Documentation: 9.1/10
-- Test coverage: 9.4/10
+- Test coverage: 9.6/10
 - Release readiness: 7.8/10
 - `audience-reviewer`: 8.8/10 pending real multi-audience calibration
 - `paper-researcher`: 9.0/10 pending messy-import calibration
@@ -403,9 +403,8 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Add a quantitatively heavy example to validate numerical claims, source alignment, and fact-check handling beyond the controlled semantic gate tests.
+1. Add real public-source citation fidelity checks after the synthetic external and quantitative fixtures.
 2. Harden import based on real use, especially canonical draft selection and richer source extraction.
-3. Add real public-source citation fidelity checks after the synthetic external fixture.
+3. Add release/update documentation and compatibility policy.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
-5. Add release/update documentation and compatibility policy.
-6. Revisit agents after real-use calibration.
+5. Revisit agents after real-use calibration.
