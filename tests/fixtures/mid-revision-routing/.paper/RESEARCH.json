@@ -1,0 +1,159 @@
+{
+  "metadata": {
+    "topic": "Platform review cycle pilot",
+    "scope": "Synthetic internal decision memo fixture",
+    "depth": "standard",
+    "source_mode": "user_provided",
+    "created_at": "2026-05-12T12:00:00.000Z",
+    "updated_at": "2026-05-12T12:00:00.000Z"
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "Does separating decision-ready review from advisory intake reduce review-cycle time?",
+        "mapped_claims": ["C1"],
+        "why_it_matters": "The pilot should rest on cycle-time evidence, not preference.",
+        "planned_source_types": ["user_provided"],
+        "search_queries": ["synthetic review cycle packet sample"]
+      },
+      {
+        "id": "RQ2",
+        "question": "Does narrower intake reduce avoidable rework?",
+        "mapped_claims": ["C2"],
+        "why_it_matters": "The draft currently makes this claim more strongly than the evidence supports.",
+        "planned_source_types": ["user_provided"],
+        "search_queries": ["synthetic rework source follow up"]
+      }
+    ],
+    "depth_rationale": "The paper is an internal decision memo with meaningful operating consequences.",
+    "source_mode_rationale": "The fixture uses synthetic internal source identifiers only.",
+    "user_feedback": "Fact-check requires additional research for the rework claim."
+  },
+  "research_brief": {
+    "executive_summary": "Cycle-time evidence supports a bounded pilot; rework-reduction evidence is partial and needs follow-up.",
+    "key_findings": [
+      "Decision-ready packet reviews were faster in the synthetic sample.",
+      "Packet completeness improved in the synthetic sample.",
+      "Avoidable rework is plausible but not directly proven by the current sources."
+    ]
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "Synthetic Review Packet Sample",
+      "url_or_path": "synthetic://review-packets",
+      "source_type": "user_provided",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Synthetic fixture data created for tests.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "Contains cycle-time comparison for the synthetic packet sample."
+        },
+        {
+          "claim_id": "C2",
+          "support": "partial",
+          "rationale": "Mentions rework categories but does not prove avoided rework."
+        }
+      ],
+      "notes": "Use only as fixture evidence."
+    },
+    {
+      "id": "S2",
+      "title": "Synthetic Packet Completeness Log",
+      "url_or_path": "synthetic://packet-completeness",
+      "source_type": "user_provided",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Synthetic fixture data created for tests.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "Shows more complete packets in the synthetic pilot group."
+        },
+        {
+          "claim_id": "C2",
+          "support": "topical_only",
+          "rationale": "Completeness may relate to rework but does not directly measure it."
+        }
+      ],
+      "notes": "Supports packet completeness, not avoided rework."
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "Decision-ready packet review is faster than mixed advisory intake in the synthetic sample.",
+      "claim_type": "factual",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1", "S2"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Keep with sample qualifier."
+    },
+    {
+      "claim_id": "C2",
+      "claim": "The pilot will reduce avoidable rework.",
+      "claim_type": "causal",
+      "research_questions": ["RQ2"],
+      "supporting_sources": ["S1"],
+      "contradicting_sources": [],
+      "strength_of_support": "weak",
+      "confidence": "low",
+      "recommended_handling": "support_more",
+      "notes": "Needs additional research before revision or export."
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": ["cycle_time", "packet_quality", "rework_gap"],
+    "rows": [
+      {
+        "theme": "cycle_time",
+        "source_summaries": {
+          "S1": "Synthetic packet sample supports a cycle-time comparison.",
+          "S2": "Synthetic completeness log supports a related packet-quality signal."
+        },
+        "pattern": "agreement",
+        "implication": "The cycle-time claim can remain with scope qualifiers."
+      },
+      {
+        "theme": "rework_gap",
+        "source_summaries": {
+          "S1": "Mentions rework categories without direct avoided-rework measurement.",
+          "S2": "Is topical only for rework."
+        },
+        "pattern": "gap",
+        "implication": "The rework claim should route back to research."
+      }
+    ]
+  },
+  "contradictions": [],
+  "open_questions": [
+    "What source directly measures avoided rework after intake changes?"
+  ],
+  "draft_support_notes": [
+    "Keep cycle-time claims scoped to the synthetic sample.",
+    "Do not claim rework reduction until follow-up research exists."
+  ],
+  "facts_safe_to_use": [
+    "The synthetic sample supports a cycle-time comparison for decision-ready packets."
+  ],
+  "claims_to_soften": [
+    "The pilot may reduce avoidable rework if follow-up research supports the causal link."
+  ],
+  "claims_to_drop_or_reframe": [
+    "The pilot will reduce avoidable rework."
+  ]
+}

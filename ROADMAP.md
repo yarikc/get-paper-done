@@ -43,7 +43,7 @@ Current issue alignment:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-12 after adding failed-strategy-gate fixture to active scope.
+Last changed: 2026-05-12 after completing the mid-revision routing fixture.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -68,6 +68,7 @@ Plan-change rule:
 5. Completed: added `tests/fixtures/broken-semantic-paper/README.md` mapping intentional violations to semantic issue IDs.
 6. Completed: added a dedicated `technology-lifecycle-management` import-recovery test covering anonymization/source boundary, mixed-audience config, absence of committed source draft, clean semantic validation, and completed routing.
 7. Completed: added a failed-strategy-gate fixture that proves `Revise Before Drafting` blocks downstream progress and routes back to `/gpd-brief` with clear validation output.
+8. Completed: added a mid-revision routing fixture that proves downstream review/fact-check artifacts can route a paper backward for incremental repair without resetting the whole workflow.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -77,7 +78,6 @@ Plan-change rule:
 
 ### Deferred After This Cycle
 
-- Mid-revision fixture.
 - Longer-paper prose-saturation recalibration.
 - Live public-source verification on a real paper.
 - Release hardening beyond the package-boundary cleanup already completed.
@@ -134,6 +134,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added an explicit npm package allowlist plus `npm run pack:check` so private templates, RFC drafts, tests, feedback files, and local scratch files do not enter the installable package.
 - Added stable semantic issue IDs, backfilled claim-support metadata into the quantitative example, added quantitative expected findings, documented the broken semantic fixture, and added a dedicated imported-paper recovery test.
 - Added a failed-strategy-gate fixture plus regression test proving a blocked strategy state routes back to `/gpd-brief` and fails validation clearly without downstream artifacts.
+- Added a mid-revision routing fixture plus regression test proving fact-check can route a structurally valid paper back to `/gpd-research` while preserving downstream artifacts.
 
 ---
 

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "status": "Research Refresh Required",
+  "current_stage": "Research Refresh",
+  "last_completed_stage": "Review",
+  "last_activity": "2026-05-12T12:00:00.000Z",
+  "suggested_next_command": "/gpd-research",
+  "blocked_by": [
+    "fact-check source gap: avoided rework claim"
+  ],
+  "strategy": {
+    "status": "Go",
+    "blocking_issues": [],
+    "primary_blocker": "none",
+    "block_severity": "None",
+    "required_unblock_action": "none"
+  },
+  "feedback": {
+    "feedback_plan_status": "Not created",
+    "approved_handling": ""
+  },
+  "post_import_choices": []
+}
