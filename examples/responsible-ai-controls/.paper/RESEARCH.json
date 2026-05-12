@@ -1,0 +1,261 @@
+{
+  "metadata": {
+    "topic": "Responsible AI control evidence for external governance claims",
+    "scope": "Synthetic source pack for an external explainer about operating controls, evidence, exceptions, monitoring, and bounded public claims.",
+    "depth": "deep",
+    "source_mode": "synthetic_fixture",
+    "created_at": "2026-05-12T02:00:00.000Z",
+    "updated_at": "2026-05-12T02:00:00.000Z"
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "What evidence supports moving from responsible AI principles to operating controls?",
+        "mapped_claims": ["C1", "C2"],
+        "why_it_matters": "The paper must avoid generic principle language and show the operating mechanism.",
+        "planned_source_types": ["official", "industry", "academic"],
+        "search_queries": ["synthetic responsible AI controls principles operating evidence"]
+      },
+      {
+        "id": "RQ2",
+        "question": "What counterevidence warns that controls can become bureaucracy or fail in practice?",
+        "mapped_claims": ["C3"],
+        "why_it_matters": "External credibility depends on admitting the limits of control evidence.",
+        "planned_source_types": ["academic", "news", "analyst"],
+        "search_queries": ["synthetic AI governance controls bureaucracy failures"]
+      },
+      {
+        "id": "RQ3",
+        "question": "What first implementation step is practical for high-risk AI use cases?",
+        "mapped_claims": ["C4"],
+        "why_it_matters": "The recommendation must be concrete enough to guide action without becoming a full maturity model.",
+        "planned_source_types": ["industry", "analyst", "user_provided"],
+        "search_queries": ["synthetic AI governance claim control map high risk use cases"]
+      }
+    ],
+    "depth_rationale": "Deep research is required because the paper is external, source-sensitive, and likely to be read by technical and risk-aware audiences.",
+    "source_mode_rationale": "This committed fixture uses synthetic source records to exercise the workflow without relying on private or time-sensitive source material.",
+    "user_feedback": "Create an evidence-heavy external fixture that validates research, fact-check, counterevidence, and audience tension."
+  },
+  "research_brief": {
+    "executive_summary": "The synthetic source pack supports a bounded mechanism claim: responsible AI claims become more credible when principles are connected to owned controls, evidence artifacts, exception paths, monitoring signals, and review cadence. The pack also warns against overclaiming because controls can become stale, bureaucratic, or mismatched to risk.",
+    "key_findings": [
+      "Principles need operating evidence before external audiences can inspect behavior.",
+      "A minimum evidence set includes owners, artifacts, exception handling, monitoring, and review cadence.",
+      "Control evidence improves scrutiny but does not guarantee safe, compliant, or high-performing AI outcomes.",
+      "A narrow claim-to-control map for high-risk AI use cases is more practical than a broad documentation rollout."
+    ]
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "Synthetic Official AI Risk Management Framework",
+      "url_or_path": "synthetic://official/ai-risk-management-framework",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Framework source favors structured governance and risk management.",
+      "stance": "supportive",
+      "notes": "Supports controls, ownership, monitoring, documentation, and lifecycle review as governance mechanisms."
+    },
+    {
+      "id": "S2",
+      "title": "Synthetic Academic Review Of Responsible AI Control Failures",
+      "url_or_path": "synthetic://academic/responsible-ai-control-failures",
+      "source_type": "academic",
+      "authority": "medium",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Research source emphasizes failure modes and empirical caution.",
+      "stance": "critical",
+      "notes": "Warns that control programs can become symbolic, stale, or disconnected from actual model behavior."
+    },
+    {
+      "id": "S3",
+      "title": "Synthetic Industry Guide To AI Operating Controls",
+      "url_or_path": "synthetic://industry/ai-operating-controls-guide",
+      "source_type": "industry",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Practitioner source favors actionable implementation patterns.",
+      "stance": "supportive",
+      "notes": "Describes owner assignment, approval artifacts, exception logs, monitoring signals, and review cadence."
+    },
+    {
+      "id": "S4",
+      "title": "Synthetic Analyst Note On Public Trust And AI Governance Claims",
+      "url_or_path": "synthetic://analyst/public-ai-governance-claims",
+      "source_type": "analyst",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Analyst source emphasizes market scrutiny and trust.",
+      "stance": "mixed",
+      "notes": "Supports public credibility risk when claims are broad and evidence is hard to inspect."
+    },
+    {
+      "id": "S5",
+      "title": "Synthetic Control Evidence Pattern Library",
+      "url_or_path": "synthetic://user-provided/control-evidence-pattern-library",
+      "source_type": "user_provided",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Internal-style pattern library favors pragmatic implementation.",
+      "stance": "supportive",
+      "notes": "Supports the claim-to-control map recommendation and practical evidence examples."
+    },
+    {
+      "id": "S6",
+      "title": "Synthetic News Analysis Of AI Claims Challenged By Missing Evidence",
+      "url_or_path": "synthetic://news/ai-claims-missing-evidence",
+      "source_type": "news",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "medium",
+      "specificity": "medium",
+      "bias_or_agenda": "News source emphasizes public challenge and reputational consequences.",
+      "stance": "critical",
+      "notes": "Supports the risk of public overclaiming when evidence is not available or not shareable."
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "Responsible AI principles are not enough for public credibility.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1", "S4"],
+      "contradicting_sources": ["S2"],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "soften",
+      "notes": "Supported as credibility judgment, not as measured public-trust causality."
+    },
+    {
+      "claim_id": "C2",
+      "claim": "Control evidence should include ownership, review cadence, exception handling, and monitoring signals.",
+      "claim_type": "technical_mechanism",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1", "S3", "S5"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Strongest claim in the paper because it is mechanism-oriented."
+    },
+    {
+      "claim_id": "C3",
+      "claim": "Control evidence improves scrutiny but does not guarantee safe or compliant outcomes.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ2"],
+      "supporting_sources": ["S2", "S4", "S6"],
+      "contradicting_sources": ["S1"],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Critical sources support caveat; official framework source supports controls but not guarantees."
+    },
+    {
+      "claim_id": "C4",
+      "claim": "The first implementation step should be a claim-to-control map for the highest-risk AI use cases.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ3"],
+      "supporting_sources": ["S3", "S5"],
+      "contradicting_sources": ["S2"],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "caveat",
+      "notes": "Practical recommendation; should name candidate use cases and admit that mapping must expand over time."
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": ["principles_to_controls", "evidence_stack", "limits_and_bureaucracy", "first_step"],
+    "rows": [
+      {
+        "theme": "principles_to_controls",
+        "source_summaries": {
+          "S1": "Governance expectations need controls and lifecycle routines.",
+          "S4": "Public trust suffers when AI claims cannot be inspected."
+        },
+        "pattern": "agreement",
+        "implication": "The draft can argue that principles need operating evidence, but should use credibility language rather than certainty."
+      },
+      {
+        "theme": "evidence_stack",
+        "source_summaries": {
+          "S1": "Control ownership and monitoring matter.",
+          "S3": "Practical controls include owners, artifacts, exceptions, and review cadence.",
+          "S5": "Pattern library gives implementable evidence examples."
+        },
+        "pattern": "agreement",
+        "implication": "The minimum evidence set is defensible and should anchor the middle sections."
+      },
+      {
+        "theme": "limits_and_bureaucracy",
+        "source_summaries": {
+          "S2": "Controls fail when symbolic or stale.",
+          "S6": "Public claims are challenged when evidence is missing.",
+          "S1": "Structured controls remain useful when connected to risk."
+        },
+        "pattern": "mixed",
+        "implication": "The draft needs a bureaucracy objection and a residual-risk caveat."
+      },
+      {
+        "theme": "first_step",
+        "source_summaries": {
+          "S3": "Implementation should start with high-impact controls.",
+          "S5": "Claim-to-control mapping exposes evidence gaps.",
+          "S2": "Narrow mapping can miss systemic issues if not reviewed."
+        },
+        "pattern": "mixed",
+        "implication": "Recommend a first map, but add review cadence and expansion trigger."
+      }
+    ]
+  },
+  "contradictions": [
+    {
+      "claim_id": "C1",
+      "description": "S2 warns that formal control language can become symbolic if it is not connected to real delivery behavior.",
+      "handling": "Frame principles as necessary but insufficient, and avoid saying controls automatically create credibility."
+    },
+    {
+      "claim_id": "C4",
+      "description": "S2 warns that narrow use-case maps can miss systemic risks.",
+      "handling": "Recommend starting narrow while adding review cadence and expansion triggers."
+    }
+  ],
+  "open_questions": [
+    "Which control evidence can be safely disclosed externally?",
+    "What threshold moves an AI use case into the first mapping wave?",
+    "Who owns review when use-case context changes after launch?"
+  ],
+  "draft_support_notes": [
+    "Define control evidence near first use.",
+    "Use S1, S3, and S5 for mechanism claims.",
+    "Use S2 and S6 to keep caveats visible.",
+    "Do not claim legal compliance or safety guarantees."
+  ],
+  "facts_safe_to_use": [
+    "A minimum control-evidence set can include owner, artifact, exception path, monitoring signal, and review cadence.",
+    "Controls can fail when they are symbolic, stale, or disconnected from changing use-case risk.",
+    "A claim-to-control map is a practical first step for inspecting whether public claims have operating evidence."
+  ],
+  "claims_to_soften": [
+    "Control evidence makes responsible AI credible.",
+    "Organizations need a complete control-evidence stack.",
+    "Controls prove responsible AI."
+  ],
+  "claims_to_drop_or_reframe": [
+    "Any claim that a framework guarantees safe AI outcomes.",
+    "Any claim that the synthetic source pack establishes legal obligations."
+  ]
+}

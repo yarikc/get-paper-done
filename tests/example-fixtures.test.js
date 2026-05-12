@@ -10,6 +10,7 @@ const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
 const examplesRoot = path.join(repoRoot, 'examples');
 const dataProductsExampleDir = path.join(examplesRoot, 'data-products-ai-scaling');
+const responsibleAiExampleDir = path.join(examplesRoot, 'responsible-ai-controls');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -129,9 +130,40 @@ function testWeeklyPlatformUpdateKeepsLiteShape() {
   assert.strictEqual(config.review.fact_check, false);
 }
 
+function testResponsibleAiControlsKeepsExternalEvidenceShape() {
+  assert(fs.existsSync(path.join(responsibleAiExampleDir, '.paper', 'RESEARCH.json')));
+  assert(fs.existsSync(path.join(responsibleAiExampleDir, '.paper', 'RESEARCH.md')));
+  assert(fs.existsSync(path.join(responsibleAiExampleDir, '.paper', 'FACT-CHECK.md')));
+
+  const validation = JSON.parse(run(['validate', '--paper', responsibleAiExampleDir, '--semantic', '--json']));
+  assert.strictEqual(validation.ok, true);
+  assert.deepStrictEqual(validation.issues, []);
+  assert.strictEqual(validation.next, '/gpd-progress');
+
+  const config = JSON.parse(fs.readFileSync(path.join(responsibleAiExampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'flagship');
+  assert.strictEqual(config.classification.channel, 'external');
+  assert.strictEqual(config.classification.risk, 'external_high');
+  assert.strictEqual(config.research.require_source_table, true);
+  assert.strictEqual(config.review.fact_check, true);
+
+  const research = JSON.parse(fs.readFileSync(path.join(responsibleAiExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
+  const sourceTypes = new Set(research.source_registry.map((source) => source.source_type));
+  for (const expectedType of ['official', 'academic', 'industry', 'analyst', 'news', 'user_provided']) {
+    assert(sourceTypes.has(expectedType), `missing source type ${expectedType}`);
+  }
+  assert(research.evidence_matrix.some((row) => row.contradicting_sources.length > 0));
+  assert(research.claims_to_soften.length > 0);
+
+  const factCheck = fs.readFileSync(path.join(responsibleAiExampleDir, '.paper', 'FACT-CHECK.md'), 'utf8');
+  assert(factCheck.includes('## Claims To Soften'));
+  assert(factCheck.includes('/gpd-review'));
+}
+
 testExamplesValidateCleanly();
 testExamplesRouteToProgressAfterNormalizedCheckout();
 testDataProductsExampleHasNoTrialOnlyArtifacts();
 testWeeklyPlatformUpdateKeepsLiteShape();
+testResponsibleAiControlsKeepsExternalEvidenceShape();
 
 console.log('example fixture tests passed');

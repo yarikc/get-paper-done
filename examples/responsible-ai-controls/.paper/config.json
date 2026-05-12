@@ -1,0 +1,29 @@
+{
+  "mode": "flagship",
+  "paper_type": "explainer",
+  "classification": {
+    "purpose": "explainer",
+    "channel": "external",
+    "risk": "external_high",
+    "complexity": "deep",
+    "audience_shape": "prioritized_multi"
+  },
+  "default_length": {
+    "newsletter": "800-1200 words",
+    "blog": "1200-1800 words",
+    "position_paper": "1800-3000 words",
+    "white_paper": "3000-6000 words"
+  },
+  "citation_style": "source_ids",
+  "research": {
+    "web_allowed": false,
+    "require_source_table": true,
+    "flag_unsupported_claims": true
+  },
+  "review": {
+    "audience_fit": true,
+    "opposition_review": true,
+    "fact_check": true,
+    "persona_consistency": true
+  }
+}

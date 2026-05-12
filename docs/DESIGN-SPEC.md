@@ -385,10 +385,10 @@ Tool acceptance:
 ## Current Ratings
 
 - Overall project: 8.9/10
-- Framework design: 8.9/10
-- Installable tool maturity: 8.3/10
-- Documentation: 8.9/10
-- Test coverage: 9.1/10
+- Framework design: 9.1/10
+- Installable tool maturity: 8.4/10
+- Documentation: 9.1/10
+- Test coverage: 9.4/10
 - Release readiness: 7.8/10
 - `audience-reviewer`: 8.8/10 pending real multi-audience calibration
 - `paper-researcher`: 9.0/10 pending messy-import calibration
@@ -403,9 +403,9 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Run a real imported paper through the full workflow.
-2. Harden import based on real use.
-3. Add examples.
-4. Expand CLI validation and workflow consistency tests.
-5. Add release/update documentation.
+1. Add a quantitatively heavy example to validate numerical claims, source alignment, and fact-check handling.
+2. Harden import based on real use, especially canonical draft selection and richer source extraction.
+3. Add real public-source citation fidelity checks after the synthetic external fixture.
+4. Continue one-by-one agent calibration from completed examples and future real paper trials.
+5. Add release/update documentation and compatibility policy.
 6. Revisit agents after real-use calibration.
