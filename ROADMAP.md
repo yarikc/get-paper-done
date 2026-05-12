@@ -41,6 +41,47 @@ Current issue alignment:
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
+## Active Execution Plan: Cycle 6 Hardening
+
+Last changed: 2026-05-12
+
+This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
+
+Plan-change rule:
+
+- If scope changes, update this section with the new scope and reason.
+- If task order changes, update this section with the new order and reason.
+- If a task moves to a different issue, comment on both the old and new issue.
+- Do not use ignored `docs/feedback*.md` files as execution tracking. They are inputs, not the plan of record.
+
+### Owning Issues
+
+- `#6` owns semantic-validation hardening: semantic issue IDs and claim-support example backfill.
+- `#2` owns example and fixture hardening: pre-registration artifacts, fixture documentation, and dedicated example-shape tests.
+
+### Scope
+
+1. Completed: backfilled `source_registry[*].claim_support` into `examples/platform-review-cycle-metrics/.paper/RESEARCH.json`.
+2. Completed: added `examples/platform-review-cycle-metrics/EXPECTED-FINDINGS.md` to record the quantitative example's expected validator behavior.
+3. Completed: added stable semantic issue IDs to `gpd validate --semantic --json`.
+4. Completed: updated `tests/broken-fixture.test.js` to assert semantic issue IDs instead of prose substrings.
+5. Completed: added `tests/fixtures/broken-semantic-paper/README.md` mapping intentional violations to semantic issue IDs.
+6. Completed: added a dedicated `technology-lifecycle-management` import-recovery test covering anonymization/source boundary, mixed-audience config, absence of committed source draft, clean semantic validation, and completed routing.
+
+### Explicit Non-Goals For This Cycle
+
+- Do not implement RFC-3 or RFC-4.
+- Do not add new semantic quality heuristics unless the active plan changes first.
+- Do not commit ignored feedback files.
+
+### Deferred After This Cycle
+
+- Failed-strategy-gate fixture.
+- Mid-revision fixture.
+- Longer-paper prose-saturation recalibration.
+- Live public-source verification on a real paper.
+- Release hardening beyond the package-boundary cleanup already completed.
+
 ## Active Milestone: One-Paper Diagnostic And Examples
 
 Next work should validate behavior under real use before adding more RFC surface area.
@@ -91,6 +132,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added `examples/platform-review-cycle-metrics` plus regression coverage for a short quantitative internal memo with baseline, denominator, timeframe, and fact-check evidence shape.
 - Added `source_registry[*].claim_support` metadata and semantic coverage for public-source claim fidelity, including a topically related NIST source rejected for an OWASP-specific prompt-injection claim.
 - Added an explicit npm package allowlist plus `npm run pack:check` so private templates, RFC drafts, tests, feedback files, and local scratch files do not enter the installable package.
+- Added stable semantic issue IDs, backfilled claim-support metadata into the quantitative example, added quantitative expected findings, documented the broken semantic fixture, and added a dedicated imported-paper recovery test.
 
 ---
 

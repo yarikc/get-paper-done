@@ -3,8 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
-function issue(severity, artifact, message) {
-  return { severity, issue: `${artifact}: ${message}` };
+function issue(id, severity, artifact, message) {
+  return { id, severity, issue: `${artifact}: ${message}` };
 }
 
 function readIfExists(filePath) {
@@ -209,6 +209,7 @@ function validateProseSaturationInArtifact(paperDir, artifactName) {
   if (!hasLocalCluster && !hasArtifactDensity) return [];
 
   return [issue(
+    'semantic.prose_saturation',
     'MEDIUM',
     artifactName,
     'contains repeated list-heavy paragraphs across the artifact; revise saturated parallel structures into sharper causal or example-based prose',
@@ -227,11 +228,17 @@ function validateBriefClaimEvidence(paperDir) {
     if (!heading) continue;
     const evidence = parseMarkdownField(section, 'What evidence supports it');
     if (!evidence) {
-      issues.push(issue('HIGH', 'BRIEF.md', `${heading.replace(/^###\s*/, '')} is missing "What evidence supports it"`));
+      issues.push(issue(
+        'semantic.brief_claim_evidence_missing',
+        'HIGH',
+        'BRIEF.md',
+        `${heading.replace(/^###\s*/, '')} is missing "What evidence supports it"`,
+      ));
       continue;
     }
     if (hasSourceId(evidence) || isExplicitlyDeferred(evidence)) continue;
     issues.push(issue(
+      'semantic.brief_claim_evidence_stale',
       'HIGH',
       'BRIEF.md',
       `${heading.replace(/^###\s*/, '')} evidence field must cite source IDs like S1 or use [deferred: reason] after research exists`,
@@ -281,6 +288,7 @@ function validateStandaloneSourceSensitiveDraft(paperDir) {
   if (sourceSensitiveHits.length < 2 || strategicClaimHits.length < 2) return [];
 
   return [issue(
+    'semantic.standalone_source_sensitive_draft',
     'MEDIUM',
     'DRAFT.md',
     'source-sensitive imported draft has no RESEARCH.json, FACT-CHECK.md, or source IDs; run research/fact-check before treating regulatory, security, or operating-model claims as supported',
@@ -327,6 +335,7 @@ function validateMixedAudienceNeedsReview(paperDir) {
   if (!declaresMultipleAudiences) return [];
 
   return [issue(
+    'semantic.mixed_audience_needs_review',
     'MEDIUM',
     'AUDIENCE.md',
     'mixed-audience draft has no REVIEW.md; run audience review before treating audience fit or conflict handling as resolved',
@@ -390,6 +399,7 @@ function validateDefineBeforeReuseInDraft(paperDir) {
     if (occurrences.length < 4) continue;
     if (isDefinedNearFirstUse(draft, term, occurrences[0])) continue;
     issues.push(issue(
+      'semantic.define_before_reuse',
       'MEDIUM',
       'DRAFT.md',
       `recurring term "${term}" appears repeatedly before being defined; define it near first use or replace vague repetition with concrete meaning`,
@@ -417,6 +427,7 @@ function validateStrategyReasoningSpine(paperDir) {
     const coverage = tokenCoverage(item, thesis);
     if (itemIsSubstring || coverage >= 0.6) {
       issues.push(issue(
+        'semantic.strategy_reasoning_spine_restatement',
         'MEDIUM',
         'STRATEGY.md',
         `Reasoning Spine item "${item}" appears to decompose or restate the thesis instead of independently supporting it`,
@@ -463,6 +474,7 @@ function validateResearchSourceCoverage(paperDir) {
   const missing = [...planned].filter((sourceType) => !actual.has(sourceType));
   if (missing.length === 0) return [];
   return [issue(
+    'semantic.research_source_coverage',
     'MEDIUM',
     'RESEARCH.json',
     `planned source types missing from source_registry: ${missing.join(', ')}`,
@@ -488,6 +500,7 @@ function validateResearchCounterevidence(paperDir) {
   if (documentedReason) return [];
 
   return [issue(
+    'semantic.research_counterevidence_missing',
     'MEDIUM',
     'RESEARCH.json',
     'evidence_matrix has no contradicting_sources and contradictions does not document why counterevidence is unavailable',
@@ -510,6 +523,7 @@ function validateExportMetadataLeak(paperDir) {
   const leaks = forbidden.filter((pattern) => pattern.test(final));
   if (leaks.length === 0) return [];
   return [issue(
+    'semantic.export_metadata_leak',
     'HIGH',
     'exports/FINAL.md',
     'export contains internal metadata, draft notes, or unresolved authoring markers',
@@ -525,10 +539,16 @@ function validateStateDrift(paperDir) {
   const markdownNext = parseMarkdownField(stateMarkdown, 'Suggested next command');
   const issues = [];
   if (markdownStatus && parsed.data.status && markdownStatus !== parsed.data.status) {
-    issues.push(issue('HIGH', 'STATE.md', `Status "${markdownStatus}" does not match STATE.json status "${parsed.data.status}"`));
+    issues.push(issue(
+      'semantic.state_status_drift',
+      'HIGH',
+      'STATE.md',
+      `Status "${markdownStatus}" does not match STATE.json status "${parsed.data.status}"`,
+    ));
   }
   if (markdownNext && parsed.data.suggested_next_command && markdownNext !== parsed.data.suggested_next_command) {
     issues.push(issue(
+      'semantic.state_next_command_drift',
       'HIGH',
       'STATE.md',
       `Suggested next command "${markdownNext}" does not match STATE.json suggested_next_command "${parsed.data.suggested_next_command}"`,
@@ -554,6 +574,7 @@ function validateReviewRewriteInstructions(paperDir) {
     const instruction = row['Actionable Rewrite Instruction If 3 Or Below'] || '';
     if (!instruction || instruction === '-' || deferralOnlyInstruction.test(instruction)) {
       issues.push(issue(
+        'semantic.review_rewrite_instruction_missing',
         'HIGH',
         'REVIEW.md',
         `Audience Review Scorecard row "${row.Dimension || 'unknown'}" scores ${score} but lacks a concrete rewrite instruction`,
@@ -592,6 +613,7 @@ function validateRecommendationSpecificityInArtifact(paperDir, artifactName) {
   if (!recommendsUseCases || hasConcreteRecommendationExample(section)) return [];
 
   return [issue(
+    'semantic.recommendation_specificity',
     'MEDIUM',
     artifactName,
     'recommendation names use cases generically; add concrete candidate use cases, metrics, or failure signals',
@@ -639,6 +661,7 @@ function validateAudienceConflictSpecificity(paperDir) {
   return table.rows
     .filter((row) => isGenericConflict(row) && !hasConflictAnchor(row))
     .map((row) => issue(
+      'semantic.audience_conflict_specificity',
       'MEDIUM',
       'REVIEW.md',
       `Audience Conflict Table row "${row.Tension || 'unknown'}" is generic; anchor it to a claim ID, section, or draft phrase`,
@@ -696,6 +719,7 @@ function validateFactCheckSafeSourceAlignment(paperDir) {
     const citedSources = sourceIds(row['Source(s)']);
     if (citedSources.length === 0) {
       issues.push(issue(
+        'semantic.fact_check_safe_source_missing',
         'MEDIUM',
         'FACT-CHECK.md',
         `Safe-to-keep claim "${claimId}" has no source IDs`,
@@ -706,6 +730,7 @@ function validateFactCheckSafeSourceAlignment(paperDir) {
     const best = bestEvidenceMatch(row.Claim, parsed.data.evidence_matrix);
     if (!best.row || best.score < 0.35) {
       issues.push(issue(
+        'semantic.fact_check_safe_claim_no_match',
         'MEDIUM',
         'FACT-CHECK.md',
         `Safe-to-keep claim "${claimId}" does not map clearly to a RESEARCH.json evidence_matrix row`,
@@ -717,6 +742,7 @@ function validateFactCheckSafeSourceAlignment(paperDir) {
     const hasSupportingCitation = citedSources.some((sourceId) => supportingSources.includes(sourceId));
     if (!hasSupportingCitation) {
       issues.push(issue(
+        'semantic.fact_check_safe_source_alignment',
         'MEDIUM',
         'FACT-CHECK.md',
         `Safe-to-keep claim "${claimId}" cites sources that are not supporting_sources for the closest evidence_matrix claim "${best.row.claim_id || 'unknown'}"`,
@@ -759,6 +785,7 @@ function validateFactCheckClaimSupportMetadata(paperDir) {
       const supportEntry = claimSupportEntryFor(source, best.row.claim_id);
       if (!supportEntry) {
         issues.push(issue(
+          'semantic.fact_check_claim_support_missing',
           'MEDIUM',
           'FACT-CHECK.md',
           `Safe-to-keep claim "${row['Claim ID'] || 'unknown'}" cites ${sourceId}, but source_registry has no claim_support entry for evidence claim "${best.row.claim_id}"`,
@@ -768,6 +795,7 @@ function validateFactCheckClaimSupportMetadata(paperDir) {
 
       if (!['direct', 'partial'].includes(supportEntry.support)) {
         issues.push(issue(
+          'semantic.fact_check_claim_support_unsafe',
           'MEDIUM',
           'FACT-CHECK.md',
           `Safe-to-keep claim "${row['Claim ID'] || 'unknown'}" cites ${sourceId}, but source_registry marks support for evidence claim "${best.row.claim_id}" as ${supportEntry.support}`,
@@ -862,6 +890,7 @@ function validateQuantitativeClaimSupport(paperDir) {
 
     if (citedSources.length === 0) {
       issues.push(issue(
+        'semantic.quantitative_claim_no_sources',
         'MEDIUM',
         candidate.artifactName,
         `${label} lacks source IDs; cite the supporting source or move the number to fact-check/research before treating it as safe`,
@@ -870,6 +899,7 @@ function validateQuantitativeClaimSupport(paperDir) {
 
     if (hasComparativeQuantity(candidate.claim) && !hasQuantitativeContext(candidate.claim)) {
       issues.push(issue(
+        'semantic.quantitative_claim_missing_context',
         'MEDIUM',
         candidate.artifactName,
         `${label} lacks baseline, denominator, timeframe, or comparison context`,
@@ -881,6 +911,7 @@ function validateQuantitativeClaimSupport(paperDir) {
     const best = bestEvidenceMatch(candidate.claim, evidenceRows);
     if (!best.row || best.score < 0.25) {
       issues.push(issue(
+        'semantic.quantitative_claim_no_evidence_match',
         'MEDIUM',
         candidate.artifactName,
         `${label} does not map clearly to a RESEARCH.json evidence_matrix row`,
@@ -892,6 +923,7 @@ function validateQuantitativeClaimSupport(paperDir) {
     const hasSupportingCitation = citedSources.some((sourceId) => supportingSources.includes(sourceId));
     if (!hasSupportingCitation) {
       issues.push(issue(
+        'semantic.quantitative_claim_source_alignment',
         'MEDIUM',
         candidate.artifactName,
         `${label} cites sources that are not supporting_sources for the closest evidence_matrix claim "${best.row.claim_id || 'unknown'}"`,
@@ -904,6 +936,7 @@ function validateQuantitativeClaimSupport(paperDir) {
       || ['support_more', 'soften', 'narrow', 'caveat', 'drop'].includes(handling);
     if (weakSupport) {
       issues.push(issue(
+        'semantic.quantitative_claim_weak_support',
         'MEDIUM',
         candidate.artifactName,
         `${label} uses precise numerical wording while RESEARCH.json marks closest evidence "${best.row.claim_id || 'unknown'}" as ${best.row.strength_of_support || 'unknown'} support / ${best.row.recommended_handling || 'unknown'} handling`,
@@ -915,6 +948,7 @@ function validateQuantitativeClaimSupport(paperDir) {
       .filter((source) => source && ['old', 'unknown'].includes(source.freshness));
     if (staleSources.length > 0) {
       issues.push(issue(
+        'semantic.quantitative_claim_stale_source',
         'MEDIUM',
         candidate.artifactName,
         `${label} cites old or unknown-freshness source IDs for a numerical claim: ${staleSources.map((source) => source.id).join(', ')}`,

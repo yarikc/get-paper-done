@@ -388,8 +388,8 @@ Tool acceptance:
 - Framework design: 9.2/10
 - Installable tool maturity: 8.4/10
 - Documentation: 9.1/10
-- Test coverage: 9.6/10
-- Release readiness: 7.8/10
+- Test coverage: 9.7/10
+- Release readiness: 8.1/10
 - `audience-reviewer`: 8.8/10 pending real multi-audience calibration
 - `paper-researcher`: 9.0/10 pending messy-import calibration
 - `paper-strategist`: 9.1/10 pending real-use calibration
@@ -403,7 +403,7 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Run live public-source citation verification on a real paper now that deterministic claim-support metadata exists.
+1. Run live public-source citation verification on a real paper now that deterministic claim-support metadata exists and is demonstrated in the quantitative example.
 2. Harden import based on real use, especially canonical draft selection and richer source extraction.
 3. Add release/update documentation and compatibility policy.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.

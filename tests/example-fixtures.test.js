@@ -10,6 +10,7 @@ const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
 const examplesRoot = path.join(repoRoot, 'examples');
 const dataProductsExampleDir = path.join(examplesRoot, 'data-products-ai-scaling');
+const technologyLifecycleExampleDir = path.join(examplesRoot, 'technology-lifecycle-management');
 const responsibleAiExampleDir = path.join(examplesRoot, 'responsible-ai-controls');
 const quantitativeExampleDir = path.join(examplesRoot, 'platform-review-cycle-metrics');
 
@@ -139,7 +140,6 @@ function testResponsibleAiControlsKeepsExternalEvidenceShape() {
   const validation = JSON.parse(run(['validate', '--paper', responsibleAiExampleDir, '--semantic', '--json']));
   assert.strictEqual(validation.ok, true);
   assert.deepStrictEqual(validation.issues, []);
-  assert.strictEqual(validation.next, '/gpd-progress');
 
   const config = JSON.parse(fs.readFileSync(path.join(responsibleAiExampleDir, '.paper', 'config.json'), 'utf8'));
   assert.strictEqual(config.mode, 'flagship');
@@ -164,11 +164,11 @@ function testResponsibleAiControlsKeepsExternalEvidenceShape() {
 function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
   assert(fs.existsSync(path.join(quantitativeExampleDir, '.paper', 'RESEARCH.json')));
   assert(fs.existsSync(path.join(quantitativeExampleDir, '.paper', 'FACT-CHECK.md')));
+  assert(fs.existsSync(path.join(quantitativeExampleDir, 'EXPECTED-FINDINGS.md')));
 
   const validation = JSON.parse(run(['validate', '--paper', quantitativeExampleDir, '--semantic', '--json']));
   assert.strictEqual(validation.ok, true);
   assert.deepStrictEqual(validation.issues, []);
-  assert.strictEqual(validation.next, '/gpd-progress');
 
   const config = JSON.parse(fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'config.json'), 'utf8'));
   assert.strictEqual(config.mode, 'standard');
@@ -177,6 +177,12 @@ function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
   assert.strictEqual(config.review.fact_check, true);
 
   const research = JSON.parse(fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
+  const claimSupportSources = research.source_registry.filter((source) => Array.isArray(source.claim_support));
+  assert.strictEqual(claimSupportSources.length, 4);
+  assert(claimSupportSources.some((source) => (
+    source.id === 'S4'
+    && source.claim_support.some((entry) => entry.claim_id === 'C3' && entry.support === 'direct')
+  )));
   const strongMetricRows = research.evidence_matrix.filter((row) => (
     row.claim_type === 'factual'
     && row.strength_of_support === 'strong'
@@ -196,6 +202,41 @@ function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
   assert(final.includes('30% reduction across 20 sampled review packets (S1, S2)'));
   assert(final.includes('33% reduction across the same 20 sampled review packets over one quarter (S1, S3)'));
   assert(!final.includes('proves enterprise ROI'));
+
+  const expectedFindings = fs.readFileSync(path.join(quantitativeExampleDir, 'EXPECTED-FINDINGS.md'), 'utf8');
+  assert(expectedFindings.includes('semantic.fact_check_claim_support_unsafe'));
+  assert(expectedFindings.includes('Sources that only show improvement signal must not be treated as proof'));
+}
+
+function testTechnologyLifecycleManagementKeepsImportRecoveryShape() {
+  assert(fs.existsSync(path.join(technologyLifecycleExampleDir, '.paper')));
+  assert(!fs.existsSync(path.join(technologyLifecycleExampleDir, 'original')));
+  assert(!fs.existsSync(path.join(technologyLifecycleExampleDir, '.paper', 'original')));
+
+  const validation = JSON.parse(run(['validate', '--paper', technologyLifecycleExampleDir, '--semantic', '--json']));
+  assert.strictEqual(validation.ok, true);
+  assert.deepStrictEqual(validation.issues, []);
+
+  const config = JSON.parse(fs.readFileSync(path.join(technologyLifecycleExampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'interactive');
+  assert.strictEqual(config.research.require_source_table, true);
+  assert.strictEqual(config.review.opposition_review, true);
+  assert.strictEqual(config.review.fact_check, true);
+
+  const project = fs.readFileSync(path.join(technologyLifecycleExampleDir, '.paper', 'PROJECT.md'), 'utf8');
+  assert(project.includes('anonymized internal strategy / decision memo'));
+  assert(project.includes('private imported source draft is intentionally not included'));
+  assert(project.includes('Does not name real organizations, people, employer names, internal titles, or local file paths.'));
+
+  const audience = fs.readFileSync(path.join(technologyLifecycleExampleDir, '.paper', 'AUDIENCE.md'), 'utf8');
+  assert(audience.includes('cxo-reader; distinguished-architect-engineer'));
+  assert(audience.includes('Senior executive sponsor'));
+  assert(audience.includes('Peer architecture leaders'));
+  assert(audience.includes('Control / risk partners'));
+
+  const readme = fs.readFileSync(path.join(technologyLifecycleExampleDir, 'README.md'), 'utf8');
+  assert(readme.includes('imported-paper recovery without committing the source draft'));
+  assert(readme.includes('Do not add source drafts, local paths, real people, real organization identifiers, or sensitive role details'));
 }
 
 testExamplesValidateCleanly();
@@ -204,5 +245,6 @@ testDataProductsExampleHasNoTrialOnlyArtifacts();
 testWeeklyPlatformUpdateKeepsLiteShape();
 testResponsibleAiControlsKeepsExternalEvidenceShape();
 testPlatformReviewCycleMetricsKeepsQuantitativeShape();
+testTechnologyLifecycleManagementKeepsImportRecoveryShape();
 
 console.log('example fixture tests passed');

@@ -51,7 +51,29 @@
       "specificity": "high",
       "bias_or_agenda": "Internal pilot log may favor operational improvement narrative.",
       "stance": "supportive",
-      "notes": "Records 20 sampled review packets over one quarter, with baseline and endpoint cycle time and rework counts."
+      "notes": "Records 20 sampled review packets over one quarter, with baseline and endpoint cycle time and rework counts.",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "Contains the sampled packet count, one-quarter window, and cycle-time baseline and endpoint."
+        },
+        {
+          "claim_id": "C2",
+          "support": "direct",
+          "rationale": "Contains the same sample and the rework baseline and endpoint."
+        },
+        {
+          "claim_id": "C3",
+          "support": "contradicts",
+          "rationale": "Shows improvement signals that could be overread if not bounded by the caution source."
+        },
+        {
+          "claim_id": "C4",
+          "support": "partial",
+          "rationale": "Supports continuing the pilot, but not the exact named next-quarter categories by itself."
+        }
+      ]
     },
     {
       "id": "S2",
@@ -64,7 +86,19 @@
       "specificity": "high",
       "bias_or_agenda": "Operational extract captures queue timing but not downstream outcome quality.",
       "stance": "supportive",
-      "notes": "Supports review cycle time moving from 10 days to 7 days over the pilot sample."
+      "notes": "Supports review cycle time moving from 10 days to 7 days over the pilot sample.",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "Confirms the queue timing movement from 10 days to 7 days."
+        },
+        {
+          "claim_id": "C3",
+          "support": "contradicts",
+          "rationale": "Could be misused to imply broader proof if cited without the caution source."
+        }
+      ]
     },
     {
       "id": "S3",
@@ -77,7 +111,19 @@
       "specificity": "medium",
       "bias_or_agenda": "Practitioner-style metric review emphasizes process signal.",
       "stance": "supportive",
-      "notes": "Supports average rework items moving from 6 to 4 per packet in the same sample."
+      "notes": "Supports average rework items moving from 6 to 4 per packet in the same sample.",
+      "claim_support": [
+        {
+          "claim_id": "C2",
+          "support": "direct",
+          "rationale": "Supports the rework movement as a process metric."
+        },
+        {
+          "claim_id": "C4",
+          "support": "partial",
+          "rationale": "Supports continuing the pilot as a process-learning step, but not broad rollout."
+        }
+      ]
     },
     {
       "id": "S4",
@@ -90,7 +136,29 @@
       "specificity": "medium",
       "bias_or_agenda": "Cautionary source emphasizes sampling limits and repeatability risk.",
       "stance": "critical",
-      "notes": "Warns that a one-quarter pilot should not be converted into enterprise ROI, compliance, or benchmark claims."
+      "notes": "Warns that a one-quarter pilot should not be converted into enterprise ROI, compliance, or benchmark claims.",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "partial",
+          "rationale": "Supports keeping the cycle-time claim bounded to the pilot sample."
+        },
+        {
+          "claim_id": "C2",
+          "support": "partial",
+          "rationale": "Supports keeping the rework claim bounded to the pilot sample."
+        },
+        {
+          "claim_id": "C3",
+          "support": "direct",
+          "rationale": "Directly supports the caveat against ROI, compliance, or benchmark claims."
+        },
+        {
+          "claim_id": "C4",
+          "support": "direct",
+          "rationale": "Supports a controlled continuation rather than broad rollout."
+        }
+      ]
     }
   ],
   "evidence_matrix": [
