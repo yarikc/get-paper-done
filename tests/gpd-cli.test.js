@@ -8,6 +8,7 @@ const { execFileSync, spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
+const { slugify } = require('../bin/lib/common');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -240,14 +241,17 @@ function testSingleMarkdownImportIsCanonicalDraft() {
 }
 
 function testImportWithoutSlugUsesSourceName() {
-  const source = tempDir('gpd-import-source-name');
+  const sourceRoot = tempDir('gpd-import-source-name');
+  const source = path.join(sourceRoot, 'MixedCase Source Folder');
+  fs.mkdirSync(source);
   fs.writeFileSync(path.join(source, 'draft.md'), '# Draft\n\nCurrent text.\n');
 
   const target = tempDir('gpd-import-source-name-target');
   run(['import', '--source', source, '--location', target]);
 
-  const expected = path.join(target, path.basename(source));
+  const expected = path.join(target, slugify(path.basename(source)));
   assert(fs.existsSync(path.join(expected, '.paper', 'IMPORT.md')));
+  assert(!fs.existsSync(path.join(target, path.basename(source), '.paper', 'IMPORT.md')));
   assert(!fs.existsSync(path.join(target, '.paper')));
 }
 
