@@ -26,6 +26,12 @@
 |----------|----------|-------|-------|-----------------|-----------|-----------------|-------------------|
 | HIGH | FC1 | [claim] | [issue] | [supported/unsupported/stale/overstated/contradicted/needs_current_verification] | [S1/url/path or "-"] | [fix] | [wording or "-"] |
 
+## Quantitative Claims
+
+| Claim ID | Metric Or Number | Baseline / Denominator / Timeframe | Source(s) | Support Strength | Handling |
+|----------|------------------|------------------------------------|-----------|------------------|----------|
+| FC1 | [number, percentage, range, benchmark, cost, timing, or multiplier] | [baseline, denominator, sample, comparison window, or "-"] | [S1/url/path or "-"] | [strong/moderate/weak/none] | [keep/soften/narrow/caveat/remove/verify] |
+
 ## Claims Safe To Keep
 
 | Claim ID | Claim | Why Safe | Source(s) |

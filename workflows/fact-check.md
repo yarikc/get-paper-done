@@ -47,6 +47,8 @@ Use web research only when allowed by `.paper/config.json` and only for current,
 
 Evaluate each checked claim for support status, freshness, precision, context integrity, risk, and quantitative integrity. Do not treat a citation as sufficient unless it supports the specific wording of the claim.
 
+For numerical, statistical, benchmark, percentage, cost, ROI, timing, or multiplier claims, fill `Quantitative Claims` in `.paper/FACT-CHECK.md`. Record the metric, baseline or denominator, comparison window or timeframe, source IDs, support strength, and handling. Route back to `/gpd-research` when the number needs evidence, and to `/gpd-revise` when the evidence supports only a softer or narrower claim.
+
 For `source_registry` entries and cited source IDs, verify that URLs or file paths resolve to the intended source when practical. Record stale, redirected-to-wrong-page, inaccessible, or mismatched source links in `Source Alignment Notes` or `Source Gaps`, even if the draft prose itself is otherwise supportable.
 
 After claim-level checking, add a synthesis integrity assessment:

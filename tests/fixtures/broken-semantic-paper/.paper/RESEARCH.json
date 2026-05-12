@@ -53,6 +53,18 @@
       "confidence": "medium",
       "recommended_handling": "keep",
       "notes": "Mechanism support only."
+    },
+    {
+      "claim_id": "C2",
+      "claim": "The workflow may reduce review cycle time directionally.",
+      "claim_type": "factual",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1"],
+      "contradicting_sources": [],
+      "strength_of_support": "weak",
+      "confidence": "low",
+      "recommended_handling": "soften",
+      "notes": "The source does not support a precise percentage or baseline."
     }
   ],
   "synthesis_matrix": {

@@ -764,6 +764,75 @@ function testLowRepetitionTermDoesNotRequireDefinition() {
   assert(!issues.some((item) => item.issue.includes('appears repeatedly before being defined')));
 }
 
+function testQuantitativeOverclaimWarns() {
+  const paperDir = makePaper('semantic-quantitative-overclaim');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch({
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'The review workflow may reduce cycle time in a small pilot.',
+        claim_type: 'factual',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S1'],
+        contradicting_sources: ['S2'],
+        strength_of_support: 'weak',
+        confidence: 'low',
+        recommended_handling: 'soften',
+        notes: 'The source supports directional improvement, not a precise percentage claim.',
+      },
+    ],
+  }));
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'The pilot reduced review cycle time by 40% (S1).',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('quantitative claim lacks baseline')
+  )));
+  assert(issues.some((item) => (
+    item.severity === 'MEDIUM'
+    && item.issue.includes('precise numerical wording')
+  )));
+}
+
+function testQuantitativeClaimPassesWithContextAndStrongSupport() {
+  const paperDir = makePaper('semantic-quantitative-pass');
+  writeJsonArtifact(paperDir, 'RESEARCH.json', baseResearch({
+    evidence_matrix: [
+      {
+        claim_id: 'C1',
+        claim: 'In the synthetic pilot, review cycle time fell from ten days to seven days, a thirty percent reduction across twenty sampled reviews over one quarter.',
+        claim_type: 'factual',
+        research_questions: ['RQ1'],
+        supporting_sources: ['S1'],
+        contradicting_sources: ['S2'],
+        strength_of_support: 'strong',
+        confidence: 'high',
+        recommended_handling: 'keep',
+        notes: 'The source includes baseline, endpoint, sample, and measurement window.',
+      },
+    ],
+  }));
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'In the synthetic pilot, review cycle time fell from 10 days to 7 days, a 30% reduction across 20 sampled reviews over one quarter (S1).',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('quantitative claim')));
+}
+
 function testBriefEvidencePlaceholdersFailAfterResearch() {
   const paperDir = makePaper('semantic-brief-stale');
   writeBrief(paperDir, 'Needs research across official sources.');
@@ -908,5 +977,7 @@ testPlaceholderAudienceTemplateDoesNotRequireReview();
 testRecurringTermWarnsWhenNotDefinedNearFirstUse();
 testRecurringTermPassesWhenDefinedNearFirstUse();
 testLowRepetitionTermDoesNotRequireDefinition();
+testQuantitativeOverclaimWarns();
+testQuantitativeClaimPassesWithContextAndStrongSupport();
 
 console.log('semantic gate tests passed');

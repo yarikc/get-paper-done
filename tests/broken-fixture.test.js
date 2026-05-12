@@ -29,5 +29,7 @@ assert(issues.some((item) => item.includes('recommendation names use cases gener
 assert(issues.some((item) => item.includes('contains repeated list-heavy paragraphs')));
 assert(issues.some((item) => item.includes('Audience Conflict Table row')));
 assert(issues.some((item) => item.includes('Safe-to-keep claim "FC1" has no source IDs')));
+assert(issues.some((item) => item.includes('quantitative claim lacks baseline')));
+assert(issues.some((item) => item.includes('precise numerical wording')));
 
 console.log('broken fixture tests passed');

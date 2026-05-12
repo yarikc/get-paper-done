@@ -403,7 +403,7 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Add a quantitatively heavy example to validate numerical claims, source alignment, and fact-check handling.
+1. Add a quantitatively heavy example to validate numerical claims, source alignment, and fact-check handling beyond the controlled semantic gate tests.
 2. Harden import based on real use, especially canonical draft selection and richer source extraction.
 3. Add real public-source citation fidelity checks after the synthetic external fixture.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.

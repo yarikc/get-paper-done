@@ -160,6 +160,10 @@ function sourceIds(value) {
   return [...String(value || '').matchAll(/\bS\d+\b/g)].map((match) => match[0]);
 }
 
+function uniqueSourceIds(value) {
+  return [...new Set(sourceIds(value))];
+}
+
 function paragraphBlocks(markdown) {
   return String(markdown || '')
     .split(/\n\s*\n/)
@@ -653,6 +657,11 @@ function bestEvidenceMatch(claim, evidenceRows) {
   return best;
 }
 
+function sourceRegistryById(research) {
+  const sources = research && Array.isArray(research.source_registry) ? research.source_registry : [];
+  return new Map(sources.map((source) => [source.id, source]));
+}
+
 function normalizeClaimType(value) {
   return normalizeText(value).replace(/\s+/g, '_');
 }
@@ -718,6 +727,152 @@ function validateFactCheckSafeSourceAlignment(paperDir) {
   return issues;
 }
 
+const quantitativePatterns = [
+  /\b\d+(?:\.\d+)?\s*(?:-|–|to)\s*\d+(?:\.\d+)?\s*(?:%|percent|percentage points?)(?![a-z])/i,
+  /\b\d+(?:\.\d+)?\s*(?:%|percent|percentage points?)(?![a-z])/i,
+  /\$\s*\d+(?:[\d,.]*)(?:\s*(?:k|m|b|thousand|million|billion))?\b/i,
+  /\b\d+(?:\.\d+)?\s*(?:x|times)\b/i,
+  /\b(?:reduced|reduce|reduces|cut|cuts|saved|saves|faster|slower|increase|increased|decrease|decreased|improved|improves|fell|rose|lowered|raised)\b[^.!?\n]{0,120}\b\d+(?:\.\d+)?\s*(?:days?|weeks?|months?|hours?)\b/i,
+  /\b\d+(?:\.\d+)?\s*(?:days?|weeks?|months?|hours?)\b[^.!?\n]{0,120}\b(?:reduced|reduce|reduces|cut|cuts|saved|saves|faster|slower|increase|increased|decrease|decreased|improved|improves|fell|rose|lowered|raised)\b/i,
+];
+
+function hasQuantitativeClaim(value) {
+  return quantitativePatterns.some((pattern) => pattern.test(String(value || '')));
+}
+
+function hasComparativeQuantity(value) {
+  const text = String(value || '');
+  return /(?:%|percent|percentage points?|\b\d+(?:\.\d+)?\s*(?:x|times)\b)/i.test(text)
+    || /\b(?:reduced|reduce|reduces|cut|cuts|saved|saves|faster|slower|increase|increased|decrease|decreased|improved|improves|fell|rose|lowered|raised)\b/i.test(text);
+}
+
+function hasQuantitativeContext(value) {
+  return /\b(?:from|to|baseline|denominator|sample|sampled|n\s*=|across|over|per|compared with|compared to|versus|vs\.?|relative to|against|timeframe|period|window|quarter|year|month|week|cohort|population)\b/i.test(String(value || ''))
+    || /\bof\s+\d+\b/i.test(String(value || ''));
+}
+
+function sentenceLikeClaims(markdown) {
+  return String(markdown || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line && !/^#/.test(line) && !/^\|/.test(line));
+}
+
+function quantitativeClaimsFromArtifact(markdown) {
+  return sentenceLikeClaims(markdown).filter(hasQuantitativeClaim);
+}
+
+function quantitativeSafeClaimsFromFactCheck(factCheck) {
+  const safe = parseFirstTable(sectionBetween(factCheck, '## Claims Safe To Keep'));
+  return safe.rows
+    .filter((row) => hasQuantitativeClaim(row.Claim))
+    .map((row) => ({
+      artifactName: 'FACT-CHECK.md',
+      claim: row.Claim,
+      sourceText: row['Source(s)'],
+      label: `Safe-to-keep quantitative claim "${row['Claim ID'] || 'unknown'}"`,
+    }));
+}
+
+function quantitativeClaimsFromDraftArtifact(paperDir, artifactName) {
+  const markdown = readIfExists(metaPath(paperDir, artifactName));
+  if (!markdown) return [];
+  return quantitativeClaimsFromArtifact(markdown).map((claim) => ({
+    artifactName,
+    claim,
+    sourceText: claim,
+    label: 'quantitative claim',
+  }));
+}
+
+function validateQuantitativeClaimSupport(paperDir) {
+  const parsed = readJsonIfExists(metaPath(paperDir, 'RESEARCH.json'));
+  const research = parsed.data || {};
+  const evidenceRows = Array.isArray(research.evidence_matrix) ? research.evidence_matrix : [];
+  const sourcesById = sourceRegistryById(research);
+  const factCheck = readIfExists(metaPath(paperDir, 'FACT-CHECK.md'));
+  const candidates = [
+    ...quantitativeClaimsFromDraftArtifact(paperDir, 'DRAFT.md'),
+    ...quantitativeClaimsFromDraftArtifact(paperDir, 'exports/FINAL.md'),
+    ...(factCheck ? quantitativeSafeClaimsFromFactCheck(factCheck) : []),
+  ];
+  const issues = [];
+  const seen = new Set();
+
+  for (const candidate of candidates) {
+    const dedupeKey = `${candidate.artifactName}:${normalizeText(candidate.claim)}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    const citedSources = uniqueSourceIds(candidate.sourceText);
+    const label = candidate.label;
+
+    if (citedSources.length === 0) {
+      issues.push(issue(
+        'MEDIUM',
+        candidate.artifactName,
+        `${label} lacks source IDs; cite the supporting source or move the number to fact-check/research before treating it as safe`,
+      ));
+    }
+
+    if (hasComparativeQuantity(candidate.claim) && !hasQuantitativeContext(candidate.claim)) {
+      issues.push(issue(
+        'MEDIUM',
+        candidate.artifactName,
+        `${label} lacks baseline, denominator, timeframe, or comparison context`,
+      ));
+    }
+
+    if (evidenceRows.length === 0 || citedSources.length === 0) continue;
+
+    const best = bestEvidenceMatch(candidate.claim, evidenceRows);
+    if (!best.row || best.score < 0.25) {
+      issues.push(issue(
+        'MEDIUM',
+        candidate.artifactName,
+        `${label} does not map clearly to a RESEARCH.json evidence_matrix row`,
+      ));
+      continue;
+    }
+
+    const supportingSources = Array.isArray(best.row.supporting_sources) ? best.row.supporting_sources : [];
+    const hasSupportingCitation = citedSources.some((sourceId) => supportingSources.includes(sourceId));
+    if (!hasSupportingCitation) {
+      issues.push(issue(
+        'MEDIUM',
+        candidate.artifactName,
+        `${label} cites sources that are not supporting_sources for the closest evidence_matrix claim "${best.row.claim_id || 'unknown'}"`,
+      ));
+    }
+
+    const strength = normalizeClaimType(best.row.strength_of_support);
+    const handling = normalizeClaimType(best.row.recommended_handling);
+    const weakSupport = ['weak', 'none'].includes(strength)
+      || ['support_more', 'soften', 'narrow', 'caveat', 'drop'].includes(handling);
+    if (weakSupport) {
+      issues.push(issue(
+        'MEDIUM',
+        candidate.artifactName,
+        `${label} uses precise numerical wording while RESEARCH.json marks closest evidence "${best.row.claim_id || 'unknown'}" as ${best.row.strength_of_support || 'unknown'} support / ${best.row.recommended_handling || 'unknown'} handling`,
+      ));
+    }
+
+    const staleSources = citedSources
+      .map((sourceId) => sourcesById.get(sourceId))
+      .filter((source) => source && ['old', 'unknown'].includes(source.freshness));
+    if (staleSources.length > 0) {
+      issues.push(issue(
+        'MEDIUM',
+        candidate.artifactName,
+        `${label} cites old or unknown-freshness source IDs for a numerical claim: ${staleSources.map((source) => source.id).join(', ')}`,
+      ));
+    }
+  }
+
+  return issues;
+}
+
 function validateSemanticPaper(paperDir) {
   return [
     ...validateBriefClaimEvidence(paperDir),
@@ -736,6 +891,7 @@ function validateSemanticPaper(paperDir) {
     ...validateProseSaturationInArtifact(paperDir, 'exports/FINAL.md'),
     ...validateAudienceConflictSpecificity(paperDir),
     ...validateFactCheckSafeSourceAlignment(paperDir),
+    ...validateQuantitativeClaimSupport(paperDir),
   ];
 }
 

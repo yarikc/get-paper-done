@@ -103,6 +103,8 @@ Evaluate each claim across these dimensions:
 - **Risk:** whether the claim could create legal, regulatory, reputational, competitor, product, public-figure, or credibility issues if challenged.
 - **Quantitative integrity:** whether numbers add up, denominators and baselines are clear, and comparisons are mathematically or logically valid.
 
+For every numerical, statistical, benchmark, percentage, cost, ROI, timing, or multiplier claim, record the metric in `Quantitative Claims`. A quantitative claim is not safe merely because a source ID is present. It needs the specific source, support strength, baseline or denominator, comparison window or timeframe when relevant, and a handling decision.
+
 Flag:
 
 - unsupported factual claims
@@ -114,6 +116,7 @@ Flag:
 - claims that confuse evidence with interpretation
 - claims that are technically true but misleading in context
 - statistics without clear denominator, baseline, timeframe, or source
+- precise numerical wording when the supporting evidence is weak, directional, stale, caveated, or marked `support_more`, `soften`, `narrow`, `caveat`, or `drop` in `RESEARCH.json`
 - conclusions that rely on claims marked weak, partial, stale, or unsupported
 - claims already marked `claims_to_soften` or `claims_to_drop_or_reframe`
 
@@ -209,6 +212,12 @@ Return markdown:
 | Severity | Claim ID | Claim | Issue | Evidence Status | Source(s) | Recommended Fix | Suggested Wording |
 |----------|----------|-------|-------|-----------------|-----------|-----------------|-------------------|
 | HIGH | FC1 | [claim] | [issue] | [supported/unsupported/stale/overstated/contradicted/needs_current_verification] | [S1/url/path or "-"] | [fix] | [wording or "-"] |
+
+## Quantitative Claims
+
+| Claim ID | Metric Or Number | Baseline / Denominator / Timeframe | Source(s) | Support Strength | Handling |
+|----------|------------------|------------------------------------|-----------|------------------|----------|
+| FC1 | [number, percentage, range, benchmark, cost, timing, or multiplier] | [baseline, denominator, sample, comparison window, or "-"] | [S1/url/path or "-"] | [strong/moderate/weak/none] | [keep/soften/narrow/caveat/remove/verify] |
 
 ## Claims Safe To Keep
 
