@@ -51,6 +51,7 @@ function draftTitleAndBody(draftMarkdown, fallbackTitle) {
   const lines = draftMarkdown.split(/\r?\n/);
   let title = fallbackTitle || null;
   const output = [];
+  const hasDraftBody = lines.some((rawLine) => rawLine.trim() === '## Draft Body');
   let inDraftBody = false;
   let sawDraftBody = false;
   let inWorkingTitle = false;
@@ -80,6 +81,10 @@ function draftTitleAndBody(draftMarkdown, fallbackTitle) {
 
     if (line.startsWith('## Draft Notes') || line.startsWith('## Draft Markers') || line.startsWith('## Draft Source Anchors')) {
       break;
+    }
+
+    if (hasDraftBody && !inDraftBody) {
+      continue;
     }
 
     if (line.startsWith('## Section Intent Map')) {

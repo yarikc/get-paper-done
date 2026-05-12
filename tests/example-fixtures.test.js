@@ -8,7 +8,8 @@ const { execFileSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
-const exampleDir = path.join(repoRoot, 'examples', 'data-products-ai-scaling');
+const examplesRoot = path.join(repoRoot, 'examples');
+const dataProductsExampleDir = path.join(examplesRoot, 'data-products-ai-scaling');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -47,26 +48,37 @@ function normalizeWorkflowMtimes(paperDir) {
   });
 }
 
-function testDataProductsExampleValidatesCleanly() {
-  const validation = JSON.parse(run(['validate', '--paper', exampleDir, '--semantic', '--json']));
-  assert.strictEqual(validation.ok, true);
-  assert.deepStrictEqual(validation.issues, []);
+function examplePaperDirs() {
+  return fs.readdirSync(examplesRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => path.join(examplesRoot, entry.name))
+    .filter((dir) => fs.existsSync(path.join(dir, '.paper')));
 }
 
-function testDataProductsExampleRoutesToProgressAfterNormalizedCheckout() {
-  const dir = tempDir('gpd-example-fixture');
-  const copiedExample = path.join(dir, 'data-products-ai-scaling');
-  fs.cpSync(exampleDir, copiedExample, { recursive: true });
-  normalizeWorkflowMtimes(copiedExample);
+function testExamplesValidateCleanly() {
+  for (const exampleDir of examplePaperDirs()) {
+    const validation = JSON.parse(run(['validate', '--paper', exampleDir, '--semantic', '--json']));
+    assert.strictEqual(validation.ok, true, `${exampleDir} should validate`);
+    assert.deepStrictEqual(validation.issues, [], `${exampleDir} should not have semantic warnings`);
+  }
+}
 
-  const status = JSON.parse(run(['status', '--paper', copiedExample, '--json']));
-  assert.strictEqual(status.next, '/gpd-progress');
+function testExamplesRouteToProgressAfterNormalizedCheckout() {
+  for (const exampleDir of examplePaperDirs()) {
+    const dir = tempDir('gpd-example-fixture');
+    const copiedExample = path.join(dir, path.basename(exampleDir));
+    fs.cpSync(exampleDir, copiedExample, { recursive: true });
+    normalizeWorkflowMtimes(copiedExample);
+
+    const status = JSON.parse(run(['status', '--paper', copiedExample, '--json']));
+    assert.strictEqual(status.next, '/gpd-progress', `${exampleDir} should route to progress`);
+  }
 }
 
 function testDataProductsExampleHasNoTrialOnlyArtifacts() {
-  assert(!fs.existsSync(path.join(exampleDir, '.paper', 'FRICTION-LOG.md')));
+  assert(!fs.existsSync(path.join(dataProductsExampleDir, '.paper', 'FRICTION-LOG.md')));
 
-  const final = fs.readFileSync(path.join(exampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
+  const final = fs.readFileSync(path.join(dataProductsExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
   for (const forbidden of [
     '## Internal',
     '## Draft',
@@ -87,7 +99,7 @@ function testDataProductsExampleHasNoTrialOnlyArtifacts() {
     'OUTLINE.md',
     'DRAFT.md',
     'FACT-CHECK.md',
-  ].map((artifact) => fs.readFileSync(path.join(exampleDir, '.paper', artifact), 'utf8')).join('\n');
+  ].map((artifact) => fs.readFileSync(path.join(dataProductsExampleDir, '.paper', artifact), 'utf8')).join('\n');
 
   for (const forbidden of [
     'diagnostic trial',
@@ -99,8 +111,8 @@ function testDataProductsExampleHasNoTrialOnlyArtifacts() {
   }
 }
 
-testDataProductsExampleValidatesCleanly();
-testDataProductsExampleRoutesToProgressAfterNormalizedCheckout();
+testExamplesValidateCleanly();
+testExamplesRouteToProgressAfterNormalizedCheckout();
 testDataProductsExampleHasNoTrialOnlyArtifacts();
 
 console.log('example fixture tests passed');

@@ -236,9 +236,12 @@ The framework package is not the paper workspace. Paper-specific state and sourc
 
 ## Examples
 
-A completed reference workspace is available at [examples/data-products-ai-scaling](examples/data-products-ai-scaling).
+Completed reference workspaces are available under [examples](examples):
 
-It shows a full internal strategy-paper flow with brief, strategy gate, research, outline, draft, fact-check, review, and export artifacts. The example is included in the test suite: `tests/example-fixtures.test.js` validates semantic gates, export cleanliness, and completed-workflow routing on a normalized checkout copy. `npm run gate:examples` runs semantic validation across all example workspaces and requires zero warnings.
+- [examples/data-products-ai-scaling](examples/data-products-ai-scaling) shows a full internal strategy-paper flow from a clean paper workspace.
+- [examples/technology-lifecycle-management](examples/technology-lifecycle-management) shows an imported-paper recovery flow where the private source draft is withheld and the completed artifacts are anonymized.
+
+Both examples include brief, strategy gate, research, outline, draft, fact-check, review, and export artifacts. They are included in the test suite: `tests/example-fixtures.test.js` validates semantic gates and completed-workflow routing on normalized checkout copies, and `npm run gate:examples` runs semantic validation across all example workspaces with zero warnings required.
 
 ## Core Artifacts
 

@@ -312,6 +312,67 @@ function testExportCommandWritesFinalAndState() {
   assert.strictEqual(status.next, '/gpd-progress');
 }
 
+function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
+  const dir = tempDir('gpd-export-body-test');
+  run(['init', '--location', dir, '--slug', 'body-export', '--title', 'Body Export']);
+  const paperDir = path.join(dir, 'body-export');
+  const meta = path.join(paperDir, '.paper');
+
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), [
+    '# Draft',
+    '',
+    '**Status:** Draft',
+    '**Version:** v1',
+    '',
+    '## Working Definitions',
+    '',
+    '- **Internal term:** Should not export.',
+    '',
+    '## Section Intent Map',
+    '',
+    '| Section | Objective |',
+    '|---------|-----------|',
+    '| Opening | Test |',
+    '',
+    '## Draft Body',
+    '',
+    '## Opening',
+    '',
+    'Exported body.',
+    '',
+    '## Draft Notes',
+    '',
+    '- Internal note.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+
+  run(['export', '--paper', paperDir]);
+
+  const final = fs.readFileSync(path.join(meta, 'exports', 'FINAL.md'), 'utf8');
+  assert(final.includes('# Body Export'));
+  assert(final.includes('## Opening'));
+  assert(final.includes('Exported body.'));
+  assert(!final.includes('Working Definitions'));
+  assert(!final.includes('Internal term'));
+  assert(!final.includes('Section Intent Map'));
+  assert(!final.includes('Draft Notes'));
+}
+
 function testExportCommandRequiresReadyReview() {
   const dir = tempDir('gpd-export-not-ready-test');
   run(['init', '--location', dir, '--slug', 'not-ready', '--title', 'Not Ready']);
@@ -410,6 +471,7 @@ testImportClassifications();
 testSingleMarkdownImportIsCanonicalDraft();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
+testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();
 testMalformedInputs();
