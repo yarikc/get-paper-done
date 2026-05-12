@@ -43,7 +43,7 @@ Current issue alignment:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-12
+Last changed: 2026-05-12 after adding failed-strategy-gate fixture to active scope.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -57,7 +57,7 @@ Plan-change rule:
 ### Owning Issues
 
 - `#6` owns semantic-validation hardening: semantic issue IDs and claim-support example backfill.
-- `#2` owns example and fixture hardening: pre-registration artifacts, fixture documentation, and dedicated example-shape tests.
+- `#2` owns example and fixture hardening: pre-registration artifacts, fixture documentation, dedicated example-shape tests, and workflow-state fixtures.
 
 ### Scope
 
@@ -67,6 +67,7 @@ Plan-change rule:
 4. Completed: updated `tests/broken-fixture.test.js` to assert semantic issue IDs instead of prose substrings.
 5. Completed: added `tests/fixtures/broken-semantic-paper/README.md` mapping intentional violations to semantic issue IDs.
 6. Completed: added a dedicated `technology-lifecycle-management` import-recovery test covering anonymization/source boundary, mixed-audience config, absence of committed source draft, clean semantic validation, and completed routing.
+7. Completed: added a failed-strategy-gate fixture that proves `Revise Before Drafting` blocks downstream progress and routes back to `/gpd-brief` with clear validation output.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -76,7 +77,6 @@ Plan-change rule:
 
 ### Deferred After This Cycle
 
-- Failed-strategy-gate fixture.
 - Mid-revision fixture.
 - Longer-paper prose-saturation recalibration.
 - Live public-source verification on a real paper.
@@ -133,6 +133,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added `source_registry[*].claim_support` metadata and semantic coverage for public-source claim fidelity, including a topically related NIST source rejected for an OWASP-specific prompt-injection claim.
 - Added an explicit npm package allowlist plus `npm run pack:check` so private templates, RFC drafts, tests, feedback files, and local scratch files do not enter the installable package.
 - Added stable semantic issue IDs, backfilled claim-support metadata into the quantitative example, added quantitative expected findings, documented the broken semantic fixture, and added a dedicated imported-paper recovery test.
+- Added a failed-strategy-gate fixture plus regression test proving a blocked strategy state routes back to `/gpd-brief` and fails validation clearly without downstream artifacts.
 
 ---
 

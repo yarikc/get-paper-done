@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "status": "Blocked",
+  "current_stage": "Strategy Gate",
+  "last_completed_stage": "Brief",
+  "last_activity": "2026-05-12T12:00:00.000Z",
+  "suggested_next_command": "/gpd-brief",
+  "blocked_by": [
+    "strategy block: thesis_weak"
+  ],
+  "strategy": {
+    "status": "Revise Before Drafting",
+    "blocking_issues": [
+      "thesis_weak",
+      "audience_unclear",
+      "missing_outcome"
+    ],
+    "primary_blocker": "thesis_weak",
+    "block_severity": "High",
+    "required_unblock_action": "brief_revision"
+  },
+  "feedback": {
+    "feedback_plan_status": "Not created",
+    "approved_handling": ""
+  },
+  "post_import_choices": []
+}
