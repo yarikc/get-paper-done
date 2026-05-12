@@ -14,6 +14,12 @@ It shows the lightweight end of the workflow:
 
 The point is to demonstrate that GPD can support terse status-oriented writing without forcing the full research / fact-check path used by higher-stakes strategy papers.
 
+## Known Limitations
+
+- Synthetic operating status only; it does not prove behavior on a real weekly update stream.
+- No research or fact-check path is exercised by design.
+- It does not test multi-audience tension, external claims, or quantitative evidence.
+
 ## Privacy Boundary
 
 This example is synthetic and anonymized. It contains no real people, organization names, employer names, local paths, or private source material.

@@ -37,7 +37,7 @@ Current issue alignment:
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
 - `#8`: closed cycle-3 example and semantic-warning calibration; it added example-wide semantic gates, recommendation specificity, list-heavy prose warnings, and compact broken-fixture coverage.
-- `#9`: second-paper trial with pre-registered hypotheses; produced the anonymized imported-paper example and an exporter bug fix.
+- `#9`: second-paper trial; produced the anonymized imported-paper example and an exporter bug fix. Pre-registration was not captured as a formal artifact, so the run is useful but weaker as calibration evidence.
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
@@ -53,7 +53,7 @@ Next work should validate behavior under real use before adding more RFC surface
 6. Completed: converted the next feedback pass into prompt rules, semantic gates, and example repairs for reasoning spine, audience conflict specificity, fact-check/source alignment, and concrete recommendations.
 7. Completed: added example-wide semantic gate script, compact broken semantic fixture, recommendation-specificity warnings, list-heavy prose warnings, and cleaned the completed example opening prose.
 8. Completed: feedback-4 prep expanded the example README, tightened artifact-level prose-density warnings, repaired the completed example, and tracked the second-paper trial in GitHub.
-9. Completed: ran a second paper with a different failure profile and pre-registered validation hypotheses before adding more same-example validators.
+9. Completed: ran a second paper with a different failure profile before adding more same-example validators. Gap: hypotheses were discussed but not captured as a formal pre-registration artifact.
 10. Completed: built the anonymized control-paper fixture from the non-GPD lifecycle-paper sequence, preserving the failure pattern while removing identifying names, titles, companies, and local paths.
 11. Completed: added an anonymized imported-paper example at `examples/technology-lifecycle-management`.
 12. Completed: added a lite internal update example at `examples/weekly-platform-update` to prove low-risk papers do not need forced research or fact-check artifacts.
