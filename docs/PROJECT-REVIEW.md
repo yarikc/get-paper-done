@@ -9,7 +9,7 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 **Overall: 9.1/10 as a writing framework; 8.6/10 as an installable private-repo tool**
 
-Get Paper Done is now past the initial credibility threshold as a writing workflow framework. The project has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, five realistic completed example workspaces, semantic gates calibrated from multiple paper shapes, a short quantitative example that exercises metric support from research through fact-check and export, and deterministic public-source claim-support metadata checks. The lifecycle imported-paper run also found and fixed a real exporter bug, which is the kind of result expected from useful trial work.
+Get Paper Done is now past the initial credibility threshold as a writing workflow framework. The project has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, five realistic completed example workspaces, semantic gates calibrated from multiple paper shapes, a short quantitative example that exercises metric support from research through fact-check and export, deterministic public-source claim-support metadata checks, and package-boundary hygiene tests. The lifecycle imported-paper run also found and fixed a real exporter bug, which is the kind of result expected from useful trial work.
 
 It is still not a 9/10 installable tool. Import remains preservation-first rather than extraction-rich, external review is still prompt/workflow-driven rather than a wrapped CLI capability, and the private-repo install path still depends on local package linking rather than a release/update policy. The framework quality is stronger than the packaging story.
 
@@ -21,7 +21,7 @@ It is still not a 9/10 installable tool. Import remains preservation-first rathe
 | Installable tool maturity | 8.4/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`, and export now has a regression test for pre-body draft sections. Missing external-review runner, richer import extraction, and local package/release hardening. |
 | Documentation | 9.1/10 | README now explains the core idea, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and clean/imported/lite/external examples. Still needs a guided walkthrough. |
 | Test coverage | 9.6/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, example-wide semantic validation, compact broken semantic fixture coverage, and five realistic completed example fixtures. Still needs live public-source citation verification on a real paper. |
-| Release readiness | 7.8/10 | Package metadata, changelog, CI, license, dry-run install checks, and package dry-run are in place. Needs release checklist, versioning/update compatibility policy, and a tighter public/private distribution story. |
+| Release readiness | 8.1/10 | Package metadata, changelog, CI, license, dry-run install checks, package dry-run, and an explicit package allowlist are in place. Needs release checklist, versioning/update compatibility policy, and a tighter public/private distribution story. |
 
 ## What Works
 
@@ -44,6 +44,7 @@ It is still not a 9/10 installable tool. Import remains preservation-first rathe
 - `examples/platform-review-cycle-metrics` gives users and tests a short quantitative internal memo with baseline, sample, timeframe, source IDs, fact-check, review, and bounded export claims.
 - The completed examples are covered by semantic validation and normalized-checkout routing tests.
 - The exporter now correctly ignores pre-body draft sections when `## Draft Body` exists.
+- The npm package now has an explicit allowlist and package hygiene test, so ignored feedback files, RFC drafts, tests, and private profile templates do not enter the installable package.
 - Import is preservation-first and does not silently convert or overwrite downstream artifacts.
 - The strategy gate gives the system a useful way to stop weak papers before research or drafting.
 - The README now explains the actual user workflow instead of only listing commands.
@@ -74,6 +75,7 @@ Commands run during review:
 ```bash
 npm test
 npm run check
+npm run pack:check
 ```
 
-Both passed after the lifecycle imported-paper example, exporter fix, lite update fixture, and evidence-heavy external fixture.
+All passed after the package-boundary cleanup.

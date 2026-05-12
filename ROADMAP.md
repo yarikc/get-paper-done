@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, five realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, and deterministic public-source claim-support metadata checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, live public-source citation verification, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, five realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, deterministic public-source claim-support metadata checks, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, live public-source citation verification, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -90,6 +90,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added `validateQuantitativeClaimSupport` with regression coverage for unsupported precise numerical claims and supported numerical claims with baseline, sample, timeframe, source IDs, and strong research support.
 - Added `examples/platform-review-cycle-metrics` plus regression coverage for a short quantitative internal memo with baseline, denominator, timeframe, and fact-check evidence shape.
 - Added `source_registry[*].claim_support` metadata and semantic coverage for public-source claim fidelity, including a topically related NIST source rejected for an OWASP-specific prompt-injection claim.
+- Added an explicit npm package allowlist plus `npm run pack:check` so private templates, RFC drafts, tests, feedback files, and local scratch files do not enter the installable package.
 
 ---
 
@@ -490,7 +491,7 @@ Install/update now works from the current local package, but release mechanics a
 
 Needed:
 
-- changelog file and release notes convention
+- release notes convention
 - version bump process
 - release checklist
 - documented update path: pull or install new package, then `gpd update claude` / `gpd update codex`
@@ -499,7 +500,6 @@ Needed:
 
 Deliverables:
 
-- `CHANGELOG.md`
 - release checklist in docs
 - package versioning guidance
 - update verification checklist

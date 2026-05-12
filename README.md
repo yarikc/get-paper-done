@@ -441,6 +441,12 @@ gpd update codex
 
 Update rewrites framework-owned files from the current package, writes `get-paper-done/INSTALL-MANIFEST.json`, and backs up changed installed files under `get-paper-done/.backups/`. It does not touch paper workspaces, and custom audience/profile files with names not shipped by GPD are left in place.
 
+## Package Boundary
+
+The npm package is an installable framework bundle, not a dump of every repo file. It includes the CLI, commands, workflows, agents, templates, references, curated audiences/profiles, docs, and examples.
+
+It intentionally excludes tests, RFC design drafts, ignored feedback files, local scratch files, and private paper/profile material. `npm run pack:check` verifies the package file list before release-style handoff.
+
 ## Documentation
 
 | Doc | What's in it |
