@@ -2,14 +2,14 @@
 
 Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
 
-Last reviewed: 2026-05-12
+Last reviewed: 2026-05-13
 
 This file is the forward plan. The current ratings, risk snapshot, and review findings live in [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). When the review changes, update that snapshot first and adjust this roadmap only when the plan itself changes.
 
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
+- Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-13
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
 The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, six realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, messy-import fixture coverage, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
@@ -41,9 +41,9 @@ Current issue alignment:
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
 
-## Main Line Before RFC-5
+## Main Line Preserved During RFC-5 Detour
 
-RFC-5 identifies a real onboarding and product-story gap, but it must not displace the pre-existing main line. Before any broad README/onboarding rewrite, the plan of record remains:
+RFC-5 identifies a real onboarding and product-story gap, and a bounded documentation detour is allowed because the pre-existing main line is now explicitly recorded. After that detour, the plan of record remains:
 
 1. Run one more realistic paper calibration using public sources only.
 2. Pre-register the calibration before the run: paper purpose, channel, risk, complexity, audience shape, source set, expected failure modes, and what would count as a useful result.
@@ -60,7 +60,7 @@ Owning issues:
 
 Deferred until after the main-line calibration unless explicitly reprioritized:
 
-- RFC-5 README/onboarding/product-story implementation.
+- RFC-5 work beyond the bounded README/product-story and `docs/START-HERE.md` cleanup.
 - RFC-3 and RFC-4 visual/chart work.
 - RFC-1 later phases and RFC-2.1 intake changes.
 - Issue #5 hook/event runtime.
@@ -68,7 +68,7 @@ Deferred until after the main-line calibration unless explicitly reprioritized:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-12 after adding messy-import fixture coverage.
+Last changed: 2026-05-13 after preserving the public-source calibration main line and allowing only a bounded RFC-5 documentation detour.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -133,7 +133,7 @@ Next work should validate behavior under real use before adding more RFC surface
 15. Completed: added `examples/platform-review-cycle-metrics`, a short synthetic quantitative memo that exercises baseline, sample, timeframe, source IDs, fact-check handling, review, export, and zero-warning semantic validation.
 16. Completed: added structured `source_registry[*].claim_support` metadata plus semantic coverage that rejects safe claims citing sources recorded as only topically related.
 17. Completed: added `examples/public-ai-control-baseline`, a compact public-source decision memo that uses verified NIST, OWASP, and NCSC/CISA sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
-18. Next main-line slice: pre-register and run one more realistic public-source paper calibration before adopting RFC-5 or adding more synthetic fixtures. Use the run to decide whether the next concrete fix belongs in prompt guidance, artifact contracts, semantic validators, examples/tests, import behavior, external review, release hardening, RFC-1 later phases, RFC-2.1 intake, or Issue #5 hooks.
+18. Next main-line slice: pre-register and run one more realistic public-source paper calibration before any additional RFC-5 work or more synthetic fixtures. Use the run to decide whether the next concrete fix belongs in prompt guidance, artifact contracts, semantic validators, examples/tests, import behavior, external review, release hardening, RFC-1 later phases, RFC-2.1 intake, or Issue #5 hooks.
 
 ## Completed Design Simplifications
 

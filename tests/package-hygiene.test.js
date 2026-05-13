@@ -28,6 +28,7 @@ for (const requiredPath of [
   'LICENSE',
   'package.json',
   'bin/gpd.js',
+  'docs/START-HERE.md',
   'commands/gpd/new-paper.md',
   'workflows/new-paper.md',
   'agents/paper-strategist.md',

@@ -1,7 +1,7 @@
 # Project Review
 
-Review date: 2026-05-12
-Last reviewed: 2026-05-12
+Review date: 2026-05-13
+Last reviewed: 2026-05-13
 
 This file is the current project-health snapshot. The forward plan lives in [../ROADMAP.md](../ROADMAP.md).
 
@@ -9,7 +9,7 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 **Overall: 9.1/10 as a writing framework; 8.6/10 as an installable private-repo tool**
 
-Get Paper Done is now past the initial credibility threshold as a writing workflow framework. The project has a clearer README, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, six realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, reusable reader-feedback capture, and package-boundary hygiene tests. The lifecycle imported-paper run also found and fixed a real exporter bug, which is the kind of result expected from useful trial work.
+Get Paper Done is now past the initial credibility threshold as a writing workflow framework. The project has a clearer README with a stronger product story, a newcomer `START-HERE` guide, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, six realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, reusable reader-feedback capture, and package-boundary hygiene tests. The lifecycle imported-paper run also found and fixed a real exporter bug, which is the kind of result expected from useful trial work.
 
 It is still not a 9/10 installable tool. Import remains preservation-first rather than extraction-rich, external review is still prompt/workflow-driven rather than a wrapped CLI capability, and the private-repo install path still depends on local package linking rather than a release/update policy. The framework quality is stronger than the packaging story.
 
@@ -19,7 +19,7 @@ It is still not a 9/10 installable tool. Import remains preservation-first rathe
 |------|--------|-----------|
 | Framework design | 9.2/10 | Strong staged model, explicit paper memory, normalized classification, research compression, strategy gate, audience system, reader-feedback capture, feedback approval, clean-paper example, imported-paper recovery example, lite update example, evidence-heavy external example, short quantitative example, and live public-source example. Still needs broader messy-paper calibration and stronger external-review handling. |
 | Installable tool maturity | 8.4/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`, and export now has a regression test for pre-body draft sections. Missing external-review runner, richer import extraction, and local package/release hardening. |
-| Documentation | 9.1/10 | README now explains the core idea, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and clean/imported/lite/external examples. Still needs a guided walkthrough. |
+| Documentation | 9.3/10 | README now leads with product story, key benefits, fit/non-fit guidance, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and examples. `docs/START-HERE.md` gives newcomers a shorter first-paper path. Still needs a richer guided walkthrough based on the next real-paper calibration run. |
 | Test coverage | 9.7/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, five-signal reader-feedback structure, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, blocked-strategy, mid-revision, and messy-import fixture behavior, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, stable semantic issue IDs, example-wide semantic validation, compact broken semantic fixture coverage, live public-source citation shape, and six realistic completed example fixtures. Still needs broader real-paper calibration. |
 | Release readiness | 8.1/10 | Package metadata, changelog, CI, license, dry-run install checks, package dry-run, and an explicit package allowlist are in place. Needs release checklist, versioning/update compatibility policy, and a tighter public/private distribution story. |
 
@@ -53,7 +53,7 @@ It is still not a 9/10 installable tool. Import remains preservation-first rathe
 - The failed-strategy-gate fixture now proves that blocked strategy states remain visible, fail validation clearly, and route back to `/gpd-brief` without creating downstream artifacts.
 - The mid-revision fixture now proves that a structurally valid paper can keep downstream artifacts while fact-check routes the next action back to `/gpd-research`.
 - The messy-import fixture now proves CLI import preserves mixed draft/source/review material, classifies `source/` and `sources/` as research-like material, avoids generating downstream artifacts, keeps strategy blocked, and exposes source-sensitive imported claims for later research/fact-check.
-- The README now explains the actual user workflow instead of only listing commands.
+- The README now leads with product story and value before reference material, while `docs/START-HERE.md` gives a concise newcomer path through install, first paper setup, profile, audience, workflow commands, status, and import.
 
 ## Main Risks
 
@@ -68,9 +68,9 @@ It is still not a 9/10 installable tool. Import remains preservation-first rathe
 ## Recommended Next Work
 
 1. Run another real-source paper with public citations before adding more synthetic semantic checks.
-2. Harden `gpd import` around large-folder previews, document extraction, citation extraction, and richer manifest details.
-3. Add richer fixture workspaces only when they represent a new failure mode, not just more routing signals.
-4. Add fixture-based end-to-end tests that validate representative completed workspaces with real artifact bodies.
+2. Use that calibration run to decide whether `START-HERE` needs a richer guided walkthrough.
+3. Harden `gpd import` around large-folder previews, document extraction, citation extraction, and richer manifest details.
+4. Add richer fixture workspaces only when they represent a new failure mode, not just more routing signals.
 5. Expand semantic lint-style checks only where they are concrete enough to be useful; defer noisy heuristics until examples exist.
 6. Add a release checklist, versioning policy, and update compatibility notes.
 7. Build `gpd review-external` only after the manual external-review workflow has been proven on a real paper.
@@ -80,9 +80,9 @@ It is still not a 9/10 installable tool. Import remains preservation-first rathe
 Commands run during review:
 
 ```bash
-npm test
 npm run check
-npm run pack:check
+npm pack --dry-run --cache /tmp/gpd-npm-cache
+git diff --check
 ```
 
-All passed after the package-boundary cleanup.
+All passed after the README/product-story and `docs/START-HERE.md` onboarding update.

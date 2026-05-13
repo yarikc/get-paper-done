@@ -1,7 +1,7 @@
 {
   "name": "get-paper-done",
   "version": "0.1.0",
-  "description": "A file-based AI workflow for newsletters, blogs, position papers, and white papers.",
+  "description": "A file-based AI workflow for serious papers that need audience, evidence, argument, and revision discipline.",
   "bin": {
     "gpd": "bin/gpd.js",
     "get-paper-done": "bin/gpd.js"
@@ -17,6 +17,7 @@
     "docs/ARCHITECTURE.md",
     "docs/DESIGN-SPEC.md",
     "docs/PROJECT-REVIEW.md",
+    "docs/START-HERE.md",
     "examples/",
     "profiles/",
     "references/",

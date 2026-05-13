@@ -1,22 +1,87 @@
 # Get Paper Done
 
-A file-based AI writing workflow for serious papers: newsletters, blog posts, position papers, executive memos, strategy papers, and white papers.
+Get Paper Done is a file-based AI workflow for serious papers.
 
-**Get Paper Done makes AI writing less generic by turning each paper into a small, durable project.** The system keeps author voice, audience needs, strategy, research, outline, draft state, fact checks, reviews, and revision decisions in files instead of relying on one long chat.
+It is for writing that needs more than fluent prose: decision memos, strategy papers, explainers, architecture papers, white papers, executive updates, and public technical writing where audience, evidence, argument quality, and revision discipline matter.
 
-See [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md) for the design contract and [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md) for the current project review.
+Most AI writing workflows draft too early. They produce polished paragraphs before the paper has a clear job, reader, thesis, proof standard, or decision ask. GPD fixes that by turning each paper into a small durable project with explicit artifacts for author voice, audience, brief, strategy, research, outline, draft, fact-checking, review, feedback, and state.
 
-## Why This Exists
+The result is not just faster writing. It is a workflow that can stop weak ideas before drafting, preserve context across sessions and models, route backward when evidence changes, and make revision concrete.
 
-Most AI writing workflows fail in three predictable ways:
+New here? Start with [docs/START-HERE.md](docs/START-HERE.md). See [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md) for the design contract and [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md) for the current project review.
 
-**1. Generic context.** The model writes as if every piece has the same author, reader, proof standard, and purpose. GPD forces those decisions into `.paper/PERSONA.md`, `.paper/AUDIENCE.md`, and `.paper/BRIEF.md` before drafting.
+## Why Use It
 
-**2. Context rot.** Research notes, source dumps, draft versions, and review feedback overload the session. GPD turns each stage into an artifact so you can clear context between stages without losing the paper.
+- **Better papers, not just faster prose.** GPD forces clarity on purpose, audience, thesis, evidence, objections, and ask before polishing language.
+- **Less generic AI writing.** Author voice and audience expectations are explicit artifacts, not assumptions buried in chat history.
+- **Durable context.** Research, feedback, state, and revision decisions live in files, so the workflow survives context resets and model switches.
+- **Quality gates.** Strategy, research, fact-check, review, and export gates prevent weak papers from quietly moving forward.
+- **Controlled feedback.** Human or model feedback is captured in `READER-FEEDBACK.md` and planned in `FEEDBACK-PLAN.md` before revision changes the draft.
+- **Real revision.** If review shows the paper needs more research, a better outline, or a clearer ask, GPD routes backward instead of treating revision as line editing.
 
-**3. Premature prose.** A weak thesis can still produce polished paragraphs. GPD runs a strategy gate before research, outline, and drafting. If the paper does not have a clear job, reader promise, and decision/usefulness target, the workflow blocks and routes you back to the brief.
+## Best Fit
 
-The complexity is in the workflow files. The user-facing loop is a short set of commands.
+Use GPD for:
+
+- decision memos
+- strategy papers
+- explainers
+- architecture papers
+- white papers
+- executive updates
+- public technical writing
+- imported drafts that need recovery, evidence, or audience repair
+
+It is not meant for quick emails, casual chat replies, one-off summaries, or writing where a lightweight prompt is enough.
+
+## Quick Start
+
+Because this is currently a local/private repo, link the CLI once so `gpd` is available on your shell `PATH`:
+
+```bash
+cd /path/to/get-paper-done
+npm link
+```
+
+Install runtime assets for both Claude Code and Codex:
+
+```bash
+gpd install claude
+gpd install codex
+gpd doctor claude
+gpd doctor codex
+```
+
+Restart Claude Code and Codex after installing so they pick up the slash commands.
+
+Create a paper workspace:
+
+```bash
+gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
+cd ~/papers/metadata-strategy
+gpd status
+```
+
+Then open Claude or Codex in that paper directory and run:
+
+```text
+/gpd-persona
+/gpd-audience
+/gpd-brief
+/gpd-research
+/gpd-outline
+/gpd-draft --next-section
+/gpd-fact-check --full
+/gpd-review
+/gpd-revise
+/gpd-export
+```
+
+`/gpd-persona` and `/gpd-audience` make author voice and reader expectations explicit before strategy work. `/gpd-brief` then confirms the paper classification: `decision_memo`, `strategy_paper`, `explainer`, or `update`, plus channel, risk, complexity, and audience shape.
+
+`npm link` is not runtime-specific. It links the CLI once. After that, `gpd install claude` copies slash commands and workflow assets into `~/.claude`, and `gpd install codex` copies them into `~/.codex`.
+
+Use `gpd init` when you want deterministic CLI setup. Use `/gpd-new-paper` when you want the AI runtime to ask setup questions interactively.
 
 ## How It Works
 
@@ -46,56 +111,13 @@ create/import paper
 
 Each step reads the existing `.paper/` artifacts, writes its own artifact, and updates `.paper/STATE.md` plus `.paper/STATE.json` with the suggested next command.
 
-## Getting Started
+## Documentation Map
 
-From this local checkout, link the local CLI once:
-
-```bash
-cd /path/to/get-paper-done
-npm link
-```
-
-Then install the runtime assets for both Claude Code and Codex:
-
-```bash
-gpd install claude
-gpd install codex
-gpd doctor claude
-gpd doctor codex
-```
-
-`npm link` is not runtime-specific. It is required once because this is currently a local/private repo: it puts the `gpd` CLI on your shell `PATH`. After that, `gpd install claude` copies slash commands and workflow assets into `~/.claude`, and `gpd install codex` copies them into `~/.codex`.
-
-Restart Claude Code and Codex after installing so they pick up the slash commands.
-
-Create a paper workspace with the CLI:
-
-```bash
-gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
-cd ~/papers/metadata-strategy
-gpd status
-```
-
-Then open Claude or Codex in that paper directory and run:
-
-```text
-/gpd-brief
-/gpd-research
-/gpd-outline
-/gpd-draft --next-section
-/gpd-fact-check --full
-/gpd-review
-/gpd-revise
-/gpd-export
-```
-
-You can also start fully from the AI runtime:
-
-```text
-/gpd-new-paper
-```
-
-Use `gpd init` when you want deterministic CLI setup. Use `/gpd-new-paper` when you want the AI runtime to ask setup questions interactively.
+- [docs/START-HERE.md](docs/START-HERE.md): first paper walkthrough and newcomer mental model.
+- [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md): durable design contract, workflow model, and architecture.
+- [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md): current ratings, risks, and review findings.
+- [ROADMAP.md](ROADMAP.md): forward plan and active issue alignment.
+- [examples](examples): completed reference paper workspaces.
 
 ## State And Gates
 
