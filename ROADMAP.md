@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-13
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, six realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, messy-import fixture coverage, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, messy-import fixture coverage, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,7 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, live public-source examples, reusable reader-feedback capture, and messy import depth are now represented with regression coverage. Remaining example diversity should focus on real-paper calibration breadth, not more synthetic numeric coverage.
+- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, live public-source examples, reusable reader-feedback capture, and messy import depth are now represented with regression coverage. Remaining work should review the newest public-source calibration output for quality failures that validators do not catch.
 - `#1`: broader test/evaluation program; remains open until more fixture diversity and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
@@ -172,7 +172,8 @@ Next work should validate behavior under real use before adding more RFC surface
 15. Completed: added `examples/platform-review-cycle-metrics`, a short synthetic quantitative memo that exercises baseline, sample, timeframe, source IDs, fact-check handling, review, export, and zero-warning semantic validation.
 16. Completed: added structured `source_registry[*].claim_support` metadata plus semantic coverage that rejects safe claims citing sources recorded as only topically related.
 17. Completed: added `examples/public-ai-control-baseline`, a compact public-source decision memo that uses verified NIST, OWASP, and NCSC/CISA sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
-18. Next main-line slice: pre-register and run one more realistic public-source paper calibration before any additional RFC-5 work or more synthetic fixtures. Use the run to decide whether the next concrete fix belongs in prompt guidance, artifact contracts, semantic validators, examples/tests, import behavior, external review, release hardening, RFC-1 later phases, RFC-2.1 intake, or Issue #5 hooks.
+18. Completed: pre-registered and ran `examples/software-supply-chain-evidence-pack`, a second public-source decision memo using CISA, NIST, SLSA, and OpenSSF sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
+19. Next main-line slice: review the new calibration output for quality failures that validators do not catch. Use observed failures only to decide whether the next concrete fix belongs in prompt guidance, artifact contracts, semantic validators, examples/tests, import behavior, external review, release hardening, RFC-1 later phases, RFC-2.1 intake, or Issue #5 hooks.
 
 ## Completed Design Simplifications
 
@@ -206,6 +207,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added a failed-strategy-gate fixture plus regression test proving a blocked strategy state routes back to `/gpd-brief` and fails validation clearly without downstream artifacts.
 - Added a mid-revision routing fixture plus regression test proving fact-check can route a structurally valid paper back to `/gpd-research` while preserving downstream artifacts.
 - Added `examples/public-ai-control-baseline` plus regression coverage for real public-source URLs, source verification notes, direct claim-support metadata, fact-check source IDs, and exported public citations.
+- Added `examples/software-supply-chain-evidence-pack` plus pre-registration and regression coverage for real CISA, NIST, SLSA, and OpenSSF source URLs, direct/partial claim-support metadata, fact-check source IDs, process-burden handling, and exported public citations.
 
 ---
 

@@ -14,6 +14,7 @@ const technologyLifecycleExampleDir = path.join(examplesRoot, 'technology-lifecy
 const responsibleAiExampleDir = path.join(examplesRoot, 'responsible-ai-controls');
 const quantitativeExampleDir = path.join(examplesRoot, 'platform-review-cycle-metrics');
 const publicSourceExampleDir = path.join(examplesRoot, 'public-ai-control-baseline');
+const supplyChainExampleDir = path.join(examplesRoot, 'software-supply-chain-evidence-pack');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -307,6 +308,87 @@ function testPublicAiControlBaselineKeepsLivePublicSourceShape() {
   assert(final.includes('Validates threat-model, testing, exception, and residual-risk attestations'));
 }
 
+function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
+  assert(fs.existsSync(path.join(supplyChainExampleDir, 'PRE-REGISTRATION.md')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'RESEARCH.json')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'FACT-CHECK.md')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'exports', 'FINAL.md')));
+
+  const validation = JSON.parse(run(['validate', '--paper', supplyChainExampleDir, '--semantic', '--json']));
+  assert.strictEqual(validation.ok, true);
+  assert.deepStrictEqual(validation.issues, []);
+
+  const config = JSON.parse(fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'standard');
+  assertClassification(config, {
+    purpose: 'decision_memo',
+    channel: 'internal',
+    risk: 'internal_high',
+    complexity: 'standard',
+    audience_shape: 'prioritized_multi',
+  });
+  assert.strictEqual(config.research.web_allowed, true);
+  assert.strictEqual(config.research.require_source_table, true);
+  assert.strictEqual(config.review.fact_check, true);
+
+  const preRegistration = fs.readFileSync(path.join(supplyChainExampleDir, 'PRE-REGISTRATION.md'), 'utf8');
+  assert(preRegistration.includes('Run one more realistic public-source paper calibration'));
+  assert(preRegistration.includes('Bureaucracy objection underhandled'));
+  assert(preRegistration.includes('Visual temptation'));
+
+  const research = JSON.parse(fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
+  assert.strictEqual(research.source_registry.length, 6);
+  for (const source of research.source_registry) {
+    assert(source.url_or_path.startsWith('https://'), `${source.id} should use a public HTTPS URL`);
+    assert(Array.isArray(source.claim_support), `${source.id} should include claim_support`);
+    assert(source.claim_support.some((entry) => entry.support === 'direct'), `${source.id} should directly support a claim`);
+    assert(source.notes.includes('Verified'), `${source.id} should record verification context`);
+  }
+
+  const urls = new Set(research.source_registry.map((source) => source.url_or_path));
+  for (const expectedUrl of [
+    'https://www.cisa.gov/sbom',
+    'https://www.cisa.gov/resources-tools/resources/2025-minimum-elements-software-bill-materials-sbom',
+    'https://csrc.nist.gov/pubs/sp/800/218/final',
+    'https://csrc.nist.gov/pubs/sp/800/161/r1/final',
+    'https://slsa.dev/provenance',
+    'https://openssf.org/scorecard/',
+  ]) {
+    assert(urls.has(expectedUrl), `missing public source ${expectedUrl}`);
+  }
+
+  assert(research.claims_to_soften.some((item) => item.claim.includes('SBOMs prove pilot security')));
+  assert(research.claims_to_drop_or_reframe.some((item) => item.claim.includes('guarantees regulatory readiness')));
+
+  const factCheck = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'FACT-CHECK.md'), 'utf8');
+  for (const sourceId of ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']) {
+    assert(factCheck.includes(sourceId), `FACT-CHECK.md should include ${sourceId}`);
+  }
+  assert(factCheck.includes('The packet standardizes existing production-approval questions rather than creating a separate approval forum'));
+  assert(factCheck.includes('Public sources support the evidence categories, but the exact requirement is an internal policy recommendation'));
+
+  const review = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'REVIEW.md'), 'utf8');
+  assert(review.includes('new approval layer'));
+  assert(review.includes('Audience Conflict Table'));
+
+  const final = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
+  assert(final.includes('https://www.cisa.gov/sbom'));
+  assert(final.includes('https://csrc.nist.gov/pubs/sp/800/218/final'));
+  assert(final.includes('https://slsa.dev/provenance'));
+  assert(final.includes('https://openssf.org/scorecard/'));
+  assert(final.includes('software bill of materials, or SBOM'));
+  assert(final.includes('Secure Software Development Framework, or SSDF'));
+  assert(final.includes('Supply-chain Levels for Software Artifacts, or SLSA'));
+  assert(final.includes('does not prove the pilot is secure'));
+  assert(final.includes('not as a standalone approval decision'));
+  assert(final.includes('does not create a separate forum'));
+  assert(final.includes('pilot owner completes the packet'));
+  assert(final.includes('decision owner approves any exception explicitly'));
+  assert(!final.includes('[NEEDS EVIDENCE:'));
+  assert(!final.includes('[AUTHOR DECISION:'));
+}
+
 function testTechnologyLifecycleManagementKeepsImportRecoveryShape() {
   assert(fs.existsSync(path.join(technologyLifecycleExampleDir, '.paper')));
   assert(!fs.existsSync(path.join(technologyLifecycleExampleDir, 'original')));
@@ -352,6 +434,7 @@ testWeeklyPlatformUpdateKeepsLiteShape();
 testResponsibleAiControlsKeepsExternalEvidenceShape();
 testPlatformReviewCycleMetricsKeepsQuantitativeShape();
 testPublicAiControlBaselineKeepsLivePublicSourceShape();
+testSoftwareSupplyChainEvidencePackKeepsCalibrationShape();
 testTechnologyLifecycleManagementKeepsImportRecoveryShape();
 
 console.log('example fixture tests passed');

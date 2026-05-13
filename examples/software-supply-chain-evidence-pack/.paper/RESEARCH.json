@@ -1,0 +1,434 @@
+{
+  "metadata": {
+    "topic": "Software supply-chain evidence pack for high-risk AI and software pilots",
+    "scope": "Public-source internal decision memo calibration",
+    "depth": "standard",
+    "source_mode": "web",
+    "created_at": "2026-05-13T22:15:00.000Z",
+    "updated_at": "2026-05-13T22:15:00.000Z"
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "Which public source supports SBOM as a software transparency mechanism?",
+        "mapped_claims": ["C1"],
+        "why_it_matters": "The memo should not treat dependency visibility as an invented internal preference.",
+        "planned_source_types": ["official"],
+        "search_queries": ["CISA software bill of materials SBOM overview"]
+      },
+      {
+        "id": "RQ2",
+        "question": "Which public source identifies minimum SBOM elements?",
+        "mapped_claims": ["C2"],
+        "why_it_matters": "The memo needs to show that dependency records have recognized minimum fields.",
+        "planned_source_types": ["official"],
+        "search_queries": ["CISA 2025 Minimum Elements Software Bill of Materials SBOM"]
+      },
+      {
+        "id": "RQ3",
+        "question": "Which public source supports using SSDF as secure-development attestation framing?",
+        "mapped_claims": ["C3"],
+        "why_it_matters": "The packet needs a defensible secure-development reference without inventing a new control taxonomy.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NIST SP 800-218 Secure Software Development Framework"]
+      },
+      {
+        "id": "RQ4",
+        "question": "Which public source supports cybersecurity supply-chain risk management as an enterprise concern?",
+        "mapped_claims": ["C4"],
+        "why_it_matters": "The memo needs to connect pilot evidence to risk management, not just engineering hygiene.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NIST SP 800-161 Rev. 1 cybersecurity supply chain risk management"]
+      },
+      {
+        "id": "RQ5",
+        "question": "Which public source explains provenance as verifiable artifact production information?",
+        "mapped_claims": ["C5"],
+        "why_it_matters": "The packet needs a source-backed reason to ask where and how artifacts were produced.",
+        "planned_source_types": ["official"],
+        "search_queries": ["SLSA provenance where when how artifact produced"]
+      },
+      {
+        "id": "RQ6",
+        "question": "Which public source supports open-source project health scoring as an input?",
+        "mapped_claims": ["C6"],
+        "why_it_matters": "The packet should use project health signals carefully and not overstate them.",
+        "planned_source_types": ["official"],
+        "search_queries": ["OpenSSF Scorecard open source project security posture"]
+      }
+    ],
+    "depth_rationale": "The paper is a concise internal decision memo, but it affects production approval and risk acceptance, so each material source claim needs explicit source IDs.",
+    "source_mode_rationale": "The calibration intentionally uses live public sources verified on 2026-05-13.",
+    "user_feedback": "Keep the memo compact and test the process-burden objection directly."
+  },
+  "research_brief": {
+    "executive_summary": "The public sources support the evidence categories for a lightweight software supply-chain evidence pack: SBOM/dependency transparency from CISA, secure-development attestation from NIST SSDF, supply-chain risk context from NIST C-SCRM, provenance from SLSA, and open-source health signal use from OpenSSF Scorecard. The sources support the categories, not the exact internal packet fields.",
+    "key_findings": [
+      "CISA positions SBOM as a software transparency mechanism and provides updated minimum-elements guidance.",
+      "NIST SSDF provides a public reference for secure software development practices.",
+      "NIST SP 800-161 Rev. 1 frames cybersecurity supply-chain risk as a product, service, and organizational risk-management concern.",
+      "SLSA provenance describes verifiable information about where, when, and how software artifacts were produced.",
+      "OpenSSF Scorecard can inform open-source project risk posture but should not be treated as a standalone approval decision."
+    ]
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "CISA Software Bill of Materials overview",
+      "url_or_path": "https://www.cisa.gov/sbom",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Government cybersecurity guidance and coordination page.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "The source supports SBOM as a transparency mechanism for software components."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports the dependency-transparency category but not the exact internal packet design."
+        }
+      ],
+      "notes": "Verified public CISA page on 2026-05-13."
+    },
+    {
+      "id": "S2",
+      "title": "CISA 2025 Minimum Elements for a Software Bill of Materials",
+      "url_or_path": "https://www.cisa.gov/resources-tools/resources/2025-minimum-elements-software-bill-materials-sbom",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Draft/update guidance for SBOM minimum elements.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "The source supports the component-record detail behind dependency transparency."
+        },
+        {
+          "claim_id": "C2",
+          "support": "direct",
+          "rationale": "The source supports the idea that SBOM records have recognized minimum elements."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports a dependency inventory requirement, but not the full proposed evidence pack."
+        }
+      ],
+      "notes": "Verified public CISA page on 2026-05-13."
+    },
+    {
+      "id": "S3",
+      "title": "NIST SP 800-218 Secure Software Development Framework",
+      "url_or_path": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Official secure software development framework.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C3",
+          "support": "direct",
+          "rationale": "The source directly supports using SSDF as secure-development practice framing."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports the secure-development attestation category but not the exact internal attestation form."
+        }
+      ],
+      "notes": "Verified public NIST CSRC page on 2026-05-13."
+    },
+    {
+      "id": "S4",
+      "title": "NIST SP 800-161 Rev. 1 Cybersecurity Supply Chain Risk Management",
+      "url_or_path": "https://csrc.nist.gov/pubs/sp/800/161/r1/final",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Official cybersecurity supply-chain risk management guidance.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C4",
+          "support": "direct",
+          "rationale": "The source frames supply-chain risk as an enterprise risk-management concern."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports the risk-management need but not the exact packet fields."
+        },
+        {
+          "claim_id": "C8",
+          "support": "partial",
+          "rationale": "The source supports supply-chain risk management but not the exact lightweight governance design."
+        },
+        {
+          "claim_id": "C9",
+          "support": "partial",
+          "rationale": "The source supports accountability and risk management but not the exact internal role split."
+        }
+      ],
+      "notes": "Verified public NIST CSRC page on 2026-05-13."
+    },
+    {
+      "id": "S5",
+      "title": "SLSA Provenance",
+      "url_or_path": "https://slsa.dev/provenance",
+      "source_type": "official",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Open software supply-chain specification.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C5",
+          "support": "direct",
+          "rationale": "The source defines provenance as verifiable information about where, when, and how software artifacts were produced."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports the provenance category but not a universal requirement for every early pilot."
+        }
+      ],
+      "notes": "Verified public SLSA specification page on 2026-05-13."
+    },
+    {
+      "id": "S6",
+      "title": "OpenSSF Scorecard",
+      "url_or_path": "https://openssf.org/scorecard/",
+      "source_type": "official",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Open-source security initiative describing its own project.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C6",
+          "support": "direct",
+          "rationale": "The source supports using Scorecard as an automated signal for open-source project security posture."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports project health signal use but not treating the score as final approval."
+        }
+      ],
+      "notes": "Verified public OpenSSF page on 2026-05-13."
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "SBOMs support software component transparency and dependency visibility.",
+      "claim_type": "factual",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use as source-framing claim."
+    },
+    {
+      "claim_id": "C2",
+      "claim": "CISA minimum-elements guidance supports asking for consistent SBOM fields when software components are in scope.",
+      "claim_type": "factual",
+      "research_questions": ["RQ2"],
+      "supporting_sources": ["S2"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Do not imply the draft guidance mandates this internal packet."
+    },
+    {
+      "claim_id": "C3",
+      "claim": "NIST SSDF provides a public reference for secure software development practices.",
+      "claim_type": "factual",
+      "research_questions": ["RQ3"],
+      "supporting_sources": ["S3"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use for secure-development attestation framing."
+    },
+    {
+      "claim_id": "C4",
+      "claim": "Cybersecurity supply-chain risk management is an enterprise risk-management concern, not only an engineering hygiene issue.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Keep as a bounded inference from NIST C-SCRM framing."
+    },
+    {
+      "claim_id": "C5",
+      "claim": "SLSA provenance describes verifiable information about where, when, and how software artifacts were produced.",
+      "claim_type": "factual",
+      "research_questions": ["RQ5"],
+      "supporting_sources": ["S5"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use for the provenance evidence category."
+    },
+    {
+      "claim_id": "C6",
+      "claim": "OpenSSF Scorecard can inform review of open-source project health, but it should not be treated as a standalone approval gate.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ6"],
+      "supporting_sources": ["S6"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Source supports the signal; the caution is author judgment."
+    },
+    {
+      "claim_id": "C7",
+      "claim": "High-risk AI and software pilots should carry a minimum evidence pack before production approval.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ1", "RQ2", "RQ3", "RQ5", "RQ6"],
+      "supporting_sources": ["S1", "S2", "S3", "S5", "S6"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Recommendation is supported by categories across sources but remains an internal policy proposal."
+    },
+    {
+      "claim_id": "C8",
+      "claim": "The packet should be lightweight and should standardize existing approval questions rather than create a separate approval process.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": ["Caution: public sources do not define this exact internal process-burden balance."],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Treat as operating-design judgment, not public-standard mandate."
+    },
+    {
+      "claim_id": "C9",
+      "claim": "Pilot owner, independent reviewer, and decision owner are proposed internal roles for operating the packet.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": ["Caution: public sources support risk accountability but do not define this role split."],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Treat as minimum internal operating design after approval, not a standard-mandated role model."
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": [
+      "dependency transparency",
+      "secure development",
+      "provenance",
+      "open-source health",
+      "risk governance"
+    ],
+    "rows": [
+      {
+        "theme": "Minimum evidence categories are source-backed.",
+        "source_summaries": {
+          "S1": "Supports SBOM as transparency mechanism.",
+          "S2": "Supports minimum SBOM elements.",
+          "S3": "Supports secure-development practice framing.",
+          "S5": "Supports provenance as artifact production information.",
+          "S6": "Supports automated open-source project health signal use."
+        },
+        "pattern": "agreement",
+        "implication": "The memo can propose evidence categories with source IDs."
+      },
+      {
+        "theme": "Exact packet mechanics are internal design.",
+        "source_summaries": {
+          "S4": "Supports supply-chain risk management as an organizational concern.",
+          "S1": "Does not define the internal packet.",
+          "S5": "Does not require every early pilot to have full automated provenance."
+        },
+        "pattern": "gap",
+        "implication": "The memo must label owner, exception, and packet-field details as proposed internal mechanics."
+      }
+    ]
+  },
+  "contradictions": [
+    {
+      "claim": "The evidence pack should be lightweight.",
+      "counterpoint": "Public sources support richer supply-chain practices than this memo requires.",
+      "handling": "Position the packet as a production-approval baseline for pilots, not full software assurance."
+    }
+  ],
+  "open_questions": [
+    "Which pilot categories count as high-risk?",
+    "Which role validates exceptions?",
+    "Does production approval require stronger provenance than early pilot review?"
+  ],
+  "draft_support_notes": [
+    "Define SBOM, SSDF, and provenance before relying on acronyms.",
+    "Do not say SBOM, SLSA, or Scorecard proves security.",
+    "Frame OpenSSF Scorecard as signal input only.",
+    "Address process burden in the first half of the memo."
+  ],
+  "facts_safe_to_use": [
+    "CISA provides public SBOM guidance (S1, S2).",
+    "NIST SP 800-218 is the Secure Software Development Framework (S3).",
+    "NIST SP 800-161 Rev. 1 addresses cybersecurity supply-chain risk management (S4).",
+    "SLSA provenance describes verifiable information about where, when, and how software artifacts were produced (S5).",
+    "OpenSSF Scorecard provides automated open-source project security posture signals (S6)."
+  ],
+  "claims_to_soften": [
+    {
+      "claim": "The public sources require this exact evidence pack.",
+      "suggested_wording": "Public sources support the evidence categories; this memo proposes the internal packet design."
+    },
+    {
+      "claim": "SBOMs prove pilot security.",
+      "suggested_wording": "SBOMs improve component transparency but do not prove security."
+    },
+    {
+      "claim": "Scorecard is sufficient for dependency approval.",
+      "suggested_wording": "Scorecard can inform review and should be paired with human risk handling."
+    }
+  ],
+  "claims_to_drop_or_reframe": [
+    {
+      "claim": "The evidence pack guarantees regulatory readiness.",
+      "why": "No public source in this set supports that claim."
+    },
+    {
+      "claim": "Full SLSA compliance should be required for every early pilot.",
+      "why": "The source supports provenance concepts, but that requirement is too broad for the memo's lightweight baseline."
+    }
+  ]
+}
