@@ -16,7 +16,7 @@ The artifact model, command surface, install/update/export CLI, workspace helper
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
-Active execution checklist: GitHub Issue #2.
+Active execution checklist: GitHub Issues #1 and #2.
 
 ## Planning Sources Of Truth
 
@@ -40,6 +40,31 @@ Current issue alignment:
 - `#9`: second-paper trial; produced the anonymized imported-paper example and an exporter bug fix. Pre-registration was not captured as a formal artifact, so the run is useful but weaker as calibration evidence.
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
 - `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
+
+## Main Line Before RFC-5
+
+RFC-5 identifies a real onboarding and product-story gap, but it must not displace the pre-existing main line. Before any broad README/onboarding rewrite, the plan of record remains:
+
+1. Run one more realistic paper calibration using public sources only.
+2. Pre-register the calibration before the run: paper purpose, channel, risk, complexity, audience shape, source set, expected failure modes, and what would count as a useful result.
+3. Run the workflow end to end: brief, strategy gate, research, outline, draft, fact-check, review, revise, and export.
+4. Validate the resulting workspace with `gpd validate --semantic` and package/example checks where applicable.
+5. Convert only observed failures into targeted changes: prompt guidance, artifact contracts, semantic validators, examples, or tests.
+6. Keep all paper material anonymized and public-source-only; do not commit private drafts, person names, company names, titles, local paths, or ignored `docs/feedback*.md` files.
+
+Owning issues:
+
+- `#1` owns the broader test/evaluation objective and the real-paper calibration gap.
+- `#2` owns workflow/agent fixture implications that come out of the calibration run.
+- `#6` owns any semantic validator follow-up, but new validators should wait for concrete failures from the calibration.
+
+Deferred until after the main-line calibration unless explicitly reprioritized:
+
+- RFC-5 README/onboarding/product-story implementation.
+- RFC-3 and RFC-4 visual/chart work.
+- RFC-1 later phases and RFC-2.1 intake changes.
+- Issue #5 hook/event runtime.
+- Broad import conversion work beyond bugs exposed by the calibration.
 
 ## Active Execution Plan: Cycle 6 Hardening
 
@@ -108,7 +133,7 @@ Next work should validate behavior under real use before adding more RFC surface
 15. Completed: added `examples/platform-review-cycle-metrics`, a short synthetic quantitative memo that exercises baseline, sample, timeframe, source IDs, fact-check handling, review, export, and zero-warning semantic validation.
 16. Completed: added structured `source_registry[*].claim_support` metadata plus semantic coverage that rejects safe claims citing sources recorded as only topically related.
 17. Completed: added `examples/public-ai-control-baseline`, a compact public-source decision memo that uses verified NIST, OWASP, and NCSC/CISA sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
-18. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, Issue #5 hooks, messy import depth, or release hardening should come next.
+18. Next main-line slice: pre-register and run one more realistic public-source paper calibration before adopting RFC-5 or adding more synthetic fixtures. Use the run to decide whether the next concrete fix belongs in prompt guidance, artifact contracts, semantic validators, examples/tests, import behavior, external review, release hardening, RFC-1 later phases, RFC-2.1 intake, or Issue #5 hooks.
 
 ## Completed Design Simplifications
 
