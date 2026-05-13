@@ -4,6 +4,7 @@
 - **Author:** Yarik Chinskiy
 - **Date:** 2026-05-09
 - **Scope:** Get Paper Done framework + tooling
+- **Tracking Issue:** [#14](https://github.com/yarikc/get-paper-done/issues/14)
 - **Supersedes:** none
 
 ## Summary

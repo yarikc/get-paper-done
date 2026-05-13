@@ -39,7 +39,12 @@ Current issue alignment:
 - `#8`: closed cycle-3 example and semantic-warning calibration; it added example-wide semantic gates, recommendation specificity, list-heavy prose warnings, and compact broken-fixture coverage.
 - `#9`: second-paper trial; produced the anonymized imported-paper example and an exporter bug fix. Pre-registration was not captured as a formal artifact, so the run is useful but weaker as calibration evidence.
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
-- `#5`: hook/event runtime; deferred until real-paper trial clarifies which transitions need deterministic events.
+- `#5`: RFC event and hook runtime feature request; deferred until real-paper trial clarifies which transitions need deterministic events.
+- `#14`: RFC-1 remaining review orchestration and evaluation hardening; Phase 1 artifact contracts are implemented, and later slices should wait for observed calibration failures.
+- `#15`: RFC-2.1 progressive classification and policy-driven checks; current enum foundation exists, but classification-driven policy/routing remains deferred.
+- `#12`: RFC-3 illustrations and diagram artifacts; gated feature request, not core workflow until a real calibration paper proves the need for paper-native visual lifecycle management.
+- `#13`: RFC-4 data charts and Vega-Lite artifacts; gated feature request, not core workflow until a real quantitative/public-source paper proves charting is materially useful.
+- `#16`: RFC-5 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
 
 ## Main Line Preserved During RFC-5 Detour
 
@@ -60,11 +65,43 @@ Owning issues:
 
 Deferred until after the main-line calibration unless explicitly reprioritized:
 
-- RFC-5 work beyond the bounded README/product-story and `docs/START-HERE.md` cleanup.
-- RFC-3 and RFC-4 visual/chart work.
-- RFC-1 later phases and RFC-2.1 intake changes.
-- Issue #5 hook/event runtime.
+- RFC-5 / `#16` work beyond the bounded README/product-story and `docs/START-HERE.md` cleanup.
+- RFC-3 / `#12` and RFC-4 / `#13` visual/chart work.
+- RFC-1 / `#14` later phases and RFC-2.1 / `#15` intake or policy-routing changes.
+- Issue #5 RFC event and hook runtime.
 - Broad import conversion work beyond bugs exposed by the calibration.
+
+## RFC-3 / RFC-4 Placement
+
+RFC-3 (`#12`) and RFC-4 (`#13`) are useful design proposals, but they should not become core GPD workflow yet.
+
+Current decision:
+
+1. Treat RFC-3/RFC-4 as a gated visual-artifacts track, not active main-line work.
+2. Use the next public-source calibration paper to observe whether a serious paper naturally needs a diagram, chart, both, or neither.
+3. If a visual artifact is needed, prototype it first as an optional authoring skill or manual artifact convention before adding core CLI commands such as `gpd illustrate` or `gpd render`.
+4. Promote to GPD core only after a real paper proves that visuals need lifecycle state, validation, rendering, and export behavior inside `.paper/`.
+
+Rationale:
+
+- The project still needs broader real-paper calibration more than it needs a new artifact family.
+- RFC-3's proposed Excalidraw pipeline adds meaningful dependency and rendering complexity. It should be justified by a real diagram need, not by architecture completeness.
+- RFC-4's Vega-Lite proposal is more naturally justified by a quantitative paper with real public data. The short quantitative example did not prove charting was necessary.
+- Existing Codex skills already cover adjacent work: image generation is useful for raster assets but is not a deterministic diagram/chart source of truth; spreadsheet tooling can create charts in workbooks but does not solve paper-native markdown/SVG lifecycle management. These capabilities are helpers, not a replacement for a GPD visual artifact model.
+
+Recommended phase order if the calibration proves the need:
+
+1. **Skill prototype:** create a concise visual-authoring skill or instructions that can produce one committed SVG plus source file for a single paper, with no new GPD CLI.
+2. **Artifact convention:** document `.paper/visuals/` or split `.paper/illustrations/` / `.paper/charts/` only after the prototype shows the format is stable.
+3. **Validation slice:** add deterministic checks for referenced files, stale renders, missing sources, and obvious schema errors.
+4. **Core CLI:** add `gpd render` / `gpd illustrate` only if repeated use shows manual rendering is a real workflow burden.
+
+Open questions for the calibration:
+
+- Does the paper need a conceptual diagram to explain structure or lifecycle?
+- Does the paper include quantitative comparisons that are materially clearer as a chart?
+- Can the visual be handled with a static committed SVG, or does it need source/render lifecycle management?
+- Does fact-check need to reason over the visual, or is ordinary prose/source fact-checking enough?
 
 ## Active Execution Plan: Cycle 6 Hardening
 

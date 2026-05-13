@@ -4,6 +4,7 @@
 - **Author:** Codex, based on review of RFC-2
 - **Date:** 2026-05-10
 - **Scope:** GPD policy layer — paper classification, workflow mode recommendation, and required quality checks
+- **Tracking Issue:** [#15](https://github.com/yarikc/get-paper-done/issues/15)
 - **Supersedes:** [RFC-2](RFC-2.md) if accepted
 - **Ignores dependency status:** This RFC is written as the desired policy design, regardless of whether RFC-1 Phase 1 has landed.
 

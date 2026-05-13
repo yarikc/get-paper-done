@@ -4,6 +4,7 @@
 - **Author:** Yarik Chinskiy
 - **Date:** 2026-05-09
 - **Scope:** GPD policy layer — paper classification, workflow mode selection, machine-readable expectations
+- **Tracking Issue:** [#15](https://github.com/yarikc/get-paper-done/issues/15)
 - **Supersedes:** the implicit free-form `paper type` string in `PROJECT.md`
 - **Complements:** [RFC-1](./RFC-1.md) — RFC-1 improves how agents *run*; this RFC improves how the system *decides which workflow to run*
 

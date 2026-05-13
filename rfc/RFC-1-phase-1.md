@@ -3,6 +3,7 @@
 - **Status:** Implemented
 - **Parent RFC:** [RFC-1: Research-Driven Improvement Plan](RFC-1.md)
 - **Scope:** Get Paper Done artifact reliability, validation, and static consistency tests
+- **Related Tracking Issue:** [#14](https://github.com/yarikc/get-paper-done/issues/14) for remaining RFC-1 work
 - **Decision:** Implement this phase before external review orchestration, parallel review suites, or judge-bias mechanics.
 - **Implemented in:** `9bc4ba1`, `e7ae451`, `bef683c`, `519b9ad`, `845736b`
 
