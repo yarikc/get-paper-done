@@ -45,6 +45,7 @@ Current issue alignment:
 - `#12`: RFC-3 illustrations and diagram artifacts; gated feature request, not core workflow until a real calibration paper proves the need for paper-native visual lifecycle management.
 - `#13`: RFC-4 data charts and Vega-Lite artifacts; gated feature request, not core workflow until a real quantitative/public-source paper proves charting is materially useful.
 - `#16`: RFC-5 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
+- `#17`: RFC-6 mobile review packs for away-from-desktop review; useful capability backlog item, but should start as manual validation and review-pack export/import rather than a mobile app or vendor integration.
 
 ## Main Line Preserved During RFC-5 Detour
 
@@ -69,6 +70,7 @@ Deferred until after the main-line calibration unless explicitly reprioritized:
 - RFC-3 / `#12` and RFC-4 / `#13` visual/chart work.
 - RFC-1 / `#14` later phases and RFC-2.1 / `#15` intake or policy-routing changes.
 - Issue #5 RFC event and hook runtime.
+- RFC-6 mobile review packs / `#17` beyond manual validation.
 - Broad import conversion work beyond bugs exposed by the calibration.
 
 ## RFC-3 / RFC-4 Placement
