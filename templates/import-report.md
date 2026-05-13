@@ -1,8 +1,9 @@
 # Import Report
 
 **Imported at:** [timestamp]
-**Source:** [source path]
-**Destination:** [paper directory]
+**Source label:** [source folder or file label]
+**Destination label:** [paper slug or destination label]
+**Path policy:** Absolute local source and destination paths are intentionally omitted from this report.
 
 ## Import Summary
 
@@ -20,7 +21,7 @@ original/
 
 | Original Path | Imported Path | Classification | Notes |
 |---------------|---------------|----------------|-------|
-| [path] | [path] | [draft/research/spec/review/asset/unclear] | [notes] |
+| [path] | [path] | [draft/research/spec/review/asset/unclear] | Preserved unchanged; [size] bytes |
 
 ## Files Skipped
 
@@ -53,6 +54,7 @@ These are intentionally not generated during import unless explicitly requested.
 |----------|-----------------|---------------------|
 | RESEARCH.json / RESEARCH.md | Research compression should happen in a fresh context | `/gpd-research` |
 | OUTLINE.md | Structure should be created or validated after research/brief clarity | `/gpd-outline --lite` for triage, `/gpd-outline --deep` for serious/researched/high-stakes papers |
+| FACT-CHECK.md | Claim audit should happen after draft/context is selected | `/gpd-fact-check --risk-scan` or `/gpd-fact-check --full` |
 | REVIEW.md | Review should happen after import context is cleared | `/gpd-review` |
 
 ## Imported Research / Reference Material
@@ -89,7 +91,7 @@ Choose one when strategy gate status is `Go`:
 2. `/gpd-outline --lite` - quickly triage or rebuild structure; use `/gpd-outline --deep` for serious, researched, high-stakes, or 1,200+ word papers.
 3. `/gpd-review --external` - review the current draft locally and with available external models.
 
-Conditional note: if this imported draft is publication-sensitive and contains material factual claims, run `/gpd-fact-check --risk-scan` before external review or export.
+Conditional note: if this imported draft is publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run `/gpd-fact-check --risk-scan` before external review or export.
 
 ## Suggested Choice
 

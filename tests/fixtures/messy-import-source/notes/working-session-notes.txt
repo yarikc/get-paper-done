@@ -1,0 +1,5 @@
+Working session notes:
+
+- Keep the draft concise.
+- Do not assume the reader attended prior review sessions.
+- Separate public reference material from internal operating proposal.

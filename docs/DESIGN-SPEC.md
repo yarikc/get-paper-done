@@ -188,7 +188,7 @@ Import is preservation-first:
    - `/gpd-research`
    - `/gpd-outline --lite` for structure triage, or `/gpd-outline --deep` for serious/researched/high-stakes papers
    - `/gpd-review --external`
-   - conditional note: use `/gpd-fact-check --risk-scan` before external review or export if the imported draft is already publication-sensitive and fact-heavy
+   - conditional note: use `/gpd-fact-check --risk-scan` before external review or export if the imported draft is already publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims
 
 Import must not generate `RESEARCH.json`, `OUTLINE.md`, `FACT-CHECK.md`, or `REVIEW.md` by default. It must create a lightweight `STRATEGY.md` gate from imported context; if that gate blocks, post-import next action is `/gpd-brief` unless the user explicitly overrides.
 

@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, six realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, six realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, messy-import fixture coverage, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,7 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, live public-source examples, and reusable reader-feedback capture are now represented with regression coverage. Remaining example diversity should focus on messy import depth or real-paper calibration breadth, not more synthetic numeric coverage.
+- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, live public-source examples, reusable reader-feedback capture, and messy import depth are now represented with regression coverage. Remaining example diversity should focus on real-paper calibration breadth, not more synthetic numeric coverage.
 - `#1`: broader test/evaluation program; remains open until more fixture diversity and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
@@ -43,7 +43,7 @@ Current issue alignment:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-12 after codifying reusable reader-feedback capture.
+Last changed: 2026-05-12 after adding messy-import fixture coverage.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -57,7 +57,7 @@ Plan-change rule:
 ### Owning Issues
 
 - `#6` owns semantic-validation hardening: semantic issue IDs and claim-support example backfill.
-- `#2` owns example and fixture hardening plus workflow contract cleanup: pre-registration artifacts, fixture documentation, dedicated example-shape tests, workflow-state fixtures, classification enum consistency, and reader-feedback artifact consistency.
+- `#2` owns example and fixture hardening plus workflow contract cleanup: pre-registration artifacts, fixture documentation, dedicated example-shape tests, workflow-state fixtures, classification enum consistency, reader-feedback artifact consistency, and messy-import depth coverage.
 
 ### Scope
 
@@ -73,6 +73,7 @@ Plan-change rule:
 10. Completed: promoted classification enums into `config.schema.json`, starter templates, brief/workflow guidance, docs, profile calibration, and example tests so `purpose/channel/risk/complexity/audience_shape` drive later stages instead of loose `paper_type` labels.
 11. Completed: codified the reusable "not new bureaucracy" rule for governance, control, standard, gate, review, and required-record papers in brief, draft, review, and rubric guidance.
 12. Completed: added reusable `READER-FEEDBACK.md` capture with five-signal template, artifact validation, review/revise/progress guidance, status routing, and documentation.
+13. Completed: added a messy synthetic import fixture with expected findings and regression coverage for preservation, source/review classification, canonical draft selection, no downstream artifact generation, blocked strategy routing, and source-sensitive semantic warning.
 
 ### Explicit Non-Goals For This Cycle
 

@@ -431,7 +431,7 @@ Useful post-import next steps:
 /gpd-review --external
 ```
 
-Use `/gpd-outline --deep` when the imported paper is serious, researched, high-stakes, or about 1,200+ words. If the imported draft is already publication-sensitive and contains material factual claims, run `/gpd-fact-check --risk-scan` before external review or export.
+Use `/gpd-outline --deep` when the imported paper is serious, researched, high-stakes, or about 1,200+ words. If the imported draft is already publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run `/gpd-fact-check --risk-scan` before external review or export.
 
 ## Review And Revision
 

@@ -38,10 +38,15 @@ function classifyFile(relPath) {
   if (
     base.includes('research')
     || base.includes('reference')
+    || base.includes('source')
     || lower.startsWith('research/')
     || lower.startsWith('references/')
+    || lower.startsWith('source/')
+    || lower.startsWith('sources/')
     || lower.includes('/research/')
     || lower.includes('/references/')
+    || lower.includes('/source/')
+    || lower.includes('/sources/')
   ) return 'research';
   if (
     base.includes('draft')
@@ -144,7 +149,7 @@ function reportPathLabel(value) {
 function importReport(input, copied, skipped, canonicalDraft) {
   const copiedRows = copied.length === 0
     ? '| - | - | - | - |'
-    : copied.map((file) => `| ${file.rel} | original/${file.rel.split(path.sep).join('/')} | ${file.classification} | ${file.size} bytes |`).join('\n');
+    : copied.map((file) => `| ${file.rel} | original/${file.rel.split(path.sep).join('/')} | ${file.classification} | Preserved unchanged; ${file.size} bytes |`).join('\n');
   const skippedRows = skipped.length === 0
     ? '| - | - |'
     : skipped.map((file) => `| ${file.path.split(path.sep).join('/')} | ${file.reason} |`).join('\n');
@@ -239,6 +244,8 @@ Choose one when strategy gate status is \`Go\`:
 1. \`/gpd-research\` - research imported/source material and compress evidence for and against the argument.
 2. \`/gpd-outline --lite\` - quickly triage or rebuild structure; use \`/gpd-outline --deep\` for serious, researched, high-stakes, or 1,200+ word papers.
 3. \`/gpd-review --external\` - review the current draft locally and with available external models.
+
+Conditional note: if this imported draft is publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run \`/gpd-fact-check --risk-scan\` before external review or export.
 
 ## Suggested Choice
 
