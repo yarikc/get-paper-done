@@ -97,6 +97,7 @@ Each paper lives in its own directory:
     REVIEW.md
     FACT-CHECK.md
     EXTERNAL-REVIEWS.md
+    READER-FEEDBACK.md
     FEEDBACK-PLAN.md
 ```
 
@@ -118,6 +119,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `REVIEW.md` | Local review findings and revision plan |
 | `FACT-CHECK.md` | Claim inventory, source alignment, factual risk, source gaps, and recommended handling |
 | `EXTERNAL-REVIEWS.md` | Raw and summarized external model feedback |
+| `READER-FEEDBACK.md` | Structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals |
 | `FEEDBACK-PLAN.md` | Proposed incorporate/ignore/defer/ask handling before revision |
 | `STATE.md` | Human-readable current stage, blockers, approvals, suggested next command |
 | `STATE.json` | Machine-readable state companion used by CLI status and validation |
@@ -258,6 +260,12 @@ The default placement is after drafting and before full review when the draft co
 Review never edits the draft directly.
 
 Local review writes `REVIEW.md`.
+
+Reader feedback writes:
+
+- `READER-FEEDBACK.md`
+
+It captures five signals: voice, register, audience fit, evidence, and ask clarity. Reader feedback is an input to handling, not permission to edit.
 
 External review writes:
 

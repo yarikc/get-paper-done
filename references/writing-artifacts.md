@@ -24,7 +24,8 @@ Later stages create these on demand:
 - `FACT-CHECK.md`: claim inventory, source alignment, factual risk, source gaps, and recommended factual handling
 - `REVIEW.md`: argument, audience, structure, persona, decision-usefulness, and publication-readiness review
 - `EXTERNAL-REVIEWS.md`: optional raw and summarized feedback from external AI reviewers
-- `FEEDBACK-PLAN.md`: proposed handling of local/external feedback before revision
+- `READER-FEEDBACK.md`: structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals
+- `FEEDBACK-PLAN.md`: proposed handling of local/external/reader feedback before revision
 
 Import-specific and supporting material:
 
@@ -266,13 +267,14 @@ Deep mode adds:
 
 `/gpd-review --external` can request feedback from installed external AI CLIs or local model servers. Use `/gpd-review --external --models claude,gemini,codex` to limit reviewers. Older aliases such as `/gpd-review --all` and `/gpd-review --claude --gemini` remain acceptable for compatibility.
 
-The review stage has three outputs:
+The review stage has four possible outputs:
 
 - `.paper/REVIEW.md`: local review
 - `.paper/EXTERNAL-REVIEWS.md`: raw and summarized external model feedback
+- `.paper/READER-FEEDBACK.md`: structured capture of human/model reader feedback when feedback arrives outside the local review
 - `.paper/FEEDBACK-PLAN.md`: evaluated handling plan
 
-The feedback plan must classify each item as incorporate, ignore, defer, or ask user. No draft or upstream artifact should be changed until the user approves the proposed handling.
+`READER-FEEDBACK.md` uses five signals: voice, register, audience fit, evidence, and ask clarity. The feedback plan must classify each item as incorporate, ignore, defer, or ask user. No draft or upstream artifact should be changed until the user approves the proposed handling.
 
 ## Fast Intake
 

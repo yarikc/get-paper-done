@@ -109,7 +109,7 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 | Outline | `/gpd-outline` | `OUTLINE.md`, state | Blocks when strategy is blocked. Deep mode checks reader journey, evidence placement, objections, and draft readiness. |
 | Draft | `/gpd-draft` | `DRAFT.md`, state | Defaults to section-by-section drafting for serious papers. Routes to next section, fact-check, or review. |
 | Fact-check | `/gpd-fact-check` | `FACT-CHECK.md`, state | Flags unsupported, stale, exaggerated, contradicted, or risky claims before review/export. |
-| Review | `/gpd-review` | `REVIEW.md`, optionally `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md` | Local review uses fixed rubrics. External review proposes feedback handling but does not edit the draft. |
+| Review | `/gpd-review` | `REVIEW.md`, optionally `READER-FEEDBACK.md`, `EXTERNAL-REVIEWS.md`, and `FEEDBACK-PLAN.md` | Local review uses fixed rubrics. Reader/external feedback is captured and converted into proposed handling before revision. |
 | Revise | `/gpd-revise` | `DRAFT.md`, state | Applies approved feedback or a controlled editorial pass. Routes back to fact-check/review when needed. |
 | Export | `/gpd-export` or `gpd export` | `.paper/exports/FINAL.md`, state | Final handoff after review and revision state is clean. CLI export requires `REVIEW.md` verdict `Ready` unless `--force` is used. |
 
@@ -152,7 +152,7 @@ This is an incremental refresh, not a full reset. Keep the existing artifacts, r
 
 `STATE.json` can still carry the saved next command and mode choice, such as `/gpd-outline --lite`, but `gpd status` will not let it skip structurally required artifacts. For example, a saved `/gpd-export` is ignored until a draft and review exist. Once `.paper/exports/FINAL.md` exists and is newer than the draft, fact-check, and review, `gpd status` treats the paper as exported and routes to `/gpd-progress`.
 
-After fact-check and review, `gpd status` also reads documented outcome fields. `FACT-CHECK.md` `Recommended Next Action` can send the paper back to research or revise. `REVIEW.md` verdicts of `Revise` or `Rework` route to `/gpd-revise`. A pending `FEEDBACK-PLAN.md` pauses at `/gpd-progress` until you approve, revise, or ignore the plan.
+After fact-check and review, `gpd status` also reads documented outcome fields. `FACT-CHECK.md` `Recommended Next Action` can send the paper back to research or revise. `REVIEW.md` verdicts of `Revise` or `Rework` route to `/gpd-revise`. A newer `READER-FEEDBACK.md` routes back to `/gpd-review` so feedback can be synthesized into a plan. A pending `FEEDBACK-PLAN.md` pauses at `/gpd-progress` until you approve, revise, or ignore the plan.
 
 ## Main Slash Commands
 
@@ -246,6 +246,7 @@ gpd version
     REVIEW.md
     FACT-CHECK.md
     EXTERNAL-REVIEWS.md
+    READER-FEEDBACK.md
     FEEDBACK-PLAN.md
 ```
 
@@ -280,6 +281,7 @@ The examples are included in the test suite. `tests/example-fixtures.test.js` va
 | `FACT-CHECK.md` | Claim inventory, source alignment, factual risk, source gaps, and recommended handling. |
 | `REVIEW.md` | Local review findings and revision plan. |
 | `EXTERNAL-REVIEWS.md` | Raw and summarized external model feedback. |
+| `READER-FEEDBACK.md` | Structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals. |
 | `FEEDBACK-PLAN.md` | Proposed incorporate/ignore/defer/ask handling before revision. |
 | `STATE.md` | Human-readable current stage, blockers, approvals, suggested next command. |
 | `STATE.json` | Machine-readable state used by CLI status and validation. |
@@ -435,7 +437,7 @@ Use `/gpd-outline --deep` when the imported paper is serious, researched, high-s
 
 `/gpd-review` produces a local review with fixed scorecards and required fixes. `/gpd-review --external` asks available external AI CLIs or local models for independent feedback.
 
-External review never edits the draft directly. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, then asks how to proceed. `/gpd-revise` only applies feedback after you approve the proposed handling.
+Reader feedback is captured in `.paper/READER-FEEDBACK.md` before it becomes revision work. The artifact uses five signals: voice, register, audience fit, evidence, and ask clarity. External review never edits the draft directly. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, then asks how to proceed. `/gpd-revise` only applies feedback after you approve the proposed handling.
 
 ## Artifact Contracts
 

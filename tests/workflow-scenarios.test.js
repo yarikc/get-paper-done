@@ -209,6 +209,33 @@ function testPendingFeedbackPlanBlocksAutomaticRevise() {
   assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
 }
 
+function testReaderFeedbackRoutesToReviewBeforeRevision() {
+  const paperDir = completePaper('reader-feedback');
+  writeArtifact(paperDir, 'READER-FEEDBACK.md', fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8'));
+  touchArtifact(paperDir, 'READER-FEEDBACK.md', 30);
+
+  const status = statusJson(paperDir);
+  assert.strictEqual(status.artifacts['READER-FEEDBACK.md'], true);
+  assert.strictEqual(status.next, '/gpd-review');
+}
+
+function testHandledReaderFeedbackDoesNotStaleExport() {
+  const paperDir = completePaper('handled-reader-feedback');
+  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n');
+  writeArtifact(paperDir, 'READER-FEEDBACK.md', fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8'));
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
+    '# Feedback Handling Plan',
+    '',
+    '**Status:** Approved - no draft changes needed',
+    '',
+  ].join('\n'));
+  touchArtifact(paperDir, 'exports/FINAL.md', 30);
+  touchArtifact(paperDir, 'READER-FEEDBACK.md', 40);
+  touchArtifact(paperDir, 'FEEDBACK-PLAN.md', 50);
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
+}
+
 testCleanCompletePaperUsesStateSuggestion();
 testExportedPaperRoutesToProgress();
 testStaleExportRoutesBackToExport();
@@ -222,5 +249,7 @@ testFactCheckRecommendedResearchRoutesBackToResearch();
 testFactCheckRecommendedReviseRoutesToRevise();
 testReviewVerdictRoutesToRevise();
 testPendingFeedbackPlanBlocksAutomaticRevise();
+testReaderFeedbackRoutesToReviewBeforeRevision();
+testHandledReaderFeedbackDoesNotStaleExport();
 
 console.log('workflow scenario tests passed');

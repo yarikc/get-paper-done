@@ -271,6 +271,7 @@ function artifactState(paperDir) {
     'DRAFT.md',
     'FACT-CHECK.md',
     'REVIEW.md',
+    'READER-FEEDBACK.md',
     'FEEDBACK-PLAN.md',
     'STATE.md',
     'STATE.json',
@@ -332,6 +333,12 @@ function suggestedNext(state) {
     || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
   ) {
     return '/gpd-review --deep';
+  }
+  if (
+    a['READER-FEEDBACK.md']
+    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'READER-FEEDBACK.md', 'FEEDBACK-PLAN.md'))
+  ) {
+    return '/gpd-review';
   }
   if (feedbackPlanPending(state)) return '/gpd-progress';
 

@@ -46,6 +46,7 @@ function testTemplateArtifactsPassContracts() {
     'templates/outline.md',
     'templates/fact-check.md',
     'templates/review.md',
+    'templates/reader-feedback.md',
     'templates/feedback-plan.md',
   ]) {
     const output = run(['validate-artifact', '--path', path.join(repoRoot, file)]);
@@ -199,6 +200,18 @@ function testMarkdownContractRejectsMalformedHeading() {
   const result = runFail(['validate-artifact', '--path', badReview]);
   assert.strictEqual(result.status, 1);
   assert(result.stdout.includes('REVIEW.md: Missing heading "# Review"'));
+}
+
+function testReaderFeedbackContractRejectsMissingSignal() {
+  const dir = tempDir('gpd-artifact-reader-feedback-test');
+  const badFeedback = path.join(dir, 'READER-FEEDBACK.md');
+  const feedback = fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8')
+    .replace('| Ask clarity | [1-5] | [phrase, section, or pattern] | [what to preserve or change] |\n', '');
+  fs.writeFileSync(badFeedback, feedback);
+
+  const result = runFail(['validate-artifact', '--path', badFeedback]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('READER-FEEDBACK.md: Five-Signal Scorecard missing signal "Ask clarity"'));
 }
 
 function testFactCheckContractRequiresSafeClaimSections() {
@@ -355,6 +368,7 @@ testResearchSynthesisMatrixFailureIsActionable();
 testMarkdownContractFailureIsActionable();
 testMarkdownContractRejectsUnexpectedAudienceDimension();
 testMarkdownContractRejectsMalformedHeading();
+testReaderFeedbackContractRejectsMissingSignal();
 testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
 testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();

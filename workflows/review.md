@@ -11,9 +11,11 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 - .paper/OUTLINE.md
 - .paper/DRAFT.md
 - .paper/FACT-CHECK.md if present
+- .paper/READER-FEEDBACK.md if present
 - references/review-rubrics.md
 - references/audience-review-rubric.md
 - templates/review.md
+- templates/reader-feedback.md
 - templates/external-reviews.md
 - templates/feedback-plan.md
 </required_reading>
@@ -79,6 +81,20 @@ Write `.paper/REVIEW.md` with:
 If `.paper/REVIEW.md` already exists, the new review must clearly supersede the prior verdict and evaluate the current draft, not preserve stale findings from an earlier revision. If the draft has changed since the prior review, explicitly account for whether prior required fixes were resolved.
 
 Use review stance first. Do not praise before identifying the highest-impact issues.
+
+## 1.5 Reader Feedback Capture
+
+If the user provides paper feedback inline, through a `.feedback` file, or by pointing to notes that are not already captured in `.paper/READER-FEEDBACK.md`, create or update `.paper/READER-FEEDBACK.md` using `templates/reader-feedback.md`.
+
+Reader feedback must use the five-signal structure:
+
+- Voice
+- Register
+- Audience fit
+- Evidence
+- Ask clarity
+
+Capture the feedback as evidence for review planning, not as permission to rewrite. If feedback requires changes, route it through `.paper/FEEDBACK-PLAN.md` before `/gpd-revise`.
 
 ## 2. External Review Flag Detection
 
@@ -224,7 +240,7 @@ Include:
 - consensus summary
 - divergent views
 
-Then evaluate all feedback, including `.paper/REVIEW.md` and `.paper/FACT-CHECK.md` when present, and create `.paper/FEEDBACK-PLAN.md` using `templates/feedback-plan.md`.
+Then evaluate all feedback, including `.paper/REVIEW.md`, `.paper/FACT-CHECK.md`, and `.paper/READER-FEEDBACK.md` when present, and create `.paper/FEEDBACK-PLAN.md` using `templates/feedback-plan.md`.
 
 For each meaningful feedback item, classify:
 

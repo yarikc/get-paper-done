@@ -23,6 +23,7 @@ const artifactNameAliases = {
   'outline.md': 'OUTLINE.md',
   'fact-check.md': 'FACT-CHECK.md',
   'review.md': 'REVIEW.md',
+  'reader-feedback.md': 'READER-FEEDBACK.md',
   'feedback-plan.md': 'FEEDBACK-PLAN.md',
 };
 
@@ -152,6 +153,28 @@ const markdownContracts = {
         'Proposed Handling',
         'Affected Artifact',
       ],
+    ],
+  },
+  'READER-FEEDBACK.md': {
+    headings: [
+      '# Reader Feedback',
+      '## Source',
+      '## Five-Signal Scorecard',
+      '## Feedback Items',
+      '## Questions',
+      '## Suggested Handling',
+      '## Notes',
+    ],
+    tables: [
+      ['Signal', 'Score', 'Evidence', 'Actionable Feedback'],
+      ['#', 'Feedback', 'Signal', 'Severity', 'Recommended Handling', 'Affected Artifact'],
+    ],
+    readerFeedbackSignals: [
+      'Voice',
+      'Register',
+      'Audience fit',
+      'Evidence',
+      'Ask clarity',
     ],
   },
 };
@@ -406,6 +429,35 @@ function validateAudienceScorecard(markdown) {
   return issues;
 }
 
+function validateReaderFeedbackScorecard(markdown) {
+  const contract = markdownContracts['READER-FEEDBACK.md'];
+  const section = sectionBetween(markdown, '## Five-Signal Scorecard', /\n##\s+/);
+  const rows = parseFirstTableRows(section);
+  const signals = rows.map((row) => row[0]).filter(Boolean);
+  const issues = [];
+
+  for (const signal of contract.readerFeedbackSignals) {
+    if (!signals.includes(signal)) {
+      issues.push(issue('HIGH', 'READER-FEEDBACK.md', `Five-Signal Scorecard missing signal "${signal}"`));
+    }
+  }
+
+  for (const signal of signals) {
+    if (!contract.readerFeedbackSignals.includes(signal)) {
+      issues.push(issue('HIGH', 'READER-FEEDBACK.md', `Five-Signal Scorecard has unexpected signal "${signal}"`));
+    }
+  }
+
+  for (const signal of contract.readerFeedbackSignals) {
+    const count = signals.filter((item) => item === signal).length;
+    if (count > 1) {
+      issues.push(issue('HIGH', 'READER-FEEDBACK.md', `Five-Signal Scorecard repeats signal "${signal}"`));
+    }
+  }
+
+  return issues;
+}
+
 function extractMarkdownField(markdown, label) {
   const target = `**${label.toLowerCase()}:**`;
   for (const line of markdown.split(/\r?\n/)) {
@@ -469,6 +521,9 @@ function validateMarkdownArtifact(filePath) {
 
   if (artifact === 'REVIEW.md') {
     issues.push(...validateAudienceScorecard(markdown));
+  }
+  if (artifact === 'READER-FEEDBACK.md') {
+    issues.push(...validateReaderFeedbackScorecard(markdown));
   }
   if (artifact === 'STRATEGY.md') {
     issues.push(...validateStrategyValues(markdown, filePath));

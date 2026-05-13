@@ -15,12 +15,13 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 - .paper/REVIEW.md
 - .paper/FACT-CHECK.md if present
 - .paper/EXTERNAL-REVIEWS.md if present
+- .paper/READER-FEEDBACK.md if present
 - .paper/FEEDBACK-PLAN.md if present
 </required_reading>
 
 <process>
 
-Read the current draft and review. If `.paper/FEEDBACK-PLAN.md` exists, read it before proposing or applying changes.
+Read the current draft and review. If `.paper/READER-FEEDBACK.md` exists, read it as input to feedback handling, not as direct edit authority. If `.paper/FEEDBACK-PLAN.md` exists, read it before proposing or applying changes.
 
 If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to approve, revise, or ignore the plan. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
 
@@ -41,13 +42,14 @@ Default mode:
 
 - If approved review feedback exists, apply only approved feedback.
 - If no approved feedback exists and the user asks for editing, use `editorial_review` first unless the user explicitly requests `--section`, `--style-pass`, `--final-polish`, or `--full`.
-- If the user asks to apply pending or external feedback, create or update `.paper/FEEDBACK-PLAN.md` and ask before editing.
+- If the user asks to apply pending, reader, or external feedback, create or update `.paper/FEEDBACK-PLAN.md` and ask before editing.
 - If no edit intensity is provided, use `--standard-edit`.
 
 Before editing, identify:
 
 - required fixes
 - approved external feedback to incorporate
+- approved reader feedback to incorporate
 - feedback explicitly ignored or deferred
 - claims needing support or removal
 - fact-check findings requiring source, softening, removal, reframe, or current verification
@@ -59,7 +61,7 @@ Before editing, identify:
 
 Revision boundary:
 
-- `/gpd-revise` applies approved feedback from `.paper/REVIEW.md`, `.paper/FACT-CHECK.md`, and `.paper/FEEDBACK-PLAN.md`.
+- `/gpd-revise` applies approved feedback from `.paper/REVIEW.md`, `.paper/FACT-CHECK.md`, `.paper/READER-FEEDBACK.md`, and `.paper/FEEDBACK-PLAN.md`.
 - `paper-editor` handles controlled prose quality: editorial review, section edit, full edit, style pass, or final polish.
 - Neither path may silently change thesis, claim meaning, evidence meaning, scope, audience, or decision ask.
 

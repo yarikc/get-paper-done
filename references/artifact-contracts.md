@@ -145,3 +145,28 @@ Required headings:
 Required tables:
 
 - Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `Affected Artifact`
+
+### `READER-FEEDBACK.md`
+
+Required headings:
+
+- `# Reader Feedback`
+- `## Source`
+- `## Five-Signal Scorecard`
+- `## Feedback Items`
+- `## Questions`
+- `## Suggested Handling`
+- `## Notes`
+
+Required tables:
+
+- Five-Signal Scorecard: `Signal`, `Score`, `Evidence`, `Actionable Feedback`
+- Feedback Items: `#`, `Feedback`, `Signal`, `Severity`, `Recommended Handling`, `Affected Artifact`
+
+Five-Signal Scorecard must include exactly these five signals:
+
+- Voice
+- Register
+- Audience fit
+- Evidence
+- Ask clarity

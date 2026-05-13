@@ -30,6 +30,7 @@ Check which artifacts exist:
 - REVIEW.md
 - FACT-CHECK.md
 - EXTERNAL-REVIEWS.md
+- READER-FEEDBACK.md
 - FEEDBACK-PLAN.md
 - IMPORT.md
 - STATE.json
@@ -55,6 +56,7 @@ Stale context risks:
 - `OUTLINE.md` updated after `DRAFT.md`: draft may need refresh.
 - `DRAFT.md` updated after `FACT-CHECK.md`: fact-check may need refresh.
 - `FACT-CHECK.md` has HIGH issues or claims marked verify-before-publication: do not export without user acknowledgement.
+- `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
 - `FEEDBACK-PLAN.md` pending approval: do not revise until user approves handling.
 
 Use file modification times only as a hint; do not overstate certainty.
@@ -109,14 +111,15 @@ Use this order:
 14. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
 15. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
 16. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
-17. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-progress`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
-18. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
-19. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
-20. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
-21. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
-22. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
-23. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
-24. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
+17. `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
+18. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-progress`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
+19. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
+20. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
+21. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
+22. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
+23. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
+24. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
+25. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
 
 Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
 
@@ -134,8 +137,8 @@ Default guidance:
 - Before `/gpd-outline`: clear context after research; read compressed `RESEARCH.json`, not raw sources. Use Lite for early/short/import triage and Deep for serious/researched/high-stakes papers.
 - Before `/gpd-draft`: clear context after outline; read `PERSONA.md`, `AUDIENCE.md`, `BRIEF.md`, `RESEARCH.json`, `OUTLINE.md`.
 - Before `/gpd-fact-check`: clear context after drafting; read `DRAFT.md`, compressed `RESEARCH.json`, `BRIEF.md`, `AUDIENCE.md`, and source policy. Avoid raw sources except for specific verification.
-- Before `/gpd-review`: clear context after drafting; read draft and upstream artifacts.
-- Before `/gpd-revise`: clear context after review; read approved feedback plan and draft.
+- Before `/gpd-review`: clear context after drafting; read draft, reader feedback if present, and upstream artifacts.
+- Before `/gpd-revise`: clear context after review; read approved feedback plan, reader feedback if present, and draft.
 
 ## 6. Output Format
 
