@@ -13,7 +13,7 @@ Setup creates only the durable context needed to start:
 - `STRATEGY.md`: strategic readiness gate, paper job, thesis package, posture, decision usefulness, and scope
 - `STATE.md`: human-readable current stage, blockers, approvals, and suggested next command
 - `STATE.json`: machine-readable state companion used by CLI status and validation
-- `config.json`: workflow preferences
+- `config.json`: workflow mode, normalized classification, citation, research, and review settings
 
 Later stages create these on demand:
 
@@ -197,7 +197,7 @@ After import, show the user a small post-import menu:
 
 If the imported draft is already publication-sensitive and contains material factual claims, add a conditional note recommending `/gpd-fact-check --risk-scan` before external review or export. Keep the default import menu small.
 
-If thesis, audience, or paper type is unclear, recommend `/gpd-brief` before the three choices.
+If thesis, audience, or classification is unclear, recommend `/gpd-brief` before the three choices.
 
 ## Research Stage
 

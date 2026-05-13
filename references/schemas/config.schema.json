@@ -5,21 +5,56 @@
   "type": "object",
   "required": [
     "mode",
-    "paper_type",
+    "classification",
     "default_length",
     "citation_style",
     "research",
     "review"
   ],
   "properties": {
-    "mode": { "type": "string", "minLength": 1 },
-    "paper_type": { "type": "string", "minLength": 1 },
+    "mode": {
+      "type": "string",
+      "enum": ["lite", "standard", "flagship"]
+    },
+    "classification": {
+      "type": "object",
+      "required": ["purpose", "channel", "risk", "complexity", "audience_shape"],
+      "properties": {
+        "purpose": {
+          "type": "string",
+          "enum": ["decision_memo", "strategy_paper", "explainer", "update"]
+        },
+        "channel": {
+          "type": "string",
+          "enum": ["internal", "external", "mixed"]
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["internal_low", "internal_high", "external_low", "external_high", "regulated"]
+        },
+        "complexity": {
+          "type": "string",
+          "enum": ["light", "standard", "deep"]
+        },
+        "audience_shape": {
+          "type": "string",
+          "enum": ["single", "prioritized_multi", "hybrid"]
+        }
+      }
+    },
+    "paper_type": {
+      "type": "string",
+      "description": "Optional legacy/display label. Use classification.purpose for workflow logic.",
+      "minLength": 1
+    },
     "default_length": {
       "type": "object",
-      "required": ["newsletter", "blog", "position_paper", "white_paper"],
+      "required": ["newsletter", "blog", "memo", "update", "position_paper", "white_paper"],
       "properties": {
         "newsletter": { "type": "string", "minLength": 1 },
         "blog": { "type": "string", "minLength": 1 },
+        "memo": { "type": "string", "minLength": 1 },
+        "update": { "type": "string", "minLength": 1 },
         "position_paper": { "type": "string", "minLength": 1 },
         "white_paper": { "type": "string", "minLength": 1 }
       }

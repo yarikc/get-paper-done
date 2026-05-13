@@ -2,11 +2,18 @@
 
 ## Document Intent
 
-- **Document type:** [Position paper | Internal strategy memo | Research note | Blog | LinkedIn article | Newsletter | White paper]
+- **Purpose:** [decision_memo | strategy_paper | explainer | update]
+- **Channel:** [internal | external | mixed]
+- **Risk:** [internal_low | internal_high | external_low | external_high | regulated]
+- **Complexity:** [light | standard | deep]
+- **Audience shape:** [single | prioritized_multi | hybrid]
+- **Legacy/display label:** [optional: memo | blog | white paper | newsletter | article | board paper | etc.]
 - **Target audience:** [Primary reader]
 - **Why this audience should care:** [Reason]
 - **Desired outcome after reading:** [Belief, decision, action, or discussion]
 - **Decision or belief to influence:** [Specific decision or belief]
+
+Use the normalized classification values for workflow decisions. Treat labels such as "blog," "white paper," or "architecture paper" as display/context labels, not purpose values.
 
 ## Strategy Gate
 
@@ -94,6 +101,14 @@ Create 3 to 5 major claims. Each claim should be arguable and specific.
 - **Must avoid:** [items]
 - **Must-not-omit risks or caveats:** [Risks or caveats]
 
+## Process Burden Check
+
+Use this section when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms.
+
+- **Likely bureaucracy objection:** [How a skeptical reader might say this creates process, delay, or ceremony]
+- **Answer:** [How the proposal improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process]
+- **Existing decision need being standardized:** [What reviewers or operators already need to decide, validate, approve, reject, recertify, or retire]
+
 ## House Style Defaults
 
 - Prefer short, clear sentences.
@@ -110,6 +125,7 @@ Create 3 to 5 major claims. Each claim should be arguable and specific.
 - [ ] Audience objections are addressed
 - [ ] Claims are supported at the chosen proof standard
 - [ ] Trade-offs and caveats are explicit
+- [ ] Governance, control, or standard proposals address process-burden objections
 - [ ] Acronyms and specialized terms are explained unless common to the audience
 - [ ] Persona voice is consistent
 - [ ] Final export is ready for publication or handoff

@@ -24,6 +24,15 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 
 Read all context and the current draft.
 
+Use `.paper/config.json` classification as the review contract:
+
+- `decision_memo`: judge ask clarity, decision usefulness, support for the ask, operating mechanism, accountability, caveats, and concise memo discipline.
+- `strategy_paper`: judge problem framing, thesis, direction, trade-offs, implications over time, and audience conflict handling.
+- `explainer`: judge reader understanding, definitions, source authority, examples, mechanisms, and bounded recommendations.
+- `update`: judge status clarity, change summary, blockers, next steps, and whether the lightweight shape fits risk.
+
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, check whether the draft addresses the process-burden objection. The review should flag papers that add ceremony without explaining how the mechanism improves decision quality, evidence, accountability, risk control, speed, or consistency.
+
 Parse audience mode flags:
 
 - `--lite`: use Audience Review Lite

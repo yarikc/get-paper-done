@@ -1,30 +1,30 @@
 {
-  "mode": "flagship",
-  "paper_type": "explainer",
+  "mode": "standard",
+  "paper_type": "decision_memo",
   "classification": {
-    "purpose": "explainer",
-    "channel": "external",
-    "risk": "external_high",
-    "complexity": "deep",
+    "purpose": "decision_memo",
+    "channel": "internal",
+    "risk": "internal_high",
+    "complexity": "standard",
     "audience_shape": "prioritized_multi"
   },
   "default_length": {
     "newsletter": "800-1200 words",
     "blog": "1200-1800 words",
-    "memo": "600-1000 words",
-    "update": "150-300 words",
+    "memo": "700-1000 words",
+    "update": "150-250 words",
     "position_paper": "1800-3000 words",
     "white_paper": "3000-6000 words"
   },
   "citation_style": "source_ids",
   "research": {
-    "web_allowed": false,
+    "web_allowed": true,
     "require_source_table": true,
     "flag_unsupported_claims": true
   },
   "review": {
     "audience_fit": true,
-    "opposition_review": true,
+    "opposition_review": false,
     "fact_check": true,
     "persona_consistency": true
   }

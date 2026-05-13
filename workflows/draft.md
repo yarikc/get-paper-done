@@ -46,7 +46,12 @@ Drafting rules:
 - obey persona directives
 - meet the audience at the right expertise level
 - make the thesis clear
-- for `strategy_paper` and decision/recommendation papers, the opening must establish the problem, state the thesis, and name the requested decision or next move within the first 1 to 3 paragraphs
+- use `.paper/config.json` classification to choose draft behavior
+- for `classification.purpose = strategy_paper` and `classification.purpose = decision_memo`, the opening must establish the problem, state the thesis, and name the requested decision or next move within the first 1 to 3 paragraphs
+- for `classification.purpose = decision_memo`, keep the draft concise; include only enough context, evidence, mechanism, accountability, and risk framing to support the ask
+- for `classification.purpose = explainer`, prioritize reader understanding before recommendation language
+- for `classification.purpose = update`, keep the status/change/blocker/next-step shape and do not force research-heavy structure unless risk or evidence burden requires it
+- when proposing governance, controls, standards, gates, reviews, required records, or operating mechanisms, preempt the process-burden objection: explain how the proposal improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process
 - support claims using `RESEARCH.json` when present, with `RESEARCH.md` as a summary/index
 - address the strongest likely objection
 - stay within the requested length range unless the brief says otherwise

@@ -33,6 +33,10 @@ function tempDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
 }
 
+function loadSchema(name) {
+  return JSON.parse(fs.readFileSync(path.join(repoRoot, 'references', 'schemas', name), 'utf8'));
+}
+
 function testTemplateArtifactsPassContracts() {
   for (const file of [
     'templates/state.json',
@@ -265,11 +269,20 @@ function testPaperValidationIncludesArtifactContracts() {
   run(['init', '--location', dir, '--slug', 'contract-paper']);
   const paperDir = path.join(dir, 'contract-paper');
   fs.writeFileSync(path.join(paperDir, '.paper', 'config.json'), JSON.stringify({
-    mode: 'interactive',
-    paper_type: 'blog',
+    mode: 'standard',
+    classification: {
+      purpose: 'explainer',
+      channel: 'internal',
+      risk: 'internal_low',
+      complexity: 'standard',
+      audience_shape: 'single',
+    },
+    paper_type: 'explainer',
     default_length: {
       newsletter: '800-1200 words',
       blog: '1200-1800 words',
+      memo: '600-1000 words',
+      update: '150-300 words',
       position_paper: '1800-3000 words',
       white_paper: '3000-6000 words',
     },
@@ -292,6 +305,46 @@ function testPaperValidationIncludesArtifactContracts() {
   assert(result.stdout.includes('config.json: $.research.require_source_table expected boolean, got string'));
 }
 
+function testConfigClassificationEnumFailureIsActionable() {
+  const errors = validateJsonSchemaValue({
+    mode: 'standard',
+    classification: {
+      purpose: 'white_paper',
+      channel: 'public',
+      risk: 'high',
+      complexity: 'medium',
+      audience_shape: 'everyone',
+    },
+    paper_type: 'white_paper',
+    default_length: {
+      newsletter: '800-1200 words',
+      blog: '1200-1800 words',
+      memo: '600-1000 words',
+      update: '150-300 words',
+      position_paper: '1800-3000 words',
+      white_paper: '3000-6000 words',
+    },
+    citation_style: 'inline_links',
+    research: {
+      web_allowed: true,
+      require_source_table: true,
+      flag_unsupported_claims: true,
+    },
+    review: {
+      audience_fit: true,
+      opposition_review: true,
+      fact_check: true,
+      persona_consistency: true,
+    },
+  }, loadSchema('config.schema.json'));
+
+  assert(errors.includes('$.classification.purpose must be one of decision_memo, strategy_paper, explainer, update'));
+  assert(errors.includes('$.classification.channel must be one of internal, external, mixed'));
+  assert(errors.includes('$.classification.risk must be one of internal_low, internal_high, external_low, external_high, regulated'));
+  assert(errors.includes('$.classification.complexity must be one of light, standard, deep'));
+  assert(errors.includes('$.classification.audience_shape must be one of single, prioritized_multi, hybrid'));
+}
+
 testTemplateArtifactsPassContracts();
 testJsonSchemaFailureIsActionable();
 testStateEnumFailureIsActionable();
@@ -308,5 +361,6 @@ testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();
 testUnsupportedSchemaKeywordFailsSchemaDefinition();
 testUnknownArtifactFailsCli();
 testPaperValidationIncludesArtifactContracts();
+testConfigClassificationEnumFailureIsActionable();
 
 console.log('artifact contract tests passed');

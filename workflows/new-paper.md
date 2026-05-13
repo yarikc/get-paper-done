@@ -81,7 +81,13 @@ Ask freeform first:
 
 Follow the thread until you understand:
 
-- paper type
+- paper classification in plain language, then normalize into config enum values:
+  - `purpose`: `decision_memo`, `strategy_paper`, `explainer`, or `update`
+  - `channel`: `internal`, `external`, or `mixed`
+  - `risk`: `internal_low`, `internal_high`, `external_low`, `external_high`, or `regulated`
+  - `complexity`: `light`, `standard`, or `deep`
+  - `audience_shape`: `single`, `prioritized_multi`, or `hybrid`
+- any legacy/display label such as memo, blog, article, board paper, white paper, architecture paper, or newsletter
 - working title or topic
 - thesis or likely thesis
 - target audience
@@ -91,6 +97,8 @@ Follow the thread until you understand:
 - evidence standard
 
 Use the questioning guide, but do not run a checklist out loud.
+
+Write normalized classification into `.paper/config.json`. Do not force the user to speak in enum values; infer them from plain-language answers and state the mapping briefly before continuing.
 
 ## 3. Persona
 

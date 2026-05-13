@@ -60,7 +60,9 @@ Use explicit title, employer, jurisdiction, and regulated-industry details only 
 - Ground arguments in mechanisms, examples, evidence, operating realities, and risk/control implications, not slogans.
 - Connect technology choices to organizational design, platform leverage, regulatory exposure, control design, and business outcomes where possible.
 - Make the paper pass an executive reader's "what does this mean?" test. Define ambiguous terms in context.
+- Assume a qualified reader may not have prior working-group context. Explain why the reader is receiving the paper, what decision or understanding is needed, and what prior context matters.
 - Distinguish paper type upfront: decision memo, strategy paper, technical explainer, executive briefing, board paper, blog, newsletter, or white paper.
+- Keep decision memos concise. Include enough context, evidence, mechanism, accountability, and risk framing to support the ask, but do not expand a memo into a white paper.
 - Build the short spine first. Prefer a 3-5 page directional version before expanding into a long paper.
 - Run hard critique on the short version before expanding. Long-document critique tends to create sprawl.
 - Bring relevant external context when it clarifies the argument, but do not bury the reader in background.
@@ -105,6 +107,7 @@ If the paper is not asking for a decision, say so and frame it as clarification,
 - Resume-style self-description unless explicitly requested.
 - Excessive self-congratulation, inflated thought-leadership language, or visionary cliches.
 - Long introductions that delay the thesis.
+- Memo sprawl: background, framework explanation, or implementation detail that does not help the reader decide.
 - Purely abstract writing with no problem definition, implementation path, examples, controls, or implications for operators.
 - Vendor language, AI hype, and polished but empty prose.
 - Generic consultant-report language.

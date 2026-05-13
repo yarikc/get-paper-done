@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.1/10 as a writing framework and 8.6/10 as an installable private-repo tool as of 2026-05-12
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, five realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, deterministic public-source claim-support metadata checks, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, live public-source citation verification, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, six realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,7 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, and short quantitative examples are now represented under `examples/` with regression coverage. Public-source fidelity now has deterministic claim-support metadata coverage; remaining example diversity should focus on live public-source verification or messy import depth, not more synthetic numeric coverage.
+- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, and live public-source examples are now represented under `examples/` with regression coverage. Remaining example diversity should focus on messy import depth or real-paper calibration breadth, not more synthetic numeric coverage.
 - `#1`: broader test/evaluation program; remains open until more fixture diversity and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
@@ -43,7 +43,7 @@ Current issue alignment:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-12 after completing the mid-revision routing fixture.
+Last changed: 2026-05-12 after codifying process-burden handling for governance/control papers.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -57,7 +57,7 @@ Plan-change rule:
 ### Owning Issues
 
 - `#6` owns semantic-validation hardening: semantic issue IDs and claim-support example backfill.
-- `#2` owns example and fixture hardening: pre-registration artifacts, fixture documentation, dedicated example-shape tests, and workflow-state fixtures.
+- `#2` owns example and fixture hardening plus workflow contract cleanup: pre-registration artifacts, fixture documentation, dedicated example-shape tests, workflow-state fixtures, and classification enum consistency.
 
 ### Scope
 
@@ -69,6 +69,9 @@ Plan-change rule:
 6. Completed: added a dedicated `technology-lifecycle-management` import-recovery test covering anonymization/source boundary, mixed-audience config, absence of committed source draft, clean semantic validation, and completed routing.
 7. Completed: added a failed-strategy-gate fixture that proves `Revise Before Drafting` blocks downstream progress and routes back to `/gpd-brief` with clear validation output.
 8. Completed: added a mid-revision routing fixture that proves downstream review/fact-check artifacts can route a paper backward for incremental repair without resetting the whole workflow.
+9. Completed: added a compact live public-source example that uses real official public sources, records source verification, and proves claim-support metadata carries through research, fact-check, review, and export.
+10. Completed: promoted classification enums into `config.schema.json`, starter templates, brief/workflow guidance, docs, profile calibration, and example tests so `purpose/channel/risk/complexity/audience_shape` drive later stages instead of loose `paper_type` labels.
+11. Completed: codified the reusable "not new bureaucracy" rule for governance, control, standard, gate, review, and required-record papers in brief, draft, review, and rubric guidance.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -79,7 +82,8 @@ Plan-change rule:
 ### Deferred After This Cycle
 
 - Longer-paper prose-saturation recalibration.
-- Live public-source verification on a real paper.
+- CLI routing based on classification values. Classification is now schema/workflow/documentation enforced, but `gpd status` still routes primarily from artifact state, strategy state, mtimes, review/fact-check state, and export state.
+- Reusable `READER-FEEDBACK.md` artifact for portable five-signal human/model feedback. The discipline is demonstrated in examples and reviews, but not yet formalized as a template/schema/validator.
 - Release hardening beyond the package-boundary cleanup already completed.
 
 ## Active Milestone: One-Paper Diagnostic And Examples
@@ -102,7 +106,8 @@ Next work should validate behavior under real use before adding more RFC surface
 14. Completed: added controlled quantitative-claim semantic coverage and fact-check guidance so precise numbers require source IDs, baseline/denominator/timeframe context, and strong enough research support.
 15. Completed: added `examples/platform-review-cycle-metrics`, a short synthetic quantitative memo that exercises baseline, sample, timeframe, source IDs, fact-check handling, review, export, and zero-warning semantic validation.
 16. Completed: added structured `source_registry[*].claim_support` metadata plus semantic coverage that rejects safe claims citing sources recorded as only topically related.
-17. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, Issue #5 hooks, live public-source verification, or release hardening should come next.
+17. Completed: added `examples/public-ai-control-baseline`, a compact public-source decision memo that uses verified NIST, OWASP, and NCSC/CISA sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
+18. Use example findings to decide whether RFC-2.1 intake, RFC-1 later phases, Issue #5 hooks, messy import depth, or release hardening should come next.
 
 ## Completed Design Simplifications
 
@@ -135,6 +140,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added stable semantic issue IDs, backfilled claim-support metadata into the quantitative example, added quantitative expected findings, documented the broken semantic fixture, and added a dedicated imported-paper recovery test.
 - Added a failed-strategy-gate fixture plus regression test proving a blocked strategy state routes back to `/gpd-brief` and fails validation clearly without downstream artifacts.
 - Added a mid-revision routing fixture plus regression test proving fact-check can route a structurally valid paper back to `/gpd-research` while preserving downstream artifacts.
+- Added `examples/public-ai-control-baseline` plus regression coverage for real public-source URLs, source verification notes, direct claim-support metadata, fact-check source IDs, and exported public citations.
 
 ---
 

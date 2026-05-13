@@ -103,8 +103,8 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 
 | Stage | Primary command | Writes or updates | Gate / state change |
 |-------|-----------------|-------------------|---------------------|
-| Setup | `gpd init` or `/gpd-new-paper` | `PROJECT.md`, `PERSONA.md`, `AUDIENCE.md`, `BRIEF.md`, `STRATEGY.md`, `STATE.md`, `STATE.json`, `config.json` | Starts blocked by the strategy placeholder. Next command is `/gpd-brief`. |
-| Brief | `/gpd-brief` | `BRIEF.md`, `STRATEGY.md`, `STATE.md`, `STATE.json` | Strategy gate returns `Go`, `Revise Before Drafting`, or `No-Go`. Blocking statuses route back to `/gpd-brief`. |
+| Setup | `gpd init` or `/gpd-new-paper` | `PROJECT.md`, `PERSONA.md`, `AUDIENCE.md`, `BRIEF.md`, `STRATEGY.md`, `STATE.md`, `STATE.json`, `config.json` | Starts blocked by the strategy placeholder. Captures normalized paper classification in `config.json`. Next command is `/gpd-brief`. |
+| Brief | `/gpd-brief` | `BRIEF.md`, `STRATEGY.md`, `STATE.md`, `STATE.json`, sometimes `config.json` | Confirms or corrects classification. Strategy gate returns `Go`, `Revise Before Drafting`, or `No-Go`. Blocking statuses route back to `/gpd-brief`. |
 | Research | `/gpd-research` | `RESEARCH.json`, `RESEARCH.md`, state | Requires a non-blocking strategy gate unless explicitly overridden. Next command is usually `/gpd-outline --deep`. |
 | Outline | `/gpd-outline` | `OUTLINE.md`, state | Blocks when strategy is blocked. Deep mode checks reader journey, evidence placement, objections, and draft readiness. |
 | Draft | `/gpd-draft` | `DRAFT.md`, state | Defaults to section-by-section drafting for serious papers. Routes to next section, fact-check, or review. |
@@ -114,6 +114,23 @@ The workflow is deliberately stateful. `gpd status` and `/gpd-progress` both ins
 | Export | `/gpd-export` or `gpd export` | `.paper/exports/FINAL.md`, state | Final handoff after review and revision state is clean. CLI export requires `REVIEW.md` verdict `Ready` unless `--force` is used. |
 
 `gpd validate` is stricter than `gpd status`. A newly initialized paper can be valid structurally but still report a HIGH issue because the strategy gate intentionally blocks downstream work until `/gpd-brief` confirms the paper direction.
+
+Every paper has normalized classification in `.paper/config.json`:
+
+```json
+{
+  "classification": {
+    "purpose": "decision_memo",
+    "channel": "internal",
+    "risk": "internal_high",
+    "complexity": "standard",
+    "audience_shape": "prioritized_multi"
+  },
+  "mode": "standard"
+}
+```
+
+The allowed purposes are `decision_memo`, `strategy_paper`, `explainer`, and `update`. Labels such as "blog," "white paper," or "architecture paper" can still appear as display context, but workflow logic should use `classification.purpose`.
 
 Use `gpd validate --semantic` when you want deterministic quality gates in addition to structural contracts. Semantic validation catches empty-but-well-formed artifacts: stale BRIEF evidence placeholders after research, source-sensitive imported drafts without source mapping, mixed-audience drafts missing audience review, recurring draft terms used repeatedly before definition, planned source types missing from actual research, missing counterevidence rationale, export metadata leakage, STATE.md / STATE.json drift, weak rewrite instructions in low-scoring review rows, thesis-restating reasoning spines, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatches for strategic or recommendation claims, safe claims that cite sources marked only topically related in research claim-support metadata, precise quantitative claims without source/context/support, generic recommendations without concrete examples, and clustered or artifact-dense list-heavy prose. HIGH semantic issues fail the command; MEDIUM semantic issues are warnings. JSON output includes stable semantic issue IDs so tests can assert validator behavior without depending on prose wording.
 
@@ -243,8 +260,9 @@ Completed reference workspaces are available under [examples](examples):
 - [examples/weekly-platform-update](examples/weekly-platform-update) shows a lite internal update flow that intentionally skips research and fact-check artifacts when the paper is low-risk and does not make source-sensitive claims.
 - [examples/responsible-ai-controls](examples/responsible-ai-controls) shows an external, evidence-heavy explainer with flagship-style research, counterevidence, fact-check, audience review, and bounded publication claims.
 - [examples/platform-review-cycle-metrics](examples/platform-review-cycle-metrics) shows a short quantitative internal memo with baseline, sample, timeframe, source IDs, fact-check handling, and bounded numerical claims.
+- [examples/public-ai-control-baseline](examples/public-ai-control-baseline) shows a compact decision memo using real public NIST, OWASP, and NCSC/CISA source URLs with source verification notes, claim-support metadata, fact-check, review, and exported citations.
 
-The examples are included in the test suite. `tests/example-fixtures.test.js` validates semantic gates and completed-workflow routing on normalized checkout copies, including the lite fixture's absence of research and fact-check artifacts, the external fixture's required evidence path, the quantitative fixture's claim-support metadata, and the imported-paper fixture's anonymized source boundary. `npm run gate:examples` runs semantic validation across all example workspaces with zero warnings required.
+The examples are included in the test suite. `tests/example-fixtures.test.js` validates semantic gates and completed-workflow routing on normalized checkout copies, including the lite fixture's absence of research and fact-check artifacts, the external fixture's required evidence path, the quantitative fixture's claim-support metadata, the public-source fixture's live URL and exported-citation shape, and the imported-paper fixture's anonymized source boundary. `npm run gate:examples` runs semantic validation across all example workspaces with zero warnings required.
 
 ## Core Artifacts
 
@@ -265,6 +283,7 @@ The examples are included in the test suite. `tests/example-fixtures.test.js` va
 | `FEEDBACK-PLAN.md` | Proposed incorporate/ignore/defer/ask handling before revision. |
 | `STATE.md` | Human-readable current stage, blockers, approvals, suggested next command. |
 | `STATE.json` | Machine-readable state used by CLI status and validation. |
+| `config.json` | Machine-readable mode, classification, citation, research, and review settings. |
 | `IMPORT.md` | Import manifest and classification. |
 
 ## Audience System

@@ -13,6 +13,7 @@ const dataProductsExampleDir = path.join(examplesRoot, 'data-products-ai-scaling
 const technologyLifecycleExampleDir = path.join(examplesRoot, 'technology-lifecycle-management');
 const responsibleAiExampleDir = path.join(examplesRoot, 'responsible-ai-controls');
 const quantitativeExampleDir = path.join(examplesRoot, 'platform-review-cycle-metrics');
+const publicSourceExampleDir = path.join(examplesRoot, 'public-ai-control-baseline');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -59,6 +60,10 @@ function examplePaperDirs() {
     .filter((dir) => fs.existsSync(path.join(dir, '.paper')));
 }
 
+function assertClassification(config, expected) {
+  assert.deepStrictEqual(config.classification, expected);
+}
+
 function testExamplesValidateCleanly() {
   for (const exampleDir of examplePaperDirs()) {
     const validation = JSON.parse(run(['validate', '--paper', exampleDir, '--semantic', '--json']));
@@ -81,6 +86,16 @@ function testExamplesRouteToProgressAfterNormalizedCheckout() {
 
 function testDataProductsExampleHasNoTrialOnlyArtifacts() {
   assert(!fs.existsSync(path.join(dataProductsExampleDir, '.paper', 'FRICTION-LOG.md')));
+
+  const config = JSON.parse(fs.readFileSync(path.join(dataProductsExampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'standard');
+  assertClassification(config, {
+    purpose: 'strategy_paper',
+    channel: 'internal',
+    risk: 'internal_high',
+    complexity: 'deep',
+    audience_shape: 'prioritized_multi',
+  });
 
   const final = fs.readFileSync(path.join(dataProductsExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
   for (const forbidden of [
@@ -128,6 +143,13 @@ function testWeeklyPlatformUpdateKeepsLiteShape() {
 
   const config = JSON.parse(fs.readFileSync(path.join(exampleDir, '.paper', 'config.json'), 'utf8'));
   assert.strictEqual(config.mode, 'lite');
+  assertClassification(config, {
+    purpose: 'update',
+    channel: 'internal',
+    risk: 'internal_low',
+    complexity: 'light',
+    audience_shape: 'single',
+  });
   assert.strictEqual(config.research.require_source_table, false);
   assert.strictEqual(config.review.fact_check, false);
 }
@@ -143,8 +165,13 @@ function testResponsibleAiControlsKeepsExternalEvidenceShape() {
 
   const config = JSON.parse(fs.readFileSync(path.join(responsibleAiExampleDir, '.paper', 'config.json'), 'utf8'));
   assert.strictEqual(config.mode, 'flagship');
-  assert.strictEqual(config.classification.channel, 'external');
-  assert.strictEqual(config.classification.risk, 'external_high');
+  assertClassification(config, {
+    purpose: 'explainer',
+    channel: 'external',
+    risk: 'external_high',
+    complexity: 'deep',
+    audience_shape: 'prioritized_multi',
+  });
   assert.strictEqual(config.research.require_source_table, true);
   assert.strictEqual(config.review.fact_check, true);
 
@@ -172,8 +199,13 @@ function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
 
   const config = JSON.parse(fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'config.json'), 'utf8'));
   assert.strictEqual(config.mode, 'standard');
-  assert.strictEqual(config.classification.purpose, 'decision_memo');
-  assert.strictEqual(config.classification.risk, 'internal_high');
+  assertClassification(config, {
+    purpose: 'decision_memo',
+    channel: 'internal',
+    risk: 'internal_high',
+    complexity: 'standard',
+    audience_shape: 'prioritized_multi',
+  });
   assert.strictEqual(config.review.fact_check, true);
 
   const research = JSON.parse(fs.readFileSync(path.join(quantitativeExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
@@ -208,6 +240,73 @@ function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
   assert(expectedFindings.includes('Sources that only show improvement signal must not be treated as proof'));
 }
 
+function testPublicAiControlBaselineKeepsLivePublicSourceShape() {
+  assert(fs.existsSync(path.join(publicSourceExampleDir, '.paper')));
+  assert(fs.existsSync(path.join(publicSourceExampleDir, '.paper', 'RESEARCH.json')));
+  assert(fs.existsSync(path.join(publicSourceExampleDir, '.paper', 'FACT-CHECK.md')));
+  assert(fs.existsSync(path.join(publicSourceExampleDir, '.paper', 'exports', 'FINAL.md')));
+
+  const validation = JSON.parse(run(['validate', '--paper', publicSourceExampleDir, '--semantic', '--json']));
+  assert.strictEqual(validation.ok, true);
+  assert.deepStrictEqual(validation.issues, []);
+
+  const config = JSON.parse(fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'config.json'), 'utf8'));
+  assert.strictEqual(config.mode, 'standard');
+  assertClassification(config, {
+    purpose: 'decision_memo',
+    channel: 'internal',
+    risk: 'internal_high',
+    complexity: 'standard',
+    audience_shape: 'prioritized_multi',
+  });
+  assert.strictEqual(config.research.web_allowed, true);
+  assert.strictEqual(config.research.require_source_table, true);
+  assert.strictEqual(config.review.fact_check, true);
+
+  const research = JSON.parse(fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
+  assert.strictEqual(research.source_registry.length, 4);
+  for (const source of research.source_registry) {
+    assert.strictEqual(source.source_type, 'official');
+    assert(source.url_or_path.startsWith('https://'), `${source.id} should use a public HTTPS URL`);
+    assert(Array.isArray(source.claim_support), `${source.id} should include claim_support`);
+    assert(source.claim_support.some((entry) => entry.support === 'direct'), `${source.id} should directly support a claim`);
+    assert(source.notes.includes('Verified'), `${source.id} should record verification context`);
+  }
+
+  const urls = new Set(research.source_registry.map((source) => source.url_or_path));
+  for (const expectedUrl of [
+    'https://doi.org/10.6028/NIST.AI.100-1',
+    'https://doi.org/10.6028/NIST.AI.600-1',
+    'https://genai.owasp.org/llmrisk/llm01-prompt-injection/',
+    'https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development',
+  ]) {
+    assert(urls.has(expectedUrl), `missing public source ${expectedUrl}`);
+  }
+
+  const factCheck = fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'FACT-CHECK.md'), 'utf8');
+  for (const sourceId of ['S1', 'S2', 'S3', 'S4']) {
+    assert(factCheck.includes(sourceId), `FACT-CHECK.md should include ${sourceId}`);
+  }
+
+  const final = fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
+  assert(final.includes('https://doi.org/10.6028/NIST.AI.100-1'));
+  assert(final.includes('https://doi.org/10.6028/NIST.AI.600-1'));
+  assert(final.includes('https://genai.owasp.org/llmrisk/llm01-prompt-injection/'));
+  assert(final.includes('https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development'));
+  assert(!final.includes('guarantee'));
+  assert(final.includes('These sources do not prove the internal baseline will reduce incidents'));
+  assert(final.includes('## References And Standards Used'));
+  assert(final.includes('not create a parallel approval process'));
+  assert(final.includes('pilot_control_record_id'));
+  assert(final.includes('not_started'));
+  assert(final.includes('approved_with_exception'));
+  assert(final.includes('repeatable gate'));
+  assert(final.includes('standardizes and enforces'));
+  assert(final.includes('Security or risk reviewer'));
+  assert(final.includes('Review process owner'));
+  assert(final.includes('Validates threat-model, testing, exception, and residual-risk attestations'));
+}
+
 function testTechnologyLifecycleManagementKeepsImportRecoveryShape() {
   assert(fs.existsSync(path.join(technologyLifecycleExampleDir, '.paper')));
   assert(!fs.existsSync(path.join(technologyLifecycleExampleDir, 'original')));
@@ -218,7 +317,14 @@ function testTechnologyLifecycleManagementKeepsImportRecoveryShape() {
   assert.deepStrictEqual(validation.issues, []);
 
   const config = JSON.parse(fs.readFileSync(path.join(technologyLifecycleExampleDir, '.paper', 'config.json'), 'utf8'));
-  assert.strictEqual(config.mode, 'interactive');
+  assert.strictEqual(config.mode, 'standard');
+  assertClassification(config, {
+    purpose: 'strategy_paper',
+    channel: 'internal',
+    risk: 'internal_high',
+    complexity: 'deep',
+    audience_shape: 'hybrid',
+  });
   assert.strictEqual(config.research.require_source_table, true);
   assert.strictEqual(config.review.opposition_review, true);
   assert.strictEqual(config.review.fact_check, true);
@@ -245,6 +351,7 @@ testDataProductsExampleHasNoTrialOnlyArtifacts();
 testWeeklyPlatformUpdateKeepsLiteShape();
 testResponsibleAiControlsKeepsExternalEvidenceShape();
 testPlatformReviewCycleMetricsKeepsQuantitativeShape();
+testPublicAiControlBaselineKeepsLivePublicSourceShape();
 testTechnologyLifecycleManagementKeepsImportRecoveryShape();
 
 console.log('example fixture tests passed');

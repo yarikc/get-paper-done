@@ -48,6 +48,13 @@ If no source mode is provided:
   - `web-only` - ignore provided material
 - Otherwise use `web-first` if web research is allowed by `.paper/config.json`.
 
+Use `.paper/config.json` classification to calibrate evidence burden:
+
+- `regulated` or `external_high` risk requires stronger source authority, source alignment notes, and fact-check readiness.
+- `decision_memo` research should support the ask, options, evidence basis, objections, and operating implications without becoming a literature review.
+- `explainer` research should prioritize definitions, mechanisms, examples, limits, and source authority.
+- `update` research is optional unless the update makes factual, external, regulatory, numerical, or high-stakes claims.
+
 ## 2. Infer Research Questions And Present Plan
 
 Read project, persona, audience, brief, strategy when present, and optional outline/draft.

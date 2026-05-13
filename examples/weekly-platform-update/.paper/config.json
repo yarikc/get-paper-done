@@ -1,5 +1,12 @@
 {
   "mode": "lite",
+  "classification": {
+    "purpose": "update",
+    "channel": "internal",
+    "risk": "internal_low",
+    "complexity": "light",
+    "audience_shape": "single"
+  },
   "paper_type": "update",
   "default_length": {
     "newsletter": "800-1200 words",

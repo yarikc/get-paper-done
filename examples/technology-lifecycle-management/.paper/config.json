@@ -1,9 +1,18 @@
 {
-  "mode": "interactive",
-  "paper_type": "position_paper",
+  "mode": "standard",
+  "classification": {
+    "purpose": "strategy_paper",
+    "channel": "internal",
+    "risk": "internal_high",
+    "complexity": "deep",
+    "audience_shape": "hybrid"
+  },
+  "paper_type": "strategy_paper",
   "default_length": {
     "newsletter": "800-1200 words",
     "blog": "1200-1800 words",
+    "memo": "600-1000 words",
+    "update": "150-300 words",
     "position_paper": "1800-3000 words",
     "white_paper": "3000-6000 words"
   },

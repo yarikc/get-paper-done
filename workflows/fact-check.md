@@ -29,6 +29,13 @@ Parse mode flags:
 
 If no mode is specified, use `--full` when `.paper/DRAFT.md` exists and the paper is serious, technical, executive-facing, public, or publication-bound. Otherwise use `--risk-scan`.
 
+Use `.paper/config.json` classification to set scrutiny:
+
+- `regulated` and `external_high` papers need publication-sensitive claim handling and strong source alignment.
+- `decision_memo` fact-checking must verify that the evidence supports the requested decision and that operating/accountability claims are not presented as externally mandated unless sourced.
+- `explainer` fact-checking must verify definitions, source authority, mechanism descriptions, and limits.
+- `update` fact-checking can stay light unless it includes factual, numerical, external, or high-risk claims.
+
 Extract a claim inventory from `.paper/DRAFT.md`. Assign IDs such as `FC1`, classify each material claim, and mark risk HIGH/MEDIUM/LOW.
 
 Include headings, section titles, captions, tables, callouts, and summary bullets in the claim inventory when they make factual or causal claims. A cautious paragraph can still be undermined by an over-strong heading.

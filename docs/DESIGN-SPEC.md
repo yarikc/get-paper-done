@@ -6,7 +6,7 @@
 - **Version:** 0.1 design baseline
 - **Status:** CLI-backed prompt/workflow prototype
 - **Primary user:** Senior data and AI architecture leader in regulated enterprise environments
-- **Primary use cases:** newsletters, blog posts, position papers, white papers, executive strategy papers
+- **Primary use cases:** decision memos, strategy papers, explainers, updates, newsletters, blog posts, white papers, and executive strategy papers
 
 ## Problem
 
@@ -52,11 +52,24 @@ The primary user is a senior technology executive writing serious papers where:
 - audience fit matters
 - strategic clarity matters
 - evidence quality matters
-- paper type and decision usefulness must be explicit
+- classification and decision usefulness must be explicit
+- paper classification must separate purpose, channel, risk, complexity, and audience shape
 - generic prose is a failure
 - context overload materially reduces output quality
 
 The default reusable author profile is `profiles/head-data-ai-architecture.md`, but every paper uses a local `.paper/PERSONA.md` as authoritative context.
+
+## Classification Model
+
+Each paper stores normalized classification in `.paper/config.json`:
+
+- `purpose`: `decision_memo`, `strategy_paper`, `explainer`, or `update`
+- `channel`: `internal`, `external`, or `mixed`
+- `risk`: `internal_low`, `internal_high`, `external_low`, `external_high`, or `regulated`
+- `complexity`: `light`, `standard`, or `deep`
+- `audience_shape`: `single`, `prioritized_multi`, or `hybrid`
+
+Users can describe the paper in plain language. `/gpd-new-paper` and `/gpd-brief` normalize that language into enum values so later stages can calibrate evidence burden, outline shape, draft behavior, review standards, and fact-check intensity. Legacy labels such as blog, white paper, newsletter, board paper, or architecture paper are display/context labels, not workflow purpose values.
 
 ## Workspace Model
 

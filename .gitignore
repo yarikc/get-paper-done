@@ -3,3 +3,4 @@ node_modules/
 /.paper/
 agents/.claude/
 docs/feedback*.md
+*.feedback

@@ -1,0 +1,324 @@
+{
+  "metadata": {
+    "topic": "Public AI control baseline for internal generative AI pilots",
+    "scope": "Compact decision memo using only public official or framework sources",
+    "depth": "standard",
+    "source_mode": "web",
+    "created_at": "2026-05-12T12:00:00.000Z",
+    "updated_at": "2026-05-12T12:00:00.000Z"
+  },
+  "research_plan": {
+    "inferred_research_questions": [
+      {
+        "id": "RQ1",
+        "question": "Which public source supports using Govern, Map, Measure, and Manage as AI risk-management framing?",
+        "mapped_claims": ["C1"],
+        "why_it_matters": "The memo should not invent its own governance framing.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NIST AI Risk Management Framework Govern Map Measure Manage"]
+      },
+      {
+        "id": "RQ2",
+        "question": "Which public source supports treating generative AI risks as requiring profile-specific handling?",
+        "mapped_claims": ["C2"],
+        "why_it_matters": "The baseline should explain why generic controls are not enough.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NIST AI 600-1 Generative AI Profile"]
+      },
+      {
+        "id": "RQ3",
+        "question": "Which public source supports prompt injection as a specific LLM application risk?",
+        "mapped_claims": ["C3"],
+        "why_it_matters": "The pilot baseline needs a concrete LLM security control area.",
+        "planned_source_types": ["official"],
+        "search_queries": ["OWASP LLM01 prompt injection"]
+      },
+      {
+      "id": "RQ4",
+      "question": "Which public source supports lifecycle security controls for AI systems?",
+      "mapped_claims": ["C4"],
+      "why_it_matters": "The baseline should cover design, deployment, and operation, not only model behavior.",
+      "planned_source_types": ["official"],
+      "search_queries": ["NCSC CISA Guidelines for secure AI system development"]
+      },
+      {
+        "id": "RQ5",
+        "question": "What operating mechanism makes the baseline governable after approval?",
+        "mapped_claims": ["C5"],
+        "why_it_matters": "A baseline without repeatable evidence fields, status values, and recertification gates becomes a one-time memo rather than governance.",
+        "planned_source_types": ["official"],
+        "search_queries": ["AI governance evidence lifecycle controls"]
+      },
+      {
+        "id": "RQ6",
+        "question": "What accountability model makes pilot attestations reviewable after approval?",
+        "mapped_claims": ["C6"],
+        "why_it_matters": "A baseline needs named operating and validation responsibilities, not only evidence fields.",
+        "planned_source_types": ["official"],
+        "search_queries": ["AI risk governance accountability secure AI lifecycle responsibilities"]
+      }
+    ],
+    "depth_rationale": "The paper is an internal decision memo with control consequences, so each material claim needs a public source ID.",
+    "source_mode_rationale": "This example intentionally uses live public sources verified on 2026-05-12.",
+    "user_feedback": "Keep the example compact and source-fidelity focused."
+  },
+  "research_brief": {
+    "executive_summary": "The public sources support a defensible minimum baseline for internal generative AI pilots: AI risk framing from NIST AI RMF, generative AI risk profile considerations from NIST AI 600-1, prompt-injection control focus from OWASP, and lifecycle security practices from NCSC/CISA guidance.",
+    "key_findings": [
+      "NIST AI RMF provides Govern, Map, Measure, and Manage as risk-management functions.",
+      "NIST AI 600-1 is a generative AI profile for the AI RMF and supports profile-specific handling.",
+      "OWASP LLM01 identifies prompt injection as a specific LLM application risk.",
+      "NCSC/CISA guidance organizes secure AI system development across design, development, deployment, and operation."
+    ]
+  },
+  "source_registry": [
+    {
+      "id": "S1",
+      "title": "NIST Artificial Intelligence Risk Management Framework (AI RMF 1.0)",
+      "url_or_path": "https://doi.org/10.6028/NIST.AI.100-1",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Voluntary public risk-management framework.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C1",
+          "support": "direct",
+          "rationale": "The framework defines the core Govern, Map, Measure, and Manage functions used by the memo."
+        },
+        {
+          "claim_id": "C5",
+          "support": "partial",
+          "rationale": "The framework supports governance and evidence framing, but not the memo's exact pilot control record schema."
+        },
+        {
+          "claim_id": "C6",
+          "support": "partial",
+          "rationale": "The framework supports governance accountability, but not the memo's exact internal role names."
+        }
+      ],
+      "notes": "Verified public DOI on 2026-05-12."
+    },
+    {
+      "id": "S2",
+      "title": "NIST AI 600-1 Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile",
+      "url_or_path": "https://doi.org/10.6028/NIST.AI.600-1",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "NIST profile for generative AI risk management.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C2",
+          "support": "direct",
+          "rationale": "The publication is a generative AI profile of the AI RMF and supports profile-specific treatment."
+        }
+      ],
+      "notes": "Verified NIST publication page and DOI on 2026-05-12."
+    },
+    {
+      "id": "S3",
+      "title": "OWASP GenAI Security Project LLM01:2025 Prompt Injection",
+      "url_or_path": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+      "source_type": "official",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Community security framework focused on generative AI application risk.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C3",
+          "support": "direct",
+          "rationale": "The source defines prompt injection as an LLM application risk and describes unintended model behavior."
+        }
+      ],
+      "notes": "Verified public OWASP GenAI page on 2026-05-12."
+    },
+    {
+      "id": "S4",
+      "title": "NCSC Guidelines for Secure AI System Development",
+      "url_or_path": "https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Government cybersecurity guidance co-sealed with CISA and international partners.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C4",
+          "support": "direct",
+          "rationale": "The guidance is organized around secure design, secure development, secure deployment, and secure operation and maintenance."
+        },
+        {
+          "claim_id": "C5",
+          "support": "partial",
+          "rationale": "The guidance supports lifecycle controls, but the record ID, enum, and evidence template are internal operating-design proposals."
+        },
+        {
+          "claim_id": "C6",
+          "support": "partial",
+          "rationale": "The guidance supports lifecycle security responsibilities, but the exact accountability table is an internal operating-design proposal."
+        }
+      ],
+      "notes": "Verified public NCSC guidance page on 2026-05-12."
+    }
+  ],
+  "evidence_matrix": [
+    {
+      "claim_id": "C1",
+      "claim": "NIST AI RMF supports organizing AI risk management through Govern, Map, Measure, and Manage functions.",
+      "claim_type": "factual",
+      "research_questions": ["RQ1"],
+      "supporting_sources": ["S1"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Keep as source-framing claim."
+    },
+    {
+      "claim_id": "C2",
+      "claim": "Generative AI needs profile-specific risk handling beyond generic AI governance.",
+      "claim_type": "strategic_judgment",
+      "research_questions": ["RQ2"],
+      "supporting_sources": ["S2"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Keep with wording that the profile supports, not mandates, the baseline."
+    },
+    {
+      "claim_id": "C3",
+      "claim": "Prompt injection should be treated as a specific pilot control topic.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ3"],
+      "supporting_sources": ["S3"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Keep as one baseline control, not the only security requirement."
+    },
+    {
+      "claim_id": "C4",
+      "claim": "Secure AI guidance supports lifecycle controls across design, development, deployment, and operation.",
+      "claim_type": "factual",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Keep as lifecycle framing."
+    },
+    {
+      "claim_id": "C5",
+      "claim": "A baseline is only governable if it creates a repeatable pilot control record with evidence fields, status values, validation gates, and recertification triggers.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ5"],
+      "supporting_sources": ["S1", "S4"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Keep as internal operating-design proposal supported by governance and lifecycle framing, not as a public-standard requirement."
+    },
+    {
+      "claim_id": "C6",
+      "claim": "A pilot baseline needs named roles for operating the control record and validating attestations.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ6"],
+      "supporting_sources": ["S1", "S4"],
+      "contradicting_sources": [],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Keep as internal accountability design supported by governance and lifecycle framing, not as a public-source role mandate."
+    }
+  ],
+  "synthesis_matrix": {
+    "themes": ["risk_framing", "genai_profile", "llm_security", "secure_lifecycle", "operating_accountability"],
+    "rows": [
+      {
+        "theme": "risk_framing",
+        "source_summaries": {
+          "S1": "NIST AI RMF provides risk-management functions that can frame pilot review."
+        },
+        "pattern": "agreement",
+        "implication": "Use NIST AI RMF as the organizing frame."
+      },
+      {
+        "theme": "genai_profile",
+        "source_summaries": {
+          "S2": "NIST AI 600-1 gives generative AI-specific risk profile guidance."
+        },
+        "pattern": "agreement",
+        "implication": "Treat generative AI pilots as needing profile-specific checks."
+      },
+      {
+        "theme": "llm_security",
+        "source_summaries": {
+          "S3": "OWASP LLM01 identifies prompt injection as a material LLM application risk."
+        },
+        "pattern": "agreement",
+        "implication": "Require prompt-injection threat modeling and tests."
+      },
+      {
+        "theme": "secure_lifecycle",
+        "source_summaries": {
+          "S4": "NCSC/CISA guidance covers secure design, development, deployment, and operation."
+        },
+        "pattern": "agreement",
+        "implication": "Make lifecycle checks part of pilot approval."
+      },
+      {
+        "theme": "operating_accountability",
+        "source_summaries": {
+          "S1": "NIST AI RMF supports explicit governance framing for AI risk management.",
+          "S4": "NCSC/CISA guidance supports security responsibilities across the AI lifecycle."
+        },
+        "pattern": "agreement",
+        "implication": "Name the internal roles that operate the control record and validate attestations."
+      }
+    ]
+  },
+  "contradictions": [
+    {
+      "claim_ids": ["C1", "C2", "C3", "C4", "C5", "C6"],
+      "summary": "No contradicting public source was added because the claims are limited to source framing, profile-specific risk attention, prompt-injection risk, secure lifecycle guidance, and clearly labeled internal operating-design proposals. The paper does not claim internal outcome proof."
+    }
+  ],
+  "open_questions": [
+    "Which actual internal teams would fill the generic operating and validation roles in a real deployment?"
+  ],
+  "draft_support_notes": [
+    "Use source IDs beside each material framework claim.",
+    "Do not claim that the public sources prove the internal baseline will reduce incidents.",
+    "Keep implementation details out of this decision memo.",
+    "Define the pilot control record as an internal governance object, not as something required by the public sources.",
+    "Name accountability roles generically and avoid implying that public sources assign internal owners."
+  ],
+  "facts_safe_to_use": [
+    "NIST AI RMF provides Govern, Map, Measure, and Manage functions.",
+    "NIST AI 600-1 is a generative AI profile for the AI RMF.",
+    "OWASP LLM01 treats prompt injection as an LLM application risk.",
+    "NCSC/CISA guidance frames secure AI development across the lifecycle."
+  ],
+  "claims_to_soften": [
+    "The baseline should reduce risk if implemented and maintained; the public sources do not prove internal outcome reduction."
+  ],
+  "claims_to_drop_or_reframe": [
+    "The baseline guarantees secure generative AI pilots."
+  ]
+}

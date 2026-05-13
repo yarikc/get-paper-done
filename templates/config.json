@@ -1,9 +1,18 @@
 {
-  "mode": "interactive",
-  "paper_type": "blog",
+  "mode": "standard",
+  "classification": {
+    "purpose": "explainer",
+    "channel": "internal",
+    "risk": "internal_low",
+    "complexity": "standard",
+    "audience_shape": "single"
+  },
+  "paper_type": "explainer",
   "default_length": {
     "newsletter": "800-1200 words",
     "blog": "1200-1800 words",
+    "memo": "600-1000 words",
+    "update": "150-300 words",
     "position_paper": "1800-3000 words",
     "white_paper": "3000-6000 words"
   },
@@ -20,4 +29,3 @@
     "persona_consistency": true
   }
 }
-

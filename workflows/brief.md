@@ -17,8 +17,9 @@ Read `.paper/PERSONA.md` and `.paper/AUDIENCE.md` first.
 Ask for or refine:
 
 - document intent
+- paper classification: `purpose`, `channel`, `risk`, `complexity`, and `audience_shape`
 - working title
-- format
+- legacy/display label or format, if useful
 - one-line thesis
 - strongest opposing view
 - why the position matters now
@@ -32,6 +33,16 @@ Ask for or refine:
 - must-include and must-avoid items
 
 Write `.paper/BRIEF.md`.
+
+If classification is missing or wrong in `.paper/config.json`, update it using the normalized enum values:
+
+- `purpose`: `decision_memo`, `strategy_paper`, `explainer`, or `update`
+- `channel`: `internal`, `external`, or `mixed`
+- `risk`: `internal_low`, `internal_high`, `external_low`, `external_high`, or `regulated`
+- `complexity`: `light`, `standard`, or `deep`
+- `audience_shape`: `single`, `prioritized_multi`, or `hybrid`
+
+Keep `paper_type` only as an optional display or backward-compatibility label. Later stages should use `classification.purpose`, not labels such as blog, white paper, or architecture paper.
 
 Run the strategy gate or update `.paper/STRATEGY.md` when the brief changes materially. The strategy gate may return:
 

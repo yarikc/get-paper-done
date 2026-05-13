@@ -163,7 +163,7 @@ Audience handling:
 Artifact derivation rules:
 
 - `.paper/DRAFT.md`: should contain the current imported draft, converted to Markdown if possible. Preserve content; do not rewrite during import.
-- `.paper/BRIEF.md`: extract document type, title, target audience, thesis, opposing view, likely claims, constraints, and known gaps. Mark uncertainty clearly.
+- `.paper/BRIEF.md`: extract or infer classification, title, target audience, thesis, opposing view, likely claims, constraints, and known gaps. Mark uncertainty clearly.
 - `.paper/STRATEGY.md`: run the strategy gate from imported context. Status must be `Go`, `Revise Before Drafting`, or `No-Go`. If thesis, reader promise, paper job, scope, or desired outcome is unclear, set status to `Revise Before Drafting` and populate `Strategy Blockers` with the normalized blocker list and primary blocker.
 - `.paper/PROJECT.md`: state what this paper appears to be and what outcome it appears to seek. Keep it short; do not duplicate the full thesis, claims, or objections from `BRIEF.md`.
 - `.paper/STATE.md` and `.paper/STATE.json`: set current position based on import quality and record post-import choices plus any suggested choice.
@@ -203,7 +203,7 @@ After import, present exactly these three choices unless required setup informat
 
 Do not add `/gpd-fact-check` as a fourth default import choice. If the imported draft is already publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, add a conditional note recommending `/gpd-fact-check --risk-scan` before external review or export.
 
-If thesis, audience, paper type, reader promise, paper job, scope, or desired outcome is unclear, recommend `/gpd-brief` before showing the three post-import choices.
+If thesis, audience, classification, reader promise, paper job, scope, or desired outcome is unclear, recommend `/gpd-brief` before showing the three post-import choices.
 
 If `STRATEGY.md` status is `Revise Before Drafting` or `No-Go`, show the block reason and primary blocker, set suggested next command to `/gpd-brief`, and do not recommend research, outline, review, fact-check, or export unless the user explicitly overrides the strategy block.
 
