@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-13 after preserving the public-source calibration main line and allowing only a bounded RFC-5 documentation detour.
+Last changed: 2026-05-14 after completing private-repo release hardening and preserving import hardening/external-review wrapping as the next main-line choice.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -149,7 +149,7 @@ Plan-change rule:
 
 - Longer-paper prose-saturation recalibration.
 - CLI routing based on classification values. Classification is now schema/workflow/documentation enforced, but `gpd status` still routes primarily from artifact state, strategy state, mtimes, review/fact-check state, and export state.
-- Release hardening beyond the package-boundary cleanup already completed.
+- Public/team distribution policy beyond the private-repo release workflow.
 
 ## Active Milestone: One-Paper Diagnostic And Examples
 
@@ -261,7 +261,7 @@ Success criteria:
 
 ### 2. Harden The Import Workflow
 
-Current import flow is conceptually strong but untested.
+Current import flow is conceptually strong and has first-pass fixture coverage, including messy-folder classification and single-draft recovery. Remaining work is deeper extraction/conversion and better large-folder guidance.
 
 Needed:
 
@@ -332,14 +332,13 @@ Success criteria:
 
 ### 5. Add Framework Examples
 
-The project needs reference examples.
+The project now has seven reference examples covering clean strategy, imported-paper recovery, lite update, evidence-heavy external writing, quantitative memo, compact public-source governance memo, and the showcase feedback-loop control memo.
 
-Create:
+Still useful later:
 
-- `examples/new-paper-minimal/`
-- `examples/imported-paper/`
-- `examples/multi-audience-paper/`
-- `examples/external-review/`
+- a true multi-audience example when a real paper creates that conflict
+- an external-review example after the manual external-review path is exercised
+- a minimal first-paper walkthrough example if newcomer feedback shows the current examples are too dense
 
 Success criteria:
 
@@ -519,13 +518,18 @@ Implemented:
 - init/status/validate smoke test
 - malformed input tests for unreadable/missing import source, missing required files, and malformed `STRATEGY.md`
 - init footgun regression test for no `--slug`, no `--title`, and no `--location`
+- slug/default-location behavior for init/import
+- template artifact contract tests
+- workflow consistency and template/agent reference tests
+- example-wide semantic gates
+- package hygiene tests
 - CI workflow that runs `npm run check`
 
 Still needed:
 
-- slug generation test
-- template presence test
-- workflow consistency tests
+- local project install tests if that feature is added
+- external-review runner tests if that feature is added
+- conversion/indexing tests when import starts parsing `.docx`, `.pdf`, spreadsheets, or diagrams
 
 Deliverables:
 
@@ -642,14 +646,12 @@ Success criteria:
 
 ## Priority Order
 
-1. Run one real paper through the current workflow.
-2. Harden import based on that run.
-3. Add examples from the real paper run.
-4. Expand validation coverage beyond setup/sequencing checks.
-5. Add workflow consistency and template coverage tests.
-6. Wrap external review runner.
-7. Add release/update documentation.
-8. Add local project install support.
+1. Harden import based on real use, especially large-folder preview, canonical draft selection, and richer source extraction.
+2. Wrap external review runner after the manual workflow proves the command shape.
+3. Continue one-by-one agent calibration from real paper trials.
+4. Add new examples only for new failure modes, especially multi-audience or external-review cases.
+5. Add local project install support if private/global runtime install becomes a blocker.
+6. Decide public/team distribution policy if the project moves beyond private GitHub use.
 
 ---
 
@@ -667,9 +669,9 @@ Success criteria:
 
 ### Tool 9/10
 
-- CLI handles install/update/doctor/version and eventually init/import/status/validate.
+- CLI handles install/update/doctor/version/init/import/status/validate.
 - Import copy behavior is safe and tested.
 - Installer is repeatable and clear.
 - External model review is wrapped in a helper command.
-- Release/update process has changelog and verification checklist.
+- Release/update process has changelog, compatibility policy, and verification checklist.
 - `npm test` covers core operations.

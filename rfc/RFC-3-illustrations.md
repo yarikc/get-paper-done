@@ -1,7 +1,7 @@
 # RFC-3: Illustrations in the Paper Pipeline (Excalidraw)
 
 - **Status:** Proposed
-- **Author:** Yarik Chinskiy
+- **Author:** Project maintainer
 - **Date:** 2026-05-11
 - **Scope:** GPD pipeline extension — diagram authoring, rendering, and validation as a first-class lifecycle artifact
 - **Tracking Issue:** [#12](https://github.com/yarikc/get-paper-done/issues/12)
@@ -126,7 +126,7 @@ Both surfaces feed into the plan file. The plan is the single source of what get
   architecture.svg
 ```
 
-Source JSON and rendered SVG are both committed. Rendered SVG is referenced from DRAFT.md and FINAL.md as a normal markdown image: `![Lifecycle](./illustrations/lifecycle.svg)`.
+Source JSON and rendered SVG are both committed. Rendered SVG is referenced from DRAFT.md and FINAL.md as a normal Markdown image pointing at the rendered file.
 
 ### 4.5 Render flow
 
@@ -190,7 +190,7 @@ Implementation: `validateExcalidrawSchema` in `bin/lib/semantic.js`, following t
 
 ### 5.2 Semantic validation
 
-- Every illustration referenced in DRAFT.md (`![](./illustrations/foo.svg)`) has a matching `foo.excalidraw.json` source.
+- Every illustration referenced in DRAFT.md has a matching `foo.excalidraw.json` source for its rendered `foo.svg` output.
 - Every source JSON has a rendered SVG (catches missing render step).
 - Rendered SVG's mtime ≥ source JSON's mtime (catches stale renders).
 - No orphan arrows: every arrow's `startBinding.elementId` and `endBinding.elementId` exist in the elements array.

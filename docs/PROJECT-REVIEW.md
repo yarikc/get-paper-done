@@ -18,7 +18,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 | Area | Rating | Rationale |
 |------|--------|-----------|
 | Framework design | 9.5/10 | Strong staged model, explicit paper memory, normalized classification, research compression, strategy gate, audience system, reader-feedback capture, feedback approval, governance/control-paper guidance, clean-paper example, imported-paper recovery example, lite update example, evidence-heavy external example, short quantitative example, and two live public-source examples. The software supply-chain example now shows feedback-mediated backward routing as a real quality rescue. Remaining gaps are richer external-review handling and more imported/messy-paper breadth. |
-| Installable tool maturity | 8.9/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`, and export now has a regression test for pre-body draft sections. Missing external-review runner, richer import extraction, and local package/release hardening keep it below a complete product. |
+| Installable tool maturity | 8.9/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`, and export now has a regression test for pre-body draft sections. Missing external-review runner, richer import extraction, local project install mode, and public/team distribution policy keep it below a complete product. |
 | Documentation | 9.4/10 | README now leads with product story, key benefits, fit/non-fit guidance, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and examples. `docs/START-HERE.md` gives newcomers a shorter first-paper path, and the strongest example now has a README plus `EXPECTED-FINDINGS.md`. Still needs a guided walkthrough if onboarding remains dense. |
 | Test coverage | 9.8/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, five-signal reader-feedback structure, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, blocked-strategy, mid-revision, and messy-import fixture behavior, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, stable semantic issue IDs, example-wide semantic validation, compact broken semantic fixture coverage, live public-source citation shape, reader-feedback demonstration artifacts, and seven realistic completed example fixtures. Still needs broader real-paper calibration. |
 | Release readiness | 8.8/10 | Package metadata, changelog, CI, license, dry-run install checks, package dry-run, explicit package allowlist, release checklist, version policy, compatibility policy, private GitHub install/update flow, and `release:check` are in place. Remaining gap is a public/team distribution story. |
@@ -83,12 +83,12 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 
 ## Verification
 
-Commands run during review:
+Commands run during the latest review:
 
 ```bash
-npm run check
-npm pack --dry-run --cache /tmp/gpd-npm-cache
+npm run release:check
 git diff --check
+markdown link check
 ```
 
-All passed after the software supply-chain public-source calibration example was revised from human reader feedback, including the later fix that made its AI/LLM control surface explicit rather than title-only.
+All passed after the documentation consistency review corrected stale roadmap/review language and the RFC illustration link reference.
