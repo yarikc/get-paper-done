@@ -112,6 +112,8 @@ Backward-compatible aliases:
 
 If no external review flag is present, skip to Step 7.
 
+CLI note: `gpd review-external` is currently a collector, not a provider runner. Use it when external review text already exists in files or stdin and you want deterministic `.paper/EXTERNAL-REVIEWS.md`, `.paper/FEEDBACK-PLAN.md`, and pending approval state. Continue using the slash workflow below for provider-specific invocation until CLI provider wrapping is added.
+
 ## 3. Detect Available Reviewers
 
 Check which external reviewers are available:

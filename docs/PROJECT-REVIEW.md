@@ -7,20 +7,20 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 ## Summary Rating
 
-**Overall: 9.4/10 as a writing framework; 8.9/10 as an installable private-repo tool**
+**Overall: 9.4/10 as a writing framework; 9.0/10 as an installable private-repo tool**
 
 Get Paper Done is now a strong writing workflow framework with a real showcase example. The project has a clearer README with a stronger product story, a newcomer `START-HERE` guide, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, seven realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, demonstrated reader-feedback capture and feedback-plan routing, governance/control-paper prompt guidance validated on two compact control examples, stronger import preview/draft-ranking behavior, private-repo release/update guidance, and package-boundary hygiene tests. The software supply-chain example now demonstrates the full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing loop with a real quality fix, not just a synthetic validator path.
 
-The installable tool is near 9/10 but still not finished as a distributable product. Import now has better dry-run inventory, skip-threshold control, and deterministic draft-candidate ranking, but it is still preservation-first rather than extraction-rich. External review is still prompt/workflow-driven rather than a wrapped CLI capability. The private-repo release/update path is now documented and test-backed, but public or team distribution remains a later decision.
+The installable tool is now at the 9/10 private-repo threshold, but still not finished as a distributable product. Import now has better dry-run inventory, skip-threshold control, and deterministic draft-candidate ranking, but it is still preservation-first rather than extraction-rich. External review now has a safe CLI collector that writes `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md`, but provider invocation remains workflow/manual rather than automated. The private-repo release/update path is documented and test-backed, while public or team distribution remains a later decision.
 
 ## Ratings
 
 | Area | Rating | Rationale |
 |------|--------|-----------|
 | Framework design | 9.5/10 | Strong staged model, explicit paper memory, normalized classification, research compression, strategy gate, audience system, reader-feedback capture, feedback approval, governance/control-paper guidance, clean-paper example, imported-paper recovery example, lite update example, evidence-heavy external example, short quantitative example, and two live public-source examples. The software supply-chain example now shows feedback-mediated backward routing as a real quality rescue. Remaining gaps are richer external-review handling and more imported/messy-paper breadth. |
-| Installable tool maturity | 8.95/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`; import now has dry-run inventory, classification counts, warning output, skip-threshold control, and deterministic draft-candidate ranking; export has a regression test for pre-body draft sections. Missing external-review runner, document/PDF/spreadsheet extraction, local project install mode, and public/team distribution policy keep it below a complete product. |
+| Installable tool maturity | 9.0/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact` and `review-external`; import now has dry-run inventory, classification counts, warning output, skip-threshold control, and deterministic draft-candidate ranking; export has a regression test for pre-body draft sections; external review can be collected into durable artifacts without provider side effects. Missing provider invocation, document/PDF/spreadsheet extraction, local project install mode, and public/team distribution policy keep it below a complete product. |
 | Documentation | 9.4/10 | README now leads with product story, key benefits, fit/non-fit guidance, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and examples. `docs/START-HERE.md` gives newcomers a shorter first-paper path, and the strongest example now has a README plus `EXPECTED-FINDINGS.md`. Still needs a guided walkthrough if onboarding remains dense. |
-| Test coverage | 9.8/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, five-signal reader-feedback structure, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, blocked-strategy, mid-revision, and messy-import fixture behavior, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, stable semantic issue IDs, example-wide semantic validation, compact broken semantic fixture coverage, live public-source citation shape, reader-feedback demonstration artifacts, and seven realistic completed example fixtures. Still needs broader real-paper calibration. |
+| Test coverage | 9.8/10 | Tests now cover core CLI behavior, artifact contracts including external-review collection output, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, five-signal reader-feedback structure, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, blocked-strategy, mid-revision, and messy-import fixture behavior, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, stable semantic issue IDs, example-wide semantic validation, compact broken semantic fixture coverage, live public-source citation shape, reader-feedback demonstration artifacts, and seven realistic completed example fixtures. Still needs broader real-paper calibration. |
 | Release readiness | 8.8/10 | Package metadata, changelog, CI, license, dry-run install checks, package dry-run, explicit package allowlist, release checklist, version policy, compatibility policy, private GitHub install/update flow, and `release:check` are in place. Remaining gap is a public/team distribution story. |
 
 ## What Works
@@ -41,6 +41,8 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 - `gpd status` no longer lets saved `STATE.json` next commands skip structurally required artifacts.
 - `gpd status` now recognizes `.paper/exports/FINAL.md`, detects stale exports, and routes completed exports to `/gpd-progress`.
 - `gpd export` provides a deterministic CLI path for internal Markdown export after a `Ready` review verdict.
+- `gpd review-external` provides a deterministic CLI path for capturing external review text from files or stdin into `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md`, then routes to the pending approval gate.
+- `gpd validate-artifact` now recognizes `EXTERNAL-REVIEWS.md`, so the new review collector has a matching structural contract.
 - `gpd validate --semantic` now catches stale BRIEF evidence placeholders, source-sensitive imported drafts without source mapping, mixed-audience drafts missing audience review, recurring draft terms used repeatedly before definition, planned source-type gaps, missing counterevidence rationale, export metadata leakage, STATE drift, weak low-score review instructions, reasoning-spine restatement, generic audience-conflict rows, missing safe-claim sources, fact-check source/evidence mismatch for strategic or recommendation claims, safe claims that cite sources marked only topically related in research claim-support metadata, precise quantitative claims without enough source/context/support, generic recommendations without concrete examples, and clustered or artifact-dense list-heavy prose. Semantic JSON output includes stable issue IDs for regression assertions.
 - `examples/data-products-ai-scaling` gives users and tests a realistic completed clean-paper workspace.
 - `examples/technology-lifecycle-management` gives users and tests an anonymized imported-paper recovery workspace without committing the private source draft.
@@ -68,19 +70,19 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 2. Import classification is useful but still shallow. Current import preserves and catalogs messy material, previews large imports, and ranks draft candidates deterministically, but does not deeply extract `.docx`, PDFs, spreadsheets, diagrams, citations, or version history.
 3. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but the gates still cannot judge full argument quality, citation fidelity, or prose distinctiveness. The current prose-saturation calibration intentionally allows load-bearing definitional enumerations; see [SEMANTIC-CALIBRATION.md](SEMANTIC-CALIBRATION.md).
 4. State enum policy is now intentionally tighter and centrally tested. That prevents typo drift, but future blocker/action additions must go through the shared contract and workflow consistency tests.
-5. External review is workflow-documented but not tool-wrapped. Users still need runtime/model-specific manual steps for multi-model review.
+5. External review is now tool-wrapped for collection, but not for provider invocation. Users still need runtime/model-specific manual steps to generate multi-model review text before collecting it with `gpd review-external`.
 6. Release readiness remains private-repo oriented. The local/private release path is now documented and test-backed, but a public or team-facing release still needs a distribution decision.
 7. Classification is not yet used by the CLI routing engine. It is enforced in schema, templates, workflows, docs, and examples, but `gpd status` still routes mostly from artifact state, strategy state, mtimes, review/fact-check state, and export state.
 
 ## Recommended Next Work
 
-1. Decide the next main-line slice between deeper import extraction and external-review wrapping.
+1. Decide the next main-line slice between deeper import extraction and external-review provider invocation.
 2. Use the calibration review to decide whether `START-HERE` needs a richer guided walkthrough.
 3. Harden `gpd import` around document extraction, citation extraction, and richer version/source indexing.
 4. Add richer fixture workspaces only when they represent a new failure mode, not just more routing signals.
 5. Expand semantic lint-style checks only where they are concrete enough to be useful; defer noisy heuristics until examples exist.
 6. Decide whether public/team distribution is needed, and if so define publishing, tagging, and support policy.
-7. Build `gpd review-external` only after the manual external-review workflow has been proven on a real paper.
+7. Extend `gpd review-external` to invoke providers only after the manual external-review workflow proves the right command shape.
 
 ## Verification
 
@@ -93,3 +95,4 @@ markdown link check
 ```
 
 All passed after the import preview and draft-ranking hardening slice.
+The latest external-review collection slice also passed `npm run release:check` and `git diff --check`.

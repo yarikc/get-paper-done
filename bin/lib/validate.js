@@ -23,6 +23,7 @@ const artifactNameAliases = {
   'outline.md': 'OUTLINE.md',
   'fact-check.md': 'FACT-CHECK.md',
   'review.md': 'REVIEW.md',
+  'external-reviews.md': 'EXTERNAL-REVIEWS.md',
   'reader-feedback.md': 'READER-FEEDBACK.md',
   'feedback-plan.md': 'FEEDBACK-PLAN.md',
 };
@@ -154,6 +155,18 @@ const markdownContracts = {
         'Affected Artifact',
       ],
     ],
+  },
+  'EXTERNAL-REVIEWS.md': {
+    headings: [
+      '# External Reviews',
+      '## Review Prompt Summary',
+      '## Consensus Summary',
+      '### Shared Concerns',
+      '### Shared Strengths',
+      '### Divergent Views',
+      '### High-Risk Items',
+    ],
+    tables: [],
   },
   'READER-FEEDBACK.md': {
     headings: [

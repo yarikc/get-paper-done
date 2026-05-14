@@ -46,6 +46,7 @@ function testTemplateArtifactsPassContracts() {
     'templates/outline.md',
     'templates/fact-check.md',
     'templates/review.md',
+    'templates/external-reviews.md',
     'templates/reader-feedback.md',
     'templates/feedback-plan.md',
   ]) {
@@ -214,6 +215,18 @@ function testReaderFeedbackContractRejectsMissingSignal() {
   assert(result.stdout.includes('READER-FEEDBACK.md: Five-Signal Scorecard missing signal "Ask clarity"'));
 }
 
+function testExternalReviewsContractRequiresConsensusSections() {
+  const dir = tempDir('gpd-artifact-external-reviews-test');
+  const badReviews = path.join(dir, 'EXTERNAL-REVIEWS.md');
+  const reviews = fs.readFileSync(path.join(repoRoot, 'templates', 'external-reviews.md'), 'utf8')
+    .replace('### High-Risk Items\n\n- [Feedback that could materially change the thesis, evidence, or positioning]\n', '');
+  fs.writeFileSync(badReviews, reviews);
+
+  const result = runFail(['validate-artifact', '--path', badReviews]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('EXTERNAL-REVIEWS.md: Missing heading "### High-Risk Items"'));
+}
+
 function testFactCheckContractRequiresSafeClaimSections() {
   const dir = tempDir('gpd-artifact-fact-check-heading-test');
   const badFactCheck = path.join(dir, 'FACT-CHECK.md');
@@ -369,6 +382,7 @@ testMarkdownContractFailureIsActionable();
 testMarkdownContractRejectsUnexpectedAudienceDimension();
 testMarkdownContractRejectsMalformedHeading();
 testReaderFeedbackContractRejectsMissingSignal();
+testExternalReviewsContractRequiresConsensusSections();
 testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
 testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();

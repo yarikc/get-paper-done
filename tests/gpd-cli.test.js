@@ -480,6 +480,78 @@ function testExportCommandHonorsStatusRouting() {
   assert(!fs.existsSync(path.join(meta, 'exports', 'FINAL.md')));
 }
 
+function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
+  const dir = tempDir('gpd-review-external-test');
+  run(['init', '--location', dir, '--slug', 'external-review', '--title', 'External Review']);
+  const paperDir = path.join(dir, 'external-review');
+  const meta = path.join(paperDir, '.paper');
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Draft Complete';
+  state.current_stage = 'Draft';
+  state.last_completed_stage = 'Draft';
+  state.suggested_next_command = '/gpd-review --deep';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  fs.writeFileSync(path.join(meta, 'RESEARCH.json'), '{"research_plan":{},"source_registry":[],"evidence_matrix":[]}\n');
+  fs.writeFileSync(path.join(meta, 'OUTLINE.md'), '# Outline\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const reviewDir = tempDir('gpd-external-review-source');
+  const reviewPath = path.join(reviewDir, 'claude-review.md');
+  fs.writeFileSync(reviewPath, '# Claude Review\n\nHIGH: Ask is unclear.\n');
+
+  const output = run(['review-external', '--paper', paperDir, '--review-file', `claude=${reviewPath}`]);
+  assert(output.includes('reviews captured: 1'));
+  assert(output.includes('empty reviews: 0'));
+  assert(output.includes('next: /gpd-progress'));
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('## claude Review'));
+  assert(externalReviews.includes('**Source:** claude-review.md'));
+  assert(externalReviews.includes('HIGH: Ask is unclear.'));
+  assert(!externalReviews.includes(reviewDir));
+  assert(externalReviews.includes('does not invoke external model providers yet'));
+
+  const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
+  assert(feedbackPlan.includes('**Status:** Pending user approval'));
+  assert(feedbackPlan.includes('HIGH: Ask is unclear.'));
+  assert(feedbackPlan.includes('Needs decision'));
+  assert(feedbackPlan.includes('Ask user'));
+  assert(feedbackPlan.includes('No draft or upstream artifact has been changed.'));
+
+  const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  assert.strictEqual(updatedState.status, 'Feedback Pending');
+  assert.strictEqual(updatedState.current_stage, 'External Review');
+  assert.strictEqual(updatedState.suggested_next_command, '/gpd-progress');
+  assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Pending user approval');
+
+  const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(status.artifacts['EXTERNAL-REVIEWS.md'], true);
+  assert.strictEqual(status.artifacts['FEEDBACK-PLAN.md'], true);
+  assert.strictEqual(status.next, '/gpd-progress');
+}
+
+function testReviewExternalRequiresDraft() {
+  const dir = tempDir('gpd-review-external-missing-draft');
+  run(['init', '--location', dir, '--slug', 'missing-draft']);
+  const paperDir = path.join(dir, 'missing-draft');
+  const reviewDir = tempDir('gpd-external-review-source');
+  const reviewPath = path.join(reviewDir, 'review.md');
+  fs.writeFileSync(reviewPath, 'HIGH: Missing draft should block review.\n');
+
+  const failed = runFail(['review-external', '--paper', paperDir, '--review-file', reviewPath]);
+  assert.strictEqual(failed.status, 1);
+  assert(failed.stderr.includes('External review requires .paper/DRAFT.md.'));
+  assert(!fs.existsSync(path.join(paperDir, '.paper', 'EXTERNAL-REVIEWS.md')));
+  assert(!fs.existsSync(path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md')));
+}
+
 function testMalformedInputs() {
   const missingSource = runFail(['import', '--source', path.join(tempDir('gpd-missing-source'), 'missing'), '--location', tempDir('gpd-missing-source-target')]);
   assert.notStrictEqual(missingSource.status, 0);
@@ -536,6 +608,8 @@ testExportCommandWritesFinalAndState();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();
+testReviewExternalCollectsReviewAndStopsAtApprovalGate();
+testReviewExternalRequiresDraft();
 testMalformedInputs();
 
 console.log('gpd cli tests passed');

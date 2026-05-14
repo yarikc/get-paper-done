@@ -9,10 +9,10 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.4/10 as a writing framework and 8.9/10 as an installable private-repo tool as of 2026-05-14
+- Current rating: 9.4/10 as a writing framework and 9.0/10 as an installable private-repo tool as of 2026-05-14
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper document/source extraction for imports, deeper semantic validation, external review wrapping, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, external-review collection, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper document/source extraction for imports, deeper semantic validation, external review provider invocation, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after completing import preview/draft-ranking hardening and preserving deeper import extraction/external-review wrapping as the next main-line choice.
+Last changed: 2026-05-14 after adding the `gpd review-external` collection wrapper and preserving provider invocation as later work.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -138,6 +138,7 @@ Plan-change rule:
 11. Completed: codified the reusable "not new bureaucracy" rule for governance, control, standard, gate, review, and required-record papers in brief, draft, review, and rubric guidance.
 12. Completed: added reusable `READER-FEEDBACK.md` capture with five-signal template, artifact validation, review/revise/progress guidance, status routing, and documentation.
 13. Completed: added a messy synthetic import fixture with expected findings and regression coverage for preservation, source/review classification, canonical draft selection, no downstream artifact generation, blocked strategy routing, and source-sensitive semantic warning.
+14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `EXTERNAL-REVIEWS.md` artifact contract, and deliberately does not invoke external providers yet.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -180,7 +181,8 @@ Next work should validate behavior under real use before adding more RFC surface
 23. Completed: validated that governance/control guidance does not leak into ordinary non-governance examples by adding regression checks for the clean strategy paper, lite update, and short quantitative memo.
 24. Completed: added private-repo release/update guidance in `docs/RELEASE.md`, packaged it, added `npm run release:check`, and documented the release path in README.
 25. Completed: hardened `gpd import` with dry-run inventory, classification counts, copied-size reporting, warning output, `--max-file-bytes`, deterministic draft-candidate scoring, and richer `.paper/IMPORT.md` inventory.
-26. Next main-line slice: decide whether the next useful work is deeper import extraction or external-review wrapping.
+26. Completed: added `gpd review-external` collection wrapper for external review text, with tests for durable artifact output, pending feedback-plan routing, no local path leakage in the review artifact, the missing-draft failure path, and `EXTERNAL-REVIEWS.md` artifact validation.
+27. Next main-line slice: decide whether the next useful work is deeper import extraction or external-review provider invocation.
 
 ## Completed Design Simplifications
 
@@ -201,6 +203,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Upgraded strategist into a challenge-first gatekeeper that can block research, outline, and drafting with `Revise Before Drafting` or `No-Go`, plus normalized `Strategy Blockers` for machine-routable "why not Go" decisions.
 - Added install/update CLI for Claude and Codex with runtime-neutral command placeholders, install manifest, update backups, dry-run, doctor, and version commands.
 - Added deterministic `gpd export` and structural `exports/FINAL.md` status awareness.
+- Added deterministic `gpd review-external` collection from files/stdin into `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md` with pending approval routing.
 - Added first-pass `gpd validate --semantic` gates for empty-but-well-formed artifact failures.
 - Added `examples/data-products-ai-scaling` plus regression coverage for a realistic completed clean-paper workspace.
 - Added `examples/technology-lifecycle-management` plus regression coverage for an anonymized imported-paper recovery workspace.
@@ -439,6 +442,7 @@ gpd init
 gpd import --source <path> --location <path> --slug <name>
 gpd status
 gpd validate
+gpd review-external --review-file reviewer=<path>
 gpd list-audiences
 gpd list-profiles
 ```
@@ -447,7 +451,7 @@ Still needed:
 
 - richer `gpd import` classification and conversion support
 - local project install mode
-- external review runner
+- external review provider invocation
 - broader validation rules
 
 Deliverables:
@@ -527,12 +531,13 @@ Implemented:
 - workflow consistency and template/agent reference tests
 - example-wide semantic gates
 - package hygiene tests
+- external review collection tests
 - CI workflow that runs `npm run check`
 
 Still needed:
 
 - local project install tests if that feature is added
-- external-review runner tests if that feature is added
+- external-review provider invocation tests if that feature is added
 - conversion/indexing tests when import starts parsing `.docx`, `.pdf`, spreadsheets, or diagrams
 
 Deliverables:
@@ -568,13 +573,13 @@ Success criteria:
 
 ### 5. External Review Runner
 
-The workflow documents model invocation, but this should be wrapped.
+The workflow documents model invocation, and the first CLI slice now collects already-produced review text.
 
-Add:
+Implemented:
 
 ```bash
-gpd review-external
-gpd review-external --models claude,gemini,codex
+gpd review-external --review-file claude=/tmp/claude-review.md
+gpd review-external --stdin --reviewer claude
 ```
 
 Needed:
@@ -585,6 +590,7 @@ Needed:
 - error capture
 - output normalization
 - temp prompt generation
+- `--models claude,gemini,codex` provider invocation
 - write `.paper/EXTERNAL-REVIEWS.md`
 
 Deliverables:
@@ -651,7 +657,7 @@ Success criteria:
 ## Priority Order
 
 1. Harden import further only for deeper document/source extraction or very-large-folder review.
-2. Wrap external review runner after the manual workflow proves the command shape.
+2. Extend external review from safe collection to provider invocation after the manual workflow proves the command shape.
 3. Continue one-by-one agent calibration from real paper trials.
 4. Add new examples only for new failure modes, especially multi-audience or external-review cases.
 5. Add local project install support if private/global runtime install becomes a blocker.
@@ -676,6 +682,6 @@ Success criteria:
 - CLI handles install/update/doctor/version/init/import/status/validate.
 - Import copy behavior is safe and tested.
 - Installer is repeatable and clear.
-- External model review is wrapped in a helper command.
+- External model review text can be collected through a helper command.
 - Release/update process has changelog, compatibility policy, and verification checklist.
 - `npm test` covers core operations.

@@ -369,6 +369,7 @@ gpd init
 gpd import --source <path> --location <path> --slug <name>
 gpd status
 gpd validate
+gpd review-external --review-file reviewer=<path>
 gpd list-audiences
 gpd list-profiles
 ```
@@ -381,7 +382,7 @@ Remaining tool maturity requires:
 
 - deeper import conversion and source-extraction helpers
 - local project install mode
-- external review runner
+- external review provider invocation
 - public or team distribution policy
 
 ## Acceptance Criteria
@@ -406,9 +407,9 @@ Tool acceptance:
 
 ## Current Ratings
 
-- Overall project: 9.4/10 as a writing framework; 8.9/10 as an installable private-repo tool
+- Overall project: 9.4/10 as a writing framework; 9.0/10 as an installable private-repo tool
 - Framework design: 9.5/10
-- Installable tool maturity: 8.9/10
+- Installable tool maturity: 9.0/10
 - Documentation: 9.4/10
 - Test coverage: 9.8/10
 - Release readiness: 8.8/10
@@ -426,7 +427,7 @@ Tool acceptance:
 Immediate next work:
 
 1. Harden import further only where real use requires deeper document/source extraction or very-large-folder review.
-2. Wrap external review only after the manual workflow proves the right command shape.
+2. Extend `gpd review-external` from safe collection into provider invocation only after the manual workflow proves the right command shape.
 3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
 5. Revisit agents after real-use calibration.

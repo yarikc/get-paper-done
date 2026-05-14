@@ -146,6 +146,20 @@ Required tables:
 
 - Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `Affected Artifact`
 
+### `EXTERNAL-REVIEWS.md`
+
+Required headings:
+
+- `# External Reviews`
+- `## Review Prompt Summary`
+- `## Consensus Summary`
+- `### Shared Concerns`
+- `### Shared Strengths`
+- `### Divergent Views`
+- `### High-Risk Items`
+
+No table contract is required. External review content can come from different reviewers and provider formats, so validation only checks that raw feedback and summary sections have a durable place to land.
+
 ### `READER-FEEDBACK.md`
 
 Required headings:

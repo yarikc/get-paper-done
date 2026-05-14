@@ -233,6 +233,7 @@ gpd status --paper ~/papers/metadata-strategy
 gpd validate --paper ~/papers/metadata-strategy
 gpd validate --semantic --paper ~/papers/metadata-strategy
 gpd validate-artifact --path ~/papers/metadata-strategy/.paper/RESEARCH.json
+gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
 gpd list-audiences
 gpd list-profiles
 gpd version
@@ -466,6 +467,8 @@ Use `/gpd-outline --deep` when the imported paper is serious, researched, high-s
 `/gpd-review` produces a local review with fixed scorecards and required fixes. `/gpd-review --external` asks available external AI CLIs or local models for independent feedback.
 
 Reader feedback is captured in `.paper/READER-FEEDBACK.md` before it becomes revision work. The artifact uses five signals: voice, register, audience fit, evidence, and ask clarity. External review never edits the draft directly. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, then asks how to proceed. `/gpd-revise` only applies feedback after you approve the proposed handling.
+
+For deterministic CLI collection, use `gpd review-external --review-file reviewer=path` or `--stdin --reviewer name`. This records external review text from files or stdin, updates state to the pending feedback-plan gate, and does not invoke provider CLIs yet.
 
 ## Artifact Contracts
 

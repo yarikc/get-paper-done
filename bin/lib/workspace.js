@@ -15,6 +15,10 @@ const {
   printExport,
 } = require('./export');
 const {
+  reviewExternal,
+  printExternalReviewResult,
+} = require('./external-review');
+const {
   status,
   printStatus,
   validate,
@@ -31,6 +35,8 @@ module.exports = {
   importPaper,
   exportPaper,
   printExport,
+  reviewExternal,
+  printExternalReviewResult,
   status,
   printStatus,
   validate,
