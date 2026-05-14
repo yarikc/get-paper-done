@@ -727,6 +727,27 @@ function testSparseEnumerationDoesNotWarn() {
   assert(!issues.some((item) => item.issue.includes('contains repeated list-heavy paragraphs')));
 }
 
+function testScopeDefinitionEnumerationDoesNotWarn() {
+  const paperDir = makePaper('semantic-scope-definition-enumeration-pass');
+  writeArtifact(paperDir, 'DRAFT.md', [
+    '# Draft',
+    '',
+    '## Body',
+    '',
+    'High-risk means the deployment handles sensitive data; uses privileged integration; faces customers; supports regulated workflow; has production-like access; uses externally hosted AI services; or carries material supply-chain exposure.',
+    '',
+    'The definition is intentionally explicit because the reader must apply it during approval. The next paragraph explains the operating decision instead of repeating the same cadence.',
+    '',
+    'Material change means a change that alters deployed code; dependency version; artifact source; model or provider dependency; prompt or configuration; retrieval corpus; tool permission; privileged access; sensitive-data handling; customer exposure; or an approved exception.',
+    '',
+    'The rest of the memo should use those definitions to route review. It should not keep stacking parallel nouns where a causal sentence would be clearer.',
+    '',
+  ].join('\n'));
+
+  const issues = validateSemanticPaper(paperDir);
+  assert(!issues.some((item) => item.issue.includes('contains repeated list-heavy paragraphs')));
+}
+
 function testStandaloneSourceSensitiveDraftWarns() {
   const paperDir = makePaper('semantic-standalone-source-sensitive');
   writeArtifact(paperDir, 'DRAFT.md', [
@@ -1096,6 +1117,7 @@ testProseSaturationWarns();
 testDistributedProseSaturationWarns();
 testStructuredListsDoNotCountAsSaturatedProse();
 testSparseEnumerationDoesNotWarn();
+testScopeDefinitionEnumerationDoesNotWarn();
 testStandaloneSourceSensitiveDraftWarns();
 testStandaloneSourceSensitiveDraftPassesWithResearch();
 testMixedAudienceDraftWarnsWithoutReview();

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "topic": "Software supply-chain evidence pack for high-risk AI and software pilots",
+    "topic": "Supply-chain control process for high-risk AI and software deployments",
     "scope": "Public-source internal decision memo calibration",
     "depth": "standard",
     "source_mode": "web",
@@ -29,7 +29,7 @@
         "id": "RQ3",
         "question": "Which public source supports using SSDF as secure-development attestation framing?",
         "mapped_claims": ["C3"],
-        "why_it_matters": "The packet needs a defensible secure-development reference without inventing a new control taxonomy.",
+        "why_it_matters": "The control process needs a defensible secure-development reference without inventing a new control taxonomy.",
         "planned_source_types": ["official"],
         "search_queries": ["NIST SP 800-218 Secure Software Development Framework"]
       },
@@ -45,7 +45,7 @@
         "id": "RQ5",
         "question": "Which public source explains provenance as verifiable artifact production information?",
         "mapped_claims": ["C5"],
-        "why_it_matters": "The packet needs a source-backed reason to ask where and how artifacts were produced.",
+        "why_it_matters": "The control record needs a source-backed reason to ask where and how artifacts were produced.",
         "planned_source_types": ["official"],
         "search_queries": ["SLSA provenance where when how artifact produced"]
       },
@@ -53,23 +53,59 @@
         "id": "RQ6",
         "question": "Which public source supports open-source project health scoring as an input?",
         "mapped_claims": ["C6"],
-        "why_it_matters": "The packet should use project health signals carefully and not overstate them.",
+        "why_it_matters": "The control process should use project health signals carefully and not overstate them.",
         "planned_source_types": ["official"],
         "search_queries": ["OpenSSF Scorecard open source project security posture"]
+      },
+      {
+        "id": "RQ7",
+        "question": "Which public source supports treating AI systems as lifecycle risk-management artifacts rather than one-time demos?",
+        "mapped_claims": ["C13"],
+        "why_it_matters": "The memo claims AI scope and needs source-backed lifecycle framing.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NIST AI Risk Management Framework design development deployment use evaluation"]
+      },
+      {
+        "id": "RQ8",
+        "question": "Which public source supports generative AI-specific monitoring and lifecycle governance?",
+        "mapped_claims": ["C14"],
+        "why_it_matters": "LLM systems can change behavior through model, prompt, retrieval, or provider changes outside normal software release evidence.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NIST AI 600-1 Generative AI Profile lifecycle risk management"]
+      },
+      {
+        "id": "RQ9",
+        "question": "Which public source identifies LLM-specific risks relevant to supply chain, plugins, agency, and sensitive information?",
+        "mapped_claims": ["C15", "C16"],
+        "why_it_matters": "The control record needs AI-specific fields rather than only conventional SBOM and build provenance fields.",
+        "planned_source_types": ["official"],
+        "search_queries": ["OWASP Top 10 for Large Language Model Applications supply chain plugins excessive agency sensitive information"]
+      },
+      {
+        "id": "RQ10",
+        "question": "Which public source applies secure development, deployment, operation, and maintenance principles to systems that use AI and third-party AI services?",
+        "mapped_claims": ["C17"],
+        "why_it_matters": "The memo needs a source-backed reason to include AI systems built on third-party tools and services.",
+        "planned_source_types": ["official"],
+        "search_queries": ["NCSC Guidelines for secure AI system development third party tools services"]
       }
     ],
-    "depth_rationale": "The paper is a concise internal decision memo, but it affects production approval and risk acceptance, so each material source claim needs explicit source IDs.",
+    "depth_rationale": "The paper is a concise internal decision memo, but it affects deployment approval and risk acceptance, so each material source claim needs explicit source IDs.",
     "source_mode_rationale": "The calibration intentionally uses live public sources verified on 2026-05-13.",
     "user_feedback": "Keep the memo compact and test the process-burden objection directly."
   },
   "research_brief": {
-    "executive_summary": "The public sources support the evidence categories for a lightweight software supply-chain evidence pack: SBOM/dependency transparency from CISA, secure-development attestation from NIST SSDF, supply-chain risk context from NIST C-SCRM, provenance from SLSA, and open-source health signal use from OpenSSF Scorecard. The sources support the categories, not the exact internal packet fields.",
+    "executive_summary": "The public sources support the evidence categories for a lightweight supply-chain control process: SBOM/dependency transparency from CISA, secure-development attestation from NIST SSDF, supply-chain risk context from NIST C-SCRM, provenance from SLSA, open-source health signal use from OpenSSF Scorecard, and AI/LLM lifecycle controls from NIST AI RMF, NIST Generative AI Profile, OWASP LLM Top 10, and NCSC secure AI guidance. The sources support the categories, not the exact internal control record fields, decision rules, refresh triggers, or operating workflow.",
     "key_findings": [
       "CISA positions SBOM as a software transparency mechanism and provides updated minimum-elements guidance.",
       "NIST SSDF provides a public reference for secure software development practices.",
       "NIST SP 800-161 Rev. 1 frames cybersecurity supply-chain risk as a product, service, and organizational risk-management concern.",
       "SLSA provenance describes verifiable information about where, when, and how software artifacts were produced.",
-      "OpenSSF Scorecard can inform open-source project risk posture but should not be treated as a standalone approval decision."
+      "OpenSSF Scorecard can inform open-source project risk posture but should not be treated as a standalone approval decision.",
+      "AI and LLM deployments add runtime control points that conventional dependency scanning may not cover: model/provider dependencies, prompt/configuration versions, retrieval data sources, and tool or plugin permissions.",
+      "AI-specific security sources support treating model, prompt, retrieval, provider, and tool changes as material review inputs for high-risk deployments.",
+      "A static packet is an incomplete operating model; dependency, provenance, and exception evidence should be refreshed on material changes.",
+      "Observed evidence plus owner attestation and explicit exception handling is stronger than owner-declared paperwork."
     ]
   },
   "source_registry": [
@@ -93,7 +129,7 @@
         {
           "claim_id": "C7",
           "support": "partial",
-          "rationale": "The source supports the dependency-transparency category but not the exact internal packet design."
+          "rationale": "The source supports the dependency-transparency category but not the exact internal control process."
         }
       ],
       "notes": "Verified public CISA page on 2026-05-13."
@@ -123,7 +159,7 @@
         {
           "claim_id": "C7",
           "support": "partial",
-          "rationale": "The source supports a dependency inventory requirement, but not the full proposed evidence pack."
+          "rationale": "The source supports a dependency inventory requirement, but not the full proposed control process."
         }
       ],
       "notes": "Verified public CISA page on 2026-05-13."
@@ -173,7 +209,7 @@
         {
           "claim_id": "C7",
           "support": "partial",
-          "rationale": "The source supports the risk-management need but not the exact packet fields."
+          "rationale": "The source supports the risk-management need but not the exact control record fields."
         },
         {
           "claim_id": "C8",
@@ -184,6 +220,21 @@
           "claim_id": "C9",
           "support": "partial",
           "rationale": "The source supports accountability and risk management but not the exact internal role split."
+        },
+        {
+          "claim_id": "C10",
+          "support": "partial",
+          "rationale": "The source supports ongoing supply-chain risk management, but the exact refresh triggers are internal operating design."
+        },
+        {
+          "claim_id": "C11",
+          "support": "partial",
+          "rationale": "The source supports risk management accountability but not the exact automation-by-default review model."
+        },
+        {
+          "claim_id": "C12",
+          "support": "partial",
+          "rationale": "The source supports risk management accountability but not the exact observed-evidence and owner-attestation workflow."
         }
       ],
       "notes": "Verified public NIST CSRC page on 2026-05-13."
@@ -237,6 +288,141 @@
         }
       ],
       "notes": "Verified public OpenSSF page on 2026-05-13."
+    },
+    {
+      "id": "S7",
+      "title": "NIST Artificial Intelligence Risk Management Framework 1.0",
+      "url_or_path": "https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "moderate",
+      "relevance": "high",
+      "specificity": "medium",
+      "bias_or_agenda": "Official voluntary AI risk management framework.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C13",
+          "support": "direct",
+          "rationale": "The source supports risk management across AI design, development, deployment, use, and evaluation."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports AI lifecycle risk governance but not the exact internal supply-chain control process."
+        },
+        {
+          "claim_id": "C10",
+          "support": "partial",
+          "rationale": "The source supports AI lifecycle governance but not the exact refresh triggers."
+        }
+      ],
+      "notes": "Verified public NIST page on 2026-05-13."
+    },
+    {
+      "id": "S8",
+      "title": "NIST AI RMF Generative AI Profile",
+      "url_or_path": "https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Official generative AI profile for the NIST AI RMF.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C14",
+          "support": "direct",
+          "rationale": "The source supports generative AI-specific risk identification, measurement, monitoring, and lifecycle management."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports generative AI risk-management scope but not the exact control record fields."
+        },
+        {
+          "claim_id": "C10",
+          "support": "partial",
+          "rationale": "The source supports ongoing generative AI risk management but not the exact refresh triggers."
+        },
+        {
+          "claim_id": "C16",
+          "support": "partial",
+          "rationale": "The source supports generative AI risk-management scope but not the exact AI runtime field list."
+        }
+      ],
+      "notes": "Verified public NIST page on 2026-05-13."
+    },
+    {
+      "id": "S9",
+      "title": "OWASP Top 10 for Large Language Model Applications",
+      "url_or_path": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "source_type": "official",
+      "authority": "medium",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Open security project focused on LLM application risks.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C15",
+          "support": "direct",
+          "rationale": "The source identifies LLM-specific risks including supply-chain vulnerabilities, insecure plugin design, excessive agency, and sensitive information disclosure."
+        },
+        {
+          "claim_id": "C16",
+          "support": "direct",
+          "rationale": "The source supports including plugin/tool permissions and external AI dependencies in high-risk review."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports LLM-specific risk categories but not the exact internal workflow."
+        },
+        {
+          "claim_id": "C10",
+          "support": "partial",
+          "rationale": "The source supports the need to revisit LLM risk when relevant runtime dependencies or permissions change."
+        }
+      ],
+      "notes": "Verified public OWASP page on 2026-05-13."
+    },
+    {
+      "id": "S10",
+      "title": "NCSC Guidelines for secure AI system development",
+      "url_or_path": "https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development",
+      "source_type": "official",
+      "authority": "high",
+      "freshness": "recent",
+      "relevance": "high",
+      "specificity": "high",
+      "bias_or_agenda": "Government cybersecurity guidance for AI system providers.",
+      "stance": "supportive",
+      "claim_support": [
+        {
+          "claim_id": "C17",
+          "support": "direct",
+          "rationale": "The source applies secure development, deployment, operation, and maintenance guidance to AI systems, including systems built on tools and services from others."
+        },
+        {
+          "claim_id": "C7",
+          "support": "partial",
+          "rationale": "The source supports AI secure-development scope but not the exact internal control process."
+        },
+        {
+          "claim_id": "C10",
+          "support": "partial",
+          "rationale": "The source supports secure AI operation and maintenance but not the exact refresh triggers."
+        },
+        {
+          "claim_id": "C16",
+          "support": "partial",
+          "rationale": "The source supports secure AI review for systems built on third-party tools and services but not the exact field list."
+        }
+      ],
+      "notes": "Verified public NCSC page on 2026-05-13."
     }
   ],
   "evidence_matrix": [
@@ -262,7 +448,7 @@
       "strength_of_support": "strong",
       "confidence": "high",
       "recommended_handling": "keep",
-      "notes": "Do not imply the draft guidance mandates this internal packet."
+      "notes": "Do not imply the draft guidance mandates this internal control process."
     },
     {
       "claim_id": "C3",
@@ -314,19 +500,19 @@
     },
     {
       "claim_id": "C7",
-      "claim": "High-risk AI and software pilots should carry a minimum evidence pack before production approval.",
+      "claim": "High-risk AI and software deployments should use a lightweight supply-chain control process.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ1", "RQ2", "RQ3", "RQ5", "RQ6"],
-      "supporting_sources": ["S1", "S2", "S3", "S5", "S6"],
+      "research_questions": ["RQ1", "RQ2", "RQ3", "RQ5", "RQ6", "RQ7", "RQ8", "RQ9", "RQ10"],
+      "supporting_sources": ["S1", "S2", "S3", "S5", "S6", "S7", "S8", "S9", "S10"],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
-      "notes": "Recommendation is supported by categories across sources but remains an internal policy proposal."
+      "notes": "Recommendation is supported by software and AI risk categories across sources but remains an internal policy proposal."
     },
     {
       "claim_id": "C8",
-      "claim": "The packet should be lightweight and should standardize existing approval questions rather than create a separate approval process.",
+      "claim": "The control process should be lightweight and should standardize existing approval questions rather than create a separate approval process.",
       "claim_type": "strategic_judgment",
       "research_questions": ["RQ4"],
       "supporting_sources": ["S4"],
@@ -338,7 +524,7 @@
     },
     {
       "claim_id": "C9",
-      "claim": "Pilot owner, independent reviewer, and decision owner are proposed internal roles for operating the packet.",
+      "claim": "Pilot owner, independent reviewer, and decision owner are proposed internal roles for operating the control process.",
       "claim_type": "recommendation",
       "research_questions": ["RQ4"],
       "supporting_sources": ["S4"],
@@ -347,6 +533,102 @@
       "confidence": "medium",
       "recommended_handling": "keep",
       "notes": "Treat as minimum internal operating design after approval, not a standard-mandated role model."
+    },
+    {
+      "claim_id": "C10",
+      "claim": "The pilot supply-chain control record should refresh when dependencies, promoted artifacts, deployment status, or material exceptions change.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": ["Caution: public sources support ongoing supply-chain risk management but do not define these exact refresh triggers."],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Treat as internal lifecycle design needed to avoid stale evidence."
+    },
+    {
+      "claim_id": "C11",
+      "claim": "Human review should happen by exception rather than as a standing handoff for every build.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": ["Caution: public sources support risk management but do not define this automation-by-default review model."],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Treat as internal process-burden design, not a public-standard mandate."
+    },
+    {
+      "claim_id": "C12",
+      "claim": "Automated checks should create observed evidence where possible, while the owner attests to gaps and reviewers handle exceptions.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ4"],
+      "supporting_sources": ["S4"],
+      "contradicting_sources": ["Caution: public sources support risk management but do not define this observed-evidence and owner-attestation workflow."],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Treat as internal process design that avoids relying on owner declaration alone."
+    },
+    {
+      "claim_id": "C13",
+      "claim": "AI systems should be treated as lifecycle risk-management artifacts across design, development, deployment, use, and evaluation.",
+      "claim_type": "factual",
+      "research_questions": ["RQ7"],
+      "supporting_sources": ["S7"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use to justify that AI deployment review is not satisfied by a one-time demo."
+    },
+    {
+      "claim_id": "C14",
+      "claim": "Generative AI systems need risk identification, measurement, monitoring, and governance that account for AI-specific lifecycle behavior.",
+      "claim_type": "factual",
+      "research_questions": ["RQ8"],
+      "supporting_sources": ["S8"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use to justify refresh triggers beyond code and package changes."
+    },
+    {
+      "claim_id": "C15",
+      "claim": "LLM applications have risk categories that conventional software dependency checks may not fully cover, including supply-chain vulnerabilities, insecure plugin design, excessive agency, and sensitive information disclosure.",
+      "claim_type": "factual",
+      "research_questions": ["RQ9"],
+      "supporting_sources": ["S9"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use to justify AI runtime inventory fields."
+    },
+    {
+      "claim_id": "C16",
+      "claim": "High-risk LLM deployments should expose model/provider dependencies, prompt or configuration versions, retrieval data sources, and tool or plugin permissions for review.",
+      "claim_type": "recommendation",
+      "research_questions": ["RQ8", "RQ9"],
+      "supporting_sources": ["S8", "S9"],
+      "contradicting_sources": ["Caution: public sources identify relevant AI risk categories but do not mandate this exact field list."],
+      "strength_of_support": "moderate",
+      "confidence": "medium",
+      "recommended_handling": "keep",
+      "notes": "Label the field list as proposed internal evidence design."
+    },
+    {
+      "claim_id": "C17",
+      "claim": "Secure AI guidance applies to AI systems built from scratch and systems built on tools and services provided by others.",
+      "claim_type": "factual",
+      "research_questions": ["RQ10"],
+      "supporting_sources": ["S10"],
+      "contradicting_sources": [],
+      "strength_of_support": "strong",
+      "confidence": "high",
+      "recommended_handling": "keep",
+      "notes": "Use to justify external provider and third-party AI service coverage."
     }
   ],
   "synthesis_matrix": {
@@ -355,6 +637,7 @@
       "secure development",
       "provenance",
       "open-source health",
+      "AI runtime inventory",
       "risk governance"
     ],
     "rows": [
@@ -365,52 +648,83 @@
           "S2": "Supports minimum SBOM elements.",
           "S3": "Supports secure-development practice framing.",
           "S5": "Supports provenance as artifact production information.",
-          "S6": "Supports automated open-source project health signal use."
+          "S6": "Supports automated open-source project health signal use.",
+          "S7": "Supports AI lifecycle risk-management framing.",
+          "S8": "Supports generative AI-specific risk management.",
+          "S9": "Supports LLM-specific risk categories.",
+          "S10": "Supports secure development and operation for AI systems built on third-party tools or services."
         },
         "pattern": "agreement",
         "implication": "The memo can propose evidence categories with source IDs."
       },
       {
-        "theme": "Exact packet mechanics are internal design.",
+        "theme": "AI scope requires fields beyond conventional software supply-chain evidence.",
+        "source_summaries": {
+          "S7": "AI risk management spans design, development, deployment, use, and evaluation.",
+          "S8": "Generative AI risk management requires monitoring and lifecycle attention.",
+          "S9": "LLM application risks include supply chain, plugin/tool design, agency, and sensitive information exposure.",
+          "S10": "Secure AI guidance covers AI systems built on third-party tools and services."
+        },
+        "pattern": "agreement",
+        "implication": "The control record should include model/provider, prompt/configuration, retrieval/source, and tool-permission evidence."
+      },
+      {
+        "theme": "Exact control process mechanics are internal design.",
         "source_summaries": {
           "S4": "Supports supply-chain risk management as an organizational concern.",
-          "S1": "Does not define the internal packet.",
-          "S5": "Does not require every early pilot to have full automated provenance."
+          "S1": "Does not define the internal control process.",
+          "S5": "Does not require every early pilot to have full automated provenance.",
+          "S8": "Does not define the exact internal AI runtime record fields.",
+          "S9": "Does not define the exact internal review workflow."
         },
         "pattern": "gap",
-        "implication": "The memo must label owner, exception, and packet-field details as proposed internal mechanics."
+        "implication": "The memo must label owner, exception, decision rule, refresh trigger, and record-field details as proposed internal mechanics."
       }
     ]
   },
   "contradictions": [
     {
-      "claim": "The evidence pack should be lightweight.",
+      "claim": "The supply-chain control process should be lightweight.",
       "counterpoint": "Public sources support richer supply-chain practices than this memo requires.",
-      "handling": "Position the packet as a production-approval baseline for pilots, not full software assurance."
+      "handling": "Position the process as a high-risk deployment baseline, not full software or AI assurance."
+    },
+    {
+      "claim": "AI runtime inventory fields are sufficient to prove AI safety.",
+      "counterpoint": "AI-specific sources support risk identification and monitoring, not a guarantee of safe behavior.",
+      "handling": "Position AI fields as inspectable inputs for approval and exception handling, not proof of safety."
     }
   ],
   "open_questions": [
-    "Which pilot categories count as high-risk?",
+    "Which deployment categories count as high-risk?",
     "Which role validates exceptions?",
-    "Does production approval require stronger provenance than early pilot review?"
+    "Does deployment approval require stronger provenance than early pilot review?",
+    "Which dependency, artifact, model, provider, prompt, retrieval, tool, deployment, or exception changes trigger record refresh?",
+    "Which checks can be automated and which require human exception review?"
   ],
   "draft_support_notes": [
     "Define SBOM, SSDF, and provenance before relying on acronyms.",
+    "Explain why AI and LLM deployments need additional runtime inventory fields beyond conventional dependency scanning.",
     "Do not say SBOM, SLSA, or Scorecard proves security.",
+    "Do not say AI runtime inventory proves AI safety.",
     "Frame OpenSSF Scorecard as signal input only.",
-    "Address process burden in the first half of the memo."
+    "Address process burden in the first half of the memo.",
+    "Explain that the record is refreshed on material changes, not captured once and left stale."
   ],
   "facts_safe_to_use": [
     "CISA provides public SBOM guidance (S1, S2).",
     "NIST SP 800-218 is the Secure Software Development Framework (S3).",
     "NIST SP 800-161 Rev. 1 addresses cybersecurity supply-chain risk management (S4).",
     "SLSA provenance describes verifiable information about where, when, and how software artifacts were produced (S5).",
-    "OpenSSF Scorecard provides automated open-source project security posture signals (S6)."
+    "OpenSSF Scorecard provides automated open-source project security posture signals (S6).",
+    "NIST AI RMF 1.0 provides voluntary AI risk-management guidance across the AI lifecycle (S7).",
+    "NIST AI RMF Generative AI Profile provides generative AI-specific risk-management guidance (S8).",
+    "OWASP LLM Top 10 identifies LLM application risks including supply-chain vulnerabilities, insecure plugin design, excessive agency, and sensitive information disclosure (S9).",
+    "NCSC secure AI guidance applies to AI systems built from scratch or on tools and services provided by others (S10)."
   ],
   "claims_to_soften": [
     {
-      "claim": "The public sources require this exact evidence pack.",
-      "suggested_wording": "Public sources support the evidence categories; this memo proposes the internal packet design."
+      "claim": "The public sources require this exact control process.",
+      "suggested_wording": "Public references support the evidence categories; this memo proposes the internal control process."
     },
     {
       "claim": "SBOMs prove pilot security.",
@@ -419,16 +733,24 @@
     {
       "claim": "Scorecard is sufficient for dependency approval.",
       "suggested_wording": "Scorecard can inform review and should be paired with human risk handling."
+    },
+    {
+      "claim": "AI runtime inventory proves the deployment is safe.",
+      "suggested_wording": "AI runtime inventory makes model, provider, prompt, retrieval, and tool dependencies inspectable; it does not prove the deployment is safe."
     }
   ],
   "claims_to_drop_or_reframe": [
     {
-      "claim": "The evidence pack guarantees regulatory readiness.",
+      "claim": "The supply-chain control process guarantees regulatory readiness.",
       "why": "No public source in this set supports that claim."
     },
     {
       "claim": "Full SLSA compliance should be required for every early pilot.",
       "why": "The source supports provenance concepts, but that requirement is too broad for the memo's lightweight baseline."
+    },
+    {
+      "claim": "OWASP LLM Top 10 mandates this control-record template.",
+      "why": "OWASP supports LLM risk categories but does not mandate this exact internal workflow or evidence template."
     }
   ]
 }

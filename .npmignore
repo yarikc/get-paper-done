@@ -1,0 +1,6 @@
+*.feedback
+docs/feedback*.md
+agents/.claude/
+rfc/
+tests/
+.github/

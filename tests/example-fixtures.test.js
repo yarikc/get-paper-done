@@ -309,7 +309,8 @@ function testPublicAiControlBaselineKeepsLivePublicSourceShape() {
 }
 
 function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
-  assert(fs.existsSync(path.join(supplyChainExampleDir, 'PRE-REGISTRATION.md')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, 'EXPECTED-FINDINGS.md')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, 'README.md')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'RESEARCH.json')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'FACT-CHECK.md')));
@@ -332,13 +333,19 @@ function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
   assert.strictEqual(config.research.require_source_table, true);
   assert.strictEqual(config.review.fact_check, true);
 
-  const preRegistration = fs.readFileSync(path.join(supplyChainExampleDir, 'PRE-REGISTRATION.md'), 'utf8');
-  assert(preRegistration.includes('Run one more realistic public-source paper calibration'));
-  assert(preRegistration.includes('Bureaucracy objection underhandled'));
-  assert(preRegistration.includes('Visual temptation'));
+  const expectedFindings = fs.readFileSync(path.join(supplyChainExampleDir, 'EXPECTED-FINDINGS.md'), 'utf8');
+  assert(expectedFindings.includes('Run one more realistic public-source paper calibration'));
+  assert(expectedFindings.includes('Bureaucracy objection underhandled'));
+  assert(expectedFindings.includes('Visual temptation'));
+
+  const readme = fs.readFileSync(path.join(supplyChainExampleDir, 'README.md'), 'utf8');
+  assert(readme.includes('public-source internal decision memo'));
+  assert(readme.includes('backward routing'));
+  assert(readme.includes('AI runtime evidence'));
+  assert(readme.includes('Privacy Boundary'));
 
   const research = JSON.parse(fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
-  assert.strictEqual(research.source_registry.length, 6);
+  assert.strictEqual(research.source_registry.length, 10);
   for (const source of research.source_registry) {
     assert(source.url_or_path.startsWith('https://'), `${source.id} should use a public HTTPS URL`);
     assert(Array.isArray(source.claim_support), `${source.id} should include claim_support`);
@@ -354,37 +361,68 @@ function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
     'https://csrc.nist.gov/pubs/sp/800/161/r1/final',
     'https://slsa.dev/provenance',
     'https://openssf.org/scorecard/',
+    'https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10',
+    'https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence',
+    'https://owasp.org/www-project-top-10-for-large-language-model-applications/',
+    'https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development',
   ]) {
     assert(urls.has(expectedUrl), `missing public source ${expectedUrl}`);
   }
 
   assert(research.claims_to_soften.some((item) => item.claim.includes('SBOMs prove pilot security')));
+  assert(research.claims_to_soften.some((item) => item.claim.includes('AI runtime inventory proves')));
   assert(research.claims_to_drop_or_reframe.some((item) => item.claim.includes('guarantees regulatory readiness')));
 
   const factCheck = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'FACT-CHECK.md'), 'utf8');
-  for (const sourceId of ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']) {
+  for (const sourceId of ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10']) {
     assert(factCheck.includes(sourceId), `FACT-CHECK.md should include ${sourceId}`);
   }
-  assert(factCheck.includes('The packet standardizes existing production-approval questions rather than creating a separate approval forum'));
+  assert(factCheck.includes('The control process standardizes existing production-approval questions rather than creating a separate approval forum'));
   assert(factCheck.includes('Public sources support the evidence categories, but the exact requirement is an internal policy recommendation'));
+  assert(factCheck.includes('The supply-chain control record should refresh when dependencies, promoted artifacts, AI runtime inputs, deployment status, or material exceptions change'));
+  assert(factCheck.includes('AI and LLM deployments add control points that may change behavior without a normal code release'));
+  assert(factCheck.includes('Model/provider dependencies, prompt/configuration versions, retrieval data sources, and tool permissions should be visible in the control record'));
+  assert(factCheck.includes('Human review should happen by exception rather than as a standing handoff for every build'));
+  assert(factCheck.includes('Automated checks should create observed evidence where possible'));
 
   const review = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'REVIEW.md'), 'utf8');
   assert(review.includes('new approval layer'));
   assert(review.includes('Audience Conflict Table'));
+  assert(review.includes('separates observed evidence from owner attestation'));
 
   const final = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
+  assert(final.includes('Supply-Chain Control Process'));
   assert(final.includes('https://www.cisa.gov/sbom'));
   assert(final.includes('https://csrc.nist.gov/pubs/sp/800/218/final'));
   assert(final.includes('https://slsa.dev/provenance'));
   assert(final.includes('https://openssf.org/scorecard/'));
-  assert(final.includes('software bill of materials, or SBOM'));
-  assert(final.includes('Secure Software Development Framework, or SSDF'));
-  assert(final.includes('Supply-chain Levels for Software Artifacts, or SLSA'));
-  assert(final.includes('does not prove the pilot is secure'));
-  assert(final.includes('not as a standalone approval decision'));
+  assert(final.includes('https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10'));
+  assert(final.includes('https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence'));
+  assert(final.includes('https://owasp.org/www-project-top-10-for-large-language-model-applications/'));
+  assert(final.includes('https://www.ncsc.gov.uk/collection/guidelines-secure-ai-system-development'));
+  assert(final.includes('supply-chain control record'));
+  assert(final.includes('keeps evidence, attestation, validation results, exceptions, and approval decisions current'));
+  assert(final.includes('High-risk means the deployment handles sensitive data'));
+  assert(final.includes('Traditional dependency scanning helps with code and packages'));
+  assert(final.includes('AI runtime inventory'));
+  assert(final.includes('Behavior-shaping model, provider, prompt/configuration, retrieval source, and tool permission'));
+  assert(final.includes('tool-permission change'));
+  assert(final.includes('NIST AI RMF'));
+  assert(final.includes('OWASP LLM Top 10'));
+  assert(final.includes('do not prove the deployment is secure'));
+  assert(final.includes('not an approval decision'));
   assert(final.includes('does not create a separate forum'));
-  assert(final.includes('pilot owner completes the packet'));
-  assert(final.includes('decision owner approves any exception explicitly'));
+  assert(final.includes('Create observed evidence for dependency inventory; artifact provenance; open-source health; and detectable AI runtime configuration where possible'));
+  assert(final.includes('Validate exceptions, stale evidence, threshold breaches, and sampled records'));
+  assert(final.includes('Evidence is complete, current, validated as needed, and within threshold'));
+  assert(final.includes('Proceed with an explicit exception'));
+  assert(final.includes('Hold deployment approval until corrected or accepted'));
+  assert(final.includes('Sample validation'));
+  assert(final.includes('unreviewed model or provider change'));
+  assert(final.includes('unreviewed retrieval, prompt, or tool-permission change'));
+  assert(final.includes('sampled validation failure'));
+  assert(final.includes('decision owner accepts residual risk'));
+  assert(!final.includes('//YC'));
   assert(!final.includes('[NEEDS EVIDENCE:'));
   assert(!final.includes('[AUTHOR DECISION:'));
 }

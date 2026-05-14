@@ -2,7 +2,7 @@
 
 ## Title
 
-Require a Software Supply Chain Evidence Pack for High-Risk AI and Software Pilots
+Approve a Supply-Chain Control Process for High-Risk AI and Software Deployments
 
 ## Slug
 
@@ -10,7 +10,7 @@ software-supply-chain-evidence-pack
 
 ## Summary
 
-Compact internal decision memo recommending a minimum evidence pack for high-risk AI and software pilots before production approval. The calibration uses only public sources and tests whether GPD can keep a concise decision memo source-disciplined, operational, and resistant to process-burden objections.
+Compact internal decision memo recommending a lightweight supply-chain control process for high-risk AI and software deployments, including pilots moving into production-like use. The calibration uses only public sources and tests whether GPD can keep a concise decision memo source-disciplined, operational, current across material software and AI runtime changes, and resistant to process-burden objections.
 
 ## Source Boundary
 

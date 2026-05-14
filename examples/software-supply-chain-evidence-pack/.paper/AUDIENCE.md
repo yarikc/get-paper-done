@@ -2,22 +2,22 @@
 
 ## Primary Audience
 
-Senior technology or risk decision maker deciding whether high-risk AI and software pilots need a minimum software supply-chain evidence pack before production approval.
+Senior technology or risk decision maker deciding whether high-risk AI and software deployments, including pilots moving into production-like use, need a lightweight supply-chain control process that covers both conventional software evidence and AI runtime evidence.
 
 ## Secondary Audience
 
-Senior engineering or architecture leader responsible for making the evidence pack operational inside pilot intake and review.
+Senior engineering or architecture leader responsible for making the supply-chain control record and exception process operational inside deployment intake and review.
 
 ## Audience Set
 
 | Audience | Priority | What They Need | Likely Objection | Proof Standard |
 |---|---|---|---|---|
-| Senior technology/risk decision maker | Primary | Clear decision ask, bounded burden, risk rationale, accountability model | This looks like another approval layer | Public standards plus a lightweight operating model |
-| Senior engineering/architecture leader | Secondary | Evidence fields, owner expectations, exception path, implementation boundary | This is too vague to operate consistently | Specific packet contents and source-backed rationale |
+| Senior technology/risk decision maker | Primary | Clear decision ask, bounded burden, risk rationale, accountability model | This looks like another approval layer | Public references plus a lightweight control process |
+| Senior engineering/architecture leader | Secondary | Evidence fields, owner expectations, exception path, decision rules, implementation boundary | This is too vague to operate consistently, or too generic to cover AI/LLM systems | Specific record contents, AI runtime fields, source-backed rationale, and decision handling |
 
 ## Audience Tension
 
-The primary reader needs a concise decision and burden control. The secondary reader needs enough detail to implement the evidence pack without inventing a new process.
+The primary reader needs a concise decision and burden control. The secondary reader needs enough detail to implement the control record without inventing a new process.
 
 ## Conflict Rule
 

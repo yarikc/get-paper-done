@@ -14,5 +14,5 @@
 
 ## Feedback
 
-- **Feedback plan status:** Not required
-- **Approved handling:** No blocking review findings
+- **Feedback plan status:** Applied
+- **Approved handling:** Reader feedback incorporated: supply-chain control process, control record, AI runtime evidence, decision rules, standards context, and exception-based review

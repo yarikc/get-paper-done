@@ -29,6 +29,7 @@ for (const requiredPath of [
   'package.json',
   'bin/gpd.js',
   'docs/START-HERE.md',
+  'docs/SEMANTIC-CALIBRATION.md',
   'commands/gpd/new-paper.md',
   'workflows/new-paper.md',
   'agents/paper-strategist.md',
@@ -55,6 +56,7 @@ for (const forbiddenPath of [
 
 for (const filePath of files) {
   assert(!filePath.startsWith('docs/feedback'), `package should not include feedback file: ${filePath}`);
+  assert(!filePath.endsWith('.feedback'), `package should not include inline feedback file: ${filePath}`);
   assert(!filePath.startsWith('agents/.claude/'), `package should not include local agent settings: ${filePath}`);
   assert(!filePath.startsWith('rfc/'), `package should not include RFC design drafts: ${filePath}`);
   assert(!filePath.startsWith('tests/'), `package should not include tests: ${filePath}`);
