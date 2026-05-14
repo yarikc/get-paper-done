@@ -1,6 +1,6 @@
 ---
 name: gpd:progress
-description: Show paper status, missing artifacts, suggested next command, and context-clearing guidance
+description: Show the Claude/Codex paper dashboard: current state, blockers, next command, and context guidance
 argument-hint: "[--json]"
 allowed-tools:
   - Read
@@ -12,5 +12,5 @@ allowed-tools:
 </execution_context>
 
 <process>
-Run the progress workflow. This command reports and recommends only; it does not execute the next stage.
+Run the progress workflow as the in-runtime paper dashboard. This command reports and recommends only; it does not execute the next stage.
 </process>

@@ -265,7 +265,7 @@ Deep mode adds:
 
 ## Multi-Model Review Stage
 
-`/gpd-review --external` can request feedback from installed external AI CLIs or local model servers. Use `/gpd-review --external --models claude,gemini,codex` to limit reviewers. Older aliases such as `/gpd-review --all` and `/gpd-review --claude --gemini` remain acceptable for compatibility.
+`/gpd-review --external` can request feedback from installed external AI CLIs or local model servers. Use `/gpd-review --external --models claude,gemini,codex,opencode` to limit reviewers. Older aliases such as `/gpd-review --all` and `/gpd-review --claude --gemini` remain acceptable for compatibility.
 
 The review stage has four possible outputs:
 

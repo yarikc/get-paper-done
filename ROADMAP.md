@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after calibrating opencode provider invocation and correcting Gemini provider args.
+Last changed: 2026-05-14 after adding CLI-only next-action guidance and simplifying onboarding docs.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -147,11 +147,14 @@ Plan-change rule:
 20. Completed: added import-time detection of unverified source-reference candidates from Markdown, text, and `.docx` material, recording URLs, DOIs, named standards/source families, and source/reference lines in `.paper/IMPORT.md` without creating `RESEARCH.json`.
 21. Completed: added a `Version / Source Index` to `.paper/IMPORT.md`, grouping copied files by likely role, ranking signal, modified time, recommended downstream stage, and rationale without changing routing or generating downstream artifacts.
 22. Completed: calibrated the real opencode CLI path on a synthetic public paper, confirmed `opencode run -`, corrected Gemini args to `gemini -p ""` with stdin based on CLI help, and added regression assertions for both provider argument shapes. Gemini real capture remains blocked until local browser authentication is completed.
+23. Completed: added CLI-only `gpd next` as a compact read-only guide for the next command, why it is next, and what context to read or avoid, while keeping `/gpd-progress` as the Claude/Codex dashboard.
+24. Completed: simplified README and `docs/START-HERE.md` into onboarding/front-door docs and moved dense workflow mechanics behind reference links instead of front-loading them.
 
 ### Explicit Non-Goals For This Cycle
 
 - Do not implement RFC-3 or RFC-4.
 - Do not add new semantic quality heuristics unless the active plan changes first.
+- Do not add a web dashboard, app UI, or any UX surface outside the `gpd` CLI, Claude/Codex slash commands, and `.paper/` artifacts.
 - Do not commit ignored feedback files.
 
 ### Deferred After This Cycle
@@ -205,7 +208,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Simplified import so it preserves originals and creates only minimal artifacts.
 - Added paper location prompt and per-paper directory creation.
 - Added `/gpd-progress` and `/gpd-status` as read-only continuity commands.
-- Deferred `/gpd-next` to preserve explicit context-break stages.
+- Added CLI-only `gpd next` for compact next-action guidance while preserving explicit slash-command stage execution.
 - Added hard research compression rule.
 - Added curated reusable audiences.
 - Collapsed specialized audience review wrappers into one `audience-reviewer`.
@@ -441,7 +444,7 @@ Success criteria:
 
 ### 1. Add A Real CLI Helper
 
-Initial install/update CLI exists. The CLI now also has first-pass workspace helpers for init/import/status/validate/listing.
+Initial install/update CLI exists. The CLI now also has workspace helpers for init/import/next/status/validate/review/export/listing.
 
 Implemented:
 
@@ -455,6 +458,7 @@ gpd doctor codex
 gpd version
 gpd init
 gpd import --source <path> --location <path> --slug <name>
+gpd next
 gpd status
 gpd validate
 gpd review-external --review-file reviewer=<path>
@@ -477,9 +481,9 @@ Deliverables:
 - neutral `@{{GPD_RUNTIME_ROOT}}` source references plus command-reference rewriting for Claude/Codex targets
 - install manifest
 - backup of changed installed files during update
-- command routing for init/import/status/validate
+- command routing for init/import/next/status/validate
 - path handling helpers for paper workspaces
-- JSON output mode for status, validate, audience listing, and profile listing
+- JSON output mode for next, status, validate, audience listing, and profile listing
 
 Success criteria:
 
@@ -538,7 +542,7 @@ Implemented:
 - varied import classification fixture test
 - audience persona discovery test
 - profile discovery test
-- init/status/validate smoke test
+- init/next/status/validate smoke test
 - malformed input tests for unreadable/missing import source, missing required files, and malformed `STRATEGY.md`
 - init footgun regression test for no `--slug`, no `--title`, and no `--location`
 - slug/default-location behavior for init/import
@@ -692,7 +696,7 @@ Success criteria:
 
 ### Tool 9/10
 
-- CLI handles install/update/doctor/version/init/import/status/validate.
+- CLI handles install/update/doctor/version/init/import/next/status/validate.
 - Import copy behavior is safe and tested.
 - Installer is repeatable and clear.
 - External model review text can be collected through a helper command.

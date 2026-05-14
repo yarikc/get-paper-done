@@ -367,6 +367,7 @@ Workspace CLI helpers:
 ```bash
 gpd init
 gpd import --source <path> --location <path> --slug <name>
+gpd next
 gpd status
 gpd validate
 gpd review-external --review-file reviewer=<path>
@@ -376,7 +377,7 @@ gpd list-profiles
 
 `gpd init` creates `.paper/` setup artifacts and leaves strategy blocked until `/gpd-brief` confirms the paper direction. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, extracts plain text from selected `.docx` canonical drafts, records unverified source-reference candidates for later triage, indexes copied files by likely role and downstream stage, and preserves downstream research/outline/fact-check/review as separate stages.
 
-Tooling tests cover install/update/doctor, command-reference rewriting, backup correctness, init/import/status/validate, malformed input handling, and varied import classification. CI runs `npm run check`.
+Tooling tests cover install/update/doctor, command-reference rewriting, backup correctness, init/import/next/status/validate, malformed input handling, and varied import classification. CI runs `npm run check`.
 
 Remaining tool maturity requires:
 
@@ -402,7 +403,7 @@ Tool acceptance:
 - Installer dry-run passes.
 - Install result includes commands, workflows, agents, audiences, profiles, templates, and references.
 - CLI can install, update, and doctor Claude and Codex runtimes.
-- CLI can create, import, status, and validate paper workspaces safely.
+- CLI can create, import, show the next action, status, and validate paper workspaces safely.
 - Tests cover import, install, discovery, and artifact validation.
 
 ## Current Ratings

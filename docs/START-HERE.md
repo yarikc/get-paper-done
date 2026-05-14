@@ -2,58 +2,41 @@
 
 Get Paper Done turns serious AI-assisted writing into a staged paper workflow.
 
-Instead of one long chat, each paper becomes a folder with durable files for author voice, audience, brief, strategy, research, outline, draft, fact-checking, review, feedback, and state. The files let you clear context, switch between Claude and Codex, revise safely, and see exactly what should happen next.
+Instead of one long chat, each paper becomes a folder with durable files for author voice, audience, brief, strategy, research, outline, draft, fact-checking, review, feedback, and state. You can clear context, switch between Claude and Codex, and still know what should happen next.
 
-## What It Is For
+## First, See The Output
 
-Use GPD when the writing has a real job:
+Before creating your own workspace, look at a finished paper:
 
-- get a decision
-- explain a complex topic
-- set strategy or architecture direction
-- publish a public technical argument
-- recover a messy existing draft
-- make evidence, audience, and revision decisions explicit
+- [data-products-ai-scaling FINAL.md](../examples/data-products-ai-scaling/.paper/exports/FINAL.md) shows a full internal strategy-paper flow.
+- [public-ai-control-baseline FINAL.md](../examples/public-ai-control-baseline/.paper/exports/FINAL.md) shows a compact public-source decision memo.
+- [software-supply-chain-evidence-pack FINAL.md](../examples/software-supply-chain-evidence-pack/.paper/exports/FINAL.md) shows reader feedback, feedback planning, backward routing, fact-checking, and export.
 
-It is usually too heavy for quick emails, casual summaries, short chat replies, or writing where a single prompt is enough.
+These are workflow outputs, not marketing samples. The surrounding `.paper/` folders show the artifacts behind each paper.
 
-## Quick Win: See A Finished Paper
+## What You Need To Know
 
-Before creating your own workspace, look at a completed output:
-
-- [examples/data-products-ai-scaling/.paper/exports/FINAL.md](../examples/data-products-ai-scaling/.paper/exports/FINAL.md) shows a full internal strategy-paper flow.
-- [examples/public-ai-control-baseline/.paper/exports/FINAL.md](../examples/public-ai-control-baseline/.paper/exports/FINAL.md) shows a compact public-source decision memo.
-
-These are workflow outputs, not marketing samples. The surrounding `.paper/` folders show the brief, research, outline, fact-check, review, state, and export artifacts that produced the final paper.
-
-## The Mental Model
-
-There are three moving parts:
+There are only three moving parts:
 
 | Part | What it does |
 |------|--------------|
-| `gpd` CLI | Installs runtime assets, creates/imports paper workspaces, checks status, validates artifacts, and exports final Markdown. |
-| Slash commands | Run the actual AI writing workflow inside Claude or Codex. Examples: `/gpd-brief`, `/gpd-research`, `/gpd-outline`, `/gpd-draft`. |
-| `.paper/` folder | Stores durable paper memory: persona, audience, brief, strategy, research, outline, draft, review, fact-check, feedback, and state. |
+| `gpd` CLI | Installs GPD, creates/imports workspaces, shows the next action, validates, and exports. |
+| Slash commands | Run the writing workflow inside Claude or Codex. |
+| `.paper/` folder | Stores the paper memory and state. |
 
-The normal flow is:
+When unsure, run:
 
-```text
-create or import
-  -> brief
-  -> strategy gate
-  -> research
-  -> outline
-  -> draft
-  -> fact-check
-  -> review
-  -> revise
-  -> export
+```bash
+gpd next
 ```
 
-You do not need to memorize every artifact. Run `gpd status` in the paper folder, or `/gpd-progress` inside Claude or Codex, when you are unsure what to do next.
+or inside Claude/Codex:
 
-During `/gpd-brief`, GPD will classify the paper's purpose as `decision_memo`, `strategy_paper`, `explainer`, or `update`. It also records channel, risk, complexity, and audience shape so later stages know how much rigor the paper needs.
+```text
+/gpd-progress
+```
+
+Both are read-only. They tell you the next command and why.
 
 ## Install Once
 
@@ -64,9 +47,7 @@ cd /path/to/get-paper-done
 npm link
 ```
 
-`npm link` puts the local `gpd` CLI on your shell `PATH`. It is required once for this private/local repo setup.
-
-Install runtime assets for both Claude Code and Codex:
+Install into both AI runtimes:
 
 ```bash
 gpd install claude
@@ -75,21 +56,23 @@ gpd doctor claude
 gpd doctor codex
 ```
 
-Restart Claude Code and Codex after installing so the slash commands are available.
+Restart Claude Code and Codex after installing.
 
-## Create Your First Paper
+`npm link` puts the local `gpd` CLI on your shell `PATH`. `gpd install ...` copies the slash commands and workflow files into Claude/Codex.
 
-Use the CLI when you want deterministic setup:
+## Create A Paper
+
+Use the CLI for deterministic setup:
 
 ```bash
 gpd init --location ~/papers --slug my-first-paper --title "My First Paper"
 cd ~/papers/my-first-paper
-gpd status
+gpd next
 ```
 
-Then open Claude or Codex in that paper directory.
+Then open Claude or Codex in that paper directory and run the command GPD recommends.
 
-Run:
+For a first clean paper, the usual path is:
 
 ```text
 /gpd-persona
@@ -104,63 +87,81 @@ Run:
 /gpd-export
 ```
 
-Use `/gpd-persona` and `/gpd-audience` on a first paper so GPD captures author voice, authority posture, reader priority, objections, and proof standard before strategy work.
-
-You can also start from the AI runtime:
+You can also create the paper interactively from the AI runtime:
 
 ```text
 /gpd-new-paper
 ```
 
-Use `/gpd-new-paper` when you want the AI runtime to ask setup questions interactively.
+## The Workflow In One Screen
 
-## Persona And Audience
+```text
+create or import
+  -> brief
+  -> strategy gate
+  -> research
+  -> outline
+  -> draft
+  -> fact-check
+  -> review
+  -> revise
+  -> export
+```
 
-GPD separates author voice from reader needs.
+During `/gpd-brief`, GPD classifies the paper as `decision_memo`, `strategy_paper`, `explainer`, or `update`. It also records channel, risk, complexity, and audience shape so later stages know how much rigor the paper needs.
 
-`PERSONA.md` is the paper-specific author profile. It should capture how the paper should sound and argue:
+Moving backward is normal. If you change the brief after research, or research after outlining, GPD routes you back to the earliest stage that needs refresh. That is an incremental repair, not a full reset.
 
-- role or authority posture
-- voice
-- tone boundaries
-- default argument style
-- things to avoid
+## Author Voice And Audience
 
-`AUDIENCE.md` is the paper-specific reader model. It should capture:
-
-- primary reader
-- secondary readers, if needed
-- what they care about
-- what they will challenge
-- what proof standard they expect
-
-Use these commands when the defaults are not enough:
+Use these on a first paper:
 
 ```text
 /gpd-persona
 /gpd-audience
-/gpd-curate-audience
 ```
+
+`PERSONA.md` captures how the paper should sound and argue. `AUDIENCE.md` captures who the paper must satisfy, what they care about, what they will challenge, and what proof standard they expect.
 
 Start with one primary audience. Add secondary audiences only when the paper truly needs them.
 
 ## Reader Feedback
 
-When a person or another model reviews the paper, capture that read in `READER-FEEDBACK.md` before revising. GPD uses five signals:
+When a person or another model reviews the paper, capture that read before revising:
 
-- voice
-- register
-- audience fit
-- evidence
-- ask clarity
+```text
+/gpd-review
+```
 
-Feedback then moves through `FEEDBACK-PLAN.md`, where each item is marked incorporate, ignore, defer, or ask user before `/gpd-revise` changes the draft.
+GPD records feedback in `READER-FEEDBACK.md` and plans handling in `FEEDBACK-PLAN.md`. Revision should happen only after the handling plan is approved.
+
+## Import Existing Work
+
+If you already have drafts, notes, sources, or review comments:
+
+```bash
+gpd import --source ~/drafts/current-paper --location ~/papers --slug imported-paper --dry-run
+gpd import --source ~/drafts/current-paper --location ~/papers --slug imported-paper
+cd ~/papers/imported-paper
+gpd next
+```
+
+Import is preservation-first. GPD copies source material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and leaves research, outline, fact-check, and review as separate stages.
+
+If the imported draft is publication-sensitive and contains factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run:
+
+```text
+/gpd-fact-check --risk-scan
+```
+
+before external review or export.
 
 ## When You Get Stuck
 
 From the paper directory:
 
 ```bash
+gpd next
 gpd status
 gpd validate
 gpd validate --semantic
@@ -172,31 +173,4 @@ Inside Claude or Codex:
 /gpd-progress
 ```
 
-Moving backward is normal. If you change the brief after research, or research after outlining, GPD routes you back to the earliest stage that needs refresh. That is an incremental repair, not a full reset.
-
-## Import Existing Work
-
-If you already have drafts, notes, sources, or review comments, import them instead of starting clean:
-
-```bash
-gpd import --source ~/drafts/current-paper --location ~/papers --slug imported-paper --dry-run
-gpd import --source ~/drafts/current-paper --location ~/papers --slug imported-paper
-cd ~/papers/imported-paper
-gpd status
-```
-
-Import is preservation-first. GPD copies source material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and leaves research, outline, fact-check, and review as separate stages.
-
-If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import writes `.paper/DRAFT.md` from it. `.docx` import extracts plain paragraph text only and keeps the original file unchanged under `original/`.
-
-Import also records unverified source-reference candidates, such as URLs, DOIs, standards, and lines labeled as sources or references. Treat them as research/fact-check leads, not verified evidence.
-
-`IMPORT.md` also includes a `Version / Source Index` so you can see which files look like the canonical draft, older versions, source material, review feedback, outlines/specs, assets, notes, or unclear material.
-
-If the imported draft is publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run:
-
-```text
-/gpd-fact-check --risk-scan
-```
-
-before external review or export.
+Use `gpd next` for the compact answer. Use `gpd status` when you want the full artifact list. Use `gpd validate --semantic` before treating a paper as example-quality, publication-ready, or ready for long-term handoff.

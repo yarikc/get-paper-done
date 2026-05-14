@@ -1,5 +1,5 @@
 <purpose>
-Report paper status, artifact completeness, suggested next command, and context-clearing guidance. This command is intentionally read-only and should not execute the next stage.
+Report the paper dashboard inside Claude/Codex: current state, artifact completeness, blockers, suggested next command, why that command is next, and context-clearing guidance. This command is intentionally read-only and should not execute the next stage.
 </purpose>
 
 <process>

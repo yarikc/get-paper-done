@@ -30,6 +30,13 @@ function tempDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
 }
 
+function testHelpShowsCalibratedExternalReviewProviders() {
+  const output = run(['help']);
+  assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,opencode'));
+  assert(output.includes('next                         Show only the next recommended action and why'));
+  assert(output.includes('gpd next --paper ~/papers/metadata-strategy'));
+}
+
 function minimalDocxBuffer(paragraphs) {
   const xml = [
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
@@ -204,6 +211,23 @@ function testStateJsonSuggestedNextIsStatusSourceOfTruth() {
 
   const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(status.next, '/gpd-outline --lite');
+}
+
+function testNextCommandShowsCompactGuidance() {
+  const dir = tempDir('gpd-next-test');
+  run(['init', '--location', dir, '--slug', 'guided-next', '--title', 'Guided Next']);
+  const paperDir = path.join(dir, 'guided-next');
+
+  const output = run(['next', '--paper', paperDir]);
+  assert(output.includes('next: /gpd-brief'));
+  assert(output.includes('why: The strategy gate is Revise Before Drafting'));
+  assert(output.includes('clear context:'));
+  assert(!output.includes('artifacts:'));
+
+  const json = JSON.parse(run(['next', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.next, '/gpd-brief');
+  assert(json.why.includes('strategy gate'));
+  assert.strictEqual(json.context.clear_context, 'No, unless the current chat is noisy.');
 }
 
 function testInitWithoutSlugUsesSubdirectory() {
@@ -949,11 +973,13 @@ function testMalformedInputs() {
   assert(unsupportedVersion.stdout.includes('Unsupported STATE.json version 2; run gpd update or migrate'));
 }
 
+testHelpShowsCalibratedExternalReviewProviders();
 testInstallerInstallDoctorRewriteAndBackup();
 testListCommands();
 testInitStatusValidate();
 testStateJsonIsStatusSourceOfTruth();
 testStateJsonSuggestedNextIsStatusSourceOfTruth();
+testNextCommandShowsCompactGuidance();
 testInitWithoutSlugUsesSubdirectory();
 testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();

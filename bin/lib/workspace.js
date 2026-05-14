@@ -21,6 +21,8 @@ const {
 const {
   status,
   printStatus,
+  nextAction,
+  printNext,
   validate,
   printValidation,
 } = require('./state');
@@ -39,6 +41,8 @@ module.exports = {
   printExternalReviewResult,
   status,
   printStatus,
+  nextAction,
+  printNext,
   validate,
   printValidation,
   validateArtifact,

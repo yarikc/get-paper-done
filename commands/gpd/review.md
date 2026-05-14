@@ -1,7 +1,7 @@
 ---
 name: gpd:review
 description: Review the draft locally, capture reader feedback, or use external AI CLIs, then propose a feedback handling plan
-argument-hint: "[--lite|--deep] [--external] [--models claude,gemini,codex]"
+argument-hint: "[--lite|--deep] [--external] [--models claude,gemini,codex,opencode]"
 allowed-tools:
   - Read
   - Write
@@ -15,7 +15,7 @@ allowed-tools:
 - `--lite` - Fast audience review for outlines, rough drafts, or early decision checks.
 - `--deep` - Full audience review with reverse outline, objection map, and decision-gap analysis.
 - `--external` - Ask available external AI CLIs/local model servers to review.
-- `--models <list>` - Limit external review to comma-separated reviewers, such as `claude,gemini,codex`.
+- `--models <list>` - Limit external review to comma-separated reviewers, such as `claude,gemini,codex,opencode`.
 
 No external flag means local review only. If no review depth is specified, choose Lite for outlines/rough drafts and Deep for mature drafts.
 

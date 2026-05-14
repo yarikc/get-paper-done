@@ -15,6 +15,8 @@ const {
   printExternalReviewResult,
   status,
   printStatus,
+  nextAction,
+  printNext,
   validate,
   printValidation,
   validateArtifact,
@@ -34,6 +36,7 @@ Commands:
   export                       Export reviewed draft to .paper/exports/FINAL.md
   review-external              Collect external review text into review artifacts
   status                       Show current paper workspace state
+  next                         Show only the next recommended action and why
   validate                     Validate current paper workspace state
   validate-artifact            Validate one GPD artifact contract
   list-audiences               List reusable audience personas
@@ -53,9 +56,9 @@ Options:
   --timeout-ms MS              External reviewer timeout in milliseconds
   --reviewer NAME              Reviewer name for stdin review input
   --stdin                      Read one external review from stdin
-  --paper DIR                  Existing paper directory for status/validate
+  --paper DIR                  Existing paper directory for next/status/validate
   --path FILE                  Artifact path for validate-artifact
-  --json                       Print JSON for list/status/validate
+  --json                       Print JSON for list/next/status/validate
   --semantic                   Include deterministic semantic gates in validate
   --force                      Allow export when REVIEW.md is not Ready
   --dry-run                    Show planned changes without writing
@@ -69,9 +72,10 @@ Examples:
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
-  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex
+  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,opencode
   gpd export --paper ~/papers/metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
+  gpd next --paper ~/papers/metadata-strategy
   gpd validate
   gpd validate --semantic --paper ~/papers/metadata-strategy
   gpd validate-artifact --path ~/papers/metadata-strategy/.paper/STATE.json
@@ -228,6 +232,14 @@ function main(argv) {
     const result = status(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printStatus(result);
+    return;
+  }
+
+  if (command === 'next') {
+    const args = parseWorkspaceOptions(rest);
+    const result = nextAction(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printNext(result);
     return;
   }
 

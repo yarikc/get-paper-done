@@ -389,6 +389,145 @@ function printStatus(state) {
   console.log(`next: ${state.next}`);
 }
 
+function contextForCommand(command) {
+  const base = baseCommand(command);
+  if (base === '/gpd-research') {
+    return {
+      clear_context: 'Yes, if coming from intake or brief discussion.',
+      read: ['PROJECT.md', 'PERSONA.md', 'AUDIENCE.md', 'BRIEF.md', 'STRATEGY.md'],
+      avoid: ['raw sources unless planning specific source work'],
+    };
+  }
+  if (base === '/gpd-outline') {
+    return {
+      clear_context: 'Yes, after research.',
+      read: ['PERSONA.md', 'AUDIENCE.md', 'BRIEF.md', 'STRATEGY.md', 'RESEARCH.json'],
+      avoid: ['raw .paper/sources/ by default'],
+    };
+  }
+  if (base === '/gpd-draft') {
+    return {
+      clear_context: 'Yes, after outline.',
+      read: ['PERSONA.md', 'AUDIENCE.md', 'BRIEF.md', 'RESEARCH.json', 'OUTLINE.md'],
+      avoid: ['raw sources unless verifying a specific claim'],
+    };
+  }
+  if (base === '/gpd-fact-check') {
+    return {
+      clear_context: 'Yes, after drafting.',
+      read: ['DRAFT.md', 'RESEARCH.json', 'BRIEF.md', 'AUDIENCE.md'],
+      avoid: ['unneeded source dumps; inspect sources only for specific verification'],
+    };
+  }
+  if (base === '/gpd-review') {
+    return {
+      clear_context: 'Yes, after drafting or fact-check.',
+      read: ['DRAFT.md', 'REVIEW.md if present', 'READER-FEEDBACK.md if present', 'upstream artifacts as needed'],
+      avoid: ['rewriting before feedback handling is approved'],
+    };
+  }
+  if (base === '/gpd-revise') {
+    return {
+      clear_context: 'Yes, after review.',
+      read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'READER-FEEDBACK.md if present'],
+      avoid: ['unapproved feedback items'],
+    };
+  }
+  if (base === '/gpd-export') {
+    return {
+      clear_context: 'No.',
+      read: ['DRAFT.md', 'REVIEW.md', 'FACT-CHECK.md if present'],
+      avoid: ['internal notes that should not appear in FINAL.md'],
+    };
+  }
+  if (base === '/gpd-progress') {
+    return {
+      clear_context: 'No.',
+      read: ['STATE.json', 'STATE.md', 'artifact timestamps'],
+      avoid: ['raw sources by default'],
+    };
+  }
+  return {
+    clear_context: 'No, unless the current chat is noisy.',
+    read: ['PROJECT.md', 'PERSONA.md', 'AUDIENCE.md', 'BRIEF.md', 'STATE.json'],
+    avoid: ['downstream drafting before the strategy gate is clear'],
+  };
+}
+
+function explainNext(state) {
+  const a = state.artifacts;
+  const next = state.next;
+  if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) {
+    return 'One or more setup artifacts are missing, so the paper needs intake/brief repair before downstream work.';
+  }
+  if (!a['STRATEGY.md']) return 'The strategy gate has not been created yet, so brief work must run before research or drafting.';
+  if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
+    return `The strategy gate is ${state.strategyStatus}; fix the primary blocker (${state.primaryBlocker || 'unknown'}) before downstream work.`;
+  }
+  if (feedbackPlanPending(state)) return 'A feedback plan is pending approval, so revision should wait until the handling decision is explicit.';
+  if (
+    artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
+    || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
+  ) {
+    return 'The brief or strategy changed after research, so research needs an incremental refresh.';
+  }
+  if (artifactNewerThan(state.paperDir, 'RESEARCH.json', 'OUTLINE.md')) return 'Research is newer than the outline, so the outline needs to be refreshed.';
+  if (artifactNewerThan(state.paperDir, 'OUTLINE.md', 'DRAFT.md')) return 'The outline is newer than the draft, so drafting should resume from the updated structure.';
+  if (artifactNewerThan(state.paperDir, 'DRAFT.md', 'FACT-CHECK.md')) return 'The draft is newer than the fact-check, so material claims need a fresh check.';
+  const factCheckAction = factCheckRecommendedAction(state);
+  if (factCheckAction === next) return `FACT-CHECK.md recommends ${next}, so follow the documented fact-check routing.`;
+  if (
+    artifactNewerThan(state.paperDir, 'DRAFT.md', 'REVIEW.md')
+    || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
+  ) {
+    return 'The draft or fact-check changed after review, so review needs a refresh.';
+  }
+  if (
+    a['READER-FEEDBACK.md']
+    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'READER-FEEDBACK.md', 'FEEDBACK-PLAN.md'))
+  ) {
+    return 'Reader feedback exists without a current feedback plan, so review should synthesize it before revision.';
+  }
+  const verdict = reviewVerdict(state);
+  if ((verdict === 'Revise' || verdict === 'Rework') && next === '/gpd-revise') return `REVIEW.md verdict is ${verdict}, so revision is the next controlled step.`;
+  if (a['exports/FINAL.md'] && next === '/gpd-progress') return 'The export is current, so there is no required next writing stage.';
+  if (a['exports/FINAL.md'] && next === '/gpd-export') return 'The draft, fact-check, or review changed after export, so FINAL.md needs regeneration.';
+  const nextFromState = savedNextCommand(state);
+  if (nextFromState === next) return 'STATE.json saved this as the next plausible command, and required upstream artifacts are present.';
+  if (!a['RESEARCH.json'] && next === '/gpd-research') return 'Structured research is missing, so research is the next required artifact.';
+  if (!a['OUTLINE.md'] && next.startsWith('/gpd-outline')) return 'The outline is missing, so structure should be created before drafting.';
+  if (!a['DRAFT.md'] && next === '/gpd-draft') return 'The draft is missing, so drafting is the next stage.';
+  if (!a['FACT-CHECK.md'] && next.startsWith('/gpd-fact-check')) return 'Fact-check is missing for an existing draft.';
+  if (!a['REVIEW.md'] && next.startsWith('/gpd-review')) return 'Review is missing for an existing draft.';
+  if (a['FEEDBACK-PLAN.md'] && next === '/gpd-revise') return 'A feedback plan exists, so approved changes can be applied through revision.';
+  if (next === '/gpd-export') return 'The paper has the required reviewed draft artifacts and is ready for export.';
+  return 'This is the earliest stage that appears necessary from the current artifact state.';
+}
+
+function nextAction(input = {}) {
+  const state = status(input);
+  return {
+    paperDir: state.paperDir,
+    next: state.next,
+    why: explainNext(state),
+    strategyStatus: state.strategyStatus,
+    primaryBlocker: state.primaryBlocker,
+    stateSource: state.stateSource,
+    context: contextForCommand(state.next),
+  };
+}
+
+function printNext(result) {
+  console.log(`paper: ${result.paperDir}`);
+  console.log(`next: ${result.next}`);
+  console.log(`why: ${result.why}`);
+  if (result.strategyStatus) console.log(`strategy: ${result.strategyStatus}`);
+  if (result.primaryBlocker) console.log(`primary blocker: ${result.primaryBlocker}`);
+  console.log(`clear context: ${result.context.clear_context}`);
+  console.log(`read: ${result.context.read.join(', ')}`);
+  console.log(`avoid: ${result.context.avoid.join(', ')}`);
+}
+
 function validate(input = {}) {
   const state = status(input);
   const issues = [];
@@ -465,6 +604,8 @@ module.exports = {
   findPaperDir,
   status,
   printStatus,
+  nextAction,
+  printNext,
   validate,
   printValidation,
 };
