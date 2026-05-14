@@ -595,6 +595,37 @@ function testReviewExternalInvokesProviderModel() {
   assert(feedbackPlan.includes('Pending user approval'));
 }
 
+function testReviewExternalUsesCodexProviderArgs() {
+  const dir = tempDir('gpd-review-external-codex-provider-test');
+  run(['init', '--location', dir, '--slug', 'codex-provider-review', '--title', 'Codex Provider Review']);
+  const paperDir = path.join(dir, 'codex-provider-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const providerDir = tempDir('gpd-codex-provider-bin');
+  const providerPath = path.join(providerDir, 'codex');
+  const argsPath = path.join(providerDir, 'codex-args.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
+    'cat >/dev/null',
+    'echo "HIGH: Codex provider saw draft context."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'codex', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert(output.includes('- codex: captured (provider:codex)'));
+  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), 'exec\n--skip-git-repo-check\n-\n');
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('HIGH: Codex provider saw draft context.'));
+}
+
 function testReviewExternalRecordsMissingProvider() {
   const dir = tempDir('gpd-review-external-missing-provider-test');
   run(['init', '--location', dir, '--slug', 'missing-provider', '--title', 'Missing Provider']);
@@ -694,6 +725,7 @@ testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();
 testReviewExternalCollectsReviewAndStopsAtApprovalGate();
 testReviewExternalInvokesProviderModel();
+testReviewExternalUsesCodexProviderArgs();
 testReviewExternalRecordsMissingProvider();
 testReviewExternalRequiresDraft();
 testMalformedInputs();

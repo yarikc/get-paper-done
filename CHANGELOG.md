@@ -15,6 +15,7 @@ Initial working release.
 - Workspace CLI helpers: `gpd init`, `gpd import`, `gpd status`, `gpd validate`, `gpd list-audiences`, and `gpd list-profiles`.
 - External-review helper: `gpd review-external` writes captured review text to `.paper/EXTERNAL-REVIEWS.md`, can invoke selected installed provider CLIs with `--models`, creates a pending `.paper/FEEDBACK-PLAN.md`, and stops at the approval gate without revising the draft.
 - Claude provider calibration for `gpd review-external --models claude`, including corrected `claude -p` stdin invocation.
+- Codex provider calibration for `gpd review-external --models codex`, confirming `codex exec --skip-git-repo-check -` stdin invocation.
 - Status routing now keeps pending feedback plans at `/gpd-progress` instead of letting stale mtimes bypass the approval gate.
 - Artifact validation for `EXTERNAL-REVIEWS.md`, including required prompt-summary and consensus-summary sections.
 - Safe import behavior that preserves source material under `original/`.
