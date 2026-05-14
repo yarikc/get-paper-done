@@ -9,10 +9,10 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.4/10 as a writing framework and 9.09/10 as an installable private-repo tool as of 2026-05-14
+- Current rating: 9.4/10 as a writing framework and 9.10/10 as an installable private-repo tool as of 2026-05-14
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, broader provider calibration/local HTTP support, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/opencode-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, Gemini real-capture calibration after authentication, local HTTP provider support, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after adding import version/source indexing to `gpd import`.
+Last changed: 2026-05-14 after calibrating opencode provider invocation and correcting Gemini provider args.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -146,6 +146,7 @@ Plan-change rule:
 19. Completed: added first-pass `.docx` canonical-draft text extraction for `gpd import`, preserving the original file under `original/`, writing extracted paragraph text to `.paper/DRAFT.md`, recording extraction provenance in `.paper/IMPORT.md`, and covering the behavior with a synthetic DOCX regression test.
 20. Completed: added import-time detection of unverified source-reference candidates from Markdown, text, and `.docx` material, recording URLs, DOIs, named standards/source families, and source/reference lines in `.paper/IMPORT.md` without creating `RESEARCH.json`.
 21. Completed: added a `Version / Source Index` to `.paper/IMPORT.md`, grouping copied files by likely role, ranking signal, modified time, recommended downstream stage, and rationale without changing routing or generating downstream artifacts.
+22. Completed: calibrated the real opencode CLI path on a synthetic public paper, confirmed `opencode run -`, corrected Gemini args to `gemini -p ""` with stdin based on CLI help, and added regression assertions for both provider argument shapes. Gemini real capture remains blocked until local browser authentication is completed.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -195,7 +196,8 @@ Next work should validate behavior under real use before adding more RFC surface
 30. Completed: added `.docx` canonical-draft text extraction for `gpd import` without adding package dependencies or committing binary/private fixture material.
 31. Completed: added import-time source-reference triage for Markdown, text, and `.docx` imports, explicitly leaving verification to research/fact-check.
 32. Completed: added import version/source indexing so `IMPORT.md` shows canonical draft, alternate drafts, source/reference material, review feedback, outlines/specs, assets, notes, and unclear files with downstream-stage guidance.
-33. Next main-line slice: decide whether to continue import hardening with PDF/spreadsheet handling or pause import work and return to Gemini/opencode provider calibration.
+33. Completed: calibrated `gpd review-external --models opencode` against the real opencode CLI on a synthetic public paper. Gemini is installed and argument-corrected but blocked by local authentication before real capture.
+34. Next main-line slice: decide whether to complete Gemini authentication/calibration, start PDF/spreadsheet import handling, or pause broad hardening for another real-paper workflow validation.
 
 ## Completed Design Simplifications
 
@@ -593,15 +595,16 @@ Implemented:
 ```bash
 gpd review-external --review-file claude=/tmp/claude-review.md
 gpd review-external --stdin --reviewer claude
-gpd review-external --models claude,codex
+gpd review-external --models claude,codex,opencode
 ```
 
 Needed:
 
 - current-runtime skip logic
 - output normalization
+- Gemini real-capture calibration after local authentication
 - local HTTP server support for Ollama, LM Studio, and llama.cpp
-- broader real-provider calibration for Gemini, opencode, prompt size, and timeout behavior
+- broader prompt size and timeout behavior calibration
 
 Deliverables:
 

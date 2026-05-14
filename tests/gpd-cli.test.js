@@ -807,6 +807,68 @@ function testReviewExternalUsesCodexProviderArgs() {
   assert(externalReviews.includes('HIGH: Codex provider saw draft context.'));
 }
 
+function testReviewExternalUsesGeminiProviderArgs() {
+  const dir = tempDir('gpd-review-external-gemini-provider-test');
+  run(['init', '--location', dir, '--slug', 'gemini-provider-review', '--title', 'Gemini Provider Review']);
+  const paperDir = path.join(dir, 'gemini-provider-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const providerDir = tempDir('gpd-gemini-provider-bin');
+  const providerPath = path.join(providerDir, 'gemini');
+  const argsPath = path.join(providerDir, 'gemini-args.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
+    'cat >/dev/null',
+    'echo "HIGH: Gemini provider saw draft context."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'gemini', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert(output.includes('- gemini: captured (provider:gemini)'));
+  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), '-p\n\n');
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('HIGH: Gemini provider saw draft context.'));
+}
+
+function testReviewExternalUsesOpencodeProviderArgs() {
+  const dir = tempDir('gpd-review-external-opencode-provider-test');
+  run(['init', '--location', dir, '--slug', 'opencode-provider-review', '--title', 'Opencode Provider Review']);
+  const paperDir = path.join(dir, 'opencode-provider-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const providerDir = tempDir('gpd-opencode-provider-bin');
+  const providerPath = path.join(providerDir, 'opencode');
+  const argsPath = path.join(providerDir, 'opencode-args.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
+    'cat >/dev/null',
+    'echo "HIGH: Opencode provider saw draft context."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'opencode', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert(output.includes('- opencode: captured (provider:opencode)'));
+  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), 'run\n-\n');
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('HIGH: Opencode provider saw draft context.'));
+}
+
 function testReviewExternalRecordsMissingProvider() {
   const dir = tempDir('gpd-review-external-missing-provider-test');
   run(['init', '--location', dir, '--slug', 'missing-provider', '--title', 'Missing Provider']);
@@ -910,6 +972,8 @@ testExportCommandHonorsStatusRouting();
 testReviewExternalCollectsReviewAndStopsAtApprovalGate();
 testReviewExternalInvokesProviderModel();
 testReviewExternalUsesCodexProviderArgs();
+testReviewExternalUsesGeminiProviderArgs();
+testReviewExternalUsesOpencodeProviderArgs();
 testReviewExternalRecordsMissingProvider();
 testReviewExternalRequiresDraft();
 testMalformedInputs();

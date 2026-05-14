@@ -234,6 +234,7 @@ gpd validate --paper ~/papers/metadata-strategy
 gpd validate --semantic --paper ~/papers/metadata-strategy
 gpd validate-artifact --path ~/papers/metadata-strategy/.paper/RESEARCH.json
 gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
+gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,opencode
 gpd list-audiences
 gpd list-profiles
 gpd version
@@ -474,7 +475,7 @@ Use `/gpd-outline --deep` when the imported paper is serious, researched, high-s
 
 Reader feedback is captured in `.paper/READER-FEEDBACK.md` before it becomes revision work. The artifact uses five signals: voice, register, audience fit, evidence, and ask clarity. External review never edits the draft directly. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, then asks how to proceed. `/gpd-revise` only applies feedback after you approve the proposed handling.
 
-For deterministic CLI collection, use `gpd review-external --review-file reviewer=path` or `--stdin --reviewer name`. To invoke installed provider CLIs, use `gpd review-external --models claude,codex`. Provider invocation sends the generated review prompt to the selected CLI, so only use it with paper content that may be reviewed by that provider. Both paths update state to the pending feedback-plan gate and do not revise the draft.
+For deterministic CLI collection, use `gpd review-external --review-file reviewer=path` or `--stdin --reviewer name`. To invoke installed provider CLIs, use `gpd review-external --models claude,codex,opencode`. Provider invocation sends the generated review prompt to the selected CLI, so only use it with paper content that may be reviewed by that provider. Claude, Codex, and opencode have been calibrated on synthetic public papers; Gemini has argument-shape coverage but requires local Gemini authentication before real capture. Both paths update state to the pending feedback-plan gate and do not revise the draft.
 
 ## Artifact Contracts
 
