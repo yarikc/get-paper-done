@@ -9,9 +9,9 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 **Overall: 9.4/10 as a writing framework; 8.9/10 as an installable private-repo tool**
 
-Get Paper Done is now a strong writing workflow framework with a real showcase example. The project has a clearer README with a stronger product story, a newcomer `START-HERE` guide, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, seven realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, demonstrated reader-feedback capture and feedback-plan routing, governance/control-paper prompt guidance validated on two compact control examples, and package-boundary hygiene tests. The software supply-chain example now demonstrates the full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing loop with a real quality fix, not just a synthetic validator path.
+Get Paper Done is now a strong writing workflow framework with a real showcase example. The project has a clearer README with a stronger product story, a newcomer `START-HERE` guide, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, seven realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, demonstrated reader-feedback capture and feedback-plan routing, governance/control-paper prompt guidance validated on two compact control examples, private-repo release/update guidance, and package-boundary hygiene tests. The software supply-chain example now demonstrates the full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing loop with a real quality fix, not just a synthetic validator path.
 
-The installable tool is near 9/10 but still not finished as a distributable product. Import remains preservation-first rather than extraction-rich, external review is still prompt/workflow-driven rather than a wrapped CLI capability, and the private-repo install path still depends on local package linking rather than a release/update policy. The framework quality is stronger than the packaging story.
+The installable tool is near 9/10 but still not finished as a distributable product. Import remains preservation-first rather than extraction-rich, and external review is still prompt/workflow-driven rather than a wrapped CLI capability. The private-repo release/update path is now documented and test-backed, but public or team distribution remains a later decision.
 
 ## Ratings
 
@@ -21,7 +21,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 | Installable tool maturity | 8.9/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`, and export now has a regression test for pre-body draft sections. Missing external-review runner, richer import extraction, and local package/release hardening keep it below a complete product. |
 | Documentation | 9.4/10 | README now leads with product story, key benefits, fit/non-fit guidance, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and examples. `docs/START-HERE.md` gives newcomers a shorter first-paper path, and the strongest example now has a README plus `EXPECTED-FINDINGS.md`. Still needs a guided walkthrough if onboarding remains dense. |
 | Test coverage | 9.8/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, five-signal reader-feedback structure, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, blocked-strategy, mid-revision, and messy-import fixture behavior, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, stable semantic issue IDs, example-wide semantic validation, compact broken semantic fixture coverage, live public-source citation shape, reader-feedback demonstration artifacts, and seven realistic completed example fixtures. Still needs broader real-paper calibration. |
-| Release readiness | 8.4/10 | Package metadata, changelog, CI, license, dry-run install checks, package dry-run, and an explicit package allowlist are in place. Needs release checklist, versioning/update compatibility policy, and a tighter public/private distribution story. |
+| Release readiness | 8.8/10 | Package metadata, changelog, CI, license, dry-run install checks, package dry-run, explicit package allowlist, release checklist, version policy, compatibility policy, private GitHub install/update flow, and `release:check` are in place. Remaining gap is a public/team distribution story. |
 
 ## What Works
 
@@ -53,6 +53,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 - The imported-paper recovery example has a dedicated test for anonymization/source boundary, mixed-audience config, clean semantic validation, and completed routing.
 - The exporter now correctly ignores pre-body draft sections when `## Draft Body` exists.
 - The npm package now has an explicit allowlist and package hygiene test, so ignored feedback files, RFC drafts, tests, and private profile templates do not enter the installable package.
+- `docs/RELEASE.md` now defines the private-repo release checklist, version policy, compatibility policy, update flow, package boundary, and release record expectations; `npm run release:check` provides a single release validation command.
 - Import is preservation-first and does not silently convert or overwrite downstream artifacts.
 - The strategy gate gives the system a useful way to stop weak papers before research or drafting.
 - The failed-strategy-gate fixture now proves that blocked strategy states remain visible, fail validation clearly, and route back to `/gpd-brief` without creating downstream artifacts.
@@ -67,17 +68,17 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 3. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but the gates still cannot judge full argument quality, citation fidelity, or prose distinctiveness. The current prose-saturation calibration intentionally allows load-bearing definitional enumerations; see [SEMANTIC-CALIBRATION.md](SEMANTIC-CALIBRATION.md).
 4. State enum policy is now intentionally tighter and centrally tested. That prevents typo drift, but future blocker/action additions must go through the shared contract and workflow consistency tests.
 5. External review is workflow-documented but not tool-wrapped. Users still need runtime/model-specific manual steps for multi-model review.
-6. Release readiness remains private-repo oriented. The install flow assumes local `npm link`; a public or team-facing release needs clearer versioning and update guarantees.
+6. Release readiness remains private-repo oriented. The local/private release path is now documented and test-backed, but a public or team-facing release still needs a distribution decision.
 7. Classification is not yet used by the CLI routing engine. It is enforced in schema, templates, workflows, docs, and examples, but `gpd status` still routes mostly from artifact state, strategy state, mtimes, review/fact-check state, and export state.
 
 ## Recommended Next Work
 
-1. Decide the next main-line slice among import hardening, release hardening, and external-review wrapping.
+1. Decide the next main-line slice between import hardening and external-review wrapping.
 2. Use the calibration review to decide whether `START-HERE` needs a richer guided walkthrough.
 3. Harden `gpd import` around large-folder previews, document extraction, citation extraction, and richer manifest details.
 4. Add richer fixture workspaces only when they represent a new failure mode, not just more routing signals.
 5. Expand semantic lint-style checks only where they are concrete enough to be useful; defer noisy heuristics until examples exist.
-6. Add a release checklist, versioning policy, and update compatibility notes.
+6. Decide whether public/team distribution is needed, and if so define publishing, tagging, and support policy.
 7. Build `gpd review-external` only after the manual external-review workflow has been proven on a real paper.
 
 ## Verification

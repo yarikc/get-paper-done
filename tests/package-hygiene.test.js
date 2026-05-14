@@ -26,9 +26,11 @@ const files = new Set(pack.files.map((file) => file.path));
 for (const requiredPath of [
   'README.md',
   'LICENSE',
+  'CHANGELOG.md',
   'package.json',
   'bin/gpd.js',
   'docs/START-HERE.md',
+  'docs/RELEASE.md',
   'docs/SEMANTIC-CALIBRATION.md',
   'commands/gpd/new-paper.md',
   'workflows/new-paper.md',

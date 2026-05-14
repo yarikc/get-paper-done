@@ -8,6 +8,7 @@ Initial working release.
 
 ### Added
 
+- Private-repo release/update guide with version policy, compatibility policy, release checklist, package-boundary expectations, and `npm run release:check`.
 - File-based paper workflow for newsletters, blogs, position papers, and white papers.
 - Paper-scoped `.paper/` artifacts for project, persona, audience, brief, strategy, research, outline, draft, fact-check, review, feedback planning, revision, and export.
 - Install/update CLI for Claude and Codex runtimes.

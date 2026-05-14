@@ -2,17 +2,17 @@
 
 Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
 
-Last reviewed: 2026-05-13
+Last reviewed: 2026-05-14
 
 This file is the forward plan. The current ratings, risk snapshot, and review findings live in [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). When the review changes, update that snapshot first and adjust this roadmap only when the plan itself changes.
 
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.4/10 as a writing framework and 8.9/10 as an installable private-repo tool as of 2026-05-13
+- Current rating: 9.4/10 as a writing framework and 8.9/10 as an installable private-repo tool as of 2026-05-14
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, release guidance, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -178,7 +178,8 @@ Next work should validate behavior under real use before adding more RFC surface
 21. Completed: codified the reusable control/governance-paper lesson into workflow guidance, templates, agents, rubrics, and consistency tests. The guidance is prompt/artifact guidance first, not a new validator: when a paper proposes controls, standards, gates, reviews, or required records, it must define the governed object early, explain why cited standards matter, name the required artifact, state whether evidence is static or current, name refresh triggers, explain how evidence changes decisions, and handle process burden with automation/observed evidence plus human-by-exception where appropriate.
 22. Completed: validated the reusable control/governance guidance against `examples/public-ai-control-baseline`, a smaller AI pilot control-baseline decision memo. The artifacts now show the control check in brief, outline, fact-check, and review, while the final memo stays concise and passes semantic validation without prose-saturation warnings.
 23. Completed: validated that governance/control guidance does not leak into ordinary non-governance examples by adding regression checks for the clean strategy paper, lite update, and short quantitative memo.
-24. Next main-line slice: decide whether the next useful work is import hardening, release hardening, or external-review wrapping.
+24. Completed: added private-repo release/update guidance in `docs/RELEASE.md`, packaged it, added `npm run release:check`, and documented the release path in README.
+25. Next main-line slice: decide whether the next useful work is import hardening or external-review wrapping.
 
 ## Completed Design Simplifications
 
@@ -218,6 +219,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Codified governance/control-paper guidance across brief, outline, draft, fact-check, review, agents, and rubrics so future papers define the governed object, durable record, evidence currency, refresh triggers, decision rule, standards framing, and process-burden answer before prose polish.
 - Backfilled `examples/public-ai-control-baseline` as the second governance/control calibration point, including process-burden, governed-object, evidence-currency, refresh-trigger, decision-rule, standards-framing, and fact-check coverage without expanding the memo into a white paper.
 - Added regression coverage to keep governance/control scaffolding out of non-governance examples, protecting ordinary strategy papers, lite updates, and quantitative memos from over-application.
+- Added `docs/RELEASE.md`, `npm run release:check`, README release/update guidance, and package-hygiene coverage for the release guide.
 
 ---
 
@@ -613,26 +615,26 @@ Success criteria:
 
 ### 7. Release And Update Workflow
 
-Install/update now works from the current local package, but release mechanics are still manual.
+Status: completed for private-repo release discipline. Public/team distribution remains deferred.
 
-Needed:
+Completed:
 
 - release notes convention
 - version bump process
 - release checklist
 - documented update path: pull or install new package, then `gpd update claude` / `gpd update codex`
-- optional package publishing plan
 - compatibility notes for changed commands, templates, agents, and references
+- package-boundary check covering the release guide
+- `npm run release:check` as the canonical release validation command
 
-Deliverables:
+Deferred:
 
-- release checklist in docs
-- package versioning guidance
-- update verification checklist
+- optional public package publishing plan
+- team-wide distribution policy
 
 Success criteria:
 
-- A new release can be cut without relying on memory.
+- A private-repo release can be cut without relying on memory.
 - User can see what changed before updating installed runtimes.
 - `gpd update` has a clear role in the release process.
 

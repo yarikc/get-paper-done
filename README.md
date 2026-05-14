@@ -115,6 +115,7 @@ Each step reads the existing `.paper/` artifacts, writes its own artifact, and u
 
 - [docs/START-HERE.md](docs/START-HERE.md): first paper walkthrough and newcomer mental model.
 - [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md): durable design contract, workflow model, and architecture.
+- [docs/RELEASE.md](docs/RELEASE.md): private-repo release checklist, version policy, update flow, and package boundary.
 - [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md): current ratings, risks, and review findings.
 - [ROADMAP.md](ROADMAP.md): forward plan and active issue alignment.
 - [examples](examples): completed reference paper workspaces.
@@ -485,6 +486,12 @@ gpd update codex
 
 Update rewrites framework-owned files from the current package, writes `get-paper-done/INSTALL-MANIFEST.json`, and backs up changed installed files under `get-paper-done/.backups/`. It does not touch paper workspaces, and custom audience/profile files with names not shipped by GPD are left in place.
 
+For private-repo release and update policy, see [docs/RELEASE.md](docs/RELEASE.md). Before tagging or handing off a release, run:
+
+```bash
+npm run release:check
+```
+
 ## Package Boundary
 
 The npm package is an installable framework bundle, not a dump of every repo file. It includes the CLI, commands, workflows, agents, templates, references, curated audiences/profiles, docs, and examples.
@@ -497,6 +504,7 @@ It intentionally excludes tests, RFC design drafts, ignored feedback files, loca
 |-----|-------------|
 | [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md) | Full design contract and workflow model. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Package/runtime/workspace architecture. |
+| [docs/RELEASE.md](docs/RELEASE.md) | Private-repo release checklist, version policy, update flow, and package boundary. |
 | [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md) | Current strengths, risks, and gaps. |
 | [references/artifact-contracts.md](references/artifact-contracts.md) | Artifact contracts used by validation. |
 | [references/audience-review-rubric.md](references/audience-review-rubric.md) | Fixed audience review rubric. |

@@ -382,6 +382,7 @@ Remaining tool maturity requires:
 - deeper import classification and conversion helpers
 - local project install mode
 - external review runner
+- public or team distribution policy
 
 ## Acceptance Criteria
 
@@ -410,7 +411,7 @@ Tool acceptance:
 - Installable tool maturity: 8.9/10
 - Documentation: 9.4/10
 - Test coverage: 9.8/10
-- Release readiness: 8.4/10
+- Release readiness: 8.8/10
 - `audience-reviewer`: 8.8/10 pending real multi-audience calibration
 - `paper-researcher`: 9.0/10 pending messy-import calibration
 - `paper-strategist`: 9.1/10 pending real-use calibration
@@ -424,8 +425,8 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Run live public-source citation verification on a real paper now that deterministic claim-support metadata exists and is demonstrated in the quantitative example.
-2. Harden import based on real use, especially canonical draft selection and richer source extraction.
-3. Add release/update documentation and compatibility policy.
+1. Harden import based on real use, especially canonical draft selection and richer source extraction.
+2. Wrap external review only after the manual workflow proves the right command shape.
+3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
 5. Revisit agents after real-use calibration.
