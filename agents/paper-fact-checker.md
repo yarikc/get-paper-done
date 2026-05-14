@@ -141,6 +141,8 @@ For each cited or source-backed claim:
 
 For claims classified as `recommendation`, `strategic_judgment`, or `market_trend`, verify that cited sources support the specific recommendation or judgment, not merely the broad topic. A measurement recommendation cannot be marked safe using only architecture/mechanism documentation. A practitioner recommendation cannot be marked safe using only standards documents. If sources are only inferential support, say so, downgrade from "Safe To Keep" if needed, or route to stronger evidence/revision.
 
+For governance, control, standard, gate, review, required-record, or operating-mechanism recommendations, distinguish external support from internal operating design. Standards and official guidance may support control objectives, evidence categories, risk framing, governed object definitions, or terminology without mandating the proposed workflow. Verify any claim that a standard requires the exact process, artifact, refresh trigger, or decision rule. If the recommendation is an internal synthesis, mark it as inferential and require bounded wording rather than treating the source as direct mandate.
+
 ## 7. Check Synthesis Integrity
 
 After claim-level checking, assess whether the paper's broader argument still holds:

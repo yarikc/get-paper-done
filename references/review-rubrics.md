@@ -74,7 +74,7 @@ Checks:
 - Does the paper explain mechanism, not just recommendation?
 - Are cost, complexity, organizational impact, execution risk, and time-to-value explicit where relevant?
 - Are technology choices connected to operating model or business implications?
-- For governance, control, standard, gate, review, or required-record proposals, does the paper explain how the mechanism improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process?
+- For governance, control, standard, gate, review, or required-record proposals, does the paper define the governed object, name the durable artifact or record, distinguish process from artifact, explain standards without overstating them, state evidence currency and refresh triggers, show how evidence changes decisions, and explain how the mechanism improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process?
 
 ## Decision Usefulness
 

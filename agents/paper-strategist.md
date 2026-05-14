@@ -122,6 +122,8 @@ Define what should happen after the paper is read:
 
 If no decision is intended, reframe the paper as clarification, framing, or agenda-setting rather than pseudo-decision support.
 
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, decision usefulness must include the governed object, the durable artifact or record, the decision rule the evidence changes, and the refresh trigger that brings the paper's mechanism back into play. If those are missing, treat the ask as weak or the mechanism as underdefined.
+
 ## 7. Design The Scope
 
 Identify:

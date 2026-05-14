@@ -45,6 +45,18 @@ The memo is ready as a compact internal decision paper. It now starts from the p
 |---------|-----------------------|---------------|----------------------|
 | Approval clarity versus control detail | Senior technical decision makers and implementation leads | Decision audience first | Keep implementation mechanics in follow-up checklist work. |
 
+## Control / Governance Proposal Check
+
+| Dimension | Pass/Revise | Notes |
+|-----------|-------------|-------|
+| Governed object is clear | Pass | Internal generative AI pilots before approval, wider rollout, recertification, exception handling, or retirement. |
+| Required artifact or record is named | Pass | `pilot_control_record_id` and the pilot control record are explicit. |
+| Process and artifact are not conflated | Pass | The memo separates review/recertification workflow from the durable control record. |
+| Standards are explained and not overstated | Pass | Public sources are framed as credible structure, not proof that the internal baseline will reduce incidents or as mandates for the exact schema. |
+| Evidence currency and refresh triggers are clear | Pass | The memo names recertification and use-case change triggers, and the brief records additional refresh triggers. |
+| Evidence changes a decision | Pass | Evidence affects approval, exception, rejection, wider rollout, recertification, and retirement decisions. |
+| Process burden is answered without adding an unclear approval forum | Pass | The memo says the baseline standardizes evidence and gates reviewers already need; it does not create a parallel approval process. |
+
 ## Suggested Improvements
 
 - In the follow-up checklist, turn each source-backed control area into an owner, evidence field, and approval gate.
@@ -69,6 +81,7 @@ The memo is ready as a compact internal decision paper. It now starts from the p
 - [x] Key claims are specific rather than generic
 - [x] Trade-offs and objections are addressed fairly
 - [x] The paper explains mechanisms, not just recommendations
+- [x] Governance, control, or standard proposals define the governed object, durable record, evidence currency, refresh triggers, decision rule, and process-burden answer
 - [x] Each section earns its place
 - [x] Acronyms and specialized terms are explained unless common to the audience
 - [x] A senior stakeholder would know what to do with this

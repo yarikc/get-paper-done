@@ -58,6 +58,19 @@ Reader-state fields must name a specific belief, doubt, or decision question. Ba
 |-----------|-----------------|----------|
 | [objection] | [section] | [handling] |
 
+## Control / Governance Proposal Check
+
+Use this section only when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms.
+
+| Check | Placement | Notes |
+|-------|-----------|-------|
+| Governed object is defined early | [section] | [what is governed] |
+| Standards or references are explained as context | [section] | [why these references matter; whether they support categories, requirements, or exact process] |
+| Process is distinguished from the durable artifact/record | [section] | [process vs artifact] |
+| Evidence currency and refresh triggers are explicit | [section] | [static/current/triggered/recertified] |
+| Evidence changes a decision | [section] | [approve/reject/continue/remediate/retire/exception] |
+| Process-burden objection is answered | [section] | [automation, observed evidence, owner attestation, validation, or human-by-exception model] |
+
 ## Cut / Park List
 
 - [item] — [why]

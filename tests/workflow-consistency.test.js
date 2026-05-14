@@ -230,6 +230,33 @@ function testAudienceScorecardDimensionsAreProtected() {
   }
 }
 
+function testGovernanceControlGuidanceStaysReusable() {
+  const requiredFiles = [
+    'templates/brief.md',
+    'templates/outline.md',
+    'templates/draft.md',
+    'templates/fact-check.md',
+    'templates/review.md',
+    'workflows/brief.md',
+    'workflows/outline.md',
+    'workflows/draft.md',
+    'workflows/fact-check.md',
+    'workflows/review.md',
+    'agents/paper-drafter.md',
+    'agents/paper-fact-checker.md',
+    'agents/paper-outliner.md',
+  ];
+
+  for (const file of requiredFiles) {
+    const markdown = read(file).toLowerCase();
+    assert(markdown.includes('governed object'), `${file} is missing governed-object guidance`);
+    assert(markdown.includes('refresh trigger'), `${file} is missing refresh-trigger guidance`);
+  }
+
+  assert(read('templates/review.md').includes('Standards are explained and not overstated'));
+  assert(read('workflows/draft.md').includes('do not imply that a public standard mandates the exact internal workflow unless the source actually does'));
+}
+
 testCommandReferencesExistAndStayRuntimeNeutral();
 testCommandWorkflowFlagParity();
 testReferencedCommandsExist();
@@ -237,5 +264,6 @@ testWorkflowRequiredReadingReferencesExist();
 testStrategyEnumsStayCentralizedAndDocumented();
 testReferencedTemplatesAndAgentsExist();
 testAudienceScorecardDimensionsAreProtected();
+testGovernanceControlGuidanceStaysReusable();
 
 console.log('workflow consistency tests passed');

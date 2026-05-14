@@ -44,6 +44,7 @@ Create `.paper/OUTLINE.md` with:
 - reader questions mapped to sections
 - audience concern addressed per section
 - objection placement
+- control/governance proposal check when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms
 - approximate length per section
 - transition to next section
 - close
@@ -61,6 +62,8 @@ In Deep mode only, add:
 Reader-state cells must name a specific belief, doubt, or decision question. Bare role descriptions such as "CxO reader" or "technical audience" are invalid unless they include what that reader believes, doubts, or needs to decide.
 
 The outline should make the argument easy to inspect before prose is drafted.
+
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, the outline must place the control logic before drafting gets expensive: define the governed object early, explain why cited standards matter, distinguish process from durable artifact, state evidence currency and refresh triggers, show how evidence changes a decision, and place the process-burden answer where the skeptical reader will need it.
 
 Update `.paper/STATE.md` and `.paper/STATE.json` with suggested next command: `/gpd-draft`.
 

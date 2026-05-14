@@ -55,3 +55,19 @@ Primary reader: senior technical decision makers. Secondary readers: security, r
 - **What evidence supports it:** S1 supports governance accountability and S4 supports lifecycle security responsibilities; exact role names are proposed internal operating design.
 - **What would challenge it:** If the paper implied public standards assign internal role ownership.
 - **Current handling:** Keep as implementation accountability proposal.
+
+## Process Burden Check
+
+Use this section because the memo proposes governance, controls, standards, review gates, required records, and an operating mechanism.
+
+- **Governed object:** Internal generative AI pilots before approval, wider rollout, recertification, exception handling, or retirement.
+- **Required artifact or record:** Standard pilot control record keyed by `pilot_control_record_id`.
+- **Process vs artifact distinction:** Intake, review, exception handling, recertification, and retirement are the process; the durable artifact is the pilot control record with evidence links, owner, reviewer, status, decision date, next review date, and exception rationale.
+- **Likely bureaucracy objection:** A skeptical reader may see the baseline as a new approval layer that slows pilots.
+- **Answer:** The baseline standardizes evidence and gates that reviewers already need to approve, reject, recertify, or retire pilots; it does not approve individual pilots or create a parallel forum.
+- **Existing decision need being standardized:** Reviewers already need to compare pilot evidence, validate attestations, approve exceptions, and know when a pilot must be refreshed or retired.
+- **Evidence currency:** Evidence must remain current for pilot approval, wider rollout, recertification, and material use-case changes.
+- **Refresh triggers:** Use-case change, control owner change, exception expiry, wider rollout request, material risk-profile change, prompt-injection test change, or lifecycle control change.
+- **Decision rule:** Complete and current evidence can move to approval review; missing, stale, or failed evidence routes the pilot to more evidence, exception handling, rejection, or retirement.
+- **Human-by-exception model:** Routine fields are standardized in the record; human review focuses on exceptions, stale evidence, failed tests, residual risk, and wider rollout decisions.
+- **Standards used:** NIST AI RMF, NIST AI 600-1, OWASP LLM01, and NCSC/CISA secure AI guidance support risk framing, generative AI risk attention, prompt-injection coverage, and lifecycle evidence. They do not mandate this exact internal pilot record.

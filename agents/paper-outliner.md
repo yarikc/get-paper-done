@@ -152,6 +152,8 @@ For each major objection from `.paper/AUDIENCE.md`, `.paper/STRATEGY.md`, or `.p
 
 If a strong objection cannot be answered, recommend revising the thesis or returning to research.
 
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, place the operating logic explicitly before drafting: governed object, durable artifact or record, process/artifact distinction, standards context, evidence currency, refresh triggers, decision rule, and process-burden answer. If the outline cannot place these elements, mark the control proposal as underdefined and route back to `/gpd-brief` or `/gpd-research`.
+
 ## 7. Detect Structural Anti-Patterns
 
 In Deep mode, flag these when present, with severity:
@@ -297,6 +299,19 @@ Reader-state fields must name a specific belief, doubt, or decision question. Ba
 | Objection | Where Addressed | Handling |
 |-----------|-----------------|----------|
 | [objection] | [section] | [handling] |
+
+## Control / Governance Proposal Check
+
+Use this section only when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms.
+
+| Check | Placement | Notes |
+|-------|-----------|-------|
+| Governed object is defined early | [section] | [what is governed] |
+| Standards or references are explained as context | [section] | [why these references matter; whether they support categories, requirements, or exact process] |
+| Process is distinguished from the durable artifact/record | [section] | [process vs artifact] |
+| Evidence currency and refresh triggers are explicit | [section] | [static/current/triggered/recertified] |
+| Evidence changes a decision | [section] | [approve/reject/continue/remediate/retire/exception] |
+| Process-burden objection is answered | [section] | [automation, observed evidence, owner attestation, validation, or human-by-exception model] |
 
 ## Cut / Park List
 

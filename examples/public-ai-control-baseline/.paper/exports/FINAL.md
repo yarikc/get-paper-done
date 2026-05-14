@@ -41,6 +41,8 @@ Use these minimum status values in the control record:
 
 Each control should also record an owner, reviewer, evidence link, decision date, next review date, and exception rationale when applicable. That gives the review group a repeatable evidence model instead of a one-time memo approval.
 
+Evidence should be treated as current state rather than one-time intake paperwork. Refresh the record when the pilot's risk posture materially changes. If evidence is stale or does not pass review, the pilot should go back for remediation or an explicit exception instead of continuing silently.
+
 ## Accountability
 
 | Role | Responsibility |

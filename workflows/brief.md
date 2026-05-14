@@ -27,6 +27,7 @@ Ask for or refine:
 - reader promise
 - claims deck with 3 to 5 arguable claims
 - objection, response, and implication for each claim
+- process-burden check when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms
 - known sources
 - open questions
 - length and deadline
@@ -43,6 +44,17 @@ If classification is missing or wrong in `.paper/config.json`, update it using t
 - `audience_shape`: `single`, `prioritized_multi`, or `hybrid`
 
 Keep `paper_type` only as an optional display or backward-compatibility label. Later stages should use `classification.purpose`, not labels such as blog, white paper, or architecture paper.
+
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, make the brief name:
+
+- the governed object
+- the durable artifact or record
+- the difference between the process and the artifact
+- whether evidence is static, current, scheduled for recertification, or trigger-refreshed
+- the refresh triggers
+- the decision rule the evidence affects
+- why cited standards matter, without implying they mandate the exact internal workflow unless they do
+- how the proposal avoids unnecessary bureaucracy through automation, observed evidence, owner attestation, validation, or human-by-exception review
 
 Run the strategy gate or update `.paper/STRATEGY.md` when the brief changes materially. The strategy gate may return:
 

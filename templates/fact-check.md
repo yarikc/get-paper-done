@@ -60,6 +60,14 @@
 
 - [source/citation alignment issue or "None"]
 
+## Governance / Control Claim Checks
+
+Use this section only when the draft proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms.
+
+| Claim ID | Control Claim | Check | Status | Recommended Handling |
+|----------|---------------|-------|--------|----------------------|
+| FC1 | [claim] | [governed object / durable record / standard support / evidence currency / refresh trigger / decision rule / process-burden answer] | [supported / inferential internal design / overstated / unsupported / needs current verification] | [keep / soften / caveat / route to research / revise] |
+
 ## Synthesis Integrity
 
 - **Overall assessment:** [supported | somewhat_overextended | materially_overextended]

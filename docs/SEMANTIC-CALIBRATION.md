@@ -1,6 +1,6 @@
 # Semantic Calibration
 
-Last reviewed: 2026-05-13
+Last reviewed: 2026-05-14
 
 This file records calibration notes for semantic validators whose thresholds depend on example evidence. It is not a backlog. The forward plan remains in [../ROADMAP.md](../ROADMAP.md), and the current health snapshot remains in [PROJECT-REVIEW.md](PROJECT-REVIEW.md).
 
@@ -21,7 +21,7 @@ Calibration evidence:
 Examples that are not useful saturation evidence:
 
 - `examples/platform-review-cycle-metrics` is intentionally short and quantitative. It exercises metric support, not long-form prose cadence.
-- `examples/public-ai-control-baseline` is a compact decision memo. It is useful for public-source citation discipline but too short to stress saturation thresholds.
+- `examples/public-ai-control-baseline` is a compact decision memo. It is useful for public-source citation discipline and governance/control prompt calibration, but too short to stress saturation thresholds.
 - `examples/weekly-platform-update` is lite mode and intentionally omits research/fact-check artifacts. It should not drive standard or flagship prose-saturation thresholds.
 - `examples/responsible-ai-controls` is evidence-heavy external writing, but current saturation concerns have come from internal strategy/control papers. Use it as supporting evidence only if future reviews identify the same cadence pattern there.
 
@@ -39,6 +39,7 @@ Regression coverage:
 ## Change History
 
 - 2026-05-13: Added calibration note after the supply-chain example became the first full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing showcase. The note records that its remaining enumerations are definitional, not decorative prose saturation.
+- 2026-05-14: Backfilled `examples/public-ai-control-baseline` with governance/control checklist artifacts and tightened one output paragraph after it tripped prose-saturation warnings. This confirmed the guidance can apply to a compact decision memo, while the saturation validator still correctly pushes long trigger lists out of body prose.
 
 ## Open Calibration Question
 

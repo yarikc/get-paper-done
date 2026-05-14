@@ -135,6 +135,8 @@ Avoid repeated three-or-more-item parallel structures unless the list is canonic
 
 Recommendations must name specific use-case categories, specific metrics, or specific failure signals. "Choose high-value AI use cases" without examples is not actionable enough. Prefer concrete forms such as "customer-support intent classification," "claims triage," "fraud alert enrichment," or "regulatory reporting where source quality is uneven," adjusted to the paper domain.
 
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, the draft must define the governed object early, name the durable artifact or record, distinguish process from artifact, state whether evidence is static or must remain current, name refresh triggers, and explain how evidence changes approve/reject/continue/remediate/retire decisions. Treat standards as context and support for evidence categories unless the source mandates the exact workflow. Answer process burden with automation, observed evidence, owner attestation, validation, or human-by-exception review where appropriate.
+
 When `RESEARCH.json` marks a relevant evidence row with `recommended_handling` of `support_more`, `soften`, `narrow`, or `caveat`, draft the corresponding prose with bounded language such as "can," "may," "in contexts where," or mark `[NEEDS EVIDENCE: ...]`. Do not convert a weakly supported or caveated claim into a confident assertion.
 
 Avoid:
@@ -203,6 +205,7 @@ Return markdown:
 - **Assumptions made:** [list or "None"]
 - **Open evidence gaps:** [list or "None"]
 - **Placeholder flags:** [list or "None"]
+- **Control/governance notes:** [if relevant: governed object, durable record, evidence currency, refresh triggers, decision rule, process-burden answer]
 - **Author decisions needed:** [list or "None"]
 - **Structure issues found while drafting:** [list or "None"]
 - **Intentional deviations from outline:** [list or "None"]

@@ -33,6 +33,17 @@ The reader starts with the pilot-review problem, sees the approval ask, understa
 | Public frameworks do not prove our internal controls will work. | References and standards used | State that the sources support a baseline, not outcome proof. |
 | Who validates pilot attestations? | Accountability | Name generic operating and validation roles without naming real teams in the example. |
 
+## Control / Governance Proposal Check
+
+| Check | Placement | Notes |
+|-------|-----------|-------|
+| Governed object is defined early | Opening problem and Decision request | Internal generative AI pilots moving from experimentation toward broader use. |
+| Standards or references are explained as context | References and standards used | Sources support risk structure, generative AI profile attention, prompt-injection risk, and secure lifecycle evidence; they do not mandate the exact internal record. |
+| Process is distinguished from the durable artifact/record | Why baseline and How it works | The process is intake/review/exception/recertification/retirement; the durable artifact is the pilot control record. |
+| Evidence currency and refresh triggers are explicit | Proposed baseline and How it works | Evidence refreshes on use-case changes, wider rollout, recertification, exceptions, and lifecycle control changes. |
+| Evidence changes a decision | Decision request and What approval changes | Current evidence allows review; missing or stale evidence sends a pilot back for more evidence, exception handling, rejection, or retirement. |
+| Process-burden objection is answered | Why baseline | The memo frames the baseline as standardizing existing review decisions, not creating a parallel approval process. |
+
 ## Drafting Risks
 
 - Turning the memo into a framework summary instead of a decision memo.

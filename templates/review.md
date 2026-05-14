@@ -47,6 +47,20 @@ Include only when multiple audience personas are selected.
 |---------|-----------------------|---------------|----------------------|
 | [issue] | [audiences] | [rule] | [handling] |
 
+## Control / Governance Proposal Check
+
+Use this section only when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms.
+
+| Dimension | Pass/Revise | Notes |
+|-----------|-------------|-------|
+| Governed object is clear | [Pass/Revise] | [notes] |
+| Required artifact or record is named | [Pass/Revise] | [notes] |
+| Process and artifact are not conflated | [Pass/Revise] | [notes] |
+| Standards are explained and not overstated | [Pass/Revise] | [notes] |
+| Evidence currency and refresh triggers are clear | [Pass/Revise] | [notes] |
+| Evidence changes a decision | [Pass/Revise] | [notes] |
+| Process burden is answered without adding an unclear approval forum | [Pass/Revise] | [notes] |
+
 ## Suggested Improvements
 
 - [Improvement]
@@ -69,6 +83,7 @@ Include only when multiple audience personas are selected.
 - [ ] Key claims are specific rather than generic
 - [ ] Trade-offs and objections are addressed fairly
 - [ ] The paper explains mechanisms, not just recommendations
+- [ ] Governance, control, or standard proposals define the governed object, durable record, evidence currency, refresh triggers, decision rule, and process-burden answer
 - [ ] Each section earns its place
 - [ ] Acronyms and specialized terms are explained unless common to the audience
 - [ ] A senior stakeholder would know what to do with this

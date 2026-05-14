@@ -33,7 +33,7 @@ Use `.paper/config.json` classification as the review contract:
 - `explainer`: judge reader understanding, definitions, source authority, examples, mechanisms, and bounded recommendations.
 - `update`: judge status clarity, change summary, blockers, next steps, and whether the lightweight shape fits risk.
 
-For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, check whether the draft addresses the process-burden objection. The review should flag papers that add ceremony without explaining how the mechanism improves decision quality, evidence, accountability, risk control, speed, or consistency.
+For governance, control, standard, gate, review, required-record, or operating-mechanism proposals, check whether the draft defines the governed object, names the durable artifact or record, distinguishes process from artifact, explains standards without overstating them, states evidence currency and refresh triggers, shows how evidence changes decisions, and answers the process-burden objection. Flag papers that add ceremony without explaining how the mechanism improves decision quality, evidence, accountability, risk control, speed, or consistency, especially when they create an unclear new approval forum instead of using automation, observed evidence, owner attestation, validation, or human-by-exception review.
 
 Parse audience mode flags:
 

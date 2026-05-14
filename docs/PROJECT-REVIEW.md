@@ -1,7 +1,7 @@
 # Project Review
 
-Review date: 2026-05-13
-Last reviewed: 2026-05-13
+Review date: 2026-05-14
+Last reviewed: 2026-05-14
 
 This file is the current project-health snapshot. The forward plan lives in [../ROADMAP.md](../ROADMAP.md).
 
@@ -9,7 +9,7 @@ This file is the current project-health snapshot. The forward plan lives in [../
 
 **Overall: 9.4/10 as a writing framework; 8.9/10 as an installable private-repo tool**
 
-Get Paper Done is now a strong writing workflow framework with a real showcase example. The project has a clearer README with a stronger product story, a newcomer `START-HERE` guide, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, seven realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, demonstrated reader-feedback capture and feedback-plan routing, and package-boundary hygiene tests. The software supply-chain example now demonstrates the full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing loop with a real quality fix, not just a synthetic validator path.
+Get Paper Done is now a strong writing workflow framework with a real showcase example. The project has a clearer README with a stronger product story, a newcomer `START-HERE` guide, artifact contracts, JSON schema validation, workflow consistency tests, content-aware scenario routing tests, CLI support for validating individual artifacts, deterministic internal export, seven realistic completed example workspaces, durable failed-strategy, mid-revision, and messy-import fixtures, semantic gates calibrated from multiple paper shapes, stable semantic issue IDs, a short quantitative example that exercises metric support and claim-support metadata from research through fact-check and export, live public-source claim-support coverage, demonstrated reader-feedback capture and feedback-plan routing, governance/control-paper prompt guidance validated on two compact control examples, and package-boundary hygiene tests. The software supply-chain example now demonstrates the full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing loop with a real quality fix, not just a synthetic validator path.
 
 The installable tool is near 9/10 but still not finished as a distributable product. Import remains preservation-first rather than extraction-rich, external review is still prompt/workflow-driven rather than a wrapped CLI capability, and the private-repo install path still depends on local package linking rather than a release/update policy. The framework quality is stronger than the packaging story.
 
@@ -17,7 +17,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 
 | Area | Rating | Rationale |
 |------|--------|-----------|
-| Framework design | 9.5/10 | Strong staged model, explicit paper memory, normalized classification, research compression, strategy gate, audience system, reader-feedback capture, feedback approval, clean-paper example, imported-paper recovery example, lite update example, evidence-heavy external example, short quantitative example, and two live public-source examples. The software supply-chain example now shows feedback-mediated backward routing as a real quality rescue. Remaining gaps are richer external-review handling and more imported/messy-paper breadth. |
+| Framework design | 9.5/10 | Strong staged model, explicit paper memory, normalized classification, research compression, strategy gate, audience system, reader-feedback capture, feedback approval, governance/control-paper guidance, clean-paper example, imported-paper recovery example, lite update example, evidence-heavy external example, short quantitative example, and two live public-source examples. The software supply-chain example now shows feedback-mediated backward routing as a real quality rescue. Remaining gaps are richer external-review handling and more imported/messy-paper breadth. |
 | Installable tool maturity | 8.9/10 | CLI covers install/update/doctor/init/import/export/status/validate plus `validate-artifact`, and export now has a regression test for pre-body draft sections. Missing external-review runner, richer import extraction, and local package/release hardening keep it below a complete product. |
 | Documentation | 9.4/10 | README now leads with product story, key benefits, fit/non-fit guidance, CLI vs slash commands, setup, state changes, gates, backward routing, import, export, artifact contracts, and examples. `docs/START-HERE.md` gives newcomers a shorter first-paper path, and the strongest example now has a README plus `EXPECTED-FINDINGS.md`. Still needs a guided walkthrough if onboarding remains dense. |
 | Test coverage | 9.8/10 | Tests now cover core CLI behavior, artifact contracts, malformed JSON, enum drift in state/research, exact audience scorecard dimensions, five-signal reader-feedback structure, malformed headings, workflow reference consistency, backward/incremental refresh, content-aware routing, blocked-strategy, mid-revision, and messy-import fixture behavior, export state detection, export body extraction, semantic gates including quantitative-claim support and claim-support metadata, stable semantic issue IDs, example-wide semantic validation, compact broken semantic fixture coverage, live public-source citation shape, reader-feedback demonstration artifacts, and seven realistic completed example fixtures. Still needs broader real-paper calibration. |
@@ -32,6 +32,8 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 - Artifact contracts now protect key JSON and Markdown outputs, including the fixed seven-dimension audience scorecard.
 - `READER-FEEDBACK.md` now captures human/model reader feedback in a fixed five-signal structure before it becomes revision work.
 - `examples/software-supply-chain-evidence-pack` now demonstrates `READER-FEEDBACK.md` and `FEEDBACK-PLAN.md` end to end: low evidence/ask-clarity scores triggered a plan, approval gate, backward routing to research, and a stronger final memo.
+- Control/governance-paper guidance is now reusable across brief, outline, draft, fact-check, review, agents, and rubrics: papers that propose controls, gates, standards, reviews, records, or operating mechanisms must define the governed object, durable record, evidence currency, refresh triggers, decision rule, standards framing, and process-burden answer.
+- `examples/public-ai-control-baseline` now acts as a second compact governance calibration point, proving the same checks can apply without turning a decision memo into a white paper.
 - Workflow consistency tests reduce the risk of broken command/workflow/template/agent references.
 - Scenario routing tests now protect backward movement when upstream artifacts change after downstream work exists.
 - Content-aware routing tests now cover fact-check recommended next action, review revise/rework verdicts, reader feedback routing, and pending feedback-plan approval.
@@ -59,7 +61,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 
 ## Main Risks
 
-1. Real-paper behavior now has seven examples plus targeted fixtures, but still not enough breadth. Live public-source claim-support metadata is represented in two compact examples, and the latest calibration review found a reusable control-paper guidance gap: define the governed object early, explain standards as context, distinguish the process from the artifact, and explain how evidence changes decisions.
+1. Real-paper behavior now has seven examples plus targeted fixtures, but still not enough breadth. Live public-source claim-support metadata is represented in two compact examples, and the latest calibration review has been turned into reusable control/governance guidance across prompts and templates. It has now been checked against a second compact governance memo, but it still should not become deterministic semantic validation until a broader paper shape exposes a concrete, reliably detectable failure.
 2. Import classification is useful but still shallow. Current import preserves and catalogs messy material better, but does not deeply extract `.docx`, PDFs, spreadsheets, diagrams, citations, or version history.
 3. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but the gates still cannot judge full argument quality, citation fidelity, or prose distinctiveness. The current prose-saturation calibration intentionally allows load-bearing definitional enumerations; see [SEMANTIC-CALIBRATION.md](SEMANTIC-CALIBRATION.md).
 4. State enum policy is now intentionally tighter and centrally tested. That prevents typo drift, but future blocker/action additions must go through the shared contract and workflow consistency tests.
@@ -69,7 +71,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 
 ## Recommended Next Work
 
-1. Codify the reusable control/governance-paper lesson into workflow guidance and templates: define the governed object early, explain cited standards, distinguish the process from the artifact, name refresh triggers, explain how evidence changes decisions, and handle process burden with observed evidence plus human-by-exception where appropriate.
+1. Validate the governance/control guidance on a non-governance decision memo or strategy paper to make sure the checks do not leak into ordinary papers.
 2. Use the calibration review to decide whether `START-HERE` needs a richer guided walkthrough.
 3. Harden `gpd import` around large-folder previews, document extraction, citation extraction, and richer manifest details.
 4. Add richer fixture workspaces only when they represent a new failure mode, not just more routing signals.

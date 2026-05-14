@@ -77,6 +77,14 @@ Low
 - Do not present `pilot_control_record_id` as a public-standard field. It is a proposed internal primary key for governance.
 - Do not present the accountability table as externally mandated role design. It is the proposed internal operating model.
 
+## Governance / Control Claim Checks
+
+| Claim ID | Control Claim | Check | Status | Recommended Handling |
+|----------|---------------|-------|--------|----------------------|
+| FC5 | Each pilot should maintain a `pilot_control_record_id` with evidence fields, status values, validation gates, and recertification triggers. | governed object / durable record / standard support / evidence currency / refresh trigger / decision rule / process-burden answer | inferential internal design | Keep as the proposed internal mechanism; do not frame as a public-standard field. |
+| FC6 | The baseline should name operating and validation roles for pilot attestations. | durable record / standard support / decision rule / process-burden answer | inferential internal design | Keep generic role names and avoid implying public sources assign exact internal roles. |
+| FC7 | The baseline standardizes evidence and gates that reviewers already need. | process-burden answer / decision rule | supported as internal rationale | Keep as an operating rationale, not an externally proven outcome claim. |
+
 ## Synthesis Integrity
 
 - **Overall assessment:** supported

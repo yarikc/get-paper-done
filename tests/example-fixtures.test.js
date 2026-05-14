@@ -288,6 +288,25 @@ function testPublicAiControlBaselineKeepsLivePublicSourceShape() {
   for (const sourceId of ['S1', 'S2', 'S3', 'S4']) {
     assert(factCheck.includes(sourceId), `FACT-CHECK.md should include ${sourceId}`);
   }
+  assert(factCheck.includes('## Governance / Control Claim Checks'));
+  assert(factCheck.includes('inferential internal design'));
+  assert(factCheck.includes('do not frame as a public-standard field'));
+
+  const brief = fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'BRIEF.md'), 'utf8');
+  assert(brief.includes('## Process Burden Check'));
+  assert(brief.includes('Governed object'));
+  assert(brief.includes('pilot_control_record_id'));
+  assert(brief.includes('Human-by-exception model'));
+
+  const outline = fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'OUTLINE.md'), 'utf8');
+  assert(outline.includes('## Control / Governance Proposal Check'));
+  assert(outline.includes('Standards or references are explained as context'));
+  assert(outline.includes('Evidence changes a decision'));
+
+  const review = fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'REVIEW.md'), 'utf8');
+  assert(review.includes('## Control / Governance Proposal Check'));
+  assert(review.includes('Standards are explained and not overstated'));
+  assert(review.includes('Process burden is answered without adding an unclear approval forum'));
 
   const final = fs.readFileSync(path.join(publicSourceExampleDir, '.paper', 'exports', 'FINAL.md'), 'utf8');
   assert(final.includes('https://doi.org/10.6028/NIST.AI.100-1'));
@@ -303,6 +322,8 @@ function testPublicAiControlBaselineKeepsLivePublicSourceShape() {
   assert(final.includes('approved_with_exception'));
   assert(final.includes('repeatable gate'));
   assert(final.includes('standardizes and enforces'));
+  assert(final.includes('Evidence should be treated as current state rather than one-time intake paperwork'));
+  assert(final.includes('If evidence is stale or does not pass review'));
   assert(final.includes('Security or risk reviewer'));
   assert(final.includes('Review process owner'));
   assert(final.includes('Validates threat-model, testing, exception, and residual-risk attestations'));

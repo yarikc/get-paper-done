@@ -105,9 +105,17 @@ Create 3 to 5 major claims. Each claim should be arguable and specific.
 
 Use this section when the paper proposes governance, controls, standards, gates, reviews, required records, or operating mechanisms.
 
+- **Governed object:** [What object, decision, deployment, system, record, claim, or lifecycle state is governed]
+- **Required artifact or record:** [What durable artifact exists after the process runs]
+- **Process vs artifact distinction:** [What work happens vs what inspectable evidence remains]
 - **Likely bureaucracy objection:** [How a skeptical reader might say this creates process, delay, or ceremony]
 - **Answer:** [How the proposal improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process]
 - **Existing decision need being standardized:** [What reviewers or operators already need to decide, validate, approve, reject, recertify, or retire]
+- **Evidence currency:** [Static at approval | must remain current | recertified on schedule | recertified on trigger]
+- **Refresh triggers:** [What changes force update, re-review, recertification, or exception handling]
+- **Decision rule:** [How the evidence changes approve/reject/continue/remediate/retire decisions]
+- **Human-by-exception model:** [What is automated or observed continuously, and when a person must review]
+- **Standards used:** [Which references are used and why they matter; do not imply they mandate this exact internal process unless they do]
 
 ## House Style Defaults
 
@@ -125,7 +133,7 @@ Use this section when the paper proposes governance, controls, standards, gates,
 - [ ] Audience objections are addressed
 - [ ] Claims are supported at the chosen proof standard
 - [ ] Trade-offs and caveats are explicit
-- [ ] Governance, control, or standard proposals address process-burden objections
+- [ ] Governance, control, or standard proposals define the governed object, durable record, evidence currency, refresh triggers, decision rule, and process-burden answer
 - [ ] Acronyms and specialized terms are explained unless common to the audience
 - [ ] Persona voice is consistent
 - [ ] Final export is ready for publication or handoff

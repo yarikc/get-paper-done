@@ -35,6 +35,7 @@ Use `.paper/config.json` classification to set scrutiny:
 - `decision_memo` fact-checking must verify that the evidence supports the requested decision and that operating/accountability claims are not presented as externally mandated unless sourced.
 - `explainer` fact-checking must verify definitions, source authority, mechanism descriptions, and limits.
 - `update` fact-checking can stay light unless it includes factual, numerical, external, or high-risk claims.
+- Governance, control, standard, gate, review, required-record, or operating-mechanism proposals require source-alignment checks for the governed object, durable record, evidence currency, refresh triggers, decision rule, standards framing, and process-burden answer.
 
 Extract a claim inventory from `.paper/DRAFT.md`. Assign IDs such as `FC1`, classify each material claim, and mark risk HIGH/MEDIUM/LOW.
 
@@ -59,6 +60,8 @@ For numerical, statistical, benchmark, percentage, cost, ROI, timing, or multipl
 For `source_registry` entries and cited source IDs, verify that URLs or file paths resolve to the intended source when practical. Record stale, redirected-to-wrong-page, inaccessible, or mismatched source links in `Source Alignment Notes` or `Source Gaps`, even if the draft prose itself is otherwise supportable.
 
 When `.paper/RESEARCH.json` includes `source_registry[*].claim_support`, use it as a claim-source fidelity map. A source marked `topical_only`, `contradicts`, or `not_checked` for the closest evidence claim cannot justify a `Claims Safe To Keep` row. Move the claim to `Claims To Soften`, `Claims To Remove Or Verify Before Publication`, or route back to `/gpd-research`.
+
+For governance/control recommendations, distinguish external support from internal operating design. Standards and official guidance may support evidence categories, risk framing, or control objectives without mandating the paper's exact workflow. If the draft says or implies that a standard requires the proposed internal process, verify that exact claim. Otherwise mark the recommendation as inferential internal design and require bounded wording.
 
 After claim-level checking, add a synthesis integrity assessment:
 

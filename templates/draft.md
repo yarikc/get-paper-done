@@ -24,6 +24,7 @@
 - **Assumptions made:** [list or "None"]
 - **Open evidence gaps:** [list or "None"]
 - **Placeholder flags:** [list or "None"]
+- **Control/governance notes:** [If relevant: governed object, durable record, evidence currency, refresh triggers, decision rule, process-burden answer]
 - **Author decisions needed:** [list or "None"]
 - **Structure issues found while drafting:** [list or "None"]
 - **Intentional deviations from outline:** [list or "None"]

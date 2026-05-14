@@ -51,7 +51,9 @@ Drafting rules:
 - for `classification.purpose = decision_memo`, keep the draft concise; include only enough context, evidence, mechanism, accountability, and risk framing to support the ask
 - for `classification.purpose = explainer`, prioritize reader understanding before recommendation language
 - for `classification.purpose = update`, keep the status/change/blocker/next-step shape and do not force research-heavy structure unless risk or evidence burden requires it
-- when proposing governance, controls, standards, gates, reviews, required records, or operating mechanisms, preempt the process-burden objection: explain how the proposal improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process
+- when proposing governance, controls, standards, gates, reviews, required records, or operating mechanisms, define the governed object early, name the durable artifact or record, distinguish process from artifact, state whether evidence is static or must remain current, name refresh triggers, and show how the evidence changes approve/reject/continue/remediate/retire decisions
+- preempt the process-burden objection by explaining how the mechanism improves decision quality, evidence, accountability, risk control, speed, or consistency without creating a parallel approval process; prefer automation, observed evidence, owner attestation, validation, or human-by-exception review where appropriate
+- explain standards as context and support for evidence categories; do not imply that a public standard mandates the exact internal workflow unless the source actually does
 - support claims using `RESEARCH.json` when present, with `RESEARCH.md` as a summary/index
 - address the strongest likely objection
 - stay within the requested length range unless the brief says otherwise
