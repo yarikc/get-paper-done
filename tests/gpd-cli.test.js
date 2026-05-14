@@ -412,6 +412,52 @@ function testImportDraftSelectionUsesFilenameSignalsBeforeMtime() {
   assert(report.includes('| drafts/draft-v2.md | 1150 |'));
 }
 
+function testImportVersionSourceIndexGroupsMaterial() {
+  const source = tempDir('gpd-import-version-index-source');
+  fs.mkdirSync(path.join(source, 'drafts'));
+  fs.mkdirSync(path.join(source, 'versions'));
+  fs.mkdirSync(path.join(source, 'sources'));
+  fs.mkdirSync(path.join(source, 'review'));
+  fs.mkdirSync(path.join(source, 'assets'));
+  fs.writeFileSync(path.join(source, 'drafts', 'current-draft-v3.md'), '# Current\n');
+  fs.writeFileSync(path.join(source, 'drafts', 'old-draft-v1.md'), '# Old\n');
+  fs.writeFileSync(path.join(source, 'versions', 'draft-v2.md'), '# Version Two\n');
+  fs.writeFileSync(path.join(source, 'sources', 'nist-reference.md'), '# Source\n');
+  fs.writeFileSync(path.join(source, 'review', 'peer-feedback.md'), '# Feedback\n');
+  fs.writeFileSync(path.join(source, 'outline-v1.md'), '# Outline\n');
+  fs.writeFileSync(path.join(source, 'strategy-spec.md'), '# Strategy\n');
+  fs.writeFileSync(path.join(source, 'assets', 'chart.png'), 'not really an image\n');
+  fs.writeFileSync(path.join(source, 'loose-note.md'), '# Note\n');
+
+  const oldTime = new Date(Date.UTC(2026, 0, 1, 0, 0, 0));
+  const currentTime = new Date(Date.UTC(2026, 0, 5, 0, 0, 0));
+  fs.utimesSync(path.join(source, 'drafts', 'old-draft-v1.md'), oldTime, oldTime);
+  fs.utimesSync(path.join(source, 'drafts', 'current-draft-v3.md'), currentTime, currentTime);
+
+  const target = tempDir('gpd-import-version-index-target');
+  run(['import', '--source', source, '--location', target, '--slug', 'version-index-import']);
+  const paperDir = path.join(target, 'version-index-import');
+  const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
+
+  assert(report.includes('## Version / Source Index'));
+  assert(report.includes('This index helps triage imported material.'));
+  assert(report.includes('| original/drafts/current-draft-v3.md | canonical_draft |'));
+  assert(report.includes('| original/drafts/current-draft-v3.md | canonical_draft | 2000 |'));
+  assert(report.includes('| original/drafts/old-draft-v1.md | previous_or_alternate_draft |'));
+  assert(report.includes('| original/versions/draft-v2.md | previous_or_alternate_draft |'));
+  assert(report.includes('| original/sources/nist-reference.md | source_reference |'));
+  assert(report.includes('| original/review/peer-feedback.md | review_feedback |'));
+  assert(report.includes('| original/outline-v1.md | outline |'));
+  assert(report.includes('| original/strategy-spec.md | brief_or_strategy_context |'));
+  assert(report.includes('| original/assets/chart.png | asset |'));
+  assert(report.includes('| original/loose-note.md | notes |'));
+  assert(report.includes('| RESEARCH | Research/source filename or path; use as input to research compression. |'));
+  assert(report.includes('| REVIEW | Review or feedback filename; use during review planning, not immediate revision. |'));
+  assert(report.includes('| BRIEF, STRATEGY | Brief/spec/strategy filename; use to clarify purpose, scope, and gates. |'));
+  assert(!report.includes(source));
+  assert(!report.includes(target));
+}
+
 function testImportMaxFileBytesSkipsLargeFiles() {
   const source = tempDir('gpd-import-max-file-source');
   fs.writeFileSync(path.join(source, 'draft.md'), '# Draft\n');
@@ -854,6 +900,7 @@ testSingleMarkdownImportIsCanonicalDraft();
 testImportDocxCanonicalDraftExtraction();
 testImportDetectsSourceReferencesWithoutGeneratingResearch();
 testImportDraftSelectionUsesFilenameSignalsBeforeMtime();
+testImportVersionSourceIndexGroupsMaterial();
 testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();

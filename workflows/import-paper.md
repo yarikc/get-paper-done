@@ -130,6 +130,8 @@ CLI import can derive `.paper/DRAFT.md` from selected Markdown, plain text, or `
 
 CLI import also detects likely source-reference candidates from Markdown, text, and `.docx` material: URLs, DOIs, named standards/source families, and lines labeled as sources or references. Record them in `.paper/IMPORT.md` as unverified triage candidates only. Do not create `RESEARCH.json` or treat the detected references as evidence during import.
 
+CLI import also writes a `Version / Source Index` section in `.paper/IMPORT.md`. Group copied files by likely role, include a deterministic ranking signal, modified time, downstream stage that should inspect it, and a short rationale. This is an import triage aid only; it must not bypass brief, research, outline, review, or fact-check gates.
+
 ## 5. Derive Minimal GPD Artifacts
 
 From original material, infer and write:
@@ -196,6 +198,7 @@ Write `.paper/IMPORT.md` with:
 - classification counts
 - largest copied files
 - import warnings
+- version/source index with role, ranking signal, modified time, recommended downstream stage, and rationale
 - canonical draft selected
 - draft candidate ranking
 - draft extraction status and source basis

@@ -47,6 +47,14 @@ original/
 |------|--------|
 | [path] | [reason] |
 
+## Version / Source Index
+
+This index helps triage imported material. It does not decide evidence quality and does not replace research, fact-check, or review.
+
+| Path In original/ | Import Role | Ranking Signal | Modified | Should Inform | Rationale |
+|-------------------|-------------|----------------|----------|---------------|-----------|
+| [path] | [canonical_draft/previous_or_alternate_draft/source_reference/review_feedback/outline/brief_or_strategy_context/notes/asset/unclear] | [score] | [timestamp] | [BRIEF/RESEARCH/OUTLINE/REVIEW/MANUAL REVIEW] | [why grouped here] |
+
 ## Canonical Draft
 
 - **Selected draft:** [path]

@@ -481,6 +481,92 @@ function sourceReferenceRows(sourceReferences) {
     .join('\n') || '| - | - | - | - |';
 }
 
+function indexRole(file, canonicalDraft) {
+  const lower = file.rel.toLowerCase().split(path.sep).join('/');
+  const base = path.basename(lower);
+  if (canonicalDraft && file.rel === canonicalDraft.rel) return 'canonical_draft';
+  if (file.classification === 'draft') return 'previous_or_alternate_draft';
+  if (file.classification === 'research') return 'source_reference';
+  if (file.classification === 'review') return 'review_feedback';
+  if (file.classification === 'outline') return 'outline';
+  if (file.classification === 'spec') return 'brief_or_strategy_context';
+  if (file.classification === 'asset') return 'asset';
+  if (lower.startsWith('versions/') || lower.includes('/versions/') || lower.startsWith('archive/') || lower.includes('/archive/') || base.includes('old') || base.includes('previous')) return 'previous_or_alternate_material';
+  if (file.classification === 'notes') return 'notes';
+  return 'unclear';
+}
+
+function indexShouldInform(role) {
+  if (role === 'canonical_draft' || role === 'previous_or_alternate_draft') return 'BRIEF, OUTLINE';
+  if (role === 'source_reference') return 'RESEARCH';
+  if (role === 'review_feedback') return 'REVIEW';
+  if (role === 'outline') return 'OUTLINE';
+  if (role === 'brief_or_strategy_context') return 'BRIEF, STRATEGY';
+  if (role === 'asset') return 'MANUAL REVIEW';
+  if (role === 'notes') return 'BRIEF';
+  return 'MANUAL REVIEW';
+}
+
+function indexRationale(file, role, canonicalDraft) {
+  const lower = file.rel.toLowerCase().split(path.sep).join('/');
+  const base = path.basename(lower);
+  if (role === 'canonical_draft') return 'Selected as canonical draft by deterministic draft ranking.';
+  if (role === 'previous_or_alternate_draft') {
+    if (lower.startsWith('archive/') || lower.includes('/archive/') || lower.startsWith('versions/') || lower.includes('/versions/')) return 'Draft-like file in archive/version path; preserve for comparison.';
+    if (base.includes('old') || base.includes('previous')) return 'Draft-like filename indicates older material.';
+    if (canonicalDraft) return 'Draft-like file not selected as canonical; preserve for comparison.';
+    return 'Draft-like file preserved for user confirmation.';
+  }
+  if (role === 'source_reference') return 'Research/source filename or path; use as input to research compression.';
+  if (role === 'review_feedback') return 'Review or feedback filename; use during review planning, not immediate revision.';
+  if (role === 'outline') return 'Outline filename; use to compare or rebuild structure.';
+  if (role === 'brief_or_strategy_context') return 'Brief/spec/strategy filename; use to clarify purpose, scope, and gates.';
+  if (role === 'asset') return 'Non-text asset copied unchanged; inspect manually if relevant.';
+  if (role === 'notes') return 'General text/markdown notes; inspect during brief or research planning.';
+  return 'No strong import signal; inspect manually before relying on it.';
+}
+
+function roleOrder(role) {
+  const order = [
+    'canonical_draft',
+    'previous_or_alternate_draft',
+    'source_reference',
+    'brief_or_strategy_context',
+    'outline',
+    'review_feedback',
+    'notes',
+    'asset',
+    'previous_or_alternate_material',
+    'unclear',
+  ];
+  const index = order.indexOf(role);
+  return index === -1 ? order.length : index;
+}
+
+function importIndexRows(files, canonicalDraft) {
+  return files
+    .map((file) => {
+      const role = indexRole(file, canonicalDraft);
+      const signal = file.classification === 'draft' ? draftCandidateScore(file) : versionScore(path.basename(file.rel));
+      return {
+        file,
+        role,
+        signal,
+        modified: new Date(fileAge(file)).toISOString(),
+        shouldInform: indexShouldInform(role),
+        rationale: indexRationale(file, role, canonicalDraft),
+      };
+    })
+    .sort((a, b) => (
+      roleOrder(a.role) - roleOrder(b.role)
+      || b.signal - a.signal
+      || b.modified.localeCompare(a.modified)
+      || a.file.rel.localeCompare(b.file.rel)
+    ))
+    .map((item) => `| original/${item.file.rel.split(path.sep).join('/')} | ${item.role} | ${item.signal} | ${item.modified} | ${item.shouldInform} | ${markdownTableCell(item.rationale)} |`)
+    .join('\n') || '| - | - | - | - | - | - |';
+}
+
 function importReport(input, copied, skipped, canonicalDraft, draftExtraction, sourceReferences) {
   const inventory = importInventory(copied, skipped, input.maxFileBytes || maxDefaultFileBytes);
   const copiedRows = copied.length === 0
@@ -546,6 +632,14 @@ ${copiedRows}
 | Path | Reason |
 |------|--------|
 ${skippedRows}
+
+## Version / Source Index
+
+This index helps triage imported material. It does not decide evidence quality and does not replace research, fact-check, or review.
+
+| Path In original/ | Import Role | Ranking Signal | Modified | Should Inform | Rationale |
+|-------------------|-------------|----------------|----------|---------------|-----------|
+${importIndexRows(copied, canonicalDraft)}
 
 ## Canonical Draft
 

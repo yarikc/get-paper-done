@@ -22,6 +22,7 @@ Initial working release.
 - Import dry-run inventory, classification counts, warning output, file-size skip override, and deterministic canonical-draft candidate ranking.
 - Import plain-text extraction for selected `.docx` canonical drafts, with original files still preserved unchanged under `original/` and extraction provenance recorded in `IMPORT.md`.
 - Import-time detection of unverified source-reference candidates such as URLs, DOIs, named standards, and source lines, recorded in `IMPORT.md` for later research/fact-check triage.
+- Import `Version / Source Index` in `IMPORT.md`, grouping copied files by likely role, ranking signal, modified time, recommended downstream stage, and rationale.
 - Strategy gate with normalized `Strategy Blockers`.
 - Curated reusable audience personas and reusable author profile support.
 - Specialized agents for strategy, research, outlining, drafting, audience review, opposition review, fact-checking, and editing.

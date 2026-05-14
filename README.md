@@ -450,6 +450,8 @@ If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import 
 
 Import also detects obvious source-reference candidates from imported Markdown, text, and `.docx` material: URLs, DOIs, named standards or source families, and lines labeled as sources or references. These are recorded in `.paper/IMPORT.md` as unverified triage input. They do not become evidence until `/gpd-research` or `/gpd-fact-check` verifies relevance and claim support.
 
+`.paper/IMPORT.md` also includes a `Version / Source Index` that groups copied files by likely role, such as canonical draft, previous draft, source/reference, review feedback, outline, spec, asset, notes, or unclear. Use it to decide what should inform brief, research, outline, or review work; do not treat it as evidence validation.
+
 Import intentionally does not generate `RESEARCH.json`, `RESEARCH.md`, `OUTLINE.md`, `FACT-CHECK.md`, or `REVIEW.md` by default. Research, outline, fact-check, and review remain separate stages so you can clear context between them.
 
 When multiple draft-like files exist, import ranks candidates using filename cues, version cues, location, and modified time. Confirm the selected canonical draft in `.paper/IMPORT.md` before treating the imported draft as authoritative.

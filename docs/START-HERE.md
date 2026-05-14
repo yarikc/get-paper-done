@@ -191,6 +191,8 @@ If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import 
 
 Import also records unverified source-reference candidates, such as URLs, DOIs, standards, and lines labeled as sources or references. Treat them as research/fact-check leads, not verified evidence.
 
+`IMPORT.md` also includes a `Version / Source Index` so you can see which files look like the canonical draft, older versions, source material, review feedback, outlines/specs, assets, notes, or unclear material.
+
 If the imported draft is publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run:
 
 ```text
