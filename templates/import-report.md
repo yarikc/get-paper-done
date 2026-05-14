@@ -58,6 +58,12 @@ Draft candidates:
 |-----------|-------|----------|----------|
 | [path] | [score] | [timestamp] | [yes/no] |
 
+## Draft Extraction
+
+| Artifact | Status | Source Basis | Notes |
+|----------|--------|--------------|-------|
+| DRAFT.md | [Created/Deferred] | [original/path or -] | [Copied text from Markdown/text draft, extracted plain paragraph text from DOCX, or deferred with reason] |
+
 ## Derived Artifacts
 
 | Artifact | Status | Source Basis | Notes |

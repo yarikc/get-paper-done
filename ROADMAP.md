@@ -9,10 +9,10 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.4/10 as a writing framework and 9.06/10 as an installable private-repo tool as of 2026-05-14
+- Current rating: 9.4/10 as a writing framework and 9.07/10 as an installable private-repo tool as of 2026-05-14
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, external-review collection, Claude/Codex-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper document/source extraction for imports, deeper semantic validation, broader provider calibration/local HTTP support, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, external-review collection, Claude/Codex-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet/citation/source extraction for imports, deeper semantic validation, broader provider calibration/local HTTP support, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after calibrating the Claude and Codex provider paths and fixing pending-feedback routing precedence.
+Last changed: 2026-05-14 after adding `.docx` canonical-draft text extraction to `gpd import`.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -143,6 +143,7 @@ Plan-change rule:
 16. Completed: calibrated the real Claude CLI path on a synthetic public paper, fixed the command from `claude -p -` to `claude -p`, and added a regression assertion for the argument shape.
 17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-progress` before stale mtime refresh rules can send the paper backward.
 18. Completed: calibrated the real Codex CLI path on a synthetic public paper, confirmed `codex exec --skip-git-repo-check -`, and added a regression assertion for the argument shape.
+19. Completed: added first-pass `.docx` canonical-draft text extraction for `gpd import`, preserving the original file under `original/`, writing extracted paragraph text to `.paper/DRAFT.md`, recording extraction provenance in `.paper/IMPORT.md`, and covering the behavior with a synthetic DOCX regression test.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -189,7 +190,8 @@ Next work should validate behavior under real use before adding more RFC surface
 27. Completed: added first-pass `gpd review-external --models` provider invocation for installed CLI providers, with tests using a fake provider binary and unsupported-provider capture.
 28. Completed: calibrated `gpd review-external --models claude` against the real Claude CLI on a synthetic public paper and fixed pending feedback-plan routing precedence.
 29. Completed: calibrated `gpd review-external --models codex` against the real Codex CLI on a synthetic public paper.
-30. Next main-line slice: decide whether the next useful work is deeper import extraction or additional real-provider calibration for Gemini/opencode.
+30. Completed: added `.docx` canonical-draft text extraction for `gpd import` without adding package dependencies or committing binary/private fixture material.
+31. Next main-line slice: continue import hardening where real use needs it, likely citation/source extraction or PDF/spreadsheet handling, before returning to Gemini/opencode provider calibration.
 
 ## Completed Design Simplifications
 
@@ -273,7 +275,7 @@ Success criteria:
 
 ### 2. Harden The Import Workflow
 
-Current import flow is conceptually strong and has first-pass fixture coverage, including messy-folder classification, single-draft recovery, dry-run inventory, deterministic draft ranking, file-size skip control, and richer import reporting. Remaining work is deeper extraction/conversion and user-facing review of very large imports.
+Current import flow is conceptually strong and has first-pass fixture coverage, including messy-folder classification, single-draft recovery, dry-run inventory, deterministic draft ranking, file-size skip control, richer import reporting, and `.docx` canonical-draft text extraction. Remaining work is deeper PDF/spreadsheet/citation extraction and user-facing review of very large imports.
 
 Needed:
 

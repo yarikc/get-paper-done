@@ -446,6 +446,8 @@ Or from the AI runtime:
 
 Import is preservation-first. It creates a new paper directory, copies original material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and presents a post-import menu.
 
+If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import writes `.paper/DRAFT.md` from that draft. For `.docx`, it extracts plain paragraph text only; the original `.docx` remains unchanged under `original/`, and `.paper/IMPORT.md` records the extraction source and limitation.
+
 Import intentionally does not generate `RESEARCH.json`, `RESEARCH.md`, `OUTLINE.md`, `FACT-CHECK.md`, or `REVIEW.md` by default. Research, outline, fact-check, and review remain separate stages so you can clear context between them.
 
 When multiple draft-like files exist, import ranks candidates using filename cues, version cues, location, and modified time. Confirm the selected canonical draft in `.paper/IMPORT.md` before treating the imported draft as authoritative.

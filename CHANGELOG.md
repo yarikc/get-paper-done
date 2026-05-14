@@ -20,6 +20,7 @@ Initial working release.
 - Artifact validation for `EXTERNAL-REVIEWS.md`, including required prompt-summary and consensus-summary sections.
 - Safe import behavior that preserves source material under `original/`.
 - Import dry-run inventory, classification counts, warning output, file-size skip override, and deterministic canonical-draft candidate ranking.
+- Import plain-text extraction for selected `.docx` canonical drafts, with original files still preserved unchanged under `original/` and extraction provenance recorded in `IMPORT.md`.
 - Strategy gate with normalized `Strategy Blockers`.
 - Curated reusable audience personas and reusable author profile support.
 - Specialized agents for strategy, research, outlining, drafting, audience review, opposition review, fact-checking, and editing.

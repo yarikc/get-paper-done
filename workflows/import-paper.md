@@ -126,6 +126,8 @@ If uncertain, ask the user which draft is canonical.
 
 CLI import records every draft candidate in `.paper/IMPORT.md` with a deterministic score. Filename cues such as `latest`, `current`, `final`, `working`, version numbers, and `drafts/` location are positive signals. `old`, `previous`, `archive/`, and `versions/` are negative signals. Modified time is a tie-breaker, not the only selection rule. If more than one draft candidate exists, treat the selected draft as provisional until the user confirms it.
 
+CLI import can derive `.paper/DRAFT.md` from selected Markdown, plain text, or `.docx` canonical drafts. `.docx` handling is plain paragraph text extraction only: preserve the original `.docx` under `original/`, do not import formatting/comments/tracked changes, and record the extraction source and limitation in `.paper/IMPORT.md`.
+
 ## 5. Derive Minimal GPD Artifacts
 
 From original material, infer and write:
@@ -164,7 +166,7 @@ Audience handling:
 
 Artifact derivation rules:
 
-- `.paper/DRAFT.md`: should contain the current imported draft, converted to Markdown if possible. Preserve content; do not rewrite during import.
+- `.paper/DRAFT.md`: should contain the current imported draft, converted to Markdown if possible. Preserve content; do not rewrite during import. For `.docx`, import only plain paragraph text and record that formatting, comments, and tracked changes were not imported.
 - `.paper/BRIEF.md`: extract or infer classification, title, target audience, thesis, opposing view, likely claims, constraints, and known gaps. Mark uncertainty clearly.
 - `.paper/STRATEGY.md`: run the strategy gate from imported context. Status must be `Go`, `Revise Before Drafting`, or `No-Go`. If thesis, reader promise, paper job, scope, or desired outcome is unclear, set status to `Revise Before Drafting` and populate `Strategy Blockers` with the normalized blocker list and primary blocker.
 - `.paper/PROJECT.md`: state what this paper appears to be and what outcome it appears to seek. Keep it short; do not duplicate the full thesis, claims, or objections from `BRIEF.md`.
@@ -194,6 +196,7 @@ Write `.paper/IMPORT.md` with:
 - import warnings
 - canonical draft selected
 - draft candidate ranking
+- draft extraction status and source basis
 - minimal artifacts created
 - imported research/reference material locations
 - imported outline/review material locations

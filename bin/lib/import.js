@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 
 const {
   resolvePaperDir,
@@ -120,6 +121,84 @@ function walkSource(sourcePath, maxBytes = maxDefaultFileBytes) {
 
 function isTextDraftCandidate(file) {
   return /\.(md|txt)$/i.test(file.rel);
+}
+
+function isDocxDraftCandidate(file) {
+  return /\.docx$/i.test(file.rel);
+}
+
+function findEndOfCentralDirectory(buffer) {
+  const signature = 0x06054b50;
+  const minOffset = Math.max(0, buffer.length - 0xffff - 22);
+  for (let offset = buffer.length - 22; offset >= minOffset; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === signature) return offset;
+  }
+  return -1;
+}
+
+function zipEntry(buffer, entryName) {
+  const eocdOffset = findEndOfCentralDirectory(buffer);
+  if (eocdOffset < 0) throw new Error('DOCX zip directory not found');
+
+  const entryCount = buffer.readUInt16LE(eocdOffset + 10);
+  const centralOffset = buffer.readUInt32LE(eocdOffset + 16);
+  let offset = centralOffset;
+
+  for (let index = 0; index < entryCount; index += 1) {
+    if (buffer.readUInt32LE(offset) !== 0x02014b50) throw new Error('Malformed DOCX zip directory');
+    const compression = buffer.readUInt16LE(offset + 10);
+    const compressedSize = buffer.readUInt32LE(offset + 20);
+    const nameLength = buffer.readUInt16LE(offset + 28);
+    const extraLength = buffer.readUInt16LE(offset + 30);
+    const commentLength = buffer.readUInt16LE(offset + 32);
+    const localOffset = buffer.readUInt32LE(offset + 42);
+    const name = buffer.slice(offset + 46, offset + 46 + nameLength).toString('utf8');
+
+    if (name === entryName) {
+      if (buffer.readUInt32LE(localOffset) !== 0x04034b50) throw new Error('Malformed DOCX local header');
+      const localNameLength = buffer.readUInt16LE(localOffset + 26);
+      const localExtraLength = buffer.readUInt16LE(localOffset + 28);
+      const dataOffset = localOffset + 30 + localNameLength + localExtraLength;
+      const data = buffer.slice(dataOffset, dataOffset + compressedSize);
+      if (compression === 0) return data;
+      if (compression === 8) return zlib.inflateRawSync(data);
+      throw new Error(`Unsupported DOCX compression method: ${compression}`);
+    }
+
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+
+  throw new Error(`${entryName} not found in DOCX`);
+}
+
+function decodeXmlEntities(value) {
+  return value
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function textFromDocumentXml(xml) {
+  return xml
+    .split(/<\/w:p>/i)
+    .map((paragraph) => {
+      const parts = [];
+      for (const match of paragraph.matchAll(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/gi)) {
+        parts.push(decodeXmlEntities(match[1]));
+      }
+      return parts.join('');
+    })
+    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+function extractDocxText(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const documentXml = zipEntry(buffer, 'word/document.xml').toString('utf8');
+  return textFromDocumentXml(documentXml);
 }
 
 function fileAge(file) {
@@ -266,7 +345,72 @@ function warningRows(inventory) {
   return inventory.warnings.map((warning) => `- ${warning}`).join('\n') || '- None.';
 }
 
-function importReport(input, copied, skipped, canonicalDraft) {
+function draftSourcePath(file) {
+  return `original/${file.rel.split(path.sep).join('/')}`;
+}
+
+function planDraftExtraction(canonicalDraft) {
+  if (!canonicalDraft) {
+    return {
+      created: false,
+      artifact: 'DRAFT.md',
+      sourceBasis: '-',
+      notes: 'No canonical draft was selected during import.',
+    };
+  }
+
+  if (isTextDraftCandidate(canonicalDraft)) {
+    return {
+      created: true,
+      artifact: 'DRAFT.md',
+      sourceBasis: draftSourcePath(canonicalDraft),
+      notes: 'Copied text from the selected Markdown/text draft.',
+      content: fs.readFileSync(canonicalDraft.abs, 'utf8'),
+    };
+  }
+
+  if (isDocxDraftCandidate(canonicalDraft)) {
+    try {
+      const text = extractDocxText(canonicalDraft.abs);
+      if (!text.trim()) {
+        return {
+          created: false,
+          artifact: 'DRAFT.md',
+          sourceBasis: draftSourcePath(canonicalDraft),
+          notes: 'DOCX text extraction returned no usable paragraphs; original remains preserved.',
+        };
+      }
+      return {
+        created: true,
+        artifact: 'DRAFT.md',
+        sourceBasis: draftSourcePath(canonicalDraft),
+        notes: 'Plain paragraph text extracted from the selected DOCX draft; formatting, comments, and tracked changes are not imported.',
+        content: `# Imported Draft\n\n<!-- Derived from ${draftSourcePath(canonicalDraft)} by gpd import text extraction. Original file remains unchanged under original/. -->\n\n${text.trim()}\n`,
+      };
+    } catch (error) {
+      return {
+        created: false,
+        artifact: 'DRAFT.md',
+        sourceBasis: draftSourcePath(canonicalDraft),
+        notes: `DOCX text extraction failed (${error.message}); original remains preserved for manual review.`,
+      };
+    }
+  }
+
+  return {
+    created: false,
+    artifact: 'DRAFT.md',
+    sourceBasis: draftSourcePath(canonicalDraft),
+    notes: 'Selected draft format is preserved but not text-extracted by this import path.',
+  };
+}
+
+function draftExtractionRows(draftExtraction) {
+  const status = draftExtraction.created ? 'Created' : 'Deferred';
+  return `| ${draftExtraction.artifact} | ${status} | ${draftExtraction.sourceBasis} | ${draftExtraction.notes} |`;
+}
+
+function importReport(input, copied, skipped, canonicalDraft, draftExtraction) {
   const inventory = importInventory(copied, skipped, input.maxFileBytes || maxDefaultFileBytes);
   const copiedRows = copied.length === 0
     ? '| - | - | - | - |'
@@ -343,6 +487,12 @@ Draft candidates:
 |-----------|-------|----------|----------|
 ${draftCandidateRows(inventory, canonicalDraft)}
 
+## Draft Extraction
+
+| Artifact | Status | Source Basis | Notes |
+|----------|--------|--------------|-------|
+${draftExtractionRows(draftExtraction)}
+
 ## Deferred Artifacts
 
 These are intentionally not generated during import unless explicitly requested.
@@ -413,6 +563,7 @@ function importPaper(input = {}) {
   const scan = walkSource(input.source, input.maxFileBytes || maxDefaultFileBytes);
   const sourceIsFile = fs.statSync(scan.source).isFile();
   const canonicalDraft = selectCanonicalDraft(scan.files, sourceIsFile);
+  const draftExtraction = planDraftExtraction(canonicalDraft);
   const inventory = importInventory(scan.files, scan.skipped, input.maxFileBytes || maxDefaultFileBytes);
 
   mkdirp(paperDir, dryRun);
@@ -442,13 +593,12 @@ function importPaper(input = {}) {
   );
   writeFile(
     path.join(paperDir, '.paper', 'IMPORT.md'),
-    importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft),
+    importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft, draftExtraction),
     dryRun,
   );
 
-  if (canonicalDraft && isTextDraftCandidate(canonicalDraft)) {
-    const draft = fs.readFileSync(canonicalDraft.abs, 'utf8');
-    writeFile(path.join(paperDir, '.paper', 'DRAFT.md'), draft, dryRun);
+  if (draftExtraction.created) {
+    writeFile(path.join(paperDir, '.paper', 'DRAFT.md'), draftExtraction.content, dryRun);
   }
 
   console.log(`${dryRun ? 'Dry run complete' : 'Imported paper'}: ${paperDir}`);
@@ -461,6 +611,7 @@ function importPaper(input = {}) {
     for (const warning of inventory.warnings) console.log(`- ${warning}`);
   }
   if (canonicalDraft) console.log(`canonical draft candidate: original/${canonicalDraft.rel}`);
+  if (draftExtraction.created) console.log(`draft extraction: .paper/DRAFT.md from ${draftExtraction.sourceBasis}`);
   return { paperDir, copied: scan.files.length, skipped: scan.skipped.length };
 }
 

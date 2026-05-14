@@ -30,6 +30,72 @@ function tempDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
 }
 
+function minimalDocxBuffer(paragraphs) {
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+    '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">',
+    '<w:body>',
+    ...paragraphs.map((paragraph) => `<w:p><w:r><w:t>${paragraph}</w:t></w:r></w:p>`),
+    '</w:body>',
+    '</w:document>',
+  ].join('');
+  const entries = [{ name: 'word/document.xml', data: Buffer.from(xml, 'utf8') }];
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  for (const entry of entries) {
+    const name = Buffer.from(entry.name, 'utf8');
+    const local = Buffer.alloc(30);
+    local.writeUInt32LE(0x04034b50, 0);
+    local.writeUInt16LE(20, 4);
+    local.writeUInt16LE(0, 6);
+    local.writeUInt16LE(0, 8);
+    local.writeUInt32LE(0, 10);
+    local.writeUInt32LE(0, 14);
+    local.writeUInt32LE(entry.data.length, 18);
+    local.writeUInt32LE(entry.data.length, 22);
+    local.writeUInt16LE(name.length, 26);
+    local.writeUInt16LE(0, 28);
+    localParts.push(local, name, entry.data);
+
+    const central = Buffer.alloc(46);
+    central.writeUInt32LE(0x02014b50, 0);
+    central.writeUInt16LE(20, 4);
+    central.writeUInt16LE(20, 6);
+    central.writeUInt16LE(0, 8);
+    central.writeUInt16LE(0, 10);
+    central.writeUInt32LE(0, 12);
+    central.writeUInt32LE(0, 16);
+    central.writeUInt32LE(entry.data.length, 20);
+    central.writeUInt32LE(entry.data.length, 24);
+    central.writeUInt16LE(name.length, 28);
+    central.writeUInt16LE(0, 30);
+    central.writeUInt16LE(0, 32);
+    central.writeUInt16LE(0, 34);
+    central.writeUInt16LE(0, 36);
+    central.writeUInt32LE(0, 38);
+    central.writeUInt32LE(offset, 42);
+    centralParts.push(central, name);
+
+    offset += local.length + name.length + entry.data.length;
+  }
+
+  const centralDir = Buffer.concat(centralParts);
+  const localFiles = Buffer.concat(localParts);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(0, 4);
+  eocd.writeUInt16LE(0, 6);
+  eocd.writeUInt16LE(entries.length, 8);
+  eocd.writeUInt16LE(entries.length, 10);
+  eocd.writeUInt32LE(centralDir.length, 12);
+  eocd.writeUInt32LE(localFiles.length, 16);
+  eocd.writeUInt16LE(0, 20);
+
+  return Buffer.concat([localFiles, centralDir, eocd]);
+}
+
 function findFiles(dir, predicate, results = []) {
   if (!fs.existsSync(dir)) return results;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -244,6 +310,38 @@ function testSingleMarkdownImportIsCanonicalDraft() {
   const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
   assert(report.includes('**Selected draft:** original/Directional_Outline_v0.5-latest.md'));
   assert(report.includes('Single imported Markdown/text file treated as the working draft.'));
+}
+
+function testImportDocxCanonicalDraftExtraction() {
+  const source = tempDir('gpd-import-docx-source');
+  const docxPath = path.join(source, 'current-draft.docx');
+  fs.writeFileSync(docxPath, minimalDocxBuffer([
+    'Approve the lightweight source register.',
+    'Evidence &amp; controls need one reviewable record.',
+  ]));
+
+  const target = tempDir('gpd-import-docx-target');
+  const output = run(['import', '--source', source, '--location', target, '--slug', 'docx-import']);
+  const paperDir = path.join(target, 'docx-import');
+  const meta = path.join(paperDir, '.paper');
+
+  assert(output.includes('canonical draft candidate: original/current-draft.docx'));
+  assert(output.includes('draft extraction: .paper/DRAFT.md from original/current-draft.docx'));
+  assert(fs.existsSync(path.join(paperDir, 'original', 'current-draft.docx')));
+  assert(fs.existsSync(path.join(meta, 'DRAFT.md')));
+
+  const draft = fs.readFileSync(path.join(meta, 'DRAFT.md'), 'utf8');
+  assert(draft.includes('# Imported Draft'));
+  assert(draft.includes('Derived from original/current-draft.docx by gpd import text extraction'));
+  assert(draft.includes('Approve the lightweight source register.'));
+  assert(draft.includes('Evidence & controls need one reviewable record.'));
+
+  const report = fs.readFileSync(path.join(meta, 'IMPORT.md'), 'utf8');
+  assert(report.includes('| current-draft.docx | original/current-draft.docx | draft | Preserved unchanged;'));
+  assert(report.includes('## Draft Extraction'));
+  assert(report.includes('| DRAFT.md | Created | original/current-draft.docx | Plain paragraph text extracted from the selected DOCX draft; formatting, comments, and tracked changes are not imported. |'));
+  assert(!report.includes(source));
+  assert(!report.includes(target));
 }
 
 function testImportDraftSelectionUsesFilenameSignalsBeforeMtime() {
@@ -716,6 +814,7 @@ testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();
 testImportClassifications();
 testSingleMarkdownImportIsCanonicalDraft();
+testImportDocxCanonicalDraftExtraction();
 testImportDraftSelectionUsesFilenameSignalsBeforeMtime();
 testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();
