@@ -468,7 +468,7 @@ Use `/gpd-outline --deep` when the imported paper is serious, researched, high-s
 
 Reader feedback is captured in `.paper/READER-FEEDBACK.md` before it becomes revision work. The artifact uses five signals: voice, register, audience fit, evidence, and ask clarity. External review never edits the draft directly. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, then asks how to proceed. `/gpd-revise` only applies feedback after you approve the proposed handling.
 
-For deterministic CLI collection, use `gpd review-external --review-file reviewer=path` or `--stdin --reviewer name`. This records external review text from files or stdin, updates state to the pending feedback-plan gate, and does not invoke provider CLIs yet.
+For deterministic CLI collection, use `gpd review-external --review-file reviewer=path` or `--stdin --reviewer name`. To invoke installed provider CLIs, use `gpd review-external --models claude,codex`. Provider invocation sends the generated review prompt to the selected CLI, so only use it with paper content that may be reviewed by that provider. Both paths update state to the pending feedback-plan gate and do not revise the draft.
 
 ## Artifact Contracts
 

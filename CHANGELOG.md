@@ -13,7 +13,7 @@ Initial working release.
 - Paper-scoped `.paper/` artifacts for project, persona, audience, brief, strategy, research, outline, draft, fact-check, review, feedback planning, revision, and export.
 - Install/update CLI for Claude and Codex runtimes.
 - Workspace CLI helpers: `gpd init`, `gpd import`, `gpd status`, `gpd validate`, `gpd list-audiences`, and `gpd list-profiles`.
-- External-review collection helper: `gpd review-external` writes captured review text to `.paper/EXTERNAL-REVIEWS.md`, creates a pending `.paper/FEEDBACK-PLAN.md`, and stops at the approval gate without invoking provider CLIs.
+- External-review helper: `gpd review-external` writes captured review text to `.paper/EXTERNAL-REVIEWS.md`, can invoke selected installed provider CLIs with `--models`, creates a pending `.paper/FEEDBACK-PLAN.md`, and stops at the approval gate without revising the draft.
 - Artifact validation for `EXTERNAL-REVIEWS.md`, including required prompt-summary and consensus-summary sections.
 - Safe import behavior that preserves source material under `original/`.
 - Import dry-run inventory, classification counts, warning output, file-size skip override, and deterministic canonical-draft candidate ranking.

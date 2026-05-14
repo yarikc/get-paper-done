@@ -49,6 +49,8 @@ Options:
   --source PATH                Source folder/file for import
   --max-file-bytes BYTES       Import skip threshold for individual source files
   --review-file REVIEWER=FILE  External review file to collect; repeatable
+  --models LIST                Invoke external reviewer CLIs, comma-separated
+  --timeout-ms MS              External reviewer timeout in milliseconds
   --reviewer NAME              Reviewer name for stdin review input
   --stdin                      Read one external review from stdin
   --paper DIR                  Existing paper directory for status/validate
@@ -67,6 +69,7 @@ Examples:
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
+  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex
   gpd export --paper ~/papers/metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
   gpd validate
@@ -128,6 +131,15 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--review-file') {
       args.reviewFiles.push(argv[i + 1]);
+      i += 1;
+    } else if (arg === '--models') {
+      args.models = argv[i + 1];
+      i += 1;
+    } else if (arg === '--timeout-ms') {
+      args.timeoutMs = Number(argv[i + 1]);
+      if (!Number.isFinite(args.timeoutMs) || args.timeoutMs < 1) {
+        throw new Error('--timeout-ms must be a positive number');
+      }
       i += 1;
     } else if (arg === '--reviewer') {
       args.reviewer = argv[i + 1];

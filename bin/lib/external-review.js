@@ -1,7 +1,9 @@
 'use strict';
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const {
   expandHome,
@@ -14,6 +16,15 @@ const {
   writeStateMarkdown,
 } = require('./state');
 
+const providerCommands = {
+  gemini: { command: 'gemini', args: ['-p', '-'] },
+  claude: { command: 'claude', args: ['-p', '-'] },
+  codex: { command: 'codex', args: ['exec', '--skip-git-repo-check', '-'] },
+  opencode: { command: 'opencode', args: ['run', '-'] },
+  qwen: { command: 'qwen', args: ['-'] },
+  cursor: { command: 'cursor', args: ['agent', '-p', '--mode', 'ask', '--trust'] },
+};
+
 function reviewerSlug(value, fallback = 'external-reviewer') {
   return String(value || fallback)
     .toLowerCase()
@@ -21,6 +32,14 @@ function reviewerSlug(value, fallback = 'external-reviewer') {
     .replace(/['"]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || fallback;
+}
+
+function parseModels(value) {
+  if (!value) return [];
+  return String(value)
+    .split(',')
+    .map((item) => reviewerSlug(item))
+    .filter(Boolean);
 }
 
 function parseReviewFileSpec(spec) {
@@ -70,6 +89,184 @@ function readReviewInputs(input = {}) {
   return reviews;
 }
 
+function executablePath(command, envPath = process.env.PATH || '') {
+  const pathExt = process.platform === 'win32'
+    ? (process.env.PATHEXT || '.EXE;.CMD;.BAT').split(';')
+    : [''];
+  for (const dir of envPath.split(path.delimiter)) {
+    if (!dir) continue;
+    for (const ext of pathExt) {
+      const candidate = path.join(dir, `${command}${ext}`);
+      try {
+        fs.accessSync(candidate, fs.constants.X_OK);
+        return candidate;
+      } catch (err) {
+        // Continue searching PATH.
+      }
+    }
+  }
+  return null;
+}
+
+function readPaperArtifact(paperDir, name) {
+  const filePath = path.join(paperDir, '.paper', name);
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath, 'utf8').trim();
+  return content || '[Empty artifact]';
+}
+
+function promptSection(paperDir, title, artifactNames) {
+  for (const artifactName of artifactNames) {
+    const content = readPaperArtifact(paperDir, artifactName);
+    if (content) return `## ${title}\n\n${content}`;
+  }
+  return `## ${title}\n\n[Not present]`;
+}
+
+function buildExternalReviewPrompt(paperDir) {
+  return [
+    '# External Paper Review Request',
+    '',
+    'You are reviewing a serious paper draft. Provide direct, skeptical, useful feedback.',
+    '',
+    promptSection(paperDir, 'Project', ['PROJECT.md']),
+    promptSection(paperDir, 'Persona', ['PERSONA.md']),
+    promptSection(paperDir, 'Audience', ['AUDIENCE.md']),
+    promptSection(paperDir, 'Brief', ['BRIEF.md']),
+    promptSection(paperDir, 'Research', ['RESEARCH.json', 'RESEARCH.md']),
+    promptSection(paperDir, 'Outline', ['OUTLINE.md']),
+    promptSection(paperDir, 'Draft', ['DRAFT.md']),
+    promptSection(paperDir, 'Fact Check', ['FACT-CHECK.md']),
+    promptSection(paperDir, 'Local Review', ['REVIEW.md']),
+    '## Review Instructions',
+    '',
+    'Review the draft for:',
+    '',
+    '1. Thesis clarity',
+    '2. Argument quality',
+    '3. Evidence strength and unsupported claims',
+    '4. Counterarguments and trade-offs',
+    '5. Audience fit',
+    '6. Persona consistency',
+    '7. Technical credibility',
+    '8. Mechanism quality',
+    '9. Decision usefulness',
+    '10. Style, structure, and concision',
+    '',
+    'Return markdown with:',
+    '',
+    '- Summary',
+    '- Highest-priority concerns, with severity HIGH/MEDIUM/LOW',
+    '- Specific suggested changes',
+    '- Feedback you would ignore or treat cautiously',
+    '- Questions the author must answer before revision',
+    '',
+  ].join('\n');
+}
+
+function writeTempPrompt(prompt, dryRun) {
+  if (dryRun) return null;
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gpd-review-'));
+  const promptPath = path.join(tempDir, 'prompt.md');
+  fs.writeFileSync(promptPath, prompt);
+  return { tempDir, promptPath };
+}
+
+function providerFailureReview(reviewer, source, content, status = 'failed') {
+  return {
+    reviewer,
+    source,
+    content,
+    status,
+  };
+}
+
+function invokeProvider(model, prompt, input = {}) {
+  const config = providerCommands[model];
+  if (!config) {
+    return providerFailureReview(
+      model,
+      `provider:${model}`,
+      `Provider "${model}" is not supported by this CLI slice. Supported providers: ${Object.keys(providerCommands).join(', ')}.`,
+      'unsupported',
+    );
+  }
+
+  const found = executablePath(config.command);
+  if (!found) {
+    return providerFailureReview(
+      model,
+      `provider:${model}`,
+      `Provider CLI "${config.command}" was not found on PATH.`,
+      'missing',
+    );
+  }
+
+  if (input.dryRun) {
+    return providerFailureReview(
+      model,
+      `provider:${model}`,
+      `Dry run: would invoke "${config.command} ${config.args.join(' ')}".`,
+      'planned',
+    );
+  }
+
+  const timeoutMs = input.timeoutMs || 120000;
+  const result = spawnSync(found, config.args, {
+    input: prompt,
+    encoding: 'utf8',
+    maxBuffer: 10 * 1024 * 1024,
+    timeout: timeoutMs,
+  });
+
+  if (result.error) {
+    const timedOut = result.error.code === 'ETIMEDOUT';
+    return providerFailureReview(
+      model,
+      `provider:${model}`,
+      timedOut
+        ? `Provider CLI "${config.command}" timed out after ${timeoutMs}ms.`
+        : `Provider CLI "${config.command}" failed: ${result.error.message}`,
+      'failed',
+    );
+  }
+
+  const stdout = (result.stdout || '').trim();
+  const stderr = (result.stderr || '').trim();
+  if (result.status !== 0) {
+    return providerFailureReview(
+      model,
+      `provider:${model}`,
+      [
+        `Provider CLI "${config.command}" exited with status ${result.status}.`,
+        stderr ? `stderr: ${stderr}` : '',
+        stdout ? `stdout: ${stdout}` : '',
+      ].filter(Boolean).join('\n\n'),
+      'failed',
+    );
+  }
+
+  return {
+    reviewer: model,
+    source: `provider:${model}`,
+    content: stdout,
+    status: stdout ? 'captured' : 'empty',
+  };
+}
+
+function invokeProviderReviews(input = {}, paperDir) {
+  const models = parseModels(input.models);
+  if (models.length === 0) return [];
+
+  const prompt = buildExternalReviewPrompt(paperDir);
+  const tempPrompt = writeTempPrompt(prompt, Boolean(input.dryRun));
+  try {
+    return models.map((model) => invokeProvider(model, prompt, input));
+  } finally {
+    if (tempPrompt) fs.rmSync(tempPrompt.tempDir, { recursive: true, force: true });
+  }
+}
+
 function firstNonEmptyLine(value) {
   return value
     .split(/\r?\n/)
@@ -99,6 +296,14 @@ function externalReviewsMarkdown({ reviews, paperDir, createdAt }) {
     ].join('\n')).join('\n');
   const captured = reviews.filter((review) => review.status === 'captured');
   const empty = reviews.filter((review) => review.status !== 'captured');
+  const sources = new Set(reviews.map((review) => review.source.split(':')[0]));
+  const modes = [];
+  if (sources.has('provider')) modes.push('installed provider CLIs');
+  if (sources.has('stdin')) modes.push('stdin');
+  if (reviews.some((review) => review.source !== 'stdin' && !review.source.startsWith('provider:'))) {
+    modes.push('provided files');
+  }
+  const modeText = modes.length > 0 ? modes.join(', ') : 'provided files or stdin';
 
   return `# External Reviews
 
@@ -108,7 +313,7 @@ function externalReviewsMarkdown({ reviews, paperDir, createdAt }) {
 
 ## Review Prompt Summary
 
-External review text was collected by \`gpd review-external\` from provided files or stdin. This CLI wrapper records captured feedback and creates a pending feedback plan; it does not invoke external model providers yet.
+External review text was collected by \`gpd review-external\` from ${modeText}. Provider invocation, when used, sends the generated review prompt to selected installed CLIs and captures their stdout/stderr. This command records captured feedback and creates a pending feedback plan; it does not revise the draft.
 
 ---
 
@@ -224,7 +429,10 @@ function reviewExternal(input = {}) {
   }
   const createdAt = new Date().toISOString();
   const dryRun = Boolean(input.dryRun);
-  const reviews = readReviewInputs(input);
+  const reviews = [
+    ...readReviewInputs(input),
+    ...invokeProviderReviews(input, paperDir),
+  ];
 
   writeFile(
     path.join(paperDir, '.paper', 'EXTERNAL-REVIEWS.md'),
@@ -242,6 +450,12 @@ function reviewExternal(input = {}) {
     paperDir,
     reviewsCaptured: reviews.filter((review) => review.status === 'captured').length,
     reviewsEmpty: reviews.filter((review) => review.status !== 'captured').length,
+    reviewsFailed: reviews.filter((review) => ['failed', 'missing', 'unsupported'].includes(review.status)).length,
+    reviewers: reviews.map((review) => ({
+      reviewer: review.reviewer,
+      source: review.source,
+      status: review.status,
+    })),
     externalReviewsPath: path.join(paperDir, '.paper', 'EXTERNAL-REVIEWS.md'),
     feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
     next: '/gpd-progress',
@@ -252,12 +466,17 @@ function printExternalReviewResult(result) {
   console.log(`paper: ${result.paperDir}`);
   console.log(`reviews captured: ${result.reviewsCaptured}`);
   console.log(`empty reviews: ${result.reviewsEmpty}`);
+  console.log(`review issues: ${result.reviewsFailed}`);
+  for (const review of result.reviewers) {
+    console.log(`- ${review.reviewer}: ${review.status} (${review.source})`);
+  }
   console.log(`external reviews: ${result.externalReviewsPath}`);
   console.log(`feedback plan: ${result.feedbackPlanPath}`);
   console.log(`next: ${result.next}`);
 }
 
 module.exports = {
+  buildExternalReviewPrompt,
   reviewExternal,
   printExternalReviewResult,
 };

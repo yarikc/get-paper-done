@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after adding the `gpd review-external` collection wrapper and preserving provider invocation as later work.
+Last changed: 2026-05-14 after adding the first `gpd review-external --models` provider-invocation slice.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -139,6 +139,7 @@ Plan-change rule:
 12. Completed: added reusable `READER-FEEDBACK.md` capture with five-signal template, artifact validation, review/revise/progress guidance, status routing, and documentation.
 13. Completed: added a messy synthetic import fixture with expected findings and regression coverage for preservation, source/review classification, canonical draft selection, no downstream artifact generation, blocked strategy routing, and source-sensitive semantic warning.
 14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `EXTERNAL-REVIEWS.md` artifact contract, and deliberately does not invoke external providers yet.
+15. Completed: added a first provider-invocation slice for `gpd review-external --models`, limited to installed CLI providers with known stdin command patterns, temp prompt generation, timeout/error capture, and no local HTTP server support yet.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -182,7 +183,8 @@ Next work should validate behavior under real use before adding more RFC surface
 24. Completed: added private-repo release/update guidance in `docs/RELEASE.md`, packaged it, added `npm run release:check`, and documented the release path in README.
 25. Completed: hardened `gpd import` with dry-run inventory, classification counts, copied-size reporting, warning output, `--max-file-bytes`, deterministic draft-candidate scoring, and richer `.paper/IMPORT.md` inventory.
 26. Completed: added `gpd review-external` collection wrapper for external review text, with tests for durable artifact output, pending feedback-plan routing, no local path leakage in the review artifact, the missing-draft failure path, and `EXTERNAL-REVIEWS.md` artifact validation.
-27. Next main-line slice: decide whether the next useful work is deeper import extraction or external-review provider invocation.
+27. Completed: added first-pass `gpd review-external --models` provider invocation for installed CLI providers, with tests using a fake provider binary and unsupported-provider capture.
+28. Next main-line slice: decide whether the next useful work is deeper import extraction or real-provider calibration for external review.
 
 ## Completed Design Simplifications
 
@@ -573,25 +575,22 @@ Success criteria:
 
 ### 5. External Review Runner
 
-The workflow documents model invocation, and the first CLI slice now collects already-produced review text.
+The workflow documents model invocation, and the CLI now supports collection plus a first installed-provider invocation path.
 
 Implemented:
 
 ```bash
 gpd review-external --review-file claude=/tmp/claude-review.md
 gpd review-external --stdin --reviewer claude
+gpd review-external --models claude,codex
 ```
 
 Needed:
 
-- CLI detection
 - current-runtime skip logic
-- timeouts
-- error capture
 - output normalization
-- temp prompt generation
-- `--models claude,gemini,codex` provider invocation
-- write `.paper/EXTERNAL-REVIEWS.md`
+- local HTTP server support for Ollama, LM Studio, and llama.cpp
+- broader real-provider calibration for command arguments, prompts, and timeouts
 
 Deliverables:
 

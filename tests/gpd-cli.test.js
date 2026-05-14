@@ -516,7 +516,7 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   assert(externalReviews.includes('**Source:** claude-review.md'));
   assert(externalReviews.includes('HIGH: Ask is unclear.'));
   assert(!externalReviews.includes(reviewDir));
-  assert(externalReviews.includes('does not invoke external model providers yet'));
+  assert(externalReviews.includes('does not revise the draft'));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('**Status:** Pending user approval'));
@@ -535,6 +535,87 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   assert.strictEqual(status.artifacts['EXTERNAL-REVIEWS.md'], true);
   assert.strictEqual(status.artifacts['FEEDBACK-PLAN.md'], true);
   assert.strictEqual(status.next, '/gpd-progress');
+}
+
+function testReviewExternalInvokesProviderModel() {
+  const dir = tempDir('gpd-review-external-provider-test');
+  run(['init', '--location', dir, '--slug', 'provider-review', '--title', 'Provider Review']);
+  const paperDir = path.join(dir, 'provider-review');
+  const meta = path.join(paperDir, '.paper');
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Draft Complete';
+  state.current_stage = 'Draft';
+  state.last_completed_stage = 'Draft';
+  state.suggested_next_command = '/gpd-review --deep';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+  fs.writeFileSync(path.join(meta, 'PROJECT.md'), '# Project\n\nProvider invocation test.\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const providerDir = tempDir('gpd-provider-bin');
+  const providerPath = path.join(providerDir, 'claude');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    'if grep -q "The ask is unclear"; then',
+    '  echo "HIGH: Provider saw draft context."',
+    'else',
+    '  echo "LOW: Missing draft context."',
+    'fi',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'claude', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert(output.includes('review issues: 0'));
+  assert(output.includes('- claude: captured (provider:claude)'));
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('## claude Review'));
+  assert(externalReviews.includes('**Source:** provider:claude'));
+  assert(externalReviews.includes('HIGH: Provider saw draft context.'));
+  assert(externalReviews.includes('installed provider CLIs'));
+  assert(!externalReviews.includes(providerDir));
+  assert(!externalReviews.includes('gpd-review-'));
+
+  const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
+  assert(feedbackPlan.includes('HIGH: Provider saw draft context.'));
+  assert(feedbackPlan.includes('Pending user approval'));
+}
+
+function testReviewExternalRecordsMissingProvider() {
+  const dir = tempDir('gpd-review-external-missing-provider-test');
+  run(['init', '--location', dir, '--slug', 'missing-provider', '--title', 'Missing Provider']);
+  const paperDir = path.join(dir, 'missing-provider');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nBody.\n');
+
+  const output = run([
+    'review-external',
+    '--paper',
+    paperDir,
+    '--models',
+    'definitely-missing-reviewer',
+    '--timeout-ms',
+    '5000',
+  ]);
+  assert(output.includes('reviews captured: 0'));
+  assert(output.includes('review issues: 1'));
+  assert(output.includes('- definitely-missing-reviewer: unsupported (provider:definitely-missing-reviewer)'));
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('Provider "definitely-missing-reviewer" is not supported by this CLI slice.'));
+  assert(externalReviews.includes('Supported providers: gemini, claude, codex, opencode, qwen, cursor'));
+  assert(fs.existsSync(path.join(meta, 'FEEDBACK-PLAN.md')));
 }
 
 function testReviewExternalRequiresDraft() {
@@ -609,6 +690,8 @@ testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();
 testReviewExternalCollectsReviewAndStopsAtApprovalGate();
+testReviewExternalInvokesProviderModel();
+testReviewExternalRecordsMissingProvider();
 testReviewExternalRequiresDraft();
 testMalformedInputs();
 

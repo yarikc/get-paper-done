@@ -382,7 +382,7 @@ Remaining tool maturity requires:
 
 - deeper import conversion and source-extraction helpers
 - local project install mode
-- external review provider invocation
+- broader external review provider calibration, including local HTTP servers
 - public or team distribution policy
 
 ## Acceptance Criteria
@@ -427,7 +427,7 @@ Tool acceptance:
 Immediate next work:
 
 1. Harden import further only where real use requires deeper document/source extraction or very-large-folder review.
-2. Extend `gpd review-external` from safe collection into provider invocation only after the manual workflow proves the right command shape.
+2. Calibrate `gpd review-external --models` against real providers and decide whether to add local HTTP server support.
 3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
 5. Revisit agents after real-use calibration.
