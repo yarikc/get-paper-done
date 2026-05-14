@@ -189,6 +189,8 @@ Import is preservation-first. GPD copies source material into `original/`, write
 
 If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import writes `.paper/DRAFT.md` from it. `.docx` import extracts plain paragraph text only and keeps the original file unchanged under `original/`.
 
+Import also records unverified source-reference candidates, such as URLs, DOIs, standards, and lines labeled as sources or references. Treat them as research/fact-check leads, not verified evidence.
+
 If the imported draft is publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run:
 
 ```text

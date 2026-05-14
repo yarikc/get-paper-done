@@ -128,6 +128,8 @@ CLI import records every draft candidate in `.paper/IMPORT.md` with a determinis
 
 CLI import can derive `.paper/DRAFT.md` from selected Markdown, plain text, or `.docx` canonical drafts. `.docx` handling is plain paragraph text extraction only: preserve the original `.docx` under `original/`, do not import formatting/comments/tracked changes, and record the extraction source and limitation in `.paper/IMPORT.md`.
 
+CLI import also detects likely source-reference candidates from Markdown, text, and `.docx` material: URLs, DOIs, named standards/source families, and lines labeled as sources or references. Record them in `.paper/IMPORT.md` as unverified triage candidates only. Do not create `RESEARCH.json` or treat the detected references as evidence during import.
+
 ## 5. Derive Minimal GPD Artifacts
 
 From original material, infer and write:
@@ -197,6 +199,7 @@ Write `.paper/IMPORT.md` with:
 - canonical draft selected
 - draft candidate ranking
 - draft extraction status and source basis
+- detected source-reference candidates and a clear note that they are unverified triage inputs
 - minimal artifacts created
 - imported research/reference material locations
 - imported outline/review material locations

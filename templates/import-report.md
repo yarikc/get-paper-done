@@ -64,6 +64,14 @@ Draft candidates:
 |----------|--------|--------------|-------|
 | DRAFT.md | [Created/Deferred] | [original/path or -] | [Copied text from Markdown/text draft, extracted plain paragraph text from DOCX, or deferred with reason] |
 
+## Detected Source References
+
+These are unverified import-time triage candidates. They are not evidence until `/gpd-research` or `/gpd-fact-check` verifies source relevance and claim support.
+
+| Path In original/ | Type | Candidate Reference | Import Use |
+|-------------------|------|---------------------|------------|
+| [path] | [url/doi/named_reference/source_line] | [candidate reference] | Triage only; verify during research or fact-check. |
+
 ## Derived Artifacts
 
 | Artifact | Status | Source Basis | Notes |

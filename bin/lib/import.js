@@ -201,6 +201,67 @@ function extractDocxText(filePath) {
   return textFromDocumentXml(documentXml);
 }
 
+function sourceDetectionText(file) {
+  if (/\.(md|txt)$/i.test(file.rel)) return fs.readFileSync(file.abs, 'utf8');
+  if (isDocxDraftCandidate(file)) return extractDocxText(file.abs);
+  return null;
+}
+
+function cleanSourceReference(value) {
+  return value
+    .replace(/\s+/g, ' ')
+    .replace(/[),.;:]+$/g, '')
+    .trim()
+    .slice(0, 180);
+}
+
+function detectSourceReferences(files, limit = 30) {
+  const results = [];
+  const seen = new Set();
+  const urlPattern = /\bhttps?:\/\/[^\s<>)\]]+/gi;
+  const doiPattern = /\b(?:doi:\s*)?10\.\d{4,9}\/[^\s<>)\]]+/gi;
+  const namedSourcePattern = /\b(?:NIST(?:\s+(?:SP|AI RMF|CSF|Cybersecurity Framework|GenAI Profile)\s*[A-Z0-9 .-]*)?|OWASP(?:\s+(?:LLM|Top|ASVS|SAMM|API|Application|Software)[A-Za-z0-9 .-]*)?|CISA|NCSC|SLSA|OpenSSF|ISO\/IEC\s+\d[\d:-]*|RFC\s+\d{3,5}|W3C|IETF|SEC|FDIC|OCC|Federal Reserve|Basel\s+[IVX]+)\b/g;
+
+  function add(file, type, reference) {
+    const cleaned = cleanSourceReference(reference);
+    if (!cleaned) return;
+    const key = `${file.rel}:${type}:${cleaned.toLowerCase()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    results.push({
+      rel: file.rel,
+      type,
+      reference: cleaned,
+    });
+  }
+
+  for (const file of files) {
+    let text = null;
+    try {
+      text = sourceDetectionText(file);
+    } catch (_error) {
+      text = null;
+    }
+    if (!text) continue;
+
+    for (const line of text.split(/\n+/)) {
+      const cleanLine = line.replace(/\s+/g, ' ').trim();
+      if (!cleanLine) continue;
+
+      for (const match of cleanLine.matchAll(urlPattern)) add(file, 'url', match[0]);
+      for (const match of cleanLine.matchAll(doiPattern)) add(file, 'doi', match[0]);
+      for (const match of cleanLine.matchAll(namedSourcePattern)) add(file, 'named_reference', match[0]);
+
+      const sourceLine = cleanLine.match(/^(?:source|sources|reference|references|standard|standards)\s*[:|-]\s*(.+)$/i);
+      if (sourceLine) add(file, 'source_line', sourceLine[1]);
+
+      if (results.length >= limit) return results;
+    }
+  }
+
+  return results;
+}
+
 function fileAge(file) {
   return fs.statSync(file.abs).mtimeMs;
 }
@@ -410,7 +471,17 @@ function draftExtractionRows(draftExtraction) {
   return `| ${draftExtraction.artifact} | ${status} | ${draftExtraction.sourceBasis} | ${draftExtraction.notes} |`;
 }
 
-function importReport(input, copied, skipped, canonicalDraft, draftExtraction) {
+function markdownTableCell(value) {
+  return String(value).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+}
+
+function sourceReferenceRows(sourceReferences) {
+  return sourceReferences
+    .map((item) => `| original/${item.rel.split(path.sep).join('/')} | ${item.type} | ${markdownTableCell(item.reference)} | Triage only; verify during research or fact-check. |`)
+    .join('\n') || '| - | - | - | - |';
+}
+
+function importReport(input, copied, skipped, canonicalDraft, draftExtraction, sourceReferences) {
   const inventory = importInventory(copied, skipped, input.maxFileBytes || maxDefaultFileBytes);
   const copiedRows = copied.length === 0
     ? '| - | - | - | - |'
@@ -493,6 +564,14 @@ ${draftCandidateRows(inventory, canonicalDraft)}
 |----------|--------|--------------|-------|
 ${draftExtractionRows(draftExtraction)}
 
+## Detected Source References
+
+These are unverified import-time triage candidates. They are not evidence until \`/gpd-research\` or \`/gpd-fact-check\` verifies source relevance and claim support.
+
+| Path In original/ | Type | Candidate Reference | Import Use |
+|-------------------|------|---------------------|------------|
+${sourceReferenceRows(sourceReferences)}
+
 ## Deferred Artifacts
 
 These are intentionally not generated during import unless explicitly requested.
@@ -564,6 +643,7 @@ function importPaper(input = {}) {
   const sourceIsFile = fs.statSync(scan.source).isFile();
   const canonicalDraft = selectCanonicalDraft(scan.files, sourceIsFile);
   const draftExtraction = planDraftExtraction(canonicalDraft);
+  const sourceReferences = detectSourceReferences(scan.files);
   const inventory = importInventory(scan.files, scan.skipped, input.maxFileBytes || maxDefaultFileBytes);
 
   mkdirp(paperDir, dryRun);
@@ -593,7 +673,7 @@ function importPaper(input = {}) {
   );
   writeFile(
     path.join(paperDir, '.paper', 'IMPORT.md'),
-    importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft, draftExtraction),
+    importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft, draftExtraction, sourceReferences),
     dryRun,
   );
 
@@ -612,6 +692,7 @@ function importPaper(input = {}) {
   }
   if (canonicalDraft) console.log(`canonical draft candidate: original/${canonicalDraft.rel}`);
   if (draftExtraction.created) console.log(`draft extraction: .paper/DRAFT.md from ${draftExtraction.sourceBasis}`);
+  if (sourceReferences.length > 0) console.log(`source references detected: ${sourceReferences.length}`);
   return { paperDir, copied: scan.files.length, skipped: scan.skipped.length };
 }
 

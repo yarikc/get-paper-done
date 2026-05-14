@@ -344,6 +344,43 @@ function testImportDocxCanonicalDraftExtraction() {
   assert(!report.includes(target));
 }
 
+function testImportDetectsSourceReferencesWithoutGeneratingResearch() {
+  const source = tempDir('gpd-import-source-reference-source');
+  fs.writeFileSync(path.join(source, 'draft.md'), [
+    '# Draft',
+    '',
+    'Sources: NIST SP 800-218 and https://csrc.nist.gov/publications/detail/sp/800-218/final',
+    'A related DOI is 10.6028/NIST.SP.800-218.',
+  ].join('\n'));
+  fs.writeFileSync(path.join(source, 'reference-notes.txt'), [
+    'References: OWASP LLM Top 10 and CISA guidance.',
+    'Background note that still needs verification.',
+  ].join('\n'));
+  fs.writeFileSync(path.join(source, 'supporting-draft.docx'), minimalDocxBuffer([
+    'OpenSSF and SLSA are mentioned as possible source families.',
+  ]));
+
+  const target = tempDir('gpd-import-source-reference-target');
+  const output = run(['import', '--source', source, '--location', target, '--slug', 'source-reference-import']);
+  const paperDir = path.join(target, 'source-reference-import');
+  const meta = path.join(paperDir, '.paper');
+
+  assert(output.includes('source references detected:'));
+  assert(!fs.existsSync(path.join(meta, 'RESEARCH.json')));
+  assert(!fs.existsSync(path.join(meta, 'RESEARCH.md')));
+
+  const report = fs.readFileSync(path.join(meta, 'IMPORT.md'), 'utf8');
+  assert(report.includes('## Detected Source References'));
+  assert(report.includes('These are unverified import-time triage candidates.'));
+  assert(report.includes('| original/draft.md | url | https://csrc.nist.gov/publications/detail/sp/800-218/final | Triage only; verify during research or fact-check. |'));
+  assert(report.includes('| original/draft.md | named_reference | NIST SP 800-218 | Triage only; verify during research or fact-check. |'));
+  assert(report.includes('| original/draft.md | doi | 10.6028/NIST.SP.800-218 | Triage only; verify during research or fact-check. |'));
+  assert(report.includes('| original/reference-notes.txt | named_reference | OWASP LLM Top 10 and CISA guidance | Triage only; verify during research or fact-check. |'));
+  assert(report.includes('| original/supporting-draft.docx | named_reference | OpenSSF | Triage only; verify during research or fact-check. |'));
+  assert(!report.includes(source));
+  assert(!report.includes(target));
+}
+
 function testImportDraftSelectionUsesFilenameSignalsBeforeMtime() {
   const source = tempDir('gpd-import-draft-ranking-source');
   fs.mkdirSync(path.join(source, 'drafts'));
@@ -815,6 +852,7 @@ testImportDryRunAndCopy();
 testImportClassifications();
 testSingleMarkdownImportIsCanonicalDraft();
 testImportDocxCanonicalDraftExtraction();
+testImportDetectsSourceReferencesWithoutGeneratingResearch();
 testImportDraftSelectionUsesFilenameSignalsBeforeMtime();
 testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();

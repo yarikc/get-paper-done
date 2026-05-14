@@ -374,13 +374,13 @@ gpd list-audiences
 gpd list-profiles
 ```
 
-`gpd init` creates `.paper/` setup artifacts and leaves strategy blocked until `/gpd-brief` confirms the paper direction. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, and preserves downstream research/outline/fact-check/review as separate stages.
+`gpd init` creates `.paper/` setup artifacts and leaves strategy blocked until `/gpd-brief` confirms the paper direction. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, extracts plain text from selected `.docx` canonical drafts, records unverified source-reference candidates for later triage, and preserves downstream research/outline/fact-check/review as separate stages.
 
 Tooling tests cover install/update/doctor, command-reference rewriting, backup correctness, init/import/status/validate, malformed input handling, and varied import classification. CI runs `npm run check`.
 
 Remaining tool maturity requires:
 
-- deeper import conversion and source-extraction helpers beyond first-pass `.docx` canonical-draft text extraction
+- deeper import conversion and source-extraction helpers beyond first-pass `.docx` canonical-draft text extraction and source-reference triage
 - local project install mode
 - broader external review provider calibration beyond Claude/Codex, including local HTTP servers
 - public or team distribution policy
@@ -407,9 +407,9 @@ Tool acceptance:
 
 ## Current Ratings
 
-- Overall project: 9.4/10 as a writing framework; 9.07/10 as an installable private-repo tool
+- Overall project: 9.4/10 as a writing framework; 9.08/10 as an installable private-repo tool
 - Framework design: 9.5/10
-- Installable tool maturity: 9.07/10
+- Installable tool maturity: 9.08/10
 - Documentation: 9.4/10
 - Test coverage: 9.8/10
 - Release readiness: 8.8/10
@@ -426,7 +426,7 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Harden import further only where real use requires citation/source extraction, PDF/spreadsheet handling, or very-large-folder review.
+1. Harden import further only where real use requires PDF/spreadsheet handling, source/version indexing, or very-large-folder review.
 2. Calibrate `gpd review-external --models` against Gemini/opencode and decide whether to add local HTTP server support.
 3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
