@@ -209,6 +209,24 @@ function testPendingFeedbackPlanBlocksAutomaticRevise() {
   assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
 }
 
+function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
+  const paperDir = completePaper('feedback-pending-stale-mtime');
+  const state = readState(paperDir);
+  state.feedback.feedback_plan_status = 'Pending user approval';
+  state.suggested_next_command = '/gpd-progress';
+  writeState(paperDir, state);
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
+    '# Feedback Handling Plan',
+    '',
+    '**Status:** Pending user approval',
+    '',
+  ].join('\n'));
+  touchArtifact(paperDir, 'FEEDBACK-PLAN.md', 20);
+  touchArtifact(paperDir, 'BRIEF.md', 30);
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
+}
+
 function testReaderFeedbackRoutesToReviewBeforeRevision() {
   const paperDir = completePaper('reader-feedback');
   writeArtifact(paperDir, 'READER-FEEDBACK.md', fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8'));
@@ -249,6 +267,7 @@ testFactCheckRecommendedResearchRoutesBackToResearch();
 testFactCheckRecommendedReviseRoutesToRevise();
 testReviewVerdictRoutesToRevise();
 testPendingFeedbackPlanBlocksAutomaticRevise();
+testPendingFeedbackPlanBlocksStaleMtimeRefresh();
 testReaderFeedbackRoutesToReviewBeforeRevision();
 testHandledReaderFeedbackDoesNotStaleExport();
 

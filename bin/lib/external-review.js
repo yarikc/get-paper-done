@@ -18,7 +18,7 @@ const {
 
 const providerCommands = {
   gemini: { command: 'gemini', args: ['-p', '-'] },
-  claude: { command: 'claude', args: ['-p', '-'] },
+  claude: { command: 'claude', args: ['-p'] },
   codex: { command: 'codex', args: ['exec', '--skip-git-repo-check', '-'] },
   opencode: { command: 'opencode', args: ['run', '-'] },
   qwen: { command: 'qwen', args: ['-'] },

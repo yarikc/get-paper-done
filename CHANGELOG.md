@@ -14,6 +14,8 @@ Initial working release.
 - Install/update CLI for Claude and Codex runtimes.
 - Workspace CLI helpers: `gpd init`, `gpd import`, `gpd status`, `gpd validate`, `gpd list-audiences`, and `gpd list-profiles`.
 - External-review helper: `gpd review-external` writes captured review text to `.paper/EXTERNAL-REVIEWS.md`, can invoke selected installed provider CLIs with `--models`, creates a pending `.paper/FEEDBACK-PLAN.md`, and stops at the approval gate without revising the draft.
+- Claude provider calibration for `gpd review-external --models claude`, including corrected `claude -p` stdin invocation.
+- Status routing now keeps pending feedback plans at `/gpd-progress` instead of letting stale mtimes bypass the approval gate.
 - Artifact validation for `EXTERNAL-REVIEWS.md`, including required prompt-summary and consensus-summary sections.
 - Safe import behavior that preserves source material under `original/`.
 - Import dry-run inventory, classification counts, warning output, file-size skip override, and deterministic canonical-draft candidate ranking.

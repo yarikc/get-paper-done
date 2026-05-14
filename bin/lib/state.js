@@ -315,6 +315,7 @@ function suggestedNext(state) {
   if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) return '/gpd-brief';
   if (!a['STRATEGY.md']) return '/gpd-brief';
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') return '/gpd-brief';
+  if (feedbackPlanPending(state)) return '/gpd-progress';
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
     || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
@@ -341,7 +342,6 @@ function suggestedNext(state) {
   ) {
     return '/gpd-review';
   }
-  if (feedbackPlanPending(state)) return '/gpd-progress';
 
   const verdict = reviewVerdict(state);
   if (verdict === 'Revise' || verdict === 'Rework') return '/gpd-revise';

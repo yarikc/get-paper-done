@@ -382,7 +382,7 @@ Remaining tool maturity requires:
 
 - deeper import conversion and source-extraction helpers
 - local project install mode
-- broader external review provider calibration, including local HTTP servers
+- broader external review provider calibration beyond Claude, including local HTTP servers
 - public or team distribution policy
 
 ## Acceptance Criteria
@@ -407,9 +407,9 @@ Tool acceptance:
 
 ## Current Ratings
 
-- Overall project: 9.4/10 as a writing framework; 9.0/10 as an installable private-repo tool
+- Overall project: 9.4/10 as a writing framework; 9.05/10 as an installable private-repo tool
 - Framework design: 9.5/10
-- Installable tool maturity: 9.0/10
+- Installable tool maturity: 9.05/10
 - Documentation: 9.4/10
 - Test coverage: 9.8/10
 - Release readiness: 8.8/10
@@ -427,7 +427,7 @@ Tool acceptance:
 Immediate next work:
 
 1. Harden import further only where real use requires deeper document/source extraction or very-large-folder review.
-2. Calibrate `gpd review-external --models` against real providers and decide whether to add local HTTP server support.
+2. Calibrate `gpd review-external --models` against Codex/Gemini/opencode and decide whether to add local HTTP server support.
 3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
 5. Revisit agents after real-use calibration.

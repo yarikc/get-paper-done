@@ -560,8 +560,10 @@ function testReviewExternalInvokesProviderModel() {
 
   const providerDir = tempDir('gpd-provider-bin');
   const providerPath = path.join(providerDir, 'claude');
+  const argsPath = path.join(providerDir, 'claude-args.txt');
   fs.writeFileSync(providerPath, [
     '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
     'if grep -q "The ask is unclear"; then',
     '  echo "HIGH: Provider saw draft context."',
     'else',
@@ -586,6 +588,7 @@ function testReviewExternalInvokesProviderModel() {
   assert(externalReviews.includes('installed provider CLIs'));
   assert(!externalReviews.includes(providerDir));
   assert(!externalReviews.includes('gpd-review-'));
+  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), '-p\n');
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('HIGH: Provider saw draft context.'));

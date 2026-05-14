@@ -9,10 +9,10 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.4/10 as a writing framework and 9.0/10 as an installable private-repo tool as of 2026-05-14
+- Current rating: 9.4/10 as a writing framework and 9.05/10 as an installable private-repo tool as of 2026-05-14
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, external-review collection, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper document/source extraction for imports, deeper semantic validation, external review provider invocation, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, external-review collection, Claude-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper document/source extraction for imports, deeper semantic validation, broader provider calibration/local HTTP support, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after adding the first `gpd review-external --models` provider-invocation slice.
+Last changed: 2026-05-14 after calibrating the Claude provider path and fixing pending-feedback routing precedence.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -140,6 +140,8 @@ Plan-change rule:
 13. Completed: added a messy synthetic import fixture with expected findings and regression coverage for preservation, source/review classification, canonical draft selection, no downstream artifact generation, blocked strategy routing, and source-sensitive semantic warning.
 14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `EXTERNAL-REVIEWS.md` artifact contract, and deliberately does not invoke external providers yet.
 15. Completed: added a first provider-invocation slice for `gpd review-external --models`, limited to installed CLI providers with known stdin command patterns, temp prompt generation, timeout/error capture, and no local HTTP server support yet.
+16. Completed: calibrated the real Claude CLI path on a synthetic public paper, fixed the command from `claude -p -` to `claude -p`, and added a regression assertion for the argument shape.
+17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-progress` before stale mtime refresh rules can send the paper backward.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -184,7 +186,8 @@ Next work should validate behavior under real use before adding more RFC surface
 25. Completed: hardened `gpd import` with dry-run inventory, classification counts, copied-size reporting, warning output, `--max-file-bytes`, deterministic draft-candidate scoring, and richer `.paper/IMPORT.md` inventory.
 26. Completed: added `gpd review-external` collection wrapper for external review text, with tests for durable artifact output, pending feedback-plan routing, no local path leakage in the review artifact, the missing-draft failure path, and `EXTERNAL-REVIEWS.md` artifact validation.
 27. Completed: added first-pass `gpd review-external --models` provider invocation for installed CLI providers, with tests using a fake provider binary and unsupported-provider capture.
-28. Next main-line slice: decide whether the next useful work is deeper import extraction or real-provider calibration for external review.
+28. Completed: calibrated `gpd review-external --models claude` against the real Claude CLI on a synthetic public paper and fixed pending feedback-plan routing precedence.
+29. Next main-line slice: decide whether the next useful work is deeper import extraction or additional real-provider calibration for Codex/Gemini/opencode.
 
 ## Completed Design Simplifications
 
@@ -453,7 +456,7 @@ Still needed:
 
 - richer `gpd import` classification and conversion support
 - local project install mode
-- external review provider invocation
+- broader external review provider calibration/local HTTP support
 - broader validation rules
 
 Deliverables:
@@ -590,7 +593,7 @@ Needed:
 - current-runtime skip logic
 - output normalization
 - local HTTP server support for Ollama, LM Studio, and llama.cpp
-- broader real-provider calibration for command arguments, prompts, and timeouts
+- broader real-provider calibration for Codex, Gemini, opencode, prompt size, and timeout behavior
 
 Deliverables:
 
