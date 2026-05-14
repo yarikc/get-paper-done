@@ -213,6 +213,30 @@ function testStateJsonSuggestedNextIsStatusSourceOfTruth() {
   assert.strictEqual(status.next, '/gpd-outline --lite');
 }
 
+function testNextCommandExplainsMissingRequiredArtifactBeforeSavedState() {
+  const dir = tempDir('gpd-next-missing-artifact-test');
+  run(['init', '--location', dir, '--slug', 'missing-research', '--title', 'Missing Research']);
+  const paperDir = path.join(dir, 'missing-research');
+  const statePath = path.join(paperDir, '.paper', 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Brief Complete';
+  state.current_stage = 'Brief';
+  state.last_completed_stage = 'Brief';
+  state.suggested_next_command = '/gpd-research';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  const next = JSON.parse(run(['next', '--paper', paperDir, '--json']));
+  assert.strictEqual(next.next, '/gpd-research');
+  assert(next.why.includes('Structured research is missing'));
+  assert(!next.why.includes('STATE.json saved'));
+}
+
 function testNextCommandShowsCompactGuidance() {
   const dir = tempDir('gpd-next-test');
   run(['init', '--location', dir, '--slug', 'guided-next', '--title', 'Guided Next']);
@@ -979,6 +1003,7 @@ testListCommands();
 testInitStatusValidate();
 testStateJsonIsStatusSourceOfTruth();
 testStateJsonSuggestedNextIsStatusSourceOfTruth();
+testNextCommandExplainsMissingRequiredArtifactBeforeSavedState();
 testNextCommandShowsCompactGuidance();
 testInitWithoutSlugUsesSubdirectory();
 testInitWithoutSlugOrLocationUsesSubdirectory();

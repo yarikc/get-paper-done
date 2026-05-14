@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after adding CLI-only next-action guidance and simplifying onboarding docs.
+Last changed: 2026-05-14 after running a temp public-source onboarding calibration and tightening `gpd next` explanations.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -149,6 +149,7 @@ Plan-change rule:
 22. Completed: calibrated the real opencode CLI path on a synthetic public paper, confirmed `opencode run -`, corrected Gemini args to `gemini -p ""` with stdin based on CLI help, and added regression assertions for both provider argument shapes. Gemini real capture remains blocked until local browser authentication is completed.
 23. Completed: added CLI-only `gpd next` as a compact read-only guide for the next command, why it is next, and what context to read or avoid, while keeping `/gpd-progress` as the Claude/Codex dashboard.
 24. Completed: simplified README and `docs/START-HERE.md` into onboarding/front-door docs and moved dense workflow mechanics behind reference links instead of front-loading them.
+25. Completed: ran a temporary public-source onboarding calibration paper using `gpd next` between stages. The command routed correctly, but the calibration exposed that explanations could prefer saved `STATE.json` over the more helpful missing-artifact reason; fixed by prioritizing missing research/outline/draft/fact-check/review explanations before saved-state fallback.
 
 ### Explicit Non-Goals For This Cycle
 

@@ -492,8 +492,6 @@ function explainNext(state) {
   if ((verdict === 'Revise' || verdict === 'Rework') && next === '/gpd-revise') return `REVIEW.md verdict is ${verdict}, so revision is the next controlled step.`;
   if (a['exports/FINAL.md'] && next === '/gpd-progress') return 'The export is current, so there is no required next writing stage.';
   if (a['exports/FINAL.md'] && next === '/gpd-export') return 'The draft, fact-check, or review changed after export, so FINAL.md needs regeneration.';
-  const nextFromState = savedNextCommand(state);
-  if (nextFromState === next) return 'STATE.json saved this as the next plausible command, and required upstream artifacts are present.';
   if (!a['RESEARCH.json'] && next === '/gpd-research') return 'Structured research is missing, so research is the next required artifact.';
   if (!a['OUTLINE.md'] && next.startsWith('/gpd-outline')) return 'The outline is missing, so structure should be created before drafting.';
   if (!a['DRAFT.md'] && next === '/gpd-draft') return 'The draft is missing, so drafting is the next stage.';
@@ -501,6 +499,8 @@ function explainNext(state) {
   if (!a['REVIEW.md'] && next.startsWith('/gpd-review')) return 'Review is missing for an existing draft.';
   if (a['FEEDBACK-PLAN.md'] && next === '/gpd-revise') return 'A feedback plan exists, so approved changes can be applied through revision.';
   if (next === '/gpd-export') return 'The paper has the required reviewed draft artifacts and is ready for export.';
+  const nextFromState = savedNextCommand(state);
+  if (nextFromState === next) return 'STATE.json saved this as the next plausible command, and required upstream artifacts are present.';
   return 'This is the earliest stage that appears necessary from the current artifact state.';
 }
 

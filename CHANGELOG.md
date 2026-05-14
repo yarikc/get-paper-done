@@ -19,6 +19,7 @@ Initial working release.
 - Opencode provider calibration for `gpd review-external --models opencode`, confirming `opencode run -` stdin invocation.
 - Gemini provider argument correction for `gpd review-external --models gemini`, using `gemini -p ""` with stdin; real capture requires local Gemini authentication.
 - `gpd next` compact guidance for the next recommended workflow action, why it is next, and what context to read or avoid.
+- `gpd next` now explains missing required artifacts before falling back to saved `STATE.json` recommendations.
 - Slimmer README and `docs/START-HERE.md` onboarding focused on first use, with dense mechanics left to reference docs.
 - Status routing now keeps pending feedback plans at `/gpd-progress` instead of letting stale mtimes bypass the approval gate.
 - Artifact validation for `EXTERNAL-REVIEWS.md`, including required prompt-summary and consensus-summary sections.
