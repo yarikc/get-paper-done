@@ -102,7 +102,10 @@ function testMessyImportPreservesButDoesNotOverInfer() {
   assert(report.includes('| review/reader-feedback.md | original/review/reader-feedback.md | review | Preserved unchanged;'));
   assert(report.includes('| outline/outline-fragment.md | original/outline/outline-fragment.md | outline | Preserved unchanged;'));
   assert(report.includes('**Selected draft:** original/drafts/current-draft.md'));
-  assert(report.includes('Most recently modified imported draft-like file.'));
+  assert(report.includes('Highest-ranked imported draft-like file using filename cues, version cues, location, and modified time.'));
+  assert(report.includes('| drafts/current-draft.md |'));
+  assert(report.includes('| drafts/old-draft.md |'));
+  assert(report.includes('- Multiple draft-like files found: confirm the selected canonical draft before drafting or review.'));
   assert(report.includes('Conditional note: if this imported draft is publication-sensitive'));
   assert(report.includes('Absolute local source and destination paths are intentionally omitted'));
   assert(!report.includes(source));

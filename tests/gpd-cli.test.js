@@ -172,6 +172,8 @@ function testImportDryRunAndCopy() {
   const dryTarget = tempDir('gpd-import-dry');
   const dryRun = run(['import', '--source', source, '--location', dryTarget, '--slug', 'imported', '--dry-run']);
   assert(dryRun.includes('would copy'));
+  assert(dryRun.includes('classifications: draft=1, research=1'));
+  assert(dryRun.includes('canonical draft candidate: original/draft.md'));
   assert(!fs.existsSync(path.join(dryTarget, 'imported')));
 
   const target = tempDir('gpd-import-target');
@@ -187,6 +189,10 @@ function testImportDryRunAndCopy() {
   assert(report.includes(`**Source label:** ${path.basename(source)}`));
   assert(report.includes('**Destination label:** imported'));
   assert(report.includes('Absolute local source and destination paths are intentionally omitted'));
+  assert(report.includes('| draft | 1 |'));
+  assert(report.includes('| research | 1 |'));
+  assert(report.includes('| draft.md |'));
+  assert(report.includes('| Candidate | Score | Modified | Selected |'));
   assert(!report.includes(source));
   assert(!report.includes(target));
 
@@ -238,6 +244,56 @@ function testSingleMarkdownImportIsCanonicalDraft() {
   const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
   assert(report.includes('**Selected draft:** original/Directional_Outline_v0.5-latest.md'));
   assert(report.includes('Single imported Markdown/text file treated as the working draft.'));
+}
+
+function testImportDraftSelectionUsesFilenameSignalsBeforeMtime() {
+  const source = tempDir('gpd-import-draft-ranking-source');
+  fs.mkdirSync(path.join(source, 'drafts'));
+  const latest = path.join(source, 'drafts', 'draft-latest.md');
+  const newerVersion = path.join(source, 'drafts', 'draft-v2.md');
+  fs.writeFileSync(latest, '# Latest\n\nThis should win.\n');
+  fs.writeFileSync(newerVersion, '# Version Two\n\nNewer but less explicit.\n');
+
+  const olderTime = new Date(Date.UTC(2026, 0, 1, 0, 0, 0));
+  const newerTime = new Date(Date.UTC(2026, 0, 3, 0, 0, 0));
+  fs.utimesSync(latest, olderTime, olderTime);
+  fs.utimesSync(newerVersion, newerTime, newerTime);
+
+  const target = tempDir('gpd-import-draft-ranking-target');
+  run(['import', '--source', source, '--location', target, '--slug', 'ranked-import']);
+  const paperDir = path.join(target, 'ranked-import');
+
+  assert.strictEqual(
+    fs.readFileSync(path.join(paperDir, '.paper', 'DRAFT.md'), 'utf8'),
+    '# Latest\n\nThis should win.\n',
+  );
+
+  const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
+  assert(report.includes('**Selected draft:** original/drafts/draft-latest.md'));
+  assert(report.includes('Highest-ranked imported draft-like file using filename cues, version cues, location, and modified time.'));
+  assert(report.includes('| drafts/draft-latest.md |'));
+  assert(report.includes('| drafts/draft-v2.md |'));
+  assert(report.includes('| drafts/draft-latest.md | 1550 |'));
+  assert(report.includes('| drafts/draft-v2.md | 1150 |'));
+}
+
+function testImportMaxFileBytesSkipsLargeFiles() {
+  const source = tempDir('gpd-import-max-file-source');
+  fs.writeFileSync(path.join(source, 'draft.md'), '# Draft\n');
+  fs.writeFileSync(path.join(source, 'large-reference.pdf'), 'x'.repeat(64));
+
+  const target = tempDir('gpd-import-max-file-target');
+  const output = run(['import', '--source', source, '--location', target, '--slug', 'max-file-import', '--max-file-bytes', '16']);
+  const paperDir = path.join(target, 'max-file-import');
+
+  assert(output.includes('files skipped: 1'));
+  assert(output.includes('Some files were skipped'));
+  assert(fs.existsSync(path.join(paperDir, 'original', 'draft.md')));
+  assert(!fs.existsSync(path.join(paperDir, 'original', 'large-reference.pdf')));
+
+  const report = fs.readFileSync(path.join(paperDir, '.paper', 'IMPORT.md'), 'utf8');
+  assert(report.includes('| large-reference.pdf | larger than 16 bytes |'));
+  assert(report.includes('- Some files were skipped: review skip reasons before assuming the import is complete.'));
 }
 
 function testImportWithoutSlugUsesSourceName() {
@@ -473,6 +529,8 @@ testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();
 testImportClassifications();
 testSingleMarkdownImportIsCanonicalDraft();
+testImportDraftSelectionUsesFilenameSignalsBeforeMtime();
+testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();

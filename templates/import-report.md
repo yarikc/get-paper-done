@@ -9,6 +9,24 @@
 
 [Short summary of what was imported and how it was classified.]
 
+Per-file skip threshold: [size].
+
+## Import Inventory
+
+| Classification | Count |
+|----------------|-------|
+| [draft/research/spec/review/outline/notes/asset/unclear] | [count] |
+
+Largest copied files:
+
+| Path | Classification | Size |
+|------|----------------|------|
+| [path] | [classification] | [size] |
+
+Warnings:
+
+- [Large import / multiple draft candidates / skipped files / none.]
+
 ## Original Material
 
 Original material was copied to:
@@ -32,7 +50,13 @@ original/
 ## Canonical Draft
 
 - **Selected draft:** [path]
-- **Selection rationale:** [why this was treated as current]
+- **Selection rationale:** [why this was treated as current, including filename cues, version cues, location, and modified time when multiple candidates exist]
+
+Draft candidates:
+
+| Candidate | Score | Modified | Selected |
+|-----------|-------|----------|----------|
+| [path] | [score] | [timestamp] | [yes/no] |
 
 ## Derived Artifacts
 

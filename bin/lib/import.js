@@ -122,6 +122,53 @@ function isTextDraftCandidate(file) {
   return /\.(md|txt)$/i.test(file.rel);
 }
 
+function fileAge(file) {
+  return fs.statSync(file.abs).mtimeMs;
+}
+
+function versionScore(value) {
+  const matches = [...value.matchAll(/(?:^|[^a-z0-9])v?(\d+(?:\.\d+){0,3})(?:[^a-z0-9]|$)/gi)];
+  if (matches.length === 0) return 0;
+  return Math.max(...matches.map((match) => {
+    const parts = match[1].split('.').map((part) => Number(part));
+    return parts.reduce((score, part, index) => score + (part * (100 ** (3 - index))), 0);
+  }));
+}
+
+function draftCandidateScore(file) {
+  const lower = file.rel.toLowerCase().split(path.sep).join('/');
+  const base = path.basename(lower);
+  let score = 0;
+
+  if (base.includes('latest')) score += 900;
+  if (base.includes('current')) score += 850;
+  if (base.includes('final')) score += 700;
+  if (base.includes('working')) score += 500;
+  if (base.includes('draft')) score += 400;
+  if (base.includes('paper')) score += 250;
+  if (lower.startsWith('drafts/') || lower.includes('/drafts/')) score += 150;
+  if (base.endsWith('.md') || base.endsWith('.txt')) score += 100;
+  if (base.endsWith('.docx')) score += 80;
+
+  const version = versionScore(base);
+  if (version > 0) score += Math.min(version, 500);
+
+  if (base.includes('old') || base.includes('previous') || base.includes('archive')) score -= 600;
+  if (lower.startsWith('archive/') || lower.includes('/archive/')) score -= 500;
+  if (lower.startsWith('versions/') || lower.includes('/versions/')) score -= 200;
+
+  return score;
+}
+
+function draftSelectionRationale(ranked) {
+  const winner = ranked[0];
+  const next = ranked[1];
+  const base = 'Highest-ranked imported draft-like file using filename cues, version cues, location, and modified time.';
+  if (!next) return base;
+  if (winner.score !== next.score) return `${base} Winning score ${winner.score}; next score ${next.score}.`;
+  return `${base} Scores tied at ${winner.score}; newest modified time won.`;
+}
+
 function selectCanonicalDraft(files, sourceIsFile = false) {
   const candidates = files.filter((file) => file.classification === 'draft');
   if (candidates.length === 0) {
@@ -133,20 +180,94 @@ function selectCanonicalDraft(files, sourceIsFile = false) {
     }
     return null;
   }
-  return candidates
-    .map((file) => ({ file, mtime: fs.statSync(file.abs).mtimeMs }))
-    .sort((a, b) => b.mtime - a.mtime)
-    .map((candidate) => ({
-      ...candidate.file,
-      selectionRationale: 'Most recently modified imported draft-like file.',
-    }))[0];
+  const ranked = candidates
+    .map((file) => ({ file, score: draftCandidateScore(file), mtime: fileAge(file) }))
+    .sort((a, b) => (
+      b.score - a.score
+      || b.mtime - a.mtime
+      || a.file.rel.localeCompare(b.file.rel)
+    ));
+  return {
+    ...ranked[0].file,
+    selectionRationale: draftSelectionRationale(ranked),
+  };
 }
 
 function reportPathLabel(value) {
   return path.basename(path.resolve(expandHome(value)));
 }
 
+function byClassification(files) {
+  return files.reduce((counts, file) => {
+    counts[file.classification] = (counts[file.classification] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function bytesLabel(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function importInventory(files, skipped, maxBytes) {
+  const counts = byClassification(files);
+  const totalBytes = files.reduce((sum, file) => sum + file.size, 0);
+  const draftCandidates = files.filter((file) => file.classification === 'draft');
+  const largest = [...files].sort((a, b) => b.size - a.size).slice(0, 5);
+  const warnings = [];
+
+  if (files.length > 75) warnings.push('Large import set: review the copied file list before running downstream stages.');
+  if (draftCandidates.length > 1) warnings.push('Multiple draft-like files found: confirm the selected canonical draft before drafting or review.');
+  if (skipped.length > 0) warnings.push('Some files were skipped: review skip reasons before assuming the import is complete.');
+
+  return {
+    counts,
+    totalBytes,
+    draftCandidates,
+    largest,
+    warnings,
+    maxBytes,
+  };
+}
+
+function classificationRows(inventory) {
+  const order = ['draft', 'research', 'outline', 'review', 'spec', 'notes', 'asset', 'unclear'];
+  return order
+    .filter((name) => inventory.counts[name])
+    .map((name) => `| ${name} | ${inventory.counts[name]} |`)
+    .join('\n') || '| - | 0 |';
+}
+
+function classificationSummary(inventory) {
+  const order = ['draft', 'research', 'outline', 'review', 'spec', 'notes', 'asset', 'unclear'];
+  return order
+    .filter((name) => inventory.counts[name])
+    .map((name) => `${name}=${inventory.counts[name]}`)
+    .join(', ') || 'none';
+}
+
+function largestRows(inventory) {
+  return inventory.largest
+    .map((file) => `| ${file.rel.split(path.sep).join('/')} | ${file.classification} | ${bytesLabel(file.size)} |`)
+    .join('\n') || '| - | - | - |';
+}
+
+function draftCandidateRows(inventory, canonicalDraft) {
+  return inventory.draftCandidates
+    .map((file) => {
+      const selected = canonicalDraft && file.rel === canonicalDraft.rel ? 'yes' : 'no';
+      return `| ${file.rel.split(path.sep).join('/')} | ${draftCandidateScore(file)} | ${new Date(fileAge(file)).toISOString()} | ${selected} |`;
+    })
+    .join('\n') || '| - | - | - | - |';
+}
+
+function warningRows(inventory) {
+  return inventory.warnings.map((warning) => `- ${warning}`).join('\n') || '- None.';
+}
+
 function importReport(input, copied, skipped, canonicalDraft) {
+  const inventory = importInventory(copied, skipped, input.maxFileBytes || maxDefaultFileBytes);
   const copiedRows = copied.length === 0
     ? '| - | - | - | - |'
     : copied.map((file) => `| ${file.rel} | original/${file.rel.split(path.sep).join('/')} | ${file.classification} | Preserved unchanged; ${file.size} bytes |`).join('\n');
@@ -171,7 +292,25 @@ function importReport(input, copied, skipped, canonicalDraft) {
 
 ## Import Summary
 
-Imported ${copied.length} file(s), skipped ${skipped.length} file(s). Original material was preserved unchanged under \`original/\`.
+Imported ${copied.length} file(s), skipped ${skipped.length} file(s), total copied size ${bytesLabel(inventory.totalBytes)}. Original material was preserved unchanged under \`original/\`.
+
+Per-file skip threshold: ${bytesLabel(inventory.maxBytes)}.
+
+## Import Inventory
+
+| Classification | Count |
+|----------------|-------|
+${classificationRows(inventory)}
+
+Largest copied files:
+
+| Path | Classification | Size |
+|------|----------------|------|
+${largestRows(inventory)}
+
+Warnings:
+
+${warningRows(inventory)}
 
 ## Original Material
 
@@ -197,6 +336,12 @@ ${skippedRows}
 
 - **Selected draft:** ${canonicalDraft ? `original/${canonicalDraft.rel.split(path.sep).join('/')}` : 'None selected'}
 - **Selection rationale:** ${canonicalDraft ? canonicalDraft.selectionRationale : 'No obvious draft-like file was found.'}
+
+Draft candidates:
+
+| Candidate | Score | Modified | Selected |
+|-----------|-------|----------|----------|
+${draftCandidateRows(inventory, canonicalDraft)}
 
 ## Deferred Artifacts
 
@@ -268,6 +413,7 @@ function importPaper(input = {}) {
   const scan = walkSource(input.source, input.maxFileBytes || maxDefaultFileBytes);
   const sourceIsFile = fs.statSync(scan.source).isFile();
   const canonicalDraft = selectCanonicalDraft(scan.files, sourceIsFile);
+  const inventory = importInventory(scan.files, scan.skipped, input.maxFileBytes || maxDefaultFileBytes);
 
   mkdirp(paperDir, dryRun);
   mkdirp(path.join(paperDir, 'original'), dryRun);
@@ -308,6 +454,12 @@ function importPaper(input = {}) {
   console.log(`${dryRun ? 'Dry run complete' : 'Imported paper'}: ${paperDir}`);
   console.log(`files copied: ${scan.files.length}`);
   console.log(`files skipped: ${scan.skipped.length}`);
+  console.log(`copied size: ${bytesLabel(inventory.totalBytes)}`);
+  console.log(`classifications: ${classificationSummary(inventory)}`);
+  if (inventory.warnings.length > 0) {
+    console.log('warnings:');
+    for (const warning of inventory.warnings) console.log(`- ${warning}`);
+  }
   if (canonicalDraft) console.log(`canonical draft candidate: original/${canonicalDraft.rel}`);
   return { paperDir, copied: scan.files.length, skipped: scan.skipped.length };
 }

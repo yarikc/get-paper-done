@@ -373,13 +373,13 @@ gpd list-audiences
 gpd list-profiles
 ```
 
-`gpd init` creates `.paper/` setup artifacts and leaves strategy blocked until `/gpd-brief` confirms the paper direction. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and preserves downstream research/outline/fact-check/review as separate stages.
+`gpd init` creates `.paper/` setup artifacts and leaves strategy blocked until `/gpd-brief` confirms the paper direction. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, and preserves downstream research/outline/fact-check/review as separate stages.
 
 Tooling tests cover install/update/doctor, command-reference rewriting, backup correctness, init/import/status/validate, malformed input handling, and varied import classification. CI runs `npm run check`.
 
 Remaining tool maturity requires:
 
-- deeper import classification and conversion helpers
+- deeper import conversion and source-extraction helpers
 - local project install mode
 - external review runner
 - public or team distribution policy
@@ -425,7 +425,7 @@ Tool acceptance:
 
 Immediate next work:
 
-1. Harden import based on real use, especially canonical draft selection and richer source extraction.
+1. Harden import further only where real use requires deeper document/source extraction or very-large-folder review.
 2. Wrap external review only after the manual workflow proves the right command shape.
 3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.

@@ -433,7 +433,9 @@ cd ~/papers/lifecycle-framework
 gpd status
 ```
 
-The first command is optional but recommended when importing existing work. `--dry-run` previews the destination and copied files without writing anything. The second command runs the same import for real.
+The first command is optional but recommended when importing existing work. `--dry-run` previews the destination, copied files, skipped files, classification counts, warnings, and canonical draft candidate without writing anything. The second command runs the same import for real.
+
+Use `--max-file-bytes <bytes>` when you want to lower or raise the per-file skip threshold for unusually large import folders.
 
 Or from the AI runtime:
 
@@ -444,6 +446,8 @@ Or from the AI runtime:
 Import is preservation-first. It creates a new paper directory, copies original material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and presents a post-import menu.
 
 Import intentionally does not generate `RESEARCH.json`, `RESEARCH.md`, `OUTLINE.md`, `FACT-CHECK.md`, or `REVIEW.md` by default. Research, outline, fact-check, and review remain separate stages so you can clear context between them.
+
+When multiple draft-like files exist, import ranks candidates using filename cues, version cues, location, and modified time. Confirm the selected canonical draft in `.paper/IMPORT.md` before treating the imported draft as authoritative.
 
 Useful post-import next steps:
 

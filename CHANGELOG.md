@@ -14,6 +14,7 @@ Initial working release.
 - Install/update CLI for Claude and Codex runtimes.
 - Workspace CLI helpers: `gpd init`, `gpd import`, `gpd status`, `gpd validate`, `gpd list-audiences`, and `gpd list-profiles`.
 - Safe import behavior that preserves source material under `original/`.
+- Import dry-run inventory, classification counts, warning output, file-size skip override, and deterministic canonical-draft candidate ranking.
 - Strategy gate with normalized `Strategy Blockers`.
 - Curated reusable audience personas and reusable author profile support.
 - Specialized agents for strategy, research, outlining, drafting, audience review, opposition review, fact-checking, and editing.

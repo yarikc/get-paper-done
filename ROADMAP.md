@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.4/10 as a writing framework and 8.9/10 as an installable private-repo tool as of 2026-05-14
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, richer import helpers, deeper semantic validation, external review wrapping, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper document/source extraction for imports, deeper semantic validation, external review wrapping, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after completing private-repo release hardening and preserving import hardening/external-review wrapping as the next main-line choice.
+Last changed: 2026-05-14 after completing import preview/draft-ranking hardening and preserving deeper import extraction/external-review wrapping as the next main-line choice.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -179,7 +179,8 @@ Next work should validate behavior under real use before adding more RFC surface
 22. Completed: validated the reusable control/governance guidance against `examples/public-ai-control-baseline`, a smaller AI pilot control-baseline decision memo. The artifacts now show the control check in brief, outline, fact-check, and review, while the final memo stays concise and passes semantic validation without prose-saturation warnings.
 23. Completed: validated that governance/control guidance does not leak into ordinary non-governance examples by adding regression checks for the clean strategy paper, lite update, and short quantitative memo.
 24. Completed: added private-repo release/update guidance in `docs/RELEASE.md`, packaged it, added `npm run release:check`, and documented the release path in README.
-25. Next main-line slice: decide whether the next useful work is import hardening or external-review wrapping.
+25. Completed: hardened `gpd import` with dry-run inventory, classification counts, copied-size reporting, warning output, `--max-file-bytes`, deterministic draft-candidate scoring, and richer `.paper/IMPORT.md` inventory.
+26. Next main-line slice: decide whether the next useful work is deeper import extraction or external-review wrapping.
 
 ## Completed Design Simplifications
 
@@ -220,6 +221,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Backfilled `examples/public-ai-control-baseline` as the second governance/control calibration point, including process-burden, governed-object, evidence-currency, refresh-trigger, decision-rule, standards-framing, and fact-check coverage without expanding the memo into a white paper.
 - Added regression coverage to keep governance/control scaffolding out of non-governance examples, protecting ordinary strategy papers, lite updates, and quantitative memos from over-application.
 - Added `docs/RELEASE.md`, `npm run release:check`, README release/update guidance, and package-hygiene coverage for the release guide.
+- Hardened `gpd import` preview and reporting: dry-run now shows classification counts, copied size, warnings, and canonical draft candidate; `.paper/IMPORT.md` now records import inventory, largest files, warnings, and draft-candidate ranking; CLI supports `--max-file-bytes`.
 
 ---
 
@@ -261,15 +263,14 @@ Success criteria:
 
 ### 2. Harden The Import Workflow
 
-Current import flow is conceptually strong and has first-pass fixture coverage, including messy-folder classification and single-draft recovery. Remaining work is deeper extraction/conversion and better large-folder guidance.
+Current import flow is conceptually strong and has first-pass fixture coverage, including messy-folder classification, single-draft recovery, dry-run inventory, deterministic draft ranking, file-size skip control, and richer import reporting. Remaining work is deeper extraction/conversion and user-facing review of very large imports.
 
 Needed:
 
-- define canonical draft selection rules more concretely
-- add size limits and explicit user confirmation for large folders
+- add explicit user confirmation or review workflow for very large folders
 - add import classification categories
 - add handling for `.docx`, `.pdf`, Markdown, plain text, diagrams, and spreadsheets
-- specify how to preserve version history and choose latest draft
+- specify how to preserve and index richer version history beyond the copied file list
 
 Deliverables:
 
@@ -475,17 +476,20 @@ Implemented:
 
 - recursive copy with ignore rules
 - max file size skip
+- CLI `--max-file-bytes` override
 - binary file handling
 - dry-run mode
+- dry-run classification counts, total copied size, warnings, and canonical draft candidate
 - no overwrite without confirmation
 - `.paper/IMPORT.md` generation
+- deterministic draft-candidate scoring by filename cues, version cues, location, and modified time
+- import-report inventory with classification counts, largest files, warnings, and draft-candidate table
 
 Still needed:
 
-- richer import manifest details
 - `.docx`, `.pdf`, spreadsheet, and diagram conversion/indexing helpers
-- canonical draft ranking beyond filename and modified time
-- large folder summary before copy
+- richer citation/source extraction
+- explicit large-folder confirmation/review workflow
 
 Deliverables:
 
@@ -646,7 +650,7 @@ Success criteria:
 
 ## Priority Order
 
-1. Harden import based on real use, especially large-folder preview, canonical draft selection, and richer source extraction.
+1. Harden import further only for deeper document/source extraction or very-large-folder review.
 2. Wrap external review runner after the manual workflow proves the command shape.
 3. Continue one-by-one agent calibration from real paper trials.
 4. Add new examples only for new failure modes, especially multi-audience or external-review cases.

@@ -44,6 +44,7 @@ Options:
   --slug NAME                  Paper directory name
   --title TITLE                Paper title for init/import
   --source PATH                Source folder/file for import
+  --max-file-bytes BYTES       Import skip threshold for individual source files
   --paper DIR                  Existing paper directory for status/validate
   --path FILE                  Artifact path for validate-artifact
   --json                       Print JSON for list/status/validate
@@ -110,6 +111,12 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--source') {
       args.source = argv[i + 1];
+      i += 1;
+    } else if (arg === '--max-file-bytes') {
+      args.maxFileBytes = Number(argv[i + 1]);
+      if (!Number.isFinite(args.maxFileBytes) || args.maxFileBytes < 1) {
+        throw new Error('--max-file-bytes must be a positive number');
+      }
       i += 1;
     } else if (arg === '--paper') {
       args.paper = argv[i + 1];

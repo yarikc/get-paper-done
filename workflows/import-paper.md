@@ -124,6 +124,8 @@ If multiple current draft candidates exist, pick the most likely latest version 
 
 If uncertain, ask the user which draft is canonical.
 
+CLI import records every draft candidate in `.paper/IMPORT.md` with a deterministic score. Filename cues such as `latest`, `current`, `final`, `working`, version numbers, and `drafts/` location are positive signals. `old`, `previous`, `archive/`, and `versions/` are negative signals. Modified time is a tie-breaker, not the only selection rule. If more than one draft candidate exists, treat the selected draft as provisional until the user confirms it.
+
 ## 5. Derive Minimal GPD Artifacts
 
 From original material, infer and write:
@@ -187,7 +189,11 @@ Write `.paper/IMPORT.md` with:
 - destination path
 - files copied
 - files skipped
+- classification counts
+- largest copied files
+- import warnings
 - canonical draft selected
+- draft candidate ranking
 - minimal artifacts created
 - imported research/reference material locations
 - imported outline/review material locations
