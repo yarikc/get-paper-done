@@ -65,6 +65,34 @@ function assertClassification(config, expected) {
   assert.deepStrictEqual(config.classification, expected);
 }
 
+function assertNoGovernanceControlScaffold(exampleDir) {
+  const paperDir = path.join(exampleDir, '.paper');
+  const artifacts = [
+    'BRIEF.md',
+    'OUTLINE.md',
+    'DRAFT.md',
+    'FACT-CHECK.md',
+    'REVIEW.md',
+    'exports/FINAL.md',
+  ];
+  const combined = artifacts
+    .filter((artifact) => fs.existsSync(path.join(paperDir, artifact)))
+    .map((artifact) => fs.readFileSync(path.join(paperDir, artifact), 'utf8'))
+    .join('\n');
+
+  for (const forbidden of [
+    '## Process Burden Check',
+    '## Control / Governance Proposal Check',
+    '## Governance / Control Claim Checks',
+    'Governed object',
+    'durable record',
+    'pilot_control_record_id',
+    'Human-by-exception model',
+  ]) {
+    assert(!combined.includes(forbidden), `${exampleDir} should not include governance-control scaffold: ${forbidden}`);
+  }
+}
+
 function testExamplesValidateCleanly() {
   for (const exampleDir of examplePaperDirs()) {
     const validation = JSON.parse(run(['validate', '--paper', exampleDir, '--semantic', '--json']));
@@ -87,6 +115,7 @@ function testExamplesRouteToProgressAfterNormalizedCheckout() {
 
 function testDataProductsExampleHasNoTrialOnlyArtifacts() {
   assert(!fs.existsSync(path.join(dataProductsExampleDir, '.paper', 'FRICTION-LOG.md')));
+  assertNoGovernanceControlScaffold(dataProductsExampleDir);
 
   const config = JSON.parse(fs.readFileSync(path.join(dataProductsExampleDir, '.paper', 'config.json'), 'utf8'));
   assert.strictEqual(config.mode, 'standard');
@@ -134,6 +163,7 @@ function testDataProductsExampleHasNoTrialOnlyArtifacts() {
 function testWeeklyPlatformUpdateKeepsLiteShape() {
   const exampleDir = path.join(examplesRoot, 'weekly-platform-update');
   assert(fs.existsSync(path.join(exampleDir, '.paper')));
+  assertNoGovernanceControlScaffold(exampleDir);
   assert(!fs.existsSync(path.join(exampleDir, '.paper', 'RESEARCH.json')));
   assert(!fs.existsSync(path.join(exampleDir, '.paper', 'RESEARCH.md')));
   assert(!fs.existsSync(path.join(exampleDir, '.paper', 'FACT-CHECK.md')));
@@ -193,6 +223,7 @@ function testPlatformReviewCycleMetricsKeepsQuantitativeShape() {
   assert(fs.existsSync(path.join(quantitativeExampleDir, '.paper', 'RESEARCH.json')));
   assert(fs.existsSync(path.join(quantitativeExampleDir, '.paper', 'FACT-CHECK.md')));
   assert(fs.existsSync(path.join(quantitativeExampleDir, 'EXPECTED-FINDINGS.md')));
+  assertNoGovernanceControlScaffold(quantitativeExampleDir);
 
   const validation = JSON.parse(run(['validate', '--paper', quantitativeExampleDir, '--semantic', '--json']));
   assert.strictEqual(validation.ok, true);

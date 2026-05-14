@@ -177,7 +177,8 @@ Next work should validate behavior under real use before adding more RFC surface
 20. Completed: promoted `software-supply-chain-evidence-pack` into the showcase feedback-loop example by adding `READER-FEEDBACK.md`, `FEEDBACK-PLAN.md`, `EXPECTED-FINDINGS.md`, README coverage, and regression assertions for the backward-routing quality fix.
 21. Completed: codified the reusable control/governance-paper lesson into workflow guidance, templates, agents, rubrics, and consistency tests. The guidance is prompt/artifact guidance first, not a new validator: when a paper proposes controls, standards, gates, reviews, or required records, it must define the governed object early, explain why cited standards matter, name the required artifact, state whether evidence is static or current, name refresh triggers, explain how evidence changes decisions, and handle process burden with automation/observed evidence plus human-by-exception where appropriate.
 22. Completed: validated the reusable control/governance guidance against `examples/public-ai-control-baseline`, a smaller AI pilot control-baseline decision memo. The artifacts now show the control check in brief, outline, fact-check, and review, while the final memo stays concise and passes semantic validation without prose-saturation warnings.
-23. Next main-line slice: validate that the new guidance does not leak into ordinary non-governance papers, then decide whether the next useful work is import hardening, release hardening, or external-review wrapping.
+23. Completed: validated that governance/control guidance does not leak into ordinary non-governance examples by adding regression checks for the clean strategy paper, lite update, and short quantitative memo.
+24. Next main-line slice: decide whether the next useful work is import hardening, release hardening, or external-review wrapping.
 
 ## Completed Design Simplifications
 
@@ -216,6 +217,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Added `docs/SEMANTIC-CALIBRATION.md` to record why the prose-saturation validator allows isolated load-bearing definition lists while still treating repeated decorative parallel prose as a quality risk.
 - Codified governance/control-paper guidance across brief, outline, draft, fact-check, review, agents, and rubrics so future papers define the governed object, durable record, evidence currency, refresh triggers, decision rule, standards framing, and process-burden answer before prose polish.
 - Backfilled `examples/public-ai-control-baseline` as the second governance/control calibration point, including process-burden, governed-object, evidence-currency, refresh-trigger, decision-rule, standards-framing, and fact-check coverage without expanding the memo into a white paper.
+- Added regression coverage to keep governance/control scaffolding out of non-governance examples, protecting ordinary strategy papers, lite updates, and quantitative memos from over-application.
 
 ---
 

@@ -34,6 +34,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 - `examples/software-supply-chain-evidence-pack` now demonstrates `READER-FEEDBACK.md` and `FEEDBACK-PLAN.md` end to end: low evidence/ask-clarity scores triggered a plan, approval gate, backward routing to research, and a stronger final memo.
 - Control/governance-paper guidance is now reusable across brief, outline, draft, fact-check, review, agents, and rubrics: papers that propose controls, gates, standards, reviews, records, or operating mechanisms must define the governed object, durable record, evidence currency, refresh triggers, decision rule, standards framing, and process-burden answer.
 - `examples/public-ai-control-baseline` now acts as a second compact governance calibration point, proving the same checks can apply without turning a decision memo into a white paper.
+- Non-governance examples now have regression coverage proving the governance/control scaffold does not leak into ordinary strategy, update, or quantitative memo shapes.
 - Workflow consistency tests reduce the risk of broken command/workflow/template/agent references.
 - Scenario routing tests now protect backward movement when upstream artifacts change after downstream work exists.
 - Content-aware routing tests now cover fact-check recommended next action, review revise/rework verdicts, reader feedback routing, and pending feedback-plan approval.
@@ -61,7 +62,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 
 ## Main Risks
 
-1. Real-paper behavior now has seven examples plus targeted fixtures, but still not enough breadth. Live public-source claim-support metadata is represented in two compact examples, and the latest calibration review has been turned into reusable control/governance guidance across prompts and templates. It has now been checked against a second compact governance memo, but it still should not become deterministic semantic validation until a broader paper shape exposes a concrete, reliably detectable failure.
+1. Real-paper behavior now has seven examples plus targeted fixtures, but still not enough breadth. Live public-source claim-support metadata is represented in two compact examples, and the latest calibration review has been turned into reusable control/governance guidance across prompts and templates. It has now been checked against a second compact governance memo and guarded against leaking into three non-governance examples, but it still should not become deterministic semantic validation until a broader paper shape exposes a concrete, reliably detectable failure.
 2. Import classification is useful but still shallow. Current import preserves and catalogs messy material better, but does not deeply extract `.docx`, PDFs, spreadsheets, diagrams, citations, or version history.
 3. Semantic validation is improving from actual example feedback. It now catches several deterministic quality failures, but the gates still cannot judge full argument quality, citation fidelity, or prose distinctiveness. The current prose-saturation calibration intentionally allows load-bearing definitional enumerations; see [SEMANTIC-CALIBRATION.md](SEMANTIC-CALIBRATION.md).
 4. State enum policy is now intentionally tighter and centrally tested. That prevents typo drift, but future blocker/action additions must go through the shared contract and workflow consistency tests.
@@ -71,7 +72,7 @@ The installable tool is near 9/10 but still not finished as a distributable prod
 
 ## Recommended Next Work
 
-1. Validate the governance/control guidance on a non-governance decision memo or strategy paper to make sure the checks do not leak into ordinary papers.
+1. Decide the next main-line slice among import hardening, release hardening, and external-review wrapping.
 2. Use the calibration review to decide whether `START-HERE` needs a richer guided walkthrough.
 3. Harden `gpd import` around large-folder previews, document extraction, citation extraction, and richer manifest details.
 4. Add richer fixture workspaces only when they represent a new failure mode, not just more routing signals.
