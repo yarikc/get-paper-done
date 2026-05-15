@@ -15,6 +15,7 @@ const installMappings = [
   ['commands', ['commands']],
   ['workflows', ['get-paper-done', 'workflows']],
   ['templates', ['get-paper-done', 'templates']],
+  ['contexts', ['get-paper-done', 'contexts']],
   ['references', ['get-paper-done', 'references']],
   ['profiles', ['get-paper-done', 'profiles']],
   ['audiences', ['get-paper-done', 'audiences']],
@@ -176,6 +177,7 @@ function doctor(input = {}) {
     path.join(target, 'commands', 'gpd', 'outline.md'),
     path.join(target, 'get-paper-done', 'workflows', 'new-paper.md'),
     path.join(target, 'get-paper-done', 'templates', 'outline.md'),
+    path.join(target, 'get-paper-done', 'contexts', 'README.md'),
     path.join(target, 'get-paper-done', 'references', 'writing-artifacts.md'),
     path.join(target, 'agents', 'paper-outliner.md'),
   ];

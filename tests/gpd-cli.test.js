@@ -9,6 +9,7 @@ const { execFileSync, spawnSync } = require('child_process');
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
 const { slugify } = require('../bin/lib/common');
+const { requiredGrillDecisionKeys } = require('../bin/lib/contracts');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -119,7 +120,9 @@ function testInstallerInstallDoctorRewriteAndBackup() {
   run(['install', 'codex', '--target', target]);
 
   const commandFile = path.join(target, 'commands', 'gpd', 'new-paper.md');
+  const contextsReadme = path.join(target, 'get-paper-done', 'contexts', 'README.md');
   assert(fs.existsSync(commandFile));
+  assert(fs.existsSync(contextsReadme));
   const commandContent = fs.readFileSync(commandFile, 'utf8');
   assert(commandContent.includes(`@${target}/get-paper-done/workflows/new-paper.md`));
   assert(!commandContent.includes('@{{GPD_RUNTIME_ROOT}}'));
@@ -160,7 +163,8 @@ function testInitStatusValidate() {
   assert.strictEqual(status.stateSource, 'STATE.json');
   assert.strictEqual(status.strategyStatus, 'Revise Before Drafting');
   assert.strictEqual(status.primaryBlocker, 'thesis_weak');
-  assert.strictEqual(status.next, '/gpd-brief');
+  assert.strictEqual(status.next, '/gpd-grill');
+  assert.strictEqual(status.machineState.grill.status, 'Not Started');
 
   const validation = spawnSync(process.execPath, [gpd, 'validate', '--paper', paperDir], {
     cwd: repoRoot,
@@ -173,6 +177,12 @@ function testInitStatusValidate() {
   assert.strictEqual(semanticValidation.status, 1);
   assert(!semanticValidation.stdout.includes('STATE.md: Status'));
   assert(!semanticValidation.stdout.includes('STATE.md: Suggested next command'));
+}
+
+function completeGrill(state) {
+  state.grill.status = 'Complete';
+  state.grill.completion_basis = 'test fixture resolved required grill decisions';
+  state.grill.resolved_decisions = requiredGrillDecisionKeys;
 }
 
 function testStateJsonIsStatusSourceOfTruth() {
@@ -202,6 +212,7 @@ function testStateJsonSuggestedNextIsStatusSourceOfTruth() {
   state.last_completed_stage = 'Research';
   state.suggested_next_command = '/gpd-outline --lite';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -224,6 +235,7 @@ function testNextCommandExplainsMissingRequiredArtifactBeforeSavedState() {
   state.last_completed_stage = 'Brief';
   state.suggested_next_command = '/gpd-research';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -243,15 +255,15 @@ function testNextCommandShowsCompactGuidance() {
   const paperDir = path.join(dir, 'guided-next');
 
   const output = run(['next', '--paper', paperDir]);
-  assert(output.includes('next: /gpd-brief'));
-  assert(output.includes('why: The strategy gate is Revise Before Drafting'));
+  assert(output.includes('next: /gpd-grill'));
+  assert(output.includes('why: The mandatory grill gate is incomplete'));
   assert(output.includes('clear context:'));
   assert(!output.includes('artifacts:'));
 
   const json = JSON.parse(run(['next', '--paper', paperDir, '--json']));
-  assert.strictEqual(json.next, '/gpd-brief');
-  assert(json.why.includes('strategy gate'));
-  assert.strictEqual(json.context.clear_context, 'No, unless the current chat is noisy.');
+  assert.strictEqual(json.next, '/gpd-grill');
+  assert(json.why.includes('mandatory grill gate'));
+  assert.strictEqual(json.context.clear_context, 'No, unless the import/intake chat is noisy.');
 }
 
 function testInitWithoutSlugUsesSubdirectory() {
@@ -553,6 +565,7 @@ function testExportCommandWritesFinalAndState() {
   state.last_completed_stage = 'Review';
   state.suggested_next_command = '/gpd-export';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -614,6 +627,7 @@ function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
   state.last_completed_stage = 'Review';
   state.suggested_next_command = '/gpd-export';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -690,6 +704,7 @@ function testExportCommandHonorsStatusRouting() {
   state.last_completed_stage = 'Review';
   state.suggested_next_command = '/gpd-export';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -721,6 +736,7 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   state.last_completed_stage = 'Draft';
   state.suggested_next_command = '/gpd-review --deep';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -778,6 +794,7 @@ function testReviewExternalInvokesProviderModel() {
   state.last_completed_stage = 'Draft';
   state.suggested_next_command = '/gpd-review --deep';
   state.blocked_by = [];
+  completeGrill(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';

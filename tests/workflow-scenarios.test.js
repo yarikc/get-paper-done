@@ -8,6 +8,7 @@ const { execFileSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
+const { requiredGrillDecisionKeys } = require('../bin/lib/contracts');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -57,6 +58,9 @@ function completePaper(slug) {
   state.last_completed_stage = 'Review';
   state.suggested_next_command = '/gpd-export';
   state.blocked_by = [];
+  state.grill.status = 'Complete';
+  state.grill.completion_basis = 'test fixture resolved required grill decisions';
+  state.grill.resolved_decisions = requiredGrillDecisionKeys;
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -114,6 +118,16 @@ function testBriefChangeRoutesBackToResearch() {
   touchArtifact(paperDir, 'BRIEF.md', 20);
 
   assert.strictEqual(statusJson(paperDir).next, '/gpd-research');
+}
+
+function testGrillContextChangeRoutesBackToBrief() {
+  const paperDir = completePaper('context-refresh');
+  writeArtifact(paperDir, 'PAPER-CONTEXT.md', '# Paper Context\n\n## Language\n\nClarified term.\n');
+  writeArtifact(paperDir, 'DECISIONS.md', '# Paper Decision Records\n\n## Decision Index\n\n| ID | Status | Decision | Why It Matters |\n|----|--------|----------|----------------|\n');
+  touchArtifact(paperDir, 'PAPER-CONTEXT.md', 20);
+  touchArtifact(paperDir, 'DECISIONS.md', 21);
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-brief');
 }
 
 function testStrategyChangeRoutesBackToResearch() {
@@ -258,6 +272,7 @@ testCleanCompletePaperUsesStateSuggestion();
 testExportedPaperRoutesToProgress();
 testStaleExportRoutesBackToExport();
 testBriefChangeRoutesBackToResearch();
+testGrillContextChangeRoutesBackToBrief();
 testStrategyChangeRoutesBackToResearch();
 testResearchChangeRoutesBackToOutline();
 testOutlineChangeRoutesBackToDraft();

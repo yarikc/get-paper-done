@@ -10,7 +10,7 @@ The architecture has three boundaries:
 
 ```text
 framework package
-  commands, workflows, agents, templates, references, reusable profiles/audiences, CLI
+  commands, workflows, agents, templates, references, reusable contexts/profiles/audiences, CLI
 
 installed runtime
   copied prompt assets under Claude or Codex runtime directories

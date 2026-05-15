@@ -2,7 +2,7 @@
 
 Get Paper Done turns serious AI-assisted writing into a staged paper workflow.
 
-Instead of one long chat, each paper becomes a folder with durable files for author voice, audience, brief, strategy, research, outline, draft, fact-checking, review, feedback, and state. You can clear context, switch between Claude and Codex, and still know what should happen next.
+Instead of one long chat, each paper becomes a folder with durable files for author voice, audience, resolved language, paper decisions, brief, strategy, research, outline, draft, fact-checking, review, feedback, and state. You can clear context, switch between Claude and Codex, and still know what should happen next.
 
 ## First, See The Output
 
@@ -77,6 +77,7 @@ For a first clean paper, the usual path is:
 ```text
 /gpd-persona
 /gpd-audience
+/gpd-grill
 /gpd-brief
 /gpd-research
 /gpd-outline
@@ -97,6 +98,7 @@ You can also create the paper interactively from the AI runtime:
 
 ```text
 create or import
+  -> grill
   -> brief
   -> strategy gate
   -> research
@@ -125,6 +127,23 @@ Use these on a first paper:
 
 Start with one primary audience. Add secondary audiences only when the paper truly needs them.
 
+## Grill Before Briefing
+
+Use this before `/gpd-brief` for every new or imported paper:
+
+```text
+/gpd-grill
+```
+
+It asks one question at a time until the core decisions are resolved, then records two artifacts:
+
+- `PAPER-CONTEXT.md`: what key terms mean in this paper.
+- `DECISIONS.md`: why important thesis, audience, scope, and positioning choices were made.
+
+This protects both fresh papers and imports from the same failure mode: turning a fuzzy idea into a polished but weak brief too early.
+
+You can run `/gpd-grill` again later. Treat it as the paper's brainstorming and ambiguity-removal tool: if review, drafting, research, or your own read exposes a fuzzy term, weak thesis, wrong reader, scope problem, or missing non-goal, re-grill that branch. After context or decisions change, refresh `/gpd-brief` before continuing downstream.
+
 ## Reader Feedback
 
 When a person or another model reviews the paper, capture that read before revising:
@@ -147,6 +166,8 @@ gpd next
 ```
 
 Import is preservation-first. GPD copies source material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and leaves research, outline, fact-check, and review as separate stages.
+
+Run `/gpd-grill` before `/gpd-brief` after import. The CLI should route you there automatically.
 
 If the imported draft is publication-sensitive and contains factual, current, technical, market, regulatory, numerical, or citation-dependent claims, run:
 

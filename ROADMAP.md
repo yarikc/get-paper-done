@@ -2,17 +2,17 @@
 
 Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
 
-Last reviewed: 2026-05-14
+Last reviewed: 2026-05-15
 
 This file is the forward plan. The current ratings, risk snapshot, and review findings live in [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). When the review changes, update that snapshot first and adjust this roadmap only when the plan itself changes.
 
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.4/10 as a writing framework and 9.10/10 as an installable private-repo tool as of 2026-05-14
+- Current rating: 9.45/10 as a writing framework and 9.15/10 as an installable private-repo tool as of 2026-05-15
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/opencode-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, Gemini real-capture calibration after authentication, local HTTP provider support, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/opencode-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, Gemini real-capture calibration after authentication, local HTTP provider support, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -107,7 +107,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-14 after running a temp public-source onboarding calibration and tightening `gpd next` explanations.
+Last changed: 2026-05-15 after making `/gpd-grill` a mandatory machine-readable pre-brief gate, adding re-entry routing for later ambiguity, and adding sanitized reusable context packs.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 

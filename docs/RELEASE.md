@@ -99,7 +99,7 @@ Manual release checks:
 The package must include:
 
 - CLI binaries and support libraries.
-- Commands, workflows, agents, templates, references, profiles, audiences, docs, and examples.
+- Commands, workflows, agents, templates, references, contexts, profiles, audiences, docs, and examples.
 - License, README, changelog, release guide, and package metadata.
 
 The package must exclude:

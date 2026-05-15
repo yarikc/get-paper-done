@@ -20,6 +20,7 @@ Get Paper Done solves this by making writing context durable, staged, and inspec
 - Preserve imported source material unchanged.
 - Capture author persona and audience context before drafting.
 - Force strategic clarity before expensive research or drafting.
+- Force author-intent clarity before compressing imported drafts into a brief.
 - Convert research into structured evidence, not source volume.
 - Maintain explicit context-break stages to prevent quality degradation.
 - Support curated reusable audience personas.
@@ -59,6 +60,8 @@ The primary user is a senior technology executive writing serious papers where:
 
 The default reusable author profile is `profiles/head-data-ai-architecture.md`, but every paper uses a local `.paper/PERSONA.md` as authoritative context.
 
+Reusable cross-paper context packs live in `contexts/`. They are optional, sanitized hints for recurring language, proof standards, and decision patterns. They never override a paper's local `.paper/PAPER-CONTEXT.md` or `.paper/DECISIONS.md`, and promotion into `contexts/` requires explicit user approval.
+
 ## Classification Model
 
 Each paper stores normalized classification in `.paper/config.json`:
@@ -69,7 +72,7 @@ Each paper stores normalized classification in `.paper/config.json`:
 - `complexity`: `light`, `standard`, or `deep`
 - `audience_shape`: `single`, `prioritized_multi`, or `hybrid`
 
-Users can describe the paper in plain language. `/gpd-new-paper` and `/gpd-brief` normalize that language into enum values so later stages can calibrate evidence burden, outline shape, draft behavior, review standards, and fact-check intensity. Legacy labels such as blog, white paper, newsletter, board paper, or architecture paper are display/context labels, not workflow purpose values.
+Users can describe the paper in plain language. `/gpd-grill` resolves the real paper job, reader, thesis, proof standard, terms, scope, and non-goals before `/gpd-brief` normalizes the paper into enum values. Later stages use those values to calibrate evidence burden, outline shape, draft behavior, review standards, and fact-check intensity. Legacy labels such as blog, white paper, newsletter, board paper, or architecture paper are display/context labels, not workflow purpose values.
 
 ## Workspace Model
 
@@ -83,6 +86,8 @@ Each paper lives in its own directory:
     PROJECT.md
     PERSONA.md
     AUDIENCE.md
+    PAPER-CONTEXT.md
+    DECISIONS.md
     BRIEF.md
     STRATEGY.md
     STATE.md
@@ -110,6 +115,8 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `PROJECT.md` | Paper identity, format, publishing context, source policy, broad constraints |
 | `PERSONA.md` | Paper-scoped author voice, authority posture, tone boundaries |
 | `AUDIENCE.md` | Selected readers, priority order, conflict rule, objections, proof standard |
+| `PAPER-CONTEXT.md` | Paper-specific language contract: canonical terms, relationships, and resolved ambiguities |
+| `DECISIONS.md` | Paper decision records for hard-to-reconstruct thesis, audience, scope, source, and positioning choices |
 | `BRIEF.md` | Thesis, claims, opposing view, reader promise, scope, definition of done |
 | `STRATEGY.md` | Strategic readiness gate, paper job, posture, decision usefulness, scope |
 | `RESEARCH.json` | Canonical source registry, claim-support metadata, evidence matrix, synthesis, contradictions, gaps |
@@ -134,6 +141,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-new-paper` | Create a new paper workspace |
 | `/gpd-import-paper` | Import an existing paper and preserve originals |
 | `/gpd-progress` | Report state, artifact health, suggested next command |
+| `/gpd-grill` | Mandatory pre-brief interrogation and later re-entry workflow for paper intent, terminology, audience, thesis, proof standard, scope, and non-goals |
 | `/gpd-brief` | Create or refine thesis, claims, and paper brief |
 | `/gpd-research` | Infer questions, present plan, write structured evidence |
 | `/gpd-outline` | Create argument-aware outline; Lite for early/short/import triage, Deep for serious/researched/high-stakes papers |
@@ -164,6 +172,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 
 ```text
 new/import
+  -> grill
   -> brief
   -> strategy gate
   -> research
@@ -175,6 +184,8 @@ new/import
   -> export
 ```
 
+`/gpd-grill` can also be invoked later. If an author or agent finds unresolved ambiguity after brief, research, outline, draft, review, or feedback, the workflow updates `PAPER-CONTEXT.md` and `DECISIONS.md` without rewriting downstream artifacts directly. When those artifacts are newer than `BRIEF.md`, status routing sends the paper back to `/gpd-brief` so the formal paper contract catches up before downstream work resumes.
+
 ### Import Flow
 
 Import is preservation-first:
@@ -184,13 +195,14 @@ Import is preservation-first:
 3. Copy relevant existing material into `original/`.
 4. Create minimal `.paper/` artifacts.
 5. Catalog existing research, versions, specs, reviews, and drafts in `IMPORT.md`.
-6. Present post-import choices:
+6. Route to `/gpd-grill` before `/gpd-brief` to recover imported thesis, audience, narrative spine, desired outcome, proof standard, scope, and key terms.
+7. Present post-import choices:
    - `/gpd-research`
    - `/gpd-outline --lite` for structure triage, or `/gpd-outline --deep` for serious/researched/high-stakes papers
    - `/gpd-review --external`
    - conditional note: use `/gpd-fact-check --risk-scan` before external review or export if the imported draft is already publication-sensitive and contains material factual, current, technical, market, regulatory, numerical, or citation-dependent claims
 
-Import must not generate `RESEARCH.json`, `OUTLINE.md`, `FACT-CHECK.md`, or `REVIEW.md` by default. It must create a lightweight `STRATEGY.md` gate from imported context; if that gate blocks, post-import next action is `/gpd-brief` unless the user explicitly overrides.
+Import must not generate `RESEARCH.json`, `OUTLINE.md`, `FACT-CHECK.md`, or `REVIEW.md` by default. It must create lightweight setup artifacts and route to `/gpd-grill` before `/gpd-brief`; imported prose is evidence of possible intent, not confirmed intent.
 
 ### Strategy Gate
 
@@ -319,22 +331,27 @@ Existing curated personas are never used blindly. The workflow summarizes and su
 - current stage
 - last completed stage
 - blockers
+- grill completion state
 - feedback approval state
 - post-import choices when applicable
 - suggested next command
 
 Suggested next command precedence:
 
-1. Missing setup artifacts and blocking strategy statuses route back to `/gpd-brief`.
-2. Upstream artifacts newer than downstream artifacts route backward for incremental refresh: brief/strategy to research, research to outline, outline to draft, draft to fact-check, and fact-check to review.
-3. A saved `STATE.json` `suggested_next_command` is used only when it is structurally plausible. It cannot skip required artifacts, such as exporting without a draft and review or drafting without an outline.
-4. Fact-check and review outcome fields can route backward: fact-check recommended next action may send the paper to research or revise, and review verdicts of `Revise` or `Rework` route to revision.
-5. Pending feedback plans pause at progress/status until the user approves, revises, or ignores the plan.
-6. If no saved command can be trusted and no content outcome applies, artifact presence determines the next command.
+1. Missing setup artifacts route to setup repair.
+2. Incomplete `STATE.json.grill` routes to `/gpd-grill`; `/gpd-brief` cannot proceed until the required grill decisions are complete.
+3. `PAPER-CONTEXT.md` or `DECISIONS.md` newer than `BRIEF.md` routes to `/gpd-brief`, allowing later re-grill sessions to update the formal brief before downstream work resumes.
+4. Blocking strategy statuses route back to `/gpd-brief` after grill completion.
+5. Upstream artifacts newer than downstream artifacts route backward for incremental refresh: brief/strategy to research, research to outline, outline to draft, draft to fact-check, and fact-check to review.
+6. A saved `STATE.json` `suggested_next_command` is used only when it is structurally plausible. It cannot skip required artifacts, such as exporting without a draft and review or drafting without an outline.
+7. Fact-check and review outcome fields can route backward: fact-check recommended next action may send the paper to research or revise, and review verdicts of `Revise` or `Rework` route to revision.
+8. Pending feedback plans pause at progress/status until the user approves, revises, or ignores the plan.
+9. If no saved command can be trusted and no content outcome applies, artifact presence determines the next command.
 
 Blocking conditions:
 
 - missing persona/audience/brief
+- incomplete grill gate
 - strategy block, including the primary blocker from `STRATEGY.md`
 - missing evidence when claims require support
 - pending feedback-plan approval
@@ -352,7 +369,7 @@ gpd doctor claude
 gpd doctor codex
 ```
 
-The installer copies commands, workflows, agents, audiences, profiles, templates, and references into a Claude or Codex runtime. Source command files use `@{{GPD_RUNTIME_ROOT}}`; command files are transformed at install time so workflow references point at the selected runtime root.
+The installer copies commands, workflows, agents, audiences, profiles, templates, contexts, and references into a Claude or Codex runtime. Source command files use `@{{GPD_RUNTIME_ROOT}}`; command files are transformed at install time so workflow references point at the selected runtime root.
 
 Update behavior:
 
@@ -375,7 +392,7 @@ gpd list-audiences
 gpd list-profiles
 ```
 
-`gpd init` creates `.paper/` setup artifacts and leaves strategy blocked until `/gpd-brief` confirms the paper direction. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, extracts plain text from selected `.docx` canonical drafts, records unverified source-reference candidates for later triage, indexes copied files by likely role and downstream stage, and preserves downstream research/outline/fact-check/review as separate stages.
+`gpd init` creates `.paper/` setup artifacts and leaves grill incomplete until `/gpd-grill` resolves author intent. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, extracts plain text from selected `.docx` canonical drafts, records unverified source-reference candidates for later triage, indexes copied files by likely role and downstream stage, routes to `/gpd-grill`, and preserves downstream research/outline/fact-check/review as separate stages.
 
 Tooling tests cover install/update/doctor, command-reference rewriting, backup correctness, init/import/next/status/validate, malformed input handling, and varied import classification. CI runs `npm run check`.
 
@@ -401,7 +418,7 @@ Framework acceptance:
 Tool acceptance:
 
 - Installer dry-run passes.
-- Install result includes commands, workflows, agents, audiences, profiles, templates, and references.
+- Install result includes commands, workflows, agents, audiences, profiles, templates, contexts, and references.
 - CLI can install, update, and doctor Claude and Codex runtimes.
 - CLI can create, import, show the next action, status, and validate paper workspaces safely.
 - Tests cover import, install, discovery, and artifact validation.

@@ -12,6 +12,7 @@
     "last_activity",
     "suggested_next_command",
     "blocked_by",
+    "grill",
     "strategy",
     "feedback",
     "post_import_choices"
@@ -30,6 +31,36 @@
     "blocked_by": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "grill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "completion_basis", "resolved_decisions"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["Not Started", "In Progress", "Complete"]
+        },
+        "completion_basis": { "type": "string" },
+        "resolved_decisions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "paper_job",
+              "primary_reader",
+              "belief_shift",
+              "thesis",
+              "narrative_spine",
+              "key_terms",
+              "scope_boundary",
+              "proof_standard",
+              "strongest_counterargument",
+              "non_goals"
+            ]
+          }
+        }
+      }
     },
     "strategy": {
       "type": "object",

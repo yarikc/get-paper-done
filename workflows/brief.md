@@ -5,6 +5,8 @@ Create or refine the writing brief.
 <required_reading>
 - .paper/PERSONA.md
 - .paper/AUDIENCE.md
+- .paper/PAPER-CONTEXT.md if present
+- .paper/DECISIONS.md if present
 - .paper/STRATEGY.md if present
 - templates/brief.md
 - templates/strategy.md
@@ -14,6 +16,27 @@ Create or refine the writing brief.
 
 Read `.paper/PERSONA.md` and `.paper/AUDIENCE.md` first.
 
+Before writing or rewriting the brief, check `.paper/STATE.json` `grill`.
+
+If `grill.status` is not `Complete`, or `grill.resolved_decisions` does not include all required decision keys, stop and recommend `/gpd-grill`. This is mandatory for new and imported papers. Do not treat placeholder `BRIEF.md` content, imported draft prose, or chat memory as a substitute for completed grill state.
+
+Required grill decision keys:
+
+- `paper_job`
+- `primary_reader`
+- `belief_shift`
+- `thesis`
+- `narrative_spine`
+- `key_terms`
+- `scope_boundary`
+- `proof_standard`
+- `strongest_counterargument`
+- `non_goals`
+
+If `.paper/IMPORT.md` exists and the brief is mostly inferred from imported material, do not accept the imported thesis as settled. Check for completed grill state plus `.paper/PAPER-CONTEXT.md` and `.paper/DECISIONS.md`.
+
+If the thesis, audience priority, decision/belief shift, narrative spine, or key terms are still ambiguous, stop and recommend `/gpd-grill` before rewriting `.paper/BRIEF.md`. The grill step should recover author intent and create paper decision records before the brief compresses the paper.
+
 Ask for or refine:
 
 - document intent
@@ -21,6 +44,7 @@ Ask for or refine:
 - working title
 - legacy/display label or format, if useful
 - one-line thesis
+- narrative spine
 - strongest opposing view
 - why the position matters now
 - scope boundaries

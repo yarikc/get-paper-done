@@ -34,6 +34,8 @@ function normalizeWorkflowMtimes(paperDir) {
     'PROJECT.md',
     'PERSONA.md',
     'AUDIENCE.md',
+    'PAPER-CONTEXT.md',
+    'DECISIONS.md',
     'BRIEF.md',
     'STRATEGY.md',
     'RESEARCH.json',
@@ -365,6 +367,8 @@ function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
   assert(fs.existsSync(path.join(supplyChainExampleDir, 'README.md')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'RESEARCH.json')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'PAPER-CONTEXT.md')));
+  assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'DECISIONS.md')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'FACT-CHECK.md')));
   assert(fs.existsSync(path.join(supplyChainExampleDir, '.paper', 'exports', 'FINAL.md')));
 
@@ -395,6 +399,17 @@ function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
   assert(readme.includes('backward routing'));
   assert(readme.includes('AI runtime evidence'));
   assert(readme.includes('Privacy Boundary'));
+
+  const paperContext = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'PAPER-CONTEXT.md'), 'utf8');
+  assert(paperContext.includes('Supply-chain control record'));
+  assert(paperContext.includes('AI runtime inventory'));
+  assert(paperContext.includes('Bureaucracy'));
+
+  const decisions = fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'DECISIONS.md'), 'utf8');
+  assert(decisions.includes('PDR-0001'));
+  assert(decisions.includes('decision memo'));
+  assert(decisions.includes('AI Runtime Evidence'));
+  assert(decisions.includes('Bureaucracy Boundary'));
 
   const research = JSON.parse(fs.readFileSync(path.join(supplyChainExampleDir, '.paper', 'RESEARCH.json'), 'utf8'));
   assert.strictEqual(research.source_registry.length, 10);

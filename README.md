@@ -4,7 +4,7 @@ Get Paper Done is a file-based AI workflow for serious papers.
 
 It is for decision memos, strategy papers, explainers, architecture papers, white papers, executive updates, and public technical writing where audience, evidence, argument quality, and revision discipline matter.
 
-Most AI writing workflows draft too early. They produce polished paragraphs before the paper has a clear job, reader, thesis, proof standard, or decision ask. GPD slows the workflow down in the right places: brief, strategy gate, research, outline, draft, fact-check, review, feedback, revise, export.
+Most AI writing workflows draft too early. They produce polished paragraphs before the paper has a clear job, reader, thesis, proof standard, decision ask, or shared language. GPD slows the workflow down in the right places: grill, brief, strategy gate, research, outline, draft, fact-check, review, feedback, revise, export.
 
 The point is not more process. The point is fewer weak drafts, less generic AI prose, and a paper folder that remembers what was decided even after chat context is gone.
 
@@ -14,6 +14,7 @@ New here? Read [docs/START-HERE.md](docs/START-HERE.md), then run `gpd next` or 
 
 - **Better papers, not just faster prose.** GPD forces clarity on purpose, audience, thesis, evidence, objections, and ask before polishing language.
 - **Durable context.** Research, feedback, state, and revision decisions live in files, so the workflow survives context resets and model switches.
+- **Author-intent recovery.** `/gpd-grill` challenges every new or imported paper before it gets compressed into a brief, then records resolved language and paper decisions.
 - **Quality gates.** Strategy, research, fact-check, review, and export gates prevent weak papers from quietly moving forward.
 - **Controlled feedback.** Human or model feedback is captured and planned before revision changes the draft.
 - **Real revision.** If review shows the paper needs more research, a better outline, or a clearer ask, GPD routes backward instead of pretending revision is line editing.
@@ -60,7 +61,7 @@ gpd doctor codex
 
 Restart Claude Code and Codex after installing so they pick up the slash commands.
 
-`npm link` only exposes the local CLI. `gpd install claude` and `gpd install codex` copy slash commands, workflows, agents, templates, references, profiles, and audiences into the runtime directories.
+`npm link` only exposes the local CLI. `gpd install claude` and `gpd install codex` copy slash commands, workflows, agents, templates, references, contexts, profiles, and audiences into the runtime directories.
 
 ## First Paper
 
@@ -79,6 +80,7 @@ For a first clean paper, the path usually looks like this:
 ```text
 /gpd-persona
 /gpd-audience
+/gpd-grill
 /gpd-brief
 /gpd-research
 /gpd-outline
@@ -120,6 +122,7 @@ Normal flow:
 
 ```text
 create or import
+  -> grill
   -> brief
   -> strategy gate
   -> research
@@ -163,6 +166,10 @@ Import is preservation-first. It copies source material into `original/`, writes
 
 If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import writes `.paper/DRAFT.md` from it. `.docx` extraction is plain paragraph text only; the original file remains unchanged under `original/`.
 
+Run `/gpd-grill` before `/gpd-brief` for every new or imported paper. It asks one question at a time to recover thesis, audience, story, terminology, proof standard, scope, and non-goals, then writes `.paper/PAPER-CONTEXT.md` and `.paper/DECISIONS.md` so later stages know what was decided and why.
+
+You can also run `/gpd-grill` later. Use it when you need to brainstorm again or when an agent detects unresolved ambiguity in thesis, reader, terminology, scope, proof standard, or non-goals. If the later grill changes `PAPER-CONTEXT.md` or `DECISIONS.md`, GPD routes back to `/gpd-brief` so the formal brief absorbs the new understanding before downstream work continues.
+
 ## Reader And External Feedback
 
 Reader feedback is captured in `.paper/READER-FEEDBACK.md` before it becomes revision work. Feedback then moves through `.paper/FEEDBACK-PLAN.md`, where each item is marked incorporate, ignore, defer, or ask user before `/gpd-revise` changes the draft.
@@ -204,6 +211,6 @@ Use `gpd next` for the compact answer. Use `gpd status` when you want full artif
 
 ## Package Boundary
 
-The npm package is an installable framework bundle, not a dump of every repo file. It includes the CLI, commands, workflows, agents, templates, references, curated audiences/profiles, docs, and examples.
+The npm package is an installable framework bundle, not a dump of every repo file. It includes the CLI, commands, workflows, agents, templates, references, reusable contexts, curated audiences/profiles, docs, and examples.
 
 It intentionally excludes tests, RFC design drafts, ignored feedback files, local scratch files, and private paper/profile material. `npm run release:check` verifies the package boundary before release-style handoff.

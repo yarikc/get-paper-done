@@ -32,9 +32,30 @@ const allowedUnblockActions = [
   'user_override',
 ];
 
+const allowedGrillStatuses = [
+  'Not Started',
+  'In Progress',
+  'Complete',
+];
+
+const requiredGrillDecisionKeys = [
+  'paper_job',
+  'primary_reader',
+  'belief_shift',
+  'thesis',
+  'narrative_spine',
+  'key_terms',
+  'scope_boundary',
+  'proof_standard',
+  'strongest_counterargument',
+  'non_goals',
+];
+
 module.exports = {
   CURRENT_STATE_VERSION,
   allowedStrategyStatuses,
   allowedStrategyBlockers,
   allowedUnblockActions,
+  allowedGrillStatuses,
+  requiredGrillDecisionKeys,
 };

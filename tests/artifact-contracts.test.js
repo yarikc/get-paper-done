@@ -49,6 +49,8 @@ function testTemplateArtifactsPassContracts() {
     'templates/external-reviews.md',
     'templates/reader-feedback.md',
     'templates/feedback-plan.md',
+    'templates/paper-context.md',
+    'templates/decisions.md',
   ]) {
     const output = run(['validate-artifact', '--path', path.join(repoRoot, file)]);
     assert(output.includes('validation: ok'), file);
@@ -66,6 +68,11 @@ function testJsonSchemaFailureIsActionable() {
     last_activity: new Date().toISOString(),
     suggested_next_command: '/gpd-brief',
     blocked_by: [],
+    grill: {
+      status: 'Not Started',
+      completion_basis: '',
+      resolved_decisions: [],
+    },
     strategy: {
       blocking_issues: [],
       primary_blocker: 'none',
@@ -88,12 +95,16 @@ function testStateEnumFailureIsActionable() {
   const dir = tempDir('gpd-artifact-state-enum-test');
   const badState = path.join(dir, 'STATE.json');
   const state = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'state.json'), 'utf8'));
+  state.grill.status = 'Almost Done';
+  state.grill.resolved_decisions = ['paper_job', 'reader_vibes'];
   state.strategy.primary_blocker = 'thesis_typo';
   state.strategy.required_unblock_action = 'rewrite_the_thing';
   fs.writeFileSync(badState, JSON.stringify(state, null, 2));
 
   const result = runFail(['validate-artifact', '--path', badState]);
   assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('STATE.json: $.grill.status must be one of Not Started, In Progress, Complete'));
+  assert(result.stdout.includes('STATE.json: $.grill.resolved_decisions[1] must be one of paper_job, primary_reader'));
   assert(result.stdout.includes('STATE.json: $.strategy.primary_blocker must be one of none, scope_too_broad, thesis_weak, audience_unclear'));
   assert(result.stdout.includes('STATE.json: $.strategy.required_unblock_action must be one of none, brief_revision, audience_revision'));
 }

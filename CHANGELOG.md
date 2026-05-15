@@ -8,6 +8,11 @@ Initial working release.
 
 ### Added
 
+- `/gpd-grill` workflow for mandatory pre-brief interrogation, with `.paper/PAPER-CONTEXT.md` and `.paper/DECISIONS.md` artifacts for resolved language and paper decision records.
+- `STATE.json.grill` gate with enum-backed completion state and required decision keys, so new and imported papers route to `/gpd-grill` until paper job, reader, belief shift, thesis, narrative spine, terms, scope, proof standard, counterargument, and non-goals are resolved.
+- Re-enterable grill behavior: authors or agents can invoke `/gpd-grill` later for new ambiguity, and newer `PAPER-CONTEXT.md` / `DECISIONS.md` artifacts route the paper back to `/gpd-brief`.
+- Optional reusable `contexts/` packs for sanitized cross-paper language and decision patterns; per-paper `.paper/PAPER-CONTEXT.md` remains authoritative.
+- Installer now copies `contexts/` into Claude/Codex runtimes so `/gpd-grill` can see reusable context packs after install/update.
 - Private-repo release/update guide with version policy, compatibility policy, release checklist, package-boundary expectations, and `npm run release:check`.
 - File-based paper workflow for newsletters, blogs, position papers, and white papers.
 - Paper-scoped `.paper/` artifacts for project, persona, audience, brief, strategy, research, outline, draft, fact-check, review, feedback planning, revision, and export.

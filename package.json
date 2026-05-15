@@ -14,6 +14,7 @@
     "audiences/",
     "bin/",
     "commands/",
+    "contexts/",
     "docs/ARCHITECTURE.md",
     "docs/DESIGN-SPEC.md",
     "docs/PROJECT-REVIEW.md",

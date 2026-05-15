@@ -8,6 +8,7 @@ const { execFileSync, spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
+const { requiredGrillDecisionKeys } = require('../bin/lib/contracts');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -43,18 +44,24 @@ function writeState(paperDir, state) {
   fs.writeFileSync(path.join(paperDir, '.paper', 'STATE.json'), `${JSON.stringify(state, null, 2)}\n`);
 }
 
+function markGrillComplete(state) {
+  state.grill.status = 'Complete';
+  state.grill.completion_basis = 'test fixture resolved required grill decisions';
+  state.grill.resolved_decisions = requiredGrillDecisionKeys;
+}
+
 function statusJson(paperDir) {
   return JSON.parse(run(['status', '--paper', paperDir, '--json']));
 }
 
-function testFreshInitRoutesToBrief() {
+function testFreshInitRoutesToGrill() {
   const paperDir = initFixture('fresh-init');
   const status = statusJson(paperDir);
 
   assert.strictEqual(status.stateSource, 'STATE.json');
   assert.strictEqual(status.strategyStatus, 'Revise Before Drafting');
   assert.strictEqual(status.primaryBlocker, 'thesis_weak');
-  assert.strictEqual(status.next, '/gpd-brief');
+  assert.strictEqual(status.next, '/gpd-grill');
 }
 
 function testStateSuggestedNextWinsAfterHardGatesPass() {
@@ -66,6 +73,7 @@ function testStateSuggestedNextWinsAfterHardGatesPass() {
   state.last_completed_stage = 'Research';
   state.suggested_next_command = '/gpd-outline --lite';
   state.blocked_by = [];
+  markGrillComplete(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -81,6 +89,7 @@ function testImpossibleStateSuggestedNextFallsBackToArtifacts() {
   const state = readState(paperDir);
   state.suggested_next_command = '/gpd-export';
   state.blocked_by = [];
+  markGrillComplete(state);
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';
@@ -99,9 +108,25 @@ function testBlockedStrategyOverridesBadSuggestedNext() {
   const paperDir = initFixture('blocked-overrides-next');
   const state = readState(paperDir);
   state.suggested_next_command = '/gpd-draft';
+  markGrillComplete(state);
   writeState(paperDir, state);
 
   assert.strictEqual(statusJson(paperDir).next, '/gpd-brief');
+}
+
+function testIncompleteGrillBlocksEvenWhenStrategyWouldPass() {
+  const paperDir = initFixture('incomplete-grill-block');
+  const state = readState(paperDir);
+  state.suggested_next_command = '/gpd-research';
+  state.blocked_by = [];
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  writeState(paperDir, state);
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-grill');
 }
 
 function testUnsupportedFutureStateVersionFailsValidation() {
@@ -129,10 +154,11 @@ function testMalformedStrategyFallbackDoesNotBecomeRoutingState() {
   assert(validation.stdout.includes('Malformed STRATEGY.md: missing or invalid strategy status'));
 }
 
-testFreshInitRoutesToBrief();
+testFreshInitRoutesToGrill();
 testStateSuggestedNextWinsAfterHardGatesPass();
 testImpossibleStateSuggestedNextFallsBackToArtifacts();
 testBlockedStrategyOverridesBadSuggestedNext();
+testIncompleteGrillBlocksEvenWhenStrategyWouldPass();
 testUnsupportedFutureStateVersionFailsValidation();
 testMalformedStrategyFallbackDoesNotBecomeRoutingState();
 

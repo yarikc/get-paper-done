@@ -107,12 +107,13 @@ function testMessyImportPreservesButDoesNotOverInfer() {
   assert(report.includes('| drafts/old-draft.md |'));
   assert(report.includes('- Multiple draft-like files found: confirm the selected canonical draft before drafting or review.'));
   assert(report.includes('Conditional note: if this imported draft is publication-sensitive'));
+  assert(report.includes('Run `/gpd-grill` first to resolve imported author intent, thesis, audience, narrative spine, proof standard, and key terms.'));
   assert(report.includes('Absolute local source and destination paths are intentionally omitted'));
   assert(!report.includes(source));
   assert(!report.includes(target));
 
   const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
-  assert.strictEqual(status.next, '/gpd-brief');
+  assert.strictEqual(status.next, '/gpd-grill');
   assert.strictEqual(status.strategyStatus, 'Revise Before Drafting');
   assert.strictEqual(status.primaryBlocker, 'thesis_weak');
   assert.deepStrictEqual(status.machineState.post_import_choices, [

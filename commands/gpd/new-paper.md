@@ -1,6 +1,6 @@
 ---
 name: gpd:new-paper
-description: Initialize a new paper project with persona, audience, brief, strategy gate, and state
+description: Initialize a new paper project with persona, audience, provisional brief, grill gate, and state
 argument-hint: "[optional topic or document]"
 allowed-tools:
   - Read
@@ -10,7 +10,7 @@ allowed-tools:
 ---
 
 <objective>
-Initialize a new `.paper/` workspace for a newsletter, blog, position paper, or white paper, including the strategy gate before downstream research, outline, or drafting.
+Initialize a new `.paper/` workspace for a serious paper, including persona, audience, provisional brief, provisional strategy state, and the mandatory `/gpd-grill` gate before formal briefing or downstream research, outline, or drafting.
 </objective>
 
 <context>

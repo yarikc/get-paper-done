@@ -1,5 +1,7 @@
 # Brief
 
+**Status:** Provisional until `/gpd-grill` completes and `/gpd-brief` refreshes this artifact.
+
 ## Document Intent
 
 - **Purpose:** [decision_memo | strategy_paper | explainer | update]

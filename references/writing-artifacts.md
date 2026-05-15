@@ -9,6 +9,8 @@ Setup creates only the durable context needed to start:
 - `PROJECT.md`: what the piece is, why it exists, and its intended outcome
 - `PERSONA.md`: the paper-scoped author voice and argument posture
 - `AUDIENCE.md`: the reader model, objections, and desired belief shift
+- `PAPER-CONTEXT.md`: resolved language, term boundaries, relationships, and flagged ambiguities for this paper
+- `DECISIONS.md`: paper decision records that explain hard-to-reconstruct author choices
 - `BRIEF.md`: thesis, claims, constraints, and definition of done
 - `STRATEGY.md`: strategic readiness gate, paper job, thesis package, posture, decision usefulness, and scope
 - `STATE.md`: human-readable current stage, blockers, approvals, and suggested next command
@@ -59,6 +61,7 @@ Every drafting or revision workflow must read:
 1. `.paper/PERSONA.md`
 2. `.paper/AUDIENCE.md`
 3. `.paper/BRIEF.md`
+4. `.paper/PAPER-CONTEXT.md` and `.paper/DECISIONS.md` when present
 
 Every outline, draft, fact-check, review, and revision workflow must also read:
 
@@ -80,6 +83,25 @@ Keep `PROJECT.md` short. It answers what the paper is, why it exists, where it w
 Keep argument detail in `BRIEF.md`: thesis, claims, objections, proof standard, constraints, and definition of done.
 
 Do not duplicate the full thesis/claims deck in `PROJECT.md`. If the argument changes, update `BRIEF.md` first and only adjust `PROJECT.md` when the paper's identity, format, audience, or operating constraints change.
+
+## Paper Context And Decision Records
+
+`/gpd-grill` runs before `/gpd-brief` for every new or imported paper.
+
+It writes two paper-specific artifacts:
+
+- `PAPER-CONTEXT.md`: the paper's language contract. It defines terms such as "world model," "architecture," "evidence," or "decision memo" exactly as they should be used in the paper. It is a glossary, not a brief or outline.
+- `DECISIONS.md`: paper decision records. These record choices that would be hard to reconstruct later, such as primary audience, chosen thesis, rejected thesis, scope cuts, source-positioning choices, or why a paper is a `strategy_paper` rather than a `decision_memo`.
+
+Create decision records sparingly. A paper decision record is worth writing only when the decision is hard to reverse, surprising without context, and the result of a real trade-off.
+
+The grill step must ask one question at a time. It should challenge fuzzy terms, ambiguous audience choices, weak thesis assumptions, hidden reader context, and unstated narrative spine before the brief compresses the paper.
+
+`STATE.json.grill` is the machine-readable gate. It is complete only when `paper_job`, `primary_reader`, `belief_shift`, `thesis`, `narrative_spine`, `key_terms`, `scope_boundary`, `proof_standard`, `strongest_counterargument`, and `non_goals` have been resolved and confirmed.
+
+The grill step is also re-enterable later. Use it when review, drafting, research, or the author's own read exposes a fuzzy term, weak thesis, wrong reader, scope problem, proof-standard gap, or missing non-goal. Later grill sessions update `PAPER-CONTEXT.md` and `DECISIONS.md`; `/gpd-brief` then refreshes the formal contract before downstream artifacts are changed.
+
+Reusable context belongs in `contexts/`, not in individual paper folders. Promote paper context there only when it is sanitized, stable across papers, and explicitly approved by the user.
 
 ## Strategy Gate
 
@@ -198,7 +220,7 @@ After import, show the user a small post-import menu:
 
 If the imported draft is already publication-sensitive and contains material factual claims, add a conditional note recommending `/gpd-fact-check --risk-scan` before external review or export. Keep the default import menu small.
 
-If thesis, audience, or classification is unclear, recommend `/gpd-brief` before the three choices.
+Recommend `/gpd-grill` before `/gpd-brief` and before the three choices. Import should preserve and challenge; it should not prematurely compress imported author intent into a brief.
 
 ## Research Stage
 

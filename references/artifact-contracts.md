@@ -184,3 +184,50 @@ Five-Signal Scorecard must include exactly these five signals:
 - Audience fit
 - Evidence
 - Ask clarity
+
+### `PAPER-CONTEXT.md`
+
+Required headings:
+
+- `# Paper Context`
+- `## Language`
+- `## Relationships`
+- `## Example Dialogue`
+- `## Flagged Ambiguities`
+
+No table contract is required. This artifact is a paper-specific language contract, not a brief or outline.
+
+### `DECISIONS.md`
+
+Required headings:
+
+- `# Paper Decision Records`
+- `## Decision Index`
+
+Required tables:
+
+- Decision Index: `ID`, `Status`, `Decision`, `Why It Matters`
+
+Paper decision records should be sparse. They are for thesis, audience, scope, source-positioning, and narrative choices that would be hard to reconstruct later.
+
+## Grill State Contract
+
+`STATE.json` contains a mandatory `grill` object. `/gpd-brief` must not proceed until:
+
+- `grill.status` is `Complete`
+- `grill.completion_basis` records why completion is valid
+- `grill.resolved_decisions` contains all required decision keys:
+  - `paper_job`
+  - `primary_reader`
+  - `belief_shift`
+  - `thesis`
+  - `narrative_spine`
+  - `key_terms`
+  - `scope_boundary`
+  - `proof_standard`
+  - `strongest_counterargument`
+  - `non_goals`
+
+`PAPER-CONTEXT.md` and `DECISIONS.md` are the human-readable companion artifacts. `STATE.json.grill` is the machine-readable gate.
+
+The grill gate is re-enterable. After `grill.status` is `Complete`, `/gpd-grill` may still update `PAPER-CONTEXT.md` or `DECISIONS.md` when the author or an agent finds new ambiguity. If either artifact becomes newer than `BRIEF.md`, routing should send the paper to `/gpd-brief` so the formal paper contract catches up before research, outline, draft, review, revise, or export continues.

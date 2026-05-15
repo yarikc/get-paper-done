@@ -8,6 +8,8 @@ const {
   allowedStrategyStatuses,
   allowedStrategyBlockers,
   allowedUnblockActions,
+  allowedGrillStatuses,
+  requiredGrillDecisionKeys,
 } = require('../bin/lib/contracts');
 
 const repoRoot = path.resolve(__dirname, '..');
@@ -156,8 +158,11 @@ function testWorkflowRequiredReadingReferencesExist() {
 function testStrategyEnumsStayCentralizedAndDocumented() {
   const schema = JSON.parse(read('references/schemas/state.schema.json'));
   const strategy = schema.properties.strategy.properties;
+  const grill = schema.properties.grill.properties;
 
   arrayEqual(schema.properties.version.enum, [CURRENT_STATE_VERSION], 'STATE schema version enum');
+  arrayEqual(grill.status.enum, allowedGrillStatuses, 'grill.status enum');
+  arrayEqual(grill.resolved_decisions.items.enum, requiredGrillDecisionKeys, 'grill.resolved_decisions enum');
   arrayEqual(strategy.status.enum, allowedStrategyStatuses, 'strategy.status enum');
   arrayEqual(strategy.blocking_issues.items.enum, allowedStrategyBlockers, 'strategy.blocking_issues enum');
   arrayEqual(strategy.primary_blocker.enum, allowedStrategyBlockers, 'strategy.primary_blocker enum');
@@ -192,6 +197,14 @@ function testStrategyEnumsStayCentralizedAndDocumented() {
   for (const file of statusDocs) assertContainsAll(file, allowedStrategyStatuses, 'strategy status');
   for (const file of blockerDocs) assertContainsAll(file, allowedStrategyBlockers, 'strategy blocker');
   for (const file of unblockActionDocs) assertContainsAll(file, allowedUnblockActions, 'unblock action');
+
+  const grillDocs = [
+    'workflows/grill.md',
+    'workflows/brief.md',
+    'workflows/new-paper.md',
+    'references/artifact-contracts.md',
+  ];
+  for (const file of grillDocs) assertContainsAll(file, requiredGrillDecisionKeys, 'grill decision');
 }
 
 function testReferencedTemplatesAndAgentsExist() {

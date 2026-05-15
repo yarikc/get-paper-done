@@ -26,6 +26,8 @@ const artifactNameAliases = {
   'external-reviews.md': 'EXTERNAL-REVIEWS.md',
   'reader-feedback.md': 'READER-FEEDBACK.md',
   'feedback-plan.md': 'FEEDBACK-PLAN.md',
+  'paper-context.md': 'PAPER-CONTEXT.md',
+  'decisions.md': 'DECISIONS.md',
 };
 
 const markdownContracts = {
@@ -188,6 +190,25 @@ const markdownContracts = {
       'Audience fit',
       'Evidence',
       'Ask clarity',
+    ],
+  },
+  'PAPER-CONTEXT.md': {
+    headings: [
+      '# Paper Context',
+      '## Language',
+      '## Relationships',
+      '## Example Dialogue',
+      '## Flagged Ambiguities',
+    ],
+    tables: [],
+  },
+  'DECISIONS.md': {
+    headings: [
+      '# Paper Decision Records',
+      '## Decision Index',
+    ],
+    tables: [
+      ['ID', 'Status', 'Decision', 'Why It Matters'],
     ],
   },
 };

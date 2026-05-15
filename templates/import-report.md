@@ -129,7 +129,7 @@ Strategy gate status: [`Go` | `Revise Before Drafting` | `No-Go`]
 
 Primary strategy blocker: [`none` | `scope_too_broad` | `thesis_weak` | `audience_unclear` | `audience_conflict` | `evidence_gap` | `weak_ask` | `poor_posture` | `missing_outcome` | `reader_promise_weak` | `decision_usefulness_weak`]
 
-If strategy gate status is `Revise Before Drafting` or `No-Go`, do not use the choices below yet. Run `/gpd-brief` first unless the user explicitly overrides the strategy block.
+If strategy gate status is `Revise Before Drafting` or `No-Go`, do not use the choices below yet. Run `/gpd-grill` first when grill state is incomplete; run `/gpd-brief` after grill completion unless the user explicitly overrides the strategy block.
 
 Choose one when strategy gate status is `Go`:
 
@@ -145,4 +145,4 @@ Conditional note: if this imported draft is publication-sensitive and contains m
 
 ## Why
 
-[One-sentence reason. If setup information is missing or `STRATEGY.md` blocks, recommend `/gpd-brief` before the three post-import choices.]
+[One-sentence reason. If setup information is missing or `STRATEGY.md` blocks, recommend `/gpd-grill` first when grill state is incomplete, then `/gpd-brief` before the three post-import choices.]

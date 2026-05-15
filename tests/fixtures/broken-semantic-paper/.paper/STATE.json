@@ -17,5 +17,21 @@
     "feedback_plan_status": "Not created",
     "approved_handling": ""
   },
-  "post_import_choices": []
+  "post_import_choices": [],
+  "grill": {
+    "status": "Complete",
+    "completion_basis": "legacy completed fixture with established paper context",
+    "resolved_decisions": [
+      "paper_job",
+      "primary_reader",
+      "belief_shift",
+      "thesis",
+      "narrative_spine",
+      "key_terms",
+      "scope_boundary",
+      "proof_standard",
+      "strongest_counterargument",
+      "non_goals"
+    ]
+  }
 }

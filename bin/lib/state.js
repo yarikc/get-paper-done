@@ -17,6 +17,7 @@ const {
   CURRENT_STATE_VERSION,
   allowedStrategyStatuses,
   allowedStrategyBlockers,
+  requiredGrillDecisionKeys,
 } = require('./contracts');
 
 const allowedStrategyStatusSet = new Set(allowedStrategyStatuses);
@@ -25,14 +26,20 @@ const allowedStrategyBlockerSet = new Set(allowedStrategyBlockers);
 function defaultMachineState(input = {}) {
   const strategyStatus = input.strategyStatus || 'Revise Before Drafting';
   const primaryBlocker = input.primaryBlocker || 'thesis_weak';
+  const grill = input.grill || {
+    status: 'Not Started',
+    completion_basis: '',
+    resolved_decisions: [],
+  };
   return {
     version: 1,
     status: strategyStatus === 'Go' ? 'Initialized' : 'Blocked',
     current_stage: 'Strategy Gate',
     last_completed_stage: 'Setup',
     last_activity: input.lastActivity || new Date().toISOString(),
-    suggested_next_command: input.suggestedNextCommand || '/gpd-brief',
+    suggested_next_command: input.suggestedNextCommand || '/gpd-grill',
     blocked_by: strategyStatus === 'Go' ? [] : [`strategy block: ${primaryBlocker}`],
+    grill,
     strategy: {
       status: strategyStatus,
       blocking_issues: input.blockingIssues || ['thesis_weak', 'audience_unclear', 'missing_outcome'],
@@ -74,6 +81,11 @@ function stateMarkdown(state) {
     `- **Last completed stage:** ${state.last_completed_stage}`,
     `- **Last activity:** ${state.last_activity}`,
     `- **Suggested next command:** \`${state.suggested_next_command}\``,
+    '',
+    '## Grill Gate',
+    '',
+    `- **Status:** ${state.grill ? state.grill.status : 'Not Started'}`,
+    `- **Completion basis:** ${state.grill ? state.grill.completion_basis : ''}`,
     '',
     '## Blocked By',
     '',
@@ -186,6 +198,14 @@ function savedNextCommandIsPlausible(command, artifacts) {
   }
 }
 
+function grillComplete(machineState) {
+  if (!machineState || !machineState.grill || machineState.grill.status !== 'Complete') return false;
+  const resolved = new Set(Array.isArray(machineState.grill.resolved_decisions)
+    ? machineState.grill.resolved_decisions
+    : []);
+  return requiredGrillDecisionKeys.every((key) => resolved.has(key));
+}
+
 function stripMarkdownValue(value) {
   return value
     .trim()
@@ -266,6 +286,9 @@ function artifactState(paperDir) {
     'AUDIENCE.md',
     'BRIEF.md',
     'STRATEGY.md',
+    'IMPORT.md',
+    'PAPER-CONTEXT.md',
+    'DECISIONS.md',
     'RESEARCH.json',
     'OUTLINE.md',
     'DRAFT.md',
@@ -314,7 +337,16 @@ function suggestedNext(state) {
   const a = state.artifacts;
   if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) return '/gpd-brief';
   if (!a['STRATEGY.md']) return '/gpd-brief';
-  if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') return '/gpd-brief';
+  if (!grillComplete(state.machineState)) return '/gpd-grill';
+  if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
+    return '/gpd-brief';
+  }
+  if (
+    artifactNewerThan(state.paperDir, 'PAPER-CONTEXT.md', 'BRIEF.md')
+    || artifactNewerThan(state.paperDir, 'DECISIONS.md', 'BRIEF.md')
+  ) {
+    return '/gpd-brief';
+  }
   if (feedbackPlanPending(state)) return '/gpd-progress';
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
@@ -447,6 +479,13 @@ function contextForCommand(command) {
       avoid: ['raw sources by default'],
     };
   }
+  if (base === '/gpd-grill') {
+    return {
+      clear_context: 'No, unless the import/intake chat is noisy.',
+      read: ['IMPORT.md if present', 'PROJECT.md', 'PERSONA.md', 'AUDIENCE.md', 'BRIEF.md', 'STRATEGY.md', 'PAPER-CONTEXT.md if present', 'DECISIONS.md if present'],
+      avoid: ['research, outlining, drafting, or revising before ambiguities are resolved'],
+    };
+  }
   return {
     clear_context: 'No, unless the current chat is noisy.',
     read: ['PROJECT.md', 'PERSONA.md', 'AUDIENCE.md', 'BRIEF.md', 'STATE.json'],
@@ -461,8 +500,17 @@ function explainNext(state) {
     return 'One or more setup artifacts are missing, so the paper needs intake/brief repair before downstream work.';
   }
   if (!a['STRATEGY.md']) return 'The strategy gate has not been created yet, so brief work must run before research or drafting.';
+  if (!grillComplete(state.machineState) && next === '/gpd-grill') {
+    return 'The mandatory grill gate is incomplete, so thesis, reader, terms, proof standard, scope, and non-goals must be resolved before briefing.';
+  }
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
     return `The strategy gate is ${state.strategyStatus}; fix the primary blocker (${state.primaryBlocker || 'unknown'}) before downstream work.`;
+  }
+  if (
+    artifactNewerThan(state.paperDir, 'PAPER-CONTEXT.md', 'BRIEF.md')
+    || artifactNewerThan(state.paperDir, 'DECISIONS.md', 'BRIEF.md')
+  ) {
+    return 'Paper context or decision records changed after the brief, so the formal brief must absorb the clarified intent before downstream work continues.';
   }
   if (feedbackPlanPending(state)) return 'A feedback plan is pending approval, so revision should wait until the handling decision is explicit.';
   if (
@@ -565,6 +613,12 @@ function validate(input = {}) {
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
     issues.push({ severity: 'HIGH', issue: `Strategy blocks downstream work: ${state.primaryBlocker || state.strategyStatus}` });
   }
+  if (state.machineState && !grillComplete(state.machineState)) {
+    issues.push({
+      severity: 'HIGH',
+      issue: 'Grill gate incomplete: run /gpd-grill before /gpd-brief',
+    });
+  }
   const nextFromState = savedNextCommand(state);
   if (nextFromState && !savedNextCommandIsPlausible(nextFromState, a)) {
     issues.push({
@@ -608,4 +662,5 @@ module.exports = {
   printNext,
   validate,
   printValidation,
+  grillComplete,
 };

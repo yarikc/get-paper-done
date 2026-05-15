@@ -6,6 +6,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync, spawnSync } = require('child_process');
 const { validateSemanticPaper } = require('../bin/lib/semantic');
+const { requiredGrillDecisionKeys } = require('../bin/lib/contracts');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
@@ -62,6 +63,9 @@ function makePaper(slug = 'semantic') {
   state.last_completed_stage = 'Research';
   state.suggested_next_command = '/gpd-outline --deep';
   state.blocked_by = [];
+  state.grill.status = 'Complete';
+  state.grill.completion_basis = 'test fixture resolved required grill decisions';
+  state.grill.resolved_decisions = requiredGrillDecisionKeys;
   state.strategy.status = 'Go';
   state.strategy.blocking_issues = [];
   state.strategy.primary_blocker = 'none';

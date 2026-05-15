@@ -33,6 +33,7 @@ for (const requiredPath of [
   'docs/RELEASE.md',
   'docs/SEMANTIC-CALIBRATION.md',
   'commands/gpd/new-paper.md',
+  'contexts/README.md',
   'workflows/new-paper.md',
   'agents/paper-strategist.md',
   'templates/state.json',

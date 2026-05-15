@@ -1,5 +1,7 @@
 # Strategy Review
 
+**Status note:** Provisional setup strategy is blocked until `/gpd-grill` completes and `/gpd-brief` refreshes this gate.
+
 ## Strategic Readiness
 
 **Status:** [Go | Revise Before Drafting | No-Go]

@@ -705,7 +705,7 @@ Strategy gate status: [\`Revise Before Drafting\`]
 
 Primary strategy blocker: [\`thesis_weak\`]
 
-If strategy gate status is \`Revise Before Drafting\` or \`No-Go\`, do not use the choices below yet. Run \`/gpd-brief\` first unless the user explicitly overrides the strategy block.
+If strategy gate status is \`Revise Before Drafting\` or \`No-Go\`, do not use the choices below yet. Run \`/gpd-grill\` first to resolve imported author intent, thesis, audience, narrative spine, proof standard, and key terms. Run \`/gpd-brief\` after the grill resolves enough author intent to write a real brief.
 
 Choose one when strategy gate status is \`Go\`:
 
@@ -717,11 +717,11 @@ Conditional note: if this imported draft is publication-sensitive and contains m
 
 ## Suggested Choice
 
-\`/gpd-brief\`
+\`/gpd-grill\`
 
 ## Why
 
-Imported material needs a confirmed thesis, audience, reader promise, and strategy gate before downstream stages.
+Imported material needs author-intent recovery before it is compressed into a brief: thesis, audience, reader promise, narrative spine, key terms, and desired outcome.
 `;
 }
 
@@ -752,6 +752,7 @@ function importPaper(input = {}) {
 
   const title = input.title || input.slug || path.basename(paperDir);
   const machineState = defaultMachineState({
+    suggestedNextCommand: '/gpd-grill',
     postImportChoices: [
       '/gpd-research',
       '/gpd-outline --lite',

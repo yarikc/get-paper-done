@@ -32,6 +32,8 @@ Check which artifacts exist:
 - EXTERNAL-REVIEWS.md
 - READER-FEEDBACK.md
 - FEEDBACK-PLAN.md
+- PAPER-CONTEXT.md
+- DECISIONS.md
 - IMPORT.md
 - STATE.json
 - exports/FINAL.md
@@ -58,6 +60,9 @@ Stale context risks:
 - `FACT-CHECK.md` has HIGH issues or claims marked verify-before-publication: do not export without user acknowledgement.
 - `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
 - `FEEDBACK-PLAN.md` pending approval: do not revise until user approves handling.
+- `STATE.json` `grill.status` is not `Complete`, or required `grill.resolved_decisions` are missing: recommend `/gpd-grill` before `/gpd-brief`.
+- `PAPER-CONTEXT.md` or `DECISIONS.md` newer than `BRIEF.md`: recommend `/gpd-brief` so the formal brief absorbs the clarified context.
+- An agent detects unresolved thesis, audience, term, scope, proof-standard, or non-goal ambiguity after downstream work exists: recommend `/gpd-grill` first, then `/gpd-brief` after resolution.
 
 Use file modification times only as a hint; do not overstate certainty.
 
@@ -97,29 +102,31 @@ Use this order:
 
 1. Missing `.paper/PROJECT.md`, `.paper/PERSONA.md`, `.paper/AUDIENCE.md`, or `.paper/BRIEF.md` → `/gpd-brief` or `/gpd-audience` / `/gpd-persona` depending on the missing file.
 2. `AUDIENCE.md` exists but does not declare curated personas or a custom audience → `/gpd-audience`.
-3. `BRIEF.md` exists but thesis/claims/audience are visibly placeholder-like → `/gpd-brief`.
-4. `STRATEGY.md` missing → `/gpd-brief` to run the strategy gate before research, outline, or drafting.
-5. `STRATEGY.md` exists and says `Revise Before Drafting` or `No-Go` → `/gpd-brief`; include the `Strategy Blockers` primary blocker in the explanation.
-6. `BRIEF.md` or `STRATEGY.md` is newer than `RESEARCH.json` → `/gpd-research` for incremental research refresh.
-7. `RESEARCH.json` is newer than `OUTLINE.md` → `/gpd-outline --deep` for outline refresh.
-8. `OUTLINE.md` is newer than `DRAFT.md` → `/gpd-draft` for draft refresh.
-9. `DRAFT.md` is newer than `FACT-CHECK.md` → `/gpd-fact-check --full` for claim refresh.
-10. `DRAFT.md` or `FACT-CHECK.md` is newer than `REVIEW.md` → `/gpd-review --deep` for review refresh.
-11. `RESEARCH.json` missing or lacks the structured evidence package → `/gpd-research`.
-12. `OUTLINE.md` missing → `/gpd-outline --deep` when `RESEARCH.json` or `STRATEGY.md` exists, the paper is serious/researched/high-stakes, or target length is about 1,200+ words; otherwise `/gpd-outline --lite`.
-13. `DRAFT.md` missing → `/gpd-draft`.
-14. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
-15. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
-16. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
-17. `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
-18. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-progress`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
-19. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
-20. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
-21. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
-22. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
-23. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
-24. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
-25. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
+3. `STATE.json` `grill.status` is not `Complete`, or the required grill decision keys are missing → `/gpd-grill`.
+4. `BRIEF.md` exists but thesis/claims/audience are visibly placeholder-like → `/gpd-brief`.
+5. `STRATEGY.md` missing → `/gpd-brief` to run the strategy gate before research, outline, or drafting.
+6. `STRATEGY.md` exists and says `Revise Before Drafting` or `No-Go` → `/gpd-brief` or `/gpd-grill` when ambiguity is author-intent/narrative-language related; include the `Strategy Blockers` primary blocker in the explanation.
+7. `PAPER-CONTEXT.md` or `DECISIONS.md` is newer than `BRIEF.md` → `/gpd-brief` for brief refresh.
+8. `BRIEF.md` or `STRATEGY.md` is newer than `RESEARCH.json` → `/gpd-research` for incremental research refresh.
+9. `RESEARCH.json` is newer than `OUTLINE.md` → `/gpd-outline --deep` for outline refresh.
+10. `OUTLINE.md` is newer than `DRAFT.md` → `/gpd-draft` for draft refresh.
+11. `DRAFT.md` is newer than `FACT-CHECK.md` → `/gpd-fact-check --full` for claim refresh.
+12. `DRAFT.md` or `FACT-CHECK.md` is newer than `REVIEW.md` → `/gpd-review --deep` for review refresh.
+13. `RESEARCH.json` missing or lacks the structured evidence package → `/gpd-research`.
+14. `OUTLINE.md` missing → `/gpd-outline --deep` when `RESEARCH.json` or `STRATEGY.md` exists, the paper is serious/researched/high-stakes, or target length is about 1,200+ words; otherwise `/gpd-outline --lite`.
+15. `DRAFT.md` missing → `/gpd-draft`.
+16. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
+17. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
+18. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
+19. `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
+20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-progress`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
+21. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
+22. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
+23. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
+24. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
+25. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
+26. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
+27. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
 
 Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
 
@@ -134,6 +141,7 @@ Always include context guidance:
 Default guidance:
 
 - Before `/gpd-research`: clear context if coming from intake/brief discussion.
+- Before `/gpd-grill`: keep context focused on import/intake artifacts or the specific later ambiguity; ask one question at a time and update `PAPER-CONTEXT.md`, `DECISIONS.md`, and `STATE.json.grill` as ambiguity resolves.
 - Before `/gpd-outline`: clear context after research; read compressed `RESEARCH.json`, not raw sources. Use Lite for early/short/import triage and Deep for serious/researched/high-stakes papers.
 - Before `/gpd-draft`: clear context after outline; read `PERSONA.md`, `AUDIENCE.md`, `BRIEF.md`, `RESEARCH.json`, `OUTLINE.md`.
 - Before `/gpd-fact-check`: clear context after drafting; read `DRAFT.md`, compressed `RESEARCH.json`, `BRIEF.md`, `AUDIENCE.md`, and source policy. Avoid raw sources except for specific verification.

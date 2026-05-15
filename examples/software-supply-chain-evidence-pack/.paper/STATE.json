@@ -19,5 +19,21 @@
     "feedback_plan_status": "Applied",
     "approved_handling": "Reader feedback incorporated: supply-chain control process, control record, AI runtime evidence, decision rules, standards context, and exception-based review"
   },
-  "post_import_choices": []
+  "post_import_choices": [],
+  "grill": {
+    "status": "Complete",
+    "completion_basis": "legacy completed fixture with established paper context",
+    "resolved_decisions": [
+      "paper_job",
+      "primary_reader",
+      "belief_shift",
+      "thesis",
+      "narrative_spine",
+      "key_terms",
+      "scope_boundary",
+      "proof_standard",
+      "strongest_counterargument",
+      "non_goals"
+    ]
+  }
 }

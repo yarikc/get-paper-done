@@ -6,7 +6,13 @@
 - **Current stage:** Strategy Gate
 - **Last completed stage:** Setup
 - **Last activity:** [date] - Created paper workspace
-- **Suggested next command:** [`/gpd-brief` to complete or repair strategy gate | `/gpd-research` only when `.paper/STRATEGY.md` status is `Go`]
+- **Suggested next command:** [`/gpd-grill` until grill is complete | `/gpd-brief` to complete or repair strategy gate | `/gpd-research` only when `.paper/STRATEGY.md` status is `Go`]
+
+## Grill Gate
+
+- **Status:** [Not Started | In Progress | Complete]
+- **Completion basis:** [blank until complete]
+- **Resolved decisions:** [paper_job, primary_reader, belief_shift, thesis, narrative_spine, key_terms, scope_boundary, proof_standard, strongest_counterargument, non_goals when complete]
 
 ## Blocked By
 

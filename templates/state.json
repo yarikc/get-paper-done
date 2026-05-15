@@ -4,8 +4,13 @@
   "current_stage": "Strategy Gate",
   "last_completed_stage": "Setup",
   "last_activity": "[timestamp]",
-  "suggested_next_command": "/gpd-brief",
+  "suggested_next_command": "/gpd-grill",
   "blocked_by": [],
+  "grill": {
+    "status": "Not Started",
+    "completion_basis": "",
+    "resolved_decisions": []
+  },
   "strategy": {
     "status": "Revise Before Drafting",
     "blocking_issues": [

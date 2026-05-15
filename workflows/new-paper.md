@@ -1,5 +1,5 @@
 <purpose>
-Initialize a new paper workspace through questioning, persona setup, audience setup, and brief creation.
+Initialize a new paper workspace through light intake, persona setup, audience setup, and the mandatory grill gate. Do not collapse the paper into a formal brief until `/gpd-grill` has completed.
 </purpose>
 
 <required_reading>
@@ -10,6 +10,8 @@ Initialize a new paper workspace through questioning, persona setup, audience se
 - templates/audience.md
 - templates/brief.md
 - templates/strategy.md
+- templates/paper-context.md
+- templates/decisions.md
 - templates/state.md
 - templates/state.json
 - templates/config.json
@@ -71,7 +73,7 @@ If `--fast` is present, skip broad questioning and collect:
 - What to avoid
 - Draft length
 
-Use those answers to create `.paper/PROJECT.md`, `.paper/PERSONA.md`, `.paper/AUDIENCE.md`, `.paper/BRIEF.md`, `.paper/STRATEGY.md`, `.paper/config.json`, `.paper/STATE.md`, and `.paper/STATE.json`. Keep `PROJECT.md` short and put detailed thesis, claims, objections, and definition of done in `BRIEF.md`. Keep missing evidence marked as source gaps. Run the strategy gate before suggesting research, outline, or drafting.
+Use those answers to create `.paper/PROJECT.md`, `.paper/PERSONA.md`, `.paper/AUDIENCE.md`, placeholder `.paper/BRIEF.md`, placeholder `.paper/STRATEGY.md`, `.paper/config.json`, `.paper/STATE.md`, and `.paper/STATE.json`. Keep the placeholder brief visibly provisional and route to `/gpd-grill`; fast intake is not permission to skip ambiguity removal.
 
 If `--fast` is not present, continue with full intake.
 
@@ -153,31 +155,31 @@ Ask for or infer:
 - proof standard
 - scoring emphasis
 
-## 5. Brief
+## 5. Placeholder Brief And Mandatory Grill
 
-Create `.paper/BRIEF.md`.
+Create `.paper/BRIEF.md` only as a placeholder intake artifact. It may contain the apparent paper job, apparent reader, apparent thesis, and open questions, but it must state that it is provisional until `/gpd-grill` completes.
 
-Capture:
+Set the mandatory grill gate in `.paper/STATE.json`:
 
-- document intent
-- one-line thesis
-- strongest opposing view
-- why this matters now
-- reader promise
-- 3 to 5 arguable claims
-- likely objection, response, and implication for each claim
-- known sources
-- open questions
-- constraints
-- definition of done
+```json
+"grill": {
+  "status": "Not Started",
+  "completion_basis": "",
+  "resolved_decisions": []
+}
+```
 
-## 6. Strategy Gate, Project, And State
+The grill must later resolve these decision keys before `/gpd-brief`: `paper_job`, `primary_reader`, `belief_shift`, `thesis`, `narrative_spine`, `key_terms`, `scope_boundary`, `proof_standard`, `strongest_counterargument`, and `non_goals`.
+
+Do not run the real strategy gate, research, outline, or draft from this workflow. The next workflow must interrogate the paper idea one question at a time, record `PAPER-CONTEXT.md` and `DECISIONS.md`, then allow `/gpd-brief` to create the formal brief.
+
+## 6. Project, Provisional Strategy, And State
 
 Create `.paper/PROJECT.md`, `.paper/STRATEGY.md`, `.paper/config.json`, `.paper/STATE.md`, and `.paper/STATE.json`.
 
 `PROJECT.md` should stay short: paper identity, intended outcome, format, publishing context, source policy, and boundaries. Do not duplicate the full claims deck from `BRIEF.md`.
 
-Run the strategy gate before setting the next command. `STRATEGY.md` must declare one of:
+Create provisional `STRATEGY.md` as blocked until the grill and brief are complete. `STRATEGY.md` must declare one of:
 
 - `Go`
 - `Revise Before Drafting`
@@ -192,12 +194,9 @@ Run the strategy gate before setting the next command. `STRATEGY.md` must declar
 
 Valid blocker values are `none`, `scope_too_broad`, `thesis_weak`, `audience_unclear`, `audience_conflict`, `evidence_gap`, `weak_ask`, `poor_posture`, `missing_outcome`, `reader_promise_weak`, and `decision_usefulness_weak`.
 
-If the strategy gate returns `Revise Before Drafting` or `No-Go`, set suggested next command to `/gpd-brief` in both `STATE.md` and `STATE.json`, and do not suggest research, outline, or drafting unless the user explicitly overrides the strategy block.
+Set suggested next command to `/gpd-grill` in both `STATE.md` and `STATE.json`.
 
-Set suggested next command:
-
-- `/gpd-research` if claims need support, if the argument has meaningful opposing views, or if the paper makes factual, strategic, trend, technical, regulatory, market, or organizational claims
-- `/gpd-outline --deep` if sources and thesis are already sufficient for a serious/researched/high-stakes paper; `/gpd-outline --lite` for early shaping or short pieces
+Do not suggest `/gpd-research`, `/gpd-outline`, or `/gpd-draft` from `/gpd-new-paper`. `/gpd-brief` owns the real brief and strategy gate after the grill is complete.
 
 Research is the evidence-for/evidence-against checkpoint. It happens after the brief captures thesis and claims, and before outline/draft lock in the argument structure.
 
@@ -207,9 +206,9 @@ Research is the evidence-for/evidence-against checkpoint. It happens after the b
 - `.paper/PROJECT.md` exists
 - `.paper/PERSONA.md` exists and contains actionable drafting directives
 - `.paper/AUDIENCE.md` exists and contains objections and desired shift
-- `.paper/BRIEF.md` exists and contains a thesis, opposing view, claims deck, and definition of done
-- `.paper/STRATEGY.md` exists and records strategic readiness
-- `.paper/STATE.md` identifies `/gpd-research` as suggested next command when evidence or counterevidence is needed
+- `.paper/BRIEF.md` exists and is clearly marked provisional until `/gpd-grill`
+- `.paper/STRATEGY.md` exists and blocks downstream work until grill and brief completion
+- `.paper/STATE.md` identifies `/gpd-grill` as suggested next command
 - `.paper/STATE.md` records current stage, last completed stage, blockers, and suggested next command
 - `.paper/STATE.json` records the same state in machine-readable form for CLI status and validation
 </success_criteria>
