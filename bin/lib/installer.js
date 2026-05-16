@@ -173,7 +173,7 @@ function doctor(input = {}) {
   const resolved = resolveRuntime(input.runtime, input.target);
   const target = resolved.target;
   const required = [
-    path.join(target, 'commands', 'gpd', 'new-paper.md'),
+    path.join(target, 'commands', 'gpd', 'new.md'),
     path.join(target, 'commands', 'gpd', 'outline.md'),
     path.join(target, 'get-paper-done', 'workflows', 'new-paper.md'),
     path.join(target, 'get-paper-done', 'templates', 'outline.md'),

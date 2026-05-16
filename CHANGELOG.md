@@ -13,6 +13,17 @@ Initial working release.
 - Re-enterable grill behavior: authors or agents can invoke `/gpd-grill` later for new ambiguity, and newer `PAPER-CONTEXT.md` / `DECISIONS.md` artifacts route the paper back to `/gpd-brief`.
 - Optional reusable `contexts/` packs for sanitized cross-paper language and decision patterns; per-paper `.paper/PAPER-CONTEXT.md` remains authoritative.
 - Installer now copies `contexts/` into Claude/Codex runtimes so `/gpd-grill` can see reusable context packs after install/update.
+- Example and fixture indexes, plus explicit policy that old examples may be grandfathered while new examples should include grill companion artifacts.
+- Stronger artifact validation for non-template `PAPER-CONTEXT.md` and `DECISIONS.md`, catching unresolved placeholders and empty grill outputs.
+- Reworked README and START-HERE into simpler product-story onboarding docs: problem, output preview, install, first paper, and the clarify/support/shape/draft/check/revise/export loop.
+- Kept detailed workflow mechanics in DESIGN-SPEC with sequence tables, mandatory/conditional stage status, stage purpose, outputs, and transition rules.
+- `REPO-CONVENTIONS.md` as the canonical repository-conventions document, with `AGENTS.md` kept as the agent-discovery shim.
+- Removed duplicate long-form slash commands for new/import/status; `/gpd-new`, `/gpd-import`, and `/gpd-status` are canonical.
+- Cross-artifact validation that requires `PAPER-CONTEXT.md` canonical terms to appear in `DRAFT.md` when both artifacts exist, and requires `DECISIONS.md` PDR detail sections to include dates.
+- Example fixture coverage now enforces the new-example grill artifact policy while explicitly grandfathering pre-grill examples.
+- Explicit backward-routing walkthrough and gate-override documentation for grill and strategy gates.
+- Documented validation composition: artifact-contract validation runs before semantic lint-style validation.
+- Documented the feedback-harvesting rule: raw feedback remains ignored, while actionable items must become anonymized issues, tests, examples, docs, or roadmap entries.
 - Private-repo release/update guide with version policy, compatibility policy, release checklist, package-boundary expectations, and `npm run release:check`.
 - File-based paper workflow for newsletters, blogs, position papers, and white papers.
 - Paper-scoped `.paper/` artifacts for project, persona, audience, brief, strategy, research, outline, draft, fact-check, review, feedback planning, revision, and export.
@@ -26,7 +37,7 @@ Initial working release.
 - `gpd next` compact guidance for the next recommended workflow action, why it is next, and what context to read or avoid.
 - `gpd next` now explains missing required artifacts before falling back to saved `STATE.json` recommendations.
 - Slimmer README and `docs/START-HERE.md` onboarding focused on first use, with dense mechanics left to reference docs.
-- Status routing now keeps pending feedback plans at `/gpd-progress` instead of letting stale mtimes bypass the approval gate.
+- Status routing now keeps pending feedback plans at `/gpd-status` instead of letting stale mtimes bypass the approval gate.
 - Artifact validation for `EXTERNAL-REVIEWS.md`, including required prompt-summary and consensus-summary sections.
 - Safe import behavior that preserves source material under `original/`.
 - Import dry-run inventory, classification counts, warning output, file-size skip override, and deterministic canonical-draft candidate ranking.

@@ -135,7 +135,7 @@ function exportPaper(input = {}) {
   if (
     !input.force
     && stateResult.next !== '/gpd-export'
-    && stateResult.next !== '/gpd-progress'
+    && stateResult.next !== '/gpd-status'
   ) {
     throw new Error(`Current paper state recommends ${stateResult.next}; run that first or pass --force to export anyway.`);
   }
@@ -153,7 +153,7 @@ function exportPaper(input = {}) {
       current_stage: 'Export',
       last_completed_stage: 'Internal export',
       last_activity: new Date().toISOString(),
-      suggested_next_command: '/gpd-progress',
+      suggested_next_command: '/gpd-status',
     };
     writeStateJson(paperDir, nextState, input.dryRun);
   }
@@ -165,13 +165,13 @@ function exportPaper(input = {}) {
       '- **Status:** Exported',
       '- **Current stage:** Export',
       '- **Last completed stage:** Internal export',
-      '- **Suggested next command:** `/gpd-progress`',
+      '- **Suggested next command:** `/gpd-status`',
       '- **Blocked by:** None',
       '',
       '## Notes',
       '',
       '- Internal export created at `.paper/exports/FINAL.md`.',
-      '- Run `/gpd-progress` to decide whether to archive, revise, or start another paper.',
+      '- Run `/gpd-status` to decide whether to archive, revise, or start another paper.',
       '',
     ].join('\n'),
     input.dryRun,

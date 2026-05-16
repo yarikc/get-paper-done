@@ -92,6 +92,8 @@ Manual release checks:
 - `ROADMAP.md` records any plan change.
 - `git status --short` is clean before tagging.
 - Ignored feedback files and `*.feedback` files are not staged.
+- There is no tracked `docs/feedback-archive/`; raw review feedback stays ignored unless it is anonymized and deliberately converted into a durable issue, example, fixture, or documentation change.
+- Feedback harvesting must leave an auditable trail: either a GitHub issue, a test/example change, a roadmap entry, or a documentation update. Do not commit the raw feedback file itself.
 - Packaged paper examples are anonymized and contain no person names, company names, employer names, local paths, or private source material.
 
 ## Package Boundary Checks

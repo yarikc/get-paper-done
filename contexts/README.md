@@ -11,6 +11,11 @@ Use context packs carefully:
 - Do not auto-promote paper-specific decisions into this directory.
 - Sanitize promoted context so it contains no private names, company names, titles, local paths, or sensitive source material.
 
+Discovery is currently manual: inspect this directory before or during
+`/gpd-grill` when a paper may reuse prior terminology, proof standards, or
+decision patterns. A `gpd list-contexts` command is intentionally deferred until
+there is more than one real reusable context pack.
+
 Suggested pack shape:
 
 ```markdown

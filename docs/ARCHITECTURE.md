@@ -85,7 +85,7 @@ Agents may inspect raw sources only to verify a specific claim or fill a targete
 
 Import is preservation-first.
 
-`gpd import` and `/gpd-import-paper` copy source material into:
+`gpd import` and `/gpd-import` copy source material into:
 
 ```text
 original/

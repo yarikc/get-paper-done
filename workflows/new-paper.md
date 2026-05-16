@@ -48,7 +48,7 @@ Create the paper directory at:
 
 All subsequent file operations in this workflow happen inside that paper directory.
 
-If `[location]/[paper-slug]/.paper/` already exists, stop and tell the user to choose a different location or slug, or run `/gpd-progress` from inside the existing paper directory.
+If `[location]/[paper-slug]/.paper/` already exists, stop and tell the user to choose a different location or slug, or run `/gpd-status` from inside the existing paper directory.
 
 Create:
 
@@ -196,7 +196,7 @@ Valid blocker values are `none`, `scope_too_broad`, `thesis_weak`, `audience_unc
 
 Set suggested next command to `/gpd-grill` in both `STATE.md` and `STATE.json`.
 
-Do not suggest `/gpd-research`, `/gpd-outline`, or `/gpd-draft` from `/gpd-new-paper`. `/gpd-brief` owns the real brief and strategy gate after the grill is complete.
+Do not suggest `/gpd-research`, `/gpd-outline`, or `/gpd-draft` from `/gpd-new`. `/gpd-brief` owns the real brief and strategy gate after the grill is complete.
 
 Research is the evidence-for/evidence-against checkpoint. It happens after the brief captures thesis and claims, and before outline/draft lock in the argument structure.
 

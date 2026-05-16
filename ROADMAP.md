@@ -46,6 +46,7 @@ Current issue alignment:
 - `#13`: RFC-4 data charts and Vega-Lite artifacts; gated feature request, not core workflow until a real quantitative/public-source paper proves charting is materially useful.
 - `#16`: RFC-5 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
 - `#17`: RFC-6 mobile review packs for away-from-desktop review; useful capability backlog item, but should start as manual validation and review-pack export/import rather than a mobile app or vendor integration.
+- `#18`: closed mandatory grill gate and reusable paper context records; follow-up cleanup now clarifies grandfathered examples, indexes examples/fixtures, and tightens validation for grill companion artifacts.
 
 ## Main Line Preserved During RFC-5 Detour
 
@@ -72,6 +73,9 @@ Deferred until after the main-line calibration unless explicitly reprioritized:
 - Issue #5 RFC event and hook runtime.
 - RFC-6 mobile review packs / `#17` beyond manual validation.
 - Broad import conversion work beyond bugs exposed by the calibration.
+- Semantic validation as a routing source. `gpd validate --semantic` detects quality failures, but `gpd next` does not yet use semantic issue IDs as blockers.
+- Deterministic classification-driven policy checks beyond schema/template/workflow guidance. RFC-2.1 / issue #15 owns the broader feature direction.
+- Context-pack discovery CLI. `contexts/` is installed and documented, but users inspect the directory directly for now.
 
 ## RFC-3 / RFC-4 Placement
 
@@ -107,7 +111,7 @@ Open questions for the calibration:
 
 ## Active Execution Plan: Cycle 6 Hardening
 
-Last changed: 2026-05-15 after making `/gpd-grill` a mandatory machine-readable pre-brief gate, adding re-entry routing for later ambiguity, and adding sanitized reusable context packs.
+Last changed: 2026-05-15 after adding the post-grill cleanup slice: example/fixture indexes, explicit grandfathering policy for pre-grill examples, alias/override documentation, and stronger validation for `PAPER-CONTEXT.md` and `DECISIONS.md`.
 
 This is the active short-cycle plan. Changes to this plan must be recorded before implementation by updating this section and adding an append-only comment to the owning GitHub issue.
 
@@ -141,15 +145,16 @@ Plan-change rule:
 14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `EXTERNAL-REVIEWS.md` artifact contract, and deliberately does not invoke external providers yet.
 15. Completed: added a first provider-invocation slice for `gpd review-external --models`, limited to installed CLI providers with known stdin command patterns, temp prompt generation, timeout/error capture, and no local HTTP server support yet.
 16. Completed: calibrated the real Claude CLI path on a synthetic public paper, fixed the command from `claude -p -` to `claude -p`, and added a regression assertion for the argument shape.
-17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-progress` before stale mtime refresh rules can send the paper backward.
+17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-status` before stale mtime refresh rules can send the paper backward.
 18. Completed: calibrated the real Codex CLI path on a synthetic public paper, confirmed `codex exec --skip-git-repo-check -`, and added a regression assertion for the argument shape.
 19. Completed: added first-pass `.docx` canonical-draft text extraction for `gpd import`, preserving the original file under `original/`, writing extracted paragraph text to `.paper/DRAFT.md`, recording extraction provenance in `.paper/IMPORT.md`, and covering the behavior with a synthetic DOCX regression test.
 20. Completed: added import-time detection of unverified source-reference candidates from Markdown, text, and `.docx` material, recording URLs, DOIs, named standards/source families, and source/reference lines in `.paper/IMPORT.md` without creating `RESEARCH.json`.
 21. Completed: added a `Version / Source Index` to `.paper/IMPORT.md`, grouping copied files by likely role, ranking signal, modified time, recommended downstream stage, and rationale without changing routing or generating downstream artifacts.
 22. Completed: calibrated the real opencode CLI path on a synthetic public paper, confirmed `opencode run -`, corrected Gemini args to `gemini -p ""` with stdin based on CLI help, and added regression assertions for both provider argument shapes. Gemini real capture remains blocked until local browser authentication is completed.
-23. Completed: added CLI-only `gpd next` as a compact read-only guide for the next command, why it is next, and what context to read or avoid, while keeping `/gpd-progress` as the Claude/Codex dashboard.
-24. Completed: simplified README and `docs/START-HERE.md` into onboarding/front-door docs and moved dense workflow mechanics behind reference links instead of front-loading them.
+23. Completed: added CLI-only `gpd next` as a compact read-only guide for the next command, why it is next, and what context to read or avoid, while keeping `/gpd-status` as the Claude/Codex dashboard.
+24. Completed: simplified README and `docs/START-HERE.md` into onboarding/front-door docs with a product story, output preview, first-paper path, and clarify/support/shape/draft/check/revise/export loop; dense workflow mechanics stay in `docs/DESIGN-SPEC.md`.
 25. Completed: ran a temporary public-source onboarding calibration paper using `gpd next` between stages. The command routed correctly, but the calibration exposed that explanations could prefer saved `STATE.json` over the more helpful missing-artifact reason; fixed by prioritizing missing research/outline/draft/fact-check/review explanations before saved-state fallback.
+26. Completed: enforced the new-example grill artifact policy in tests. Existing pre-grill examples are explicitly grandfathered; any new example must include `.paper/PAPER-CONTEXT.md`, `.paper/DECISIONS.md`, and complete `STATE.json.grill` state.
 
 ### Explicit Non-Goals For This Cycle
 
@@ -157,6 +162,7 @@ Plan-change rule:
 - Do not add new semantic quality heuristics unless the active plan changes first.
 - Do not add a web dashboard, app UI, or any UX surface outside the `gpd` CLI, Claude/Codex slash commands, and `.paper/` artifacts.
 - Do not commit ignored feedback files.
+- Do not add a tracked feedback archive. Harvest actionable feedback into anonymized issues, tests, examples, docs, or roadmap entries; leave raw `docs/feedback*.md` and `*.feedback` ignored.
 
 ### Deferred After This Cycle
 
@@ -208,7 +214,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Renamed project to Get Paper Done.
 - Simplified import so it preserves originals and creates only minimal artifacts.
 - Added paper location prompt and per-paper directory creation.
-- Added `/gpd-progress` and `/gpd-status` as read-only continuity commands.
+- Added `/gpd-status` and `/gpd-status` as read-only continuity commands.
 - Added CLI-only `gpd next` for compact next-action guidance while preserving explicit slash-command stage execution.
 - Added hard research compression rule.
 - Added curated reusable audiences.
@@ -255,7 +261,7 @@ Use an existing paper project as the first test case.
 
 Flow:
 
-1. `/gpd-import-paper`
+1. `/gpd-import`
 2. `/gpd-brief`
 3. `paper-strategist` gate via `.paper/STRATEGY.md`
 4. `/gpd-research --standard` with plan approval

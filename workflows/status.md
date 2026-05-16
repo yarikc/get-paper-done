@@ -10,11 +10,11 @@ If `--json` is present, return the same status fields in a compact JSON object w
 
 If `.paper/` is missing:
 
-- If `original/` exists, recommend `/gpd-import-paper` was likely started incorrectly or the user is inside an imported paper directory without `.paper/`.
-- Otherwise recommend `/gpd-new-paper` for a new paper or `/gpd-import-paper` for an existing draft/folder.
+- If `original/` exists, recommend `/gpd-import` was likely started incorrectly or the user is inside an imported paper directory without `.paper/`.
+- Otherwise recommend `/gpd-new` for a new paper or `/gpd-import` for an existing draft/folder.
 - Stop.
 
-Read `.paper/STATE.json` first if it exists, then `.paper/STATE.md` for human notes. If both are missing, report that state is missing and recommend reconstructing with `/gpd-progress` output plus manual state repair.
+Read `.paper/STATE.json` first if it exists, then `.paper/STATE.md` for human notes. If both are missing, report that state is missing and recommend reconstructing with `/gpd-status` output plus manual state repair.
 
 Check which artifacts exist:
 
@@ -119,14 +119,14 @@ Use this order:
 17. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
 18. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
 19. `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
-20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-progress`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
+20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-status`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
 21. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
 22. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
 23. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
 24. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
 25. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
 26. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
-27. Final exists and is current → paper appears exported; recommend `/gpd-progress` or archive/next-paper planning unless new changes are planned.
+27. Final exists and is current → paper appears exported; recommend `/gpd-status` or archive/next-paper planning unless new changes are planned.
 
 Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
 

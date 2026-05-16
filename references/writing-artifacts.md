@@ -38,7 +38,7 @@ Import-specific and supporting material:
 
 ## Workspace Location
 
-`/gpd-new-paper` should ask where to create the paper project unless `--location` is provided. It creates:
+`/gpd-new` should ask where to create the paper project unless `--location` is provided. It creates:
 
 ```text
 [location]/[paper-slug]/.paper/
@@ -46,7 +46,7 @@ Import-specific and supporting material:
 
 The paper slug should be derived from the working title or topic unless `--slug` is provided.
 
-`/gpd-import-paper` follows the same location and slug behavior, but also creates:
+`/gpd-import` follows the same location and slug behavior, but also creates:
 
 ```text
 [location]/[paper-slug]/original/
@@ -192,7 +192,7 @@ If an imported source folder already contains directories named `references/`, `
 
 ## Import Stage
 
-`/gpd-import-paper` is for papers already started outside the framework.
+`/gpd-import` is for papers already started outside the framework.
 
 It should:
 

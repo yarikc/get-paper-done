@@ -138,9 +138,9 @@ Setup creates only the artifacts required to start. Later stages create their ar
 
 | Command | Purpose |
 |---------|---------|
-| `/gpd-new-paper` | Create a new paper workspace |
-| `/gpd-import-paper` | Import an existing paper and preserve originals |
-| `/gpd-progress` | Report state, artifact health, suggested next command |
+| `/gpd-new` | Create a new paper workspace |
+| `/gpd-import` | Import an existing paper and preserve originals |
+| `/gpd-status` | Report state, artifact health, suggested next command |
 | `/gpd-grill` | Mandatory pre-brief interrogation and later re-entry workflow for paper intent, terminology, audience, thesis, proof standard, scope, and non-goals |
 | `/gpd-brief` | Create or refine thesis, claims, and paper brief |
 | `/gpd-research` | Infer questions, present plan, write structured evidence |
@@ -152,14 +152,6 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-revise` | Apply approved feedback |
 | `/gpd-export` | Prepare final handoff |
 
-### Aliases
-
-| Alias | Same as |
-|-------|---------|
-| `/gpd-new` | `/gpd-new-paper` |
-| `/gpd-import` | `/gpd-import-paper` |
-| `/gpd-status` | `/gpd-progress` |
-
 ### Maintenance Commands
 
 | Command | Purpose |
@@ -170,21 +162,58 @@ Setup creates only the artifacts required to start. Later stages create their ar
 
 ## Workflow
 
-```text
-new/import
-  -> grill
-  -> brief
-  -> strategy gate
-  -> research
-  -> outline
-  -> draft
-  -> fact-check
-  -> review
-  -> revise
-  -> export
-```
+### Stage Semantics
+
+| Stage | Primary command | Gate | Mandatory? | Writes | Transition rule |
+|-------|-----------------|------|------------|--------|-----------------|
+| Setup | `gpd init`, `gpd import`, `/gpd-new` | Workspace exists | Required | `.paper/PROJECT.md`, setup artifacts, state | Route to missing setup, then persona/audience/grill. |
+| Persona | `/gpd-persona` | Author voice usable | Required unless already correct | `PERSONA.md` | Continue when voice, tone, claim style, and avoid-list are clear. |
+| Audience | `/gpd-audience` | Reader and proof standard usable | Required unless already correct | `AUDIENCE.md` | Continue when primary reader, objections, and proof expectations are explicit. |
+| Grill | `/gpd-grill` | Required decision keys complete | Mandatory for new/imported papers | `PAPER-CONTEXT.md`, `DECISIONS.md`, `STATE.json.grill` | Route to `/gpd-brief` only after author intent, thesis, reader, terms, scope, proof standard, counterargument, and non-goals are confirmed. |
+| Brief | `/gpd-brief` | Brief contract clarity | Mandatory | `BRIEF.md` | Continue when classification, thesis, claims, reader promise, scope, objections, source assumptions, and open questions are clear enough to test. |
+| Strategy gate | Produced by `/gpd-brief`; recorded in `STRATEGY.md` | Strategy status | Mandatory gate, not a separate user command | `STRATEGY.md` | `Go` allows research/outline. `Revise Before Drafting` or `No-Go` routes back to brief/grill/audience unless explicitly overridden. |
+| Research | `/gpd-research` | Evidence sufficiency | Required for standard/flagship; conditional for lite | `RESEARCH.json`, `RESEARCH.md` | Continue when sources, claim support, counterevidence, and source gaps are explicit. |
+| Outline | `/gpd-outline` | Argument structure | Required before serious drafting | `OUTLINE.md` | Continue when reader journey, claims, objections, and evidence hooks are coherent. |
+| Draft | `/gpd-draft` | Draft body exists | Required | `DRAFT.md` | Prefer `--next-section` until the paper body is complete; full draft only for short or explicit cases. |
+| Fact-check | `/gpd-fact-check` | Material claim safety | Required for standard/flagship; conditional for lite | `FACT-CHECK.md` | Keep, soften, remove, verify, or route claims back to research/revise. |
+| Review | `/gpd-review` | Review verdict | Required before export | `REVIEW.md`, optionally `READER-FEEDBACK.md` and `FEEDBACK-PLAN.md` | Ready routes to export; revise/rework routes to feedback planning or revision. |
+| Revise | `/gpd-revise` | Approved fix application | Conditional | `DRAFT.md` and state updates | Apply only approved feedback/fact-check/review fixes, then refresh stale downstream stages. |
+| Export | `/gpd-export`, `gpd export` | Final handoff current | Required for final output | `exports/FINAL.md` | Allowed when draft/review state is ready and export is not stale. |
 
 `/gpd-grill` can also be invoked later. If an author or agent finds unresolved ambiguity after brief, research, outline, draft, review, or feedback, the workflow updates `PAPER-CONTEXT.md` and `DECISIONS.md` without rewriting downstream artifacts directly. When those artifacts are newer than `BRIEF.md`, status routing sends the paper back to `/gpd-brief` so the formal paper contract catches up before downstream work resumes.
+
+### Backward Routing Walkthrough
+
+Backward routing repairs the earliest stale artifact, not the most recent one.
+
+Example:
+
+1. `/gpd-review` finds that the draft's ask is unclear.
+2. If the ask problem changes the decision, reader promise, thesis, or scope, the next command is `/gpd-brief`, not `/gpd-revise`.
+3. `/gpd-brief` updates `BRIEF.md` and reruns the strategy gate in `STRATEGY.md`.
+4. If the revised brief changes evidence needs, status routes to `/gpd-research`.
+5. If research changes, status routes to `/gpd-outline`.
+6. Drafting resumes only after the outline reflects the new brief and research.
+
+This avoids line-editing a draft whose upstream contract is wrong.
+
+### Gate Override Semantics
+
+The grill gate and strategy gate may be overridden only by explicit user instruction.
+
+- A grill override accepts the risk that downstream artifacts are based on unresolved author intent.
+- A strategy override accepts the risk that research, outline, or draft work starts from a weak or blocked brief.
+- Overrides must be recorded in `STATE.json` or the relevant gate artifact with `required_unblock_action = user_override` where applicable.
+- Status output should explain the accepted risk instead of silently treating the gate as passed.
+
+### Validation Composition
+
+Validation has two layers:
+
+1. Artifact-contract validation in `bin/lib/validate.js`. This checks required files, schemas, Markdown contracts, `PAPER-CONTEXT.md`, `DECISIONS.md`, and cross-artifact consistency such as canonical terms appearing in `DRAFT.md`.
+2. Semantic lint-style validation in `bin/lib/semantic.js`. This checks paper-quality failure patterns such as stale evidence, weak reasoning spine, unsupported quantitative claims, and overloaded prose.
+
+`gpd validate --semantic` always runs layer 1 before layer 2. A validator does not need to live in `bin/lib/semantic.js` to block semantic validation output.
 
 ### Import Flow
 
@@ -339,7 +368,7 @@ Existing curated personas are never used blindly. The workflow summarizes and su
 Suggested next command precedence:
 
 1. Missing setup artifacts route to setup repair.
-2. Incomplete `STATE.json.grill` routes to `/gpd-grill`; `/gpd-brief` cannot proceed until the required grill decisions are complete.
+2. Incomplete `STATE.json.grill` routes to `/gpd-grill`; `/gpd-brief` cannot proceed until the required grill decisions are complete unless the user explicitly records an override in state and accepts that downstream work may rest on unresolved author intent.
 3. `PAPER-CONTEXT.md` or `DECISIONS.md` newer than `BRIEF.md` routes to `/gpd-brief`, allowing later re-grill sessions to update the formal brief before downstream work resumes.
 4. Blocking strategy statuses route back to `/gpd-brief` after grill completion.
 5. Upstream artifacts newer than downstream artifacts route backward for incremental refresh: brief/strategy to research, research to outline, outline to draft, draft to fact-check, and fact-check to review.
@@ -355,6 +384,10 @@ Blocking conditions:
 - strategy block, including the primary blocker from `STRATEGY.md`
 - missing evidence when claims require support
 - pending feedback-plan approval
+
+Strategy and grill gates may be overridden only by explicit user instruction.
+The override must be recorded in `STATE.json` or the relevant gate artifact, and
+the next status explanation should say what risk the user accepted.
 
 ## Installation Model
 

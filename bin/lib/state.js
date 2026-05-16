@@ -347,7 +347,7 @@ function suggestedNext(state) {
   ) {
     return '/gpd-brief';
   }
-  if (feedbackPlanPending(state)) return '/gpd-progress';
+  if (feedbackPlanPending(state)) return '/gpd-status';
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
     || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
@@ -385,7 +385,7 @@ function suggestedNext(state) {
     ) {
       return '/gpd-export';
     }
-    return '/gpd-progress';
+    return '/gpd-status';
   }
 
   const nextFromState = savedNextCommand(state);
@@ -472,7 +472,7 @@ function contextForCommand(command) {
       avoid: ['internal notes that should not appear in FINAL.md'],
     };
   }
-  if (base === '/gpd-progress') {
+  if (base === '/gpd-status') {
     return {
       clear_context: 'No.',
       read: ['STATE.json', 'STATE.md', 'artifact timestamps'],
@@ -538,7 +538,7 @@ function explainNext(state) {
   }
   const verdict = reviewVerdict(state);
   if ((verdict === 'Revise' || verdict === 'Rework') && next === '/gpd-revise') return `REVIEW.md verdict is ${verdict}, so revision is the next controlled step.`;
-  if (a['exports/FINAL.md'] && next === '/gpd-progress') return 'The export is current, so there is no required next writing stage.';
+  if (a['exports/FINAL.md'] && next === '/gpd-status') return 'The export is current, so there is no required next writing stage.';
   if (a['exports/FINAL.md'] && next === '/gpd-export') return 'The draft, fact-check, or review changed after export, so FINAL.md needs regeneration.';
   if (!a['RESEARCH.json'] && next === '/gpd-research') return 'Structured research is missing, so research is the next required artifact.';
   if (!a['OUTLINE.md'] && next.startsWith('/gpd-outline')) return 'The outline is missing, so structure should be created before drafting.';

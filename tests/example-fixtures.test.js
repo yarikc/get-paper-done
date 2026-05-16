@@ -15,6 +15,14 @@ const responsibleAiExampleDir = path.join(examplesRoot, 'responsible-ai-controls
 const quantitativeExampleDir = path.join(examplesRoot, 'platform-review-cycle-metrics');
 const publicSourceExampleDir = path.join(examplesRoot, 'public-ai-control-baseline');
 const supplyChainExampleDir = path.join(examplesRoot, 'software-supply-chain-evidence-pack');
+const grandfatheredPreGrillExamples = new Set([
+  'data-products-ai-scaling',
+  'platform-review-cycle-metrics',
+  'public-ai-control-baseline',
+  'responsible-ai-controls',
+  'technology-lifecycle-management',
+  'weekly-platform-update',
+]);
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -111,7 +119,40 @@ function testExamplesRouteToProgressAfterNormalizedCheckout() {
     normalizeWorkflowMtimes(copiedExample);
 
     const status = JSON.parse(run(['status', '--paper', copiedExample, '--json']));
-    assert.strictEqual(status.next, '/gpd-progress', `${exampleDir} should route to progress`);
+    assert.strictEqual(status.next, '/gpd-status', `${exampleDir} should route to status`);
+  }
+}
+
+function assertCompleteGrillArtifacts(exampleDir) {
+  const paperDir = path.join(exampleDir, '.paper');
+  const state = JSON.parse(fs.readFileSync(path.join(paperDir, 'STATE.json'), 'utf8'));
+
+  assert(fs.existsSync(path.join(paperDir, 'PAPER-CONTEXT.md')), `${exampleDir} must include PAPER-CONTEXT.md`);
+  assert(fs.existsSync(path.join(paperDir, 'DECISIONS.md')), `${exampleDir} must include DECISIONS.md`);
+  assert(state.grill, `${exampleDir} must include STATE.json grill state`);
+  assert.strictEqual(state.grill.status, 'Complete', `${exampleDir} grill state must be complete`);
+  assert(Array.isArray(state.grill.resolved_decisions), `${exampleDir} grill resolved_decisions must be an array`);
+  for (const key of [
+    'paper_job',
+    'primary_reader',
+    'belief_shift',
+    'thesis',
+    'narrative_spine',
+    'key_terms',
+    'scope_boundary',
+    'proof_standard',
+    'strongest_counterargument',
+    'non_goals',
+  ]) {
+    assert(state.grill.resolved_decisions.includes(key), `${exampleDir} grill state missing ${key}`);
+  }
+}
+
+function testNewExamplesMustIncludeGrillArtifacts() {
+  for (const exampleDir of examplePaperDirs()) {
+    const slug = path.basename(exampleDir);
+    if (grandfatheredPreGrillExamples.has(slug)) continue;
+    assertCompleteGrillArtifacts(exampleDir);
   }
 }
 
@@ -534,6 +575,7 @@ function testTechnologyLifecycleManagementKeepsImportRecoveryShape() {
 
 testExamplesValidateCleanly();
 testExamplesRouteToProgressAfterNormalizedCheckout();
+testNewExamplesMustIncludeGrillArtifacts();
 testDataProductsExampleHasNoTrialOnlyArtifacts();
 testWeeklyPlatformUpdateKeepsLiteShape();
 testResponsibleAiControlsKeepsExternalEvidenceShape();

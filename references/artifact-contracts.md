@@ -231,3 +231,7 @@ Paper decision records should be sparse. They are for thesis, audience, scope, s
 `PAPER-CONTEXT.md` and `DECISIONS.md` are the human-readable companion artifacts. `STATE.json.grill` is the machine-readable gate.
 
 The grill gate is re-enterable. After `grill.status` is `Complete`, `/gpd-grill` may still update `PAPER-CONTEXT.md` or `DECISIONS.md` when the author or an agent finds new ambiguity. If either artifact becomes newer than `BRIEF.md`, routing should send the paper to `/gpd-brief` so the formal paper contract catches up before research, outline, draft, review, revise, or export continues.
+
+New examples created after the mandatory grill gate should include both companion artifacts. Older examples may be grandfathered with retroactive `STATE.json.grill` compatibility when backfilling would create artificial records. The canonical demonstration is `examples/software-supply-chain-evidence-pack/.paper/`.
+
+`gpd validate` checks the structural contracts for these artifacts. `gpd validate --semantic` runs those structural checks first, then adds semantic lint-style checks from `bin/lib/semantic.js`.

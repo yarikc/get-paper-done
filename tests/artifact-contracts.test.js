@@ -11,6 +11,7 @@ const gpd = path.join(repoRoot, 'bin', 'gpd.js');
 const {
   validateJsonSchemaValue,
   validateSchemaDefinition,
+  validatePaperArtifacts,
 } = require('../bin/lib/validate');
 
 function run(args, options = {}) {
@@ -264,6 +265,71 @@ function testStrategyValueFailureIsActionable() {
   assert(result.stdout.includes('STRATEGY.md: $.Required unblock action must be one of none, brief_revision, audience_revision'));
 }
 
+function testPaperContextRejectsPlaceholderContent() {
+  const dir = tempDir('gpd-artifact-paper-context-test');
+  const badContext = path.join(dir, 'PAPER-CONTEXT.md');
+  fs.writeFileSync(badContext, fs.readFileSync(path.join(repoRoot, 'templates', 'paper-context.md'), 'utf8'));
+
+  const result = runFail(['validate-artifact', '--path', badContext]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('PAPER-CONTEXT.md: Opening context must explain why this paper needs a language contract'));
+  assert(result.stdout.includes('PAPER-CONTEXT.md: Language section must define at least one non-placeholder canonical term'));
+  assert(result.stdout.includes('PAPER-CONTEXT.md: Contains unresolved template placeholder text'));
+}
+
+function testDecisionsRejectPlaceholderContent() {
+  const dir = tempDir('gpd-artifact-decisions-test');
+  const badDecisions = path.join(dir, 'DECISIONS.md');
+  fs.writeFileSync(badDecisions, fs.readFileSync(path.join(repoRoot, 'templates', 'decisions.md'), 'utf8'));
+
+  const result = runFail(['validate-artifact', '--path', badDecisions]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('DECISIONS.md: PDR-0001 decision must be non-placeholder text'));
+  assert(result.stdout.includes('DECISIONS.md: PDR-0001 Why It Matters must be non-placeholder text'));
+  assert(result.stdout.includes('DECISIONS.md: PDR-0001 detail section must include a YYYY-MM-DD Date field'));
+  assert(result.stdout.includes('DECISIONS.md: Contains unresolved template placeholder text'));
+}
+
+function testPaperContextTermsMustAppearInDraftWhenDraftExists() {
+  const dir = tempDir('gpd-artifact-paper-context-draft-test');
+  const paperDir = path.join(dir, 'paper');
+  const meta = path.join(paperDir, '.paper');
+  fs.mkdirSync(meta, { recursive: true });
+  fs.writeFileSync(path.join(meta, 'PAPER-CONTEXT.md'), [
+    '# Paper Context',
+    '',
+    'This context defines a term that should be used by the draft.',
+    '',
+    '## Language',
+    '',
+    '**Governed object**: The thing the control applies to.',
+    '_Avoid_: vague control target',
+    '',
+    '## Relationships',
+    '',
+    '- **Governed object** anchors the control record.',
+    '',
+    '## Example Dialogue',
+    '',
+    '> **Author:** "What is governed?"',
+    '>',
+    '> **Reader:** "The governed object."',
+    '',
+    '## Flagged Ambiguities',
+    '',
+    '- "Object" was vague.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThis draft never names the key term.\n');
+
+  const issues = validatePaperArtifacts(paperDir, {
+    'PAPER-CONTEXT.md': true,
+    'DRAFT.md': true,
+  });
+
+  assert(issues.some((item) => item.issue.includes('PAPER-CONTEXT.md: Canonical term "Governed object" does not appear in DRAFT.md')));
+}
+
 function testJsonSchemaAdditionalPropertiesAndPatternAreEnforced() {
   const schema = {
     type: 'object',
@@ -396,6 +462,9 @@ testReaderFeedbackContractRejectsMissingSignal();
 testExternalReviewsContractRequiresConsensusSections();
 testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
+testPaperContextRejectsPlaceholderContent();
+testDecisionsRejectPlaceholderContent();
+testPaperContextTermsMustAppearInDraftWhenDraftExists();
 testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();
 testUnsupportedSchemaKeywordFailsSchemaDefinition();
 testUnknownArtifactFailsCli();

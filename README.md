@@ -1,27 +1,29 @@
 # Get Paper Done
 
-Get Paper Done is a file-based AI workflow for serious papers.
+A file-based AI workflow for serious papers.
 
-It is for decision memos, strategy papers, explainers, architecture papers, white papers, executive updates, and public technical writing where audience, evidence, argument quality, and revision discipline matter.
+GPD is for decision memos, strategy papers, explainers, architecture papers,
+white papers, executive updates, and public technical writing where the paper
+has to convince a real reader.
 
-Most AI writing workflows draft too early. They produce polished paragraphs before the paper has a clear job, reader, thesis, proof standard, decision ask, or shared language. GPD slows the workflow down in the right places: grill, brief, strategy gate, research, outline, draft, fact-check, review, feedback, revise, export.
+Most AI writing workflows draft too early. They produce fluent paragraphs before
+the paper has a clear job, reader, thesis, proof standard, evidence plan, or
+decision ask. GPD fixes that by turning each paper into a small workflow with
+durable files, gates, and review loops.
 
-The point is not more process. The point is fewer weak drafts, less generic AI prose, and a paper folder that remembers what was decided even after chat context is gone.
+What you see: a few commands and a `.paper/` folder.
 
-New here? Read [docs/START-HERE.md](docs/START-HERE.md), then run `gpd next` or `/gpd-progress` whenever you are unsure what to do.
+What the system protects: author intent, audience fit, evidence, argument
+structure, fact-checking, feedback, and revision state.
+
+New here? Read [docs/START-HERE.md](docs/START-HERE.md), then run `gpd next` or
+`/gpd-status` whenever you are unsure what to do.
 
 ## Why Use It
 
-- **Better papers, not just faster prose.** GPD forces clarity on purpose, audience, thesis, evidence, objections, and ask before polishing language.
-- **Durable context.** Research, feedback, state, and revision decisions live in files, so the workflow survives context resets and model switches.
-- **Author-intent recovery.** `/gpd-grill` challenges every new or imported paper before it gets compressed into a brief, then records resolved language and paper decisions.
-- **Quality gates.** Strategy, research, fact-check, review, and export gates prevent weak papers from quietly moving forward.
-- **Controlled feedback.** Human or model feedback is captured and planned before revision changes the draft.
-- **Real revision.** If review shows the paper needs more research, a better outline, or a clearer ask, GPD routes backward instead of pretending revision is line editing.
+Use GPD when a paper needs to be better than "good AI prose."
 
-## Best Fit
-
-Use GPD when the writing has real stakes:
+It helps when:
 
 - a decision needs approval
 - a strategy or architecture direction needs to be argued
@@ -29,28 +31,35 @@ Use GPD when the writing has real stakes:
 - a public or executive-facing paper needs evidence discipline
 - an existing draft needs recovery, source mapping, or audience repair
 
-Do not use it for quick emails, casual summaries, chat replies, or writing where one prompt is enough.
+Do not use it for quick emails, casual summaries, chat replies, or anything
+where one prompt is enough.
 
-## Quick Preview
+## See The Output
 
-Before creating your own paper, inspect finished outputs:
+Before creating your own paper, inspect finished examples:
 
-- [examples/data-products-ai-scaling/.paper/exports/FINAL.md](examples/data-products-ai-scaling/.paper/exports/FINAL.md) shows a full internal strategy-paper flow.
-- [examples/public-ai-control-baseline/.paper/exports/FINAL.md](examples/public-ai-control-baseline/.paper/exports/FINAL.md) shows a compact public-source decision memo.
-- [examples/software-supply-chain-evidence-pack/.paper/exports/FINAL.md](examples/software-supply-chain-evidence-pack/.paper/exports/FINAL.md) shows the feedback-loop showcase: reader feedback, feedback plan, backward routing, fact-checking, review, and export.
+- [data-products-ai-scaling FINAL.md](examples/data-products-ai-scaling/.paper/exports/FINAL.md) shows a full internal strategy-paper flow.
+- [public-ai-control-baseline FINAL.md](examples/public-ai-control-baseline/.paper/exports/FINAL.md) shows a compact public-source decision memo.
+- [software-supply-chain-evidence-pack FINAL.md](examples/software-supply-chain-evidence-pack/.paper/exports/FINAL.md) shows reader feedback, feedback planning, backward routing, fact-checking, review, and export.
 
-The surrounding `.paper/` folders show the artifacts that produced each final paper.
+The surrounding `.paper/` folders show how each paper was built. For the grill
+step specifically, see the supply-chain example's
+[PAPER-CONTEXT.md](examples/software-supply-chain-evidence-pack/.paper/PAPER-CONTEXT.md)
+and
+[DECISIONS.md](examples/software-supply-chain-evidence-pack/.paper/DECISIONS.md).
 
 ## Install
 
-Because this is currently a local/private repo, link the CLI once so `gpd` is available on your shell `PATH`:
+This repo is currently meant to be used from a local/private checkout.
+
+Link the CLI once:
 
 ```bash
 cd /path/to/get-paper-done
 npm link
 ```
 
-Install GPD into both supported AI runtimes:
+Install the runtime files:
 
 ```bash
 gpd install claude
@@ -59,13 +68,15 @@ gpd doctor claude
 gpd doctor codex
 ```
 
-Restart Claude Code and Codex after installing so they pick up the slash commands.
+Restart Claude Code and Codex after install.
 
-`npm link` only exposes the local CLI. `gpd install claude` and `gpd install codex` copy slash commands, workflows, agents, templates, references, contexts, profiles, and audiences into the runtime directories.
+`npm link` puts the local `gpd` command on your shell `PATH`. `gpd install ...`
+copies the slash commands, workflows, agents, templates, references, contexts,
+profiles, and audiences into the AI runtime.
 
-## First Paper
+## Create A Paper
 
-Create a paper workspace:
+Use the CLI for deterministic setup:
 
 ```bash
 gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
@@ -73,83 +84,108 @@ cd ~/papers/metadata-strategy
 gpd next
 ```
 
-Then open Claude or Codex in that paper directory and run the command GPD recommends.
+Then open Claude or Codex in that paper directory and run the command GPD
+recommends.
 
-For a first clean paper, the path usually looks like this:
+You can also create the paper interactively from the AI runtime:
+
+```text
+/gpd-new
+```
+
+## How It Works
+
+The loop is simple:
+
+```text
+clarify -> support -> shape -> draft -> check -> revise -> export
+```
+
+Each command writes durable files under `.paper/`. Each later command reads
+those files instead of relying on chat memory.
+
+### 1. Clarify
 
 ```text
 /gpd-persona
 /gpd-audience
 /gpd-grill
 /gpd-brief
+```
+
+Persona captures how the author sounds and argues. Audience captures who the
+paper must satisfy and what they will challenge.
+
+Grill is the interrogation step. It asks one question at a time until the paper
+has a clear job, reader, thesis, terms, scope, proof standard, counterargument,
+and non-goals. It writes `PAPER-CONTEXT.md` and `DECISIONS.md`.
+
+Brief turns those decisions into the formal paper contract. It also produces
+the strategy gate in `STRATEGY.md`. If the strategy gate is not `Go`, the paper
+routes back before research or drafting.
+
+### 2. Support
+
+```text
 /gpd-research
+```
+
+Research builds the source plan, evidence matrix, source registry,
+counterevidence, and claim support. Weak claims are marked to soften or drop.
+
+### 3. Shape
+
+```text
 /gpd-outline
+```
+
+Outline designs the reader journey, argument flow, evidence placement, and
+objection handling before drafting starts.
+
+### 4. Draft
+
+```text
 /gpd-draft --next-section
+```
+
+Draft writes controlled sections from the approved brief, research, and
+outline. `--next-section` is the safe default for serious papers.
+
+### 5. Check
+
+```text
 /gpd-fact-check --full
 /gpd-review
+```
+
+Fact-check tests material claims for support, exaggeration, stale claims,
+contradiction, and citation risk.
+
+Review tests audience fit, ask clarity, evidence, objections, structure, and
+decision usefulness. Human or model feedback is captured before revision work
+starts.
+
+### 6. Revise And Export
+
+```text
 /gpd-revise
 /gpd-export
 ```
 
-You do not need to memorize the path. Use:
+Revise applies approved fixes from review, fact-check, or feedback planning. It
+is not an open-ended rewrite step.
 
-```bash
-gpd next
-```
+Export produces the final Markdown handoff in `.paper/exports/FINAL.md`.
 
-or, inside Claude/Codex:
+## Moving Backward Is Normal
 
-```text
-/gpd-progress
-```
+If review finds that the ask is weak, the answer may not be another draft pass.
+GPD may route back to `/gpd-brief` because the paper contract changed. If the
+new brief needs different evidence, GPD routes to `/gpd-research`, then
+`/gpd-outline`, then drafting resumes.
 
-Both are read-only. They tell you the current state, blocker, next command, and why.
-
-## CLI Vs Slash Commands
-
-GPD has two command layers:
-
-| Layer | Examples | Use it for |
-|-------|----------|------------|
-| CLI | `gpd install`, `gpd init`, `gpd import`, `gpd next`, `gpd status`, `gpd validate`, `gpd export` | Filesystem-safe setup, import/export, status, validation, release checks. |
-| Slash commands | `/gpd-brief`, `/gpd-research`, `/gpd-outline`, `/gpd-draft`, `/gpd-review` | The AI-assisted writing workflow inside Claude or Codex. |
-
-Use the CLI for setup and inspection. Use slash commands for strategy, research, outlining, drafting, review, and revision.
-
-## Workflow
-
-Normal flow:
-
-```text
-create or import
-  -> grill
-  -> brief
-  -> strategy gate
-  -> research
-  -> outline
-  -> draft
-  -> fact-check
-  -> review
-  -> revise
-  -> export
-```
-
-Each stage reads existing `.paper/` artifacts, writes its own artifact, and updates state.
-
-Moving backward is normal. If you change the brief after research, or research after outlining, GPD routes you back to the earliest stage that needs refresh. That is an incremental repair, not a full reset.
-
-For the full state and gate model, see [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
-
-## Paper Types
-
-During `/gpd-brief`, each paper gets a normalized classification:
-
-- `decision_memo`
-- `strategy_paper`
-- `explainer`
-- `update`
-
-GPD also records channel, risk, complexity, and audience shape. This lets the workflow scale rigor without inventing separate systems for memos, articles, white papers, and updates.
+That is the point. The workflow repairs the earliest stale artifact instead of
+polishing a draft built on the wrong contract.
 
 ## Import Existing Work
 
@@ -162,55 +198,68 @@ cd ~/papers/imported-paper
 gpd next
 ```
 
-Import is preservation-first. It copies source material into `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, and leaves research, outline, fact-check, and review as separate stages.
+Import is preservation-first. It copies source material into `original/`, writes
+`.paper/IMPORT.md`, creates setup artifacts, and leaves research, outline,
+fact-check, and review as separate stages.
 
-If the selected canonical draft is Markdown, plain text, or `.docx`, CLI import writes `.paper/DRAFT.md` from it. `.docx` extraction is plain paragraph text only; the original file remains unchanged under `original/`.
+Run `/gpd-grill` before `/gpd-brief` after import. This prevents a messy draft
+from being compressed into a weak brief before the core thesis and decisions are
+clear.
 
-Run `/gpd-grill` before `/gpd-brief` for every new or imported paper. It asks one question at a time to recover thesis, audience, story, terminology, proof standard, scope, and non-goals, then writes `.paper/PAPER-CONTEXT.md` and `.paper/DECISIONS.md` so later stages know what was decided and why.
+## Commands
 
-You can also run `/gpd-grill` later. Use it when you need to brainstorm again or when an agent detects unresolved ambiguity in thesis, reader, terminology, scope, proof standard, or non-goals. If the later grill changes `PAPER-CONTEXT.md` or `DECISIONS.md`, GPD routes back to `/gpd-brief` so the formal brief absorbs the new understanding before downstream work continues.
+Main writing commands:
 
-## Reader And External Feedback
+| Command | What it does |
+|---------|--------------|
+| `/gpd-new` | Create a new paper workspace interactively |
+| `/gpd-import` | Import existing paper material |
+| `/gpd-status` | Show current state, blockers, and next command |
+| `/gpd-persona` | Capture author voice |
+| `/gpd-audience` | Capture reader, objections, and proof standard |
+| `/gpd-grill` | Remove ambiguity before briefing |
+| `/gpd-brief` | Create the paper contract and strategy gate |
+| `/gpd-research` | Build evidence and claim support |
+| `/gpd-outline` | Design the argument path |
+| `/gpd-draft` | Draft from approved artifacts |
+| `/gpd-fact-check` | Check material claims |
+| `/gpd-review` | Review audience fit and paper quality |
+| `/gpd-revise` | Apply approved fixes |
+| `/gpd-export` | Create final Markdown output |
 
-Reader feedback is captured in `.paper/READER-FEEDBACK.md` before it becomes revision work. Feedback then moves through `.paper/FEEDBACK-PLAN.md`, where each item is marked incorporate, ignore, defer, or ask user before `/gpd-revise` changes the draft.
-
-For deterministic CLI collection:
+Common CLI commands:
 
 ```bash
-gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
-gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,opencode
-```
-
-Claude, Codex, and opencode have been calibrated on synthetic public papers. Gemini has argument-shape coverage but requires local Gemini authentication before real capture.
-
-## Common CLI Commands
-
-```bash
-gpd next --paper ~/papers/metadata-strategy
-gpd status --paper ~/papers/metadata-strategy
-gpd validate --paper ~/papers/metadata-strategy
-gpd validate --semantic --paper ~/papers/metadata-strategy
-gpd export --paper ~/papers/metadata-strategy
+gpd next
+gpd status
+gpd validate
+gpd validate --semantic
+gpd export
 gpd update claude
 gpd update codex
 ```
 
-Use `gpd next` for the compact answer. Use `gpd status` when you want full artifact presence. Use `gpd validate --semantic` before treating a paper as example-quality, publication-ready, or ready for long-term handoff.
+Use `gpd next` for the compact answer. Use `gpd status` when you want full
+artifact presence. Use `gpd validate --semantic` before treating a paper as
+example-quality, publication-ready, or ready for long-term handoff.
 
 ## Documentation
 
 | Doc | What it is for |
 |-----|----------------|
-| [docs/START-HERE.md](docs/START-HERE.md) | First-paper walkthrough. |
-| [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md) | Full workflow model, state gates, and design contract. |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Package/runtime/workspace architecture. |
-| [docs/RELEASE.md](docs/RELEASE.md) | Private-repo release and update policy. |
-| [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md) | Current strengths, risks, and gaps. |
-| [ROADMAP.md](ROADMAP.md) | Forward plan and active issue alignment. |
-| [references/artifact-contracts.md](references/artifact-contracts.md) | Artifact contracts used by validation. |
+| [docs/START-HERE.md](docs/START-HERE.md) | First-paper walkthrough |
+| [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md) | Full workflow model, state gates, and design contract |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Package, runtime, and workspace architecture |
+| [docs/RELEASE.md](docs/RELEASE.md) | Private-repo release and update policy |
+| [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md) | Current strengths, risks, and gaps |
+| [ROADMAP.md](ROADMAP.md) | Forward plan and issue alignment |
+| [examples/README.md](examples/README.md) | Example index |
 
 ## Package Boundary
 
-The npm package is an installable framework bundle, not a dump of every repo file. It includes the CLI, commands, workflows, agents, templates, references, reusable contexts, curated audiences/profiles, docs, and examples.
+The npm package is an installable framework bundle. It includes the CLI,
+commands, workflows, agents, templates, references, contexts, profiles,
+audiences, docs, and examples.
 
-It intentionally excludes tests, RFC design drafts, ignored feedback files, local scratch files, and private paper/profile material. `npm run release:check` verifies the package boundary before release-style handoff.
+It excludes tests, RFC drafts, ignored feedback files, scratch files, and
+private paper/profile material. `npm run release:check` verifies the boundary.

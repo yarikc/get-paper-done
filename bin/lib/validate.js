@@ -531,6 +531,104 @@ function validateStrategyValues(markdown, filePath) {
   ];
 }
 
+function containsPlaceholder(markdown) {
+  return /\[[^\]]+\]/.test(markdown);
+}
+
+function validatePaperContextContent(markdown, filePath) {
+  if (isTemplateFile(filePath)) return [];
+
+  const issues = [];
+  const summary = sectionBetween(markdown, '# Paper Context', /\n##\s+/).trim();
+  if (summary.length < 40 || containsPlaceholder(summary) || summary.includes('One or two sentences')) {
+    issues.push(issue('HIGH', 'PAPER-CONTEXT.md', 'Opening context must explain why this paper needs a language contract'));
+  }
+
+  const language = sectionBetween(markdown, '## Language', /\n##\s+/);
+  const entries = language
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => /^\*\*[^*[\]]+\*\*:\s+\S/.test(line) && !containsPlaceholder(line));
+
+  if (entries.length === 0) {
+    issues.push(issue('HIGH', 'PAPER-CONTEXT.md', 'Language section must define at least one non-placeholder canonical term'));
+  }
+
+  if (containsPlaceholder(markdown)) {
+    issues.push(issue('HIGH', 'PAPER-CONTEXT.md', 'Contains unresolved template placeholder text'));
+  }
+
+  return issues;
+}
+
+function extractCanonicalTerms(markdown) {
+  const language = sectionBetween(markdown, '## Language', /\n##\s+/);
+  return language
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .map((line) => {
+      const match = line.match(/^\*\*([^*[\]]+)\*\*:\s+\S/);
+      return match ? match[1].trim() : null;
+    })
+    .filter(Boolean);
+}
+
+function validateDecisionRecordsContent(markdown, filePath) {
+  if (isTemplateFile(filePath)) return [];
+
+  const issues = [];
+  const rows = parseFirstTableRows(sectionBetween(markdown, '## Decision Index', /\n##\s+/));
+  const decisionRows = rows.filter((row) => /^PDR-\d{4}$/.test(row[0] || ''));
+
+  if (decisionRows.length === 0) {
+    issues.push(issue('HIGH', 'DECISIONS.md', 'Decision Index must contain at least one PDR row'));
+  }
+
+  for (const row of decisionRows) {
+    const [id, status, decision, whyItMatters] = row;
+    if (!['proposed', 'accepted', 'rejected', 'superseded'].includes(status)) {
+      issues.push(issue('HIGH', 'DECISIONS.md', `${id} status must be one of proposed, accepted, rejected, superseded`));
+    }
+    if (!decision || decision.length < 10 || containsPlaceholder(decision)) {
+      issues.push(issue('HIGH', 'DECISIONS.md', `${id} decision must be non-placeholder text`));
+    }
+    if (!whyItMatters || whyItMatters.length < 15 || containsPlaceholder(whyItMatters)) {
+      issues.push(issue('HIGH', 'DECISIONS.md', `${id} Why It Matters must be non-placeholder text`));
+    }
+    if (!markdown.includes(`## ${id}:`)) {
+      issues.push(issue('HIGH', 'DECISIONS.md', `${id} is missing a detail section`));
+    }
+    const detail = sectionBetween(markdown, `## ${id}:`, /\n##\s+PDR-\d{4}:/);
+    if (!/\*\*Date:\*\*\s+\d{4}-\d{2}-\d{2}/.test(detail)) {
+      issues.push(issue('HIGH', 'DECISIONS.md', `${id} detail section must include a YYYY-MM-DD Date field`));
+    }
+  }
+
+  if (containsPlaceholder(markdown)) {
+    issues.push(issue('HIGH', 'DECISIONS.md', 'Contains unresolved template placeholder text'));
+  }
+
+  return issues;
+}
+
+function validatePaperContextTermsUsedInDraft(meta) {
+  const contextPath = path.join(meta, 'PAPER-CONTEXT.md');
+  const draftPath = path.join(meta, 'DRAFT.md');
+  if (!fs.existsSync(contextPath) || !fs.existsSync(draftPath)) return [];
+
+  const context = fs.readFileSync(contextPath, 'utf8');
+  const draft = fs.readFileSync(draftPath, 'utf8').toLowerCase();
+  const issues = [];
+
+  for (const term of extractCanonicalTerms(context)) {
+    if (!draft.includes(term.toLowerCase())) {
+      issues.push(issue('HIGH', 'PAPER-CONTEXT.md', `Canonical term "${term}" does not appear in DRAFT.md`));
+    }
+  }
+
+  return issues;
+}
+
 function validateMarkdownArtifact(filePath) {
   const basename = path.basename(filePath);
   const artifact = artifactNameAliases[basename] || basename;
@@ -562,6 +660,12 @@ function validateMarkdownArtifact(filePath) {
   if (artifact === 'STRATEGY.md') {
     issues.push(...validateStrategyValues(markdown, filePath));
   }
+  if (artifact === 'PAPER-CONTEXT.md') {
+    issues.push(...validatePaperContextContent(markdown, filePath));
+  }
+  if (artifact === 'DECISIONS.md') {
+    issues.push(...validateDecisionRecordsContent(markdown, filePath));
+  }
 
   return issues;
 }
@@ -590,6 +694,8 @@ function validatePaperArtifacts(paperDir, artifacts) {
       issues.push(...validateMarkdownArtifact(path.join(meta, name)));
     }
   }
+
+  issues.push(...validatePaperContextTermsUsedInDraft(meta));
 
   return issues;
 }

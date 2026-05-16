@@ -409,7 +409,7 @@ function updateFeedbackState(paperDir, dryRun) {
     current_stage: 'External Review',
     last_completed_stage: 'External Review',
     last_activity: new Date().toISOString(),
-    suggested_next_command: '/gpd-progress',
+    suggested_next_command: '/gpd-status',
     feedback: {
       ...(state.feedback || {}),
       feedback_plan_status: 'Pending user approval',
@@ -458,7 +458,7 @@ function reviewExternal(input = {}) {
     })),
     externalReviewsPath: path.join(paperDir, '.paper', 'EXTERNAL-REVIEWS.md'),
     feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
-    next: '/gpd-progress',
+    next: '/gpd-status',
   };
 }
 

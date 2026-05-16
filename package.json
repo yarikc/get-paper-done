@@ -9,6 +9,7 @@
   "files": [
     "AGENTS.md",
     "CHANGELOG.md",
+    "REPO-CONVENTIONS.md",
     "ROADMAP.md",
     "agents/*.md",
     "audiences/",

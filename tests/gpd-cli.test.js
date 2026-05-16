@@ -119,7 +119,7 @@ function testInstallerInstallDoctorRewriteAndBackup() {
 
   run(['install', 'codex', '--target', target]);
 
-  const commandFile = path.join(target, 'commands', 'gpd', 'new-paper.md');
+  const commandFile = path.join(target, 'commands', 'gpd', 'new.md');
   const contextsReadme = path.join(target, 'get-paper-done', 'contexts', 'README.md');
   assert(fs.existsSync(commandFile));
   assert(fs.existsSync(contextsReadme));
@@ -135,7 +135,7 @@ function testInstallerInstallDoctorRewriteAndBackup() {
 
   const backups = findFiles(
     path.join(target, 'get-paper-done', '.backups'),
-    (file) => file.endsWith(path.join('commands', 'gpd', 'new-paper.md')),
+    (file) => file.endsWith(path.join('commands', 'gpd', 'new.md')),
   );
   assert.strictEqual(backups.length, 1);
   assert.strictEqual(fs.readFileSync(backups[0], 'utf8'), 'local edit before update\n');
@@ -604,14 +604,14 @@ function testExportCommandWritesFinalAndState() {
 
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   assert.strictEqual(updatedState.status, 'Exported');
-  assert.strictEqual(updatedState.suggested_next_command, '/gpd-progress');
+  assert.strictEqual(updatedState.suggested_next_command, '/gpd-status');
   const stateMarkdown = fs.readFileSync(path.join(meta, 'STATE.md'), 'utf8');
   assert(stateMarkdown.includes('**Status:** Exported'));
-  assert(stateMarkdown.includes('**Suggested next command:** `/gpd-progress`'));
+  assert(stateMarkdown.includes('**Suggested next command:** `/gpd-status`'));
 
   const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
-  assert.strictEqual(status.next, '/gpd-progress');
+  assert.strictEqual(status.next, '/gpd-status');
 }
 
 function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
@@ -754,7 +754,7 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   const output = run(['review-external', '--paper', paperDir, '--review-file', `claude=${reviewPath}`]);
   assert(output.includes('reviews captured: 1'));
   assert(output.includes('empty reviews: 0'));
-  assert(output.includes('next: /gpd-progress'));
+  assert(output.includes('next: /gpd-status'));
 
   const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
   assert(externalReviews.includes('## claude Review'));
@@ -773,13 +773,13 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   assert.strictEqual(updatedState.status, 'Feedback Pending');
   assert.strictEqual(updatedState.current_stage, 'External Review');
-  assert.strictEqual(updatedState.suggested_next_command, '/gpd-progress');
+  assert.strictEqual(updatedState.suggested_next_command, '/gpd-status');
   assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Pending user approval');
 
   const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(status.artifacts['EXTERNAL-REVIEWS.md'], true);
   assert.strictEqual(status.artifacts['FEEDBACK-PLAN.md'], true);
-  assert.strictEqual(status.next, '/gpd-progress');
+  assert.strictEqual(status.next, '/gpd-status');
 }
 
 function testReviewExternalInvokesProviderModel() {

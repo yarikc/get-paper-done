@@ -101,7 +101,7 @@ function testExportedPaperRoutesToProgress() {
 
   const status = statusJson(paperDir);
   assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
-  assert.strictEqual(status.next, '/gpd-progress');
+  assert.strictEqual(status.next, '/gpd-status');
 }
 
 function testStaleExportRoutesBackToExport() {
@@ -220,14 +220,14 @@ function testPendingFeedbackPlanBlocksAutomaticRevise() {
     '',
   ].join('\n'));
 
-  assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-status');
 }
 
 function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
   const paperDir = completePaper('feedback-pending-stale-mtime');
   const state = readState(paperDir);
   state.feedback.feedback_plan_status = 'Pending user approval';
-  state.suggested_next_command = '/gpd-progress';
+  state.suggested_next_command = '/gpd-status';
   writeState(paperDir, state);
   writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
     '# Feedback Handling Plan',
@@ -238,7 +238,7 @@ function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
   touchArtifact(paperDir, 'FEEDBACK-PLAN.md', 20);
   touchArtifact(paperDir, 'BRIEF.md', 30);
 
-  assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-status');
 }
 
 function testReaderFeedbackRoutesToReviewBeforeRevision() {
@@ -265,7 +265,7 @@ function testHandledReaderFeedbackDoesNotStaleExport() {
   touchArtifact(paperDir, 'READER-FEEDBACK.md', 40);
   touchArtifact(paperDir, 'FEEDBACK-PLAN.md', 50);
 
-  assert.strictEqual(statusJson(paperDir).next, '/gpd-progress');
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-status');
 }
 
 testCleanCompletePaperUsesStateSuggestion();
