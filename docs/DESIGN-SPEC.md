@@ -127,7 +127,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `FACT-CHECK.md` | Claim inventory, source alignment, factual risk, source gaps, and recommended handling |
 | `EXTERNAL-REVIEWS.md` | Raw and summarized external model feedback |
 | `READER-FEEDBACK.md` | Structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals |
-| `FEEDBACK-PLAN.md` | Proposed incorporate/ignore/defer/ask handling before revision |
+| `FEEDBACK-PLAN.md` | Recommended incorporate/discuss/defer/ask handling, plus user overrides, before revision |
 | `STATE.md` | Human-readable current stage, blockers, approvals, suggested next command |
 | `STATE.json` | Machine-readable state companion used by CLI status and validation |
 | `IMPORT.md` | Import manifest and classification |
@@ -151,6 +151,8 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-review --external` | Run external model review and feedback planning |
 | `/gpd-revise` | Apply approved feedback |
 | `/gpd-export` | Prepare final handoff |
+| `gpd review-pack` | Show the current review target, editable source, and comment syntax |
+| `gpd feedback` | Capture inline comments from the review target into reader-feedback and feedback-plan artifacts |
 
 ### Maintenance Commands
 
@@ -172,7 +174,7 @@ run the recommended command
 repeat
 ```
 
-After export, the user reviews `.paper/exports/FINAL.md`. If they add comments there, `/gpd-review` captures the comments into feedback artifacts, `/gpd-revise` applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
+After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `READER-FEEDBACK.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries generated recommendations plus a `User Override` column; any populated override wins over the generated recommendation. `/gpd-revise` applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
 
 ### Stage Semantics
 
@@ -434,13 +436,17 @@ gpd import --source <path> --location <path> --slug <name>
 gpd next
 gpd status
 gpd validate
+gpd review-pack
+gpd feedback
 gpd review-external --review-file reviewer=<path>
-gpd review-external --models claude,codex,gemini
+gpd review-external --models claude,codex,gemini --current-runtime codex
 gpd list-audiences
 gpd list-profiles
 ```
 
 `gpd init` creates `.paper/` setup artifacts and leaves grill incomplete until `/gpd-grill` resolves author intent. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, extracts plain text from selected `.docx` canonical drafts, records unverified source-reference candidates for later triage, indexes copied files by likely role and downstream stage, routes to `/gpd-grill`, and preserves downstream research/outline/fact-check/review as separate stages.
+
+`gpd review-external` sends external providers the paper workspace context needed for a real paper review: state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. It stores each reviewer capture under `.paper/external-reviews/`, writes the active combined review to `EXTERNAL-REVIEWS.md`, deduplicates overlapping reviewer concerns, and decomposes captured HIGH/MEDIUM/LOW concerns and suggested changes into separate `FEEDBACK-PLAN.md` rows with recommended handling and a user override point.
 
 Tooling tests cover install/update/doctor, command-reference rewriting, backup correctness, init/import/next/status/validate, malformed input handling, and varied import classification. CI runs `npm run check`.
 
@@ -448,7 +454,7 @@ Remaining tool maturity requires:
 
 - deeper import conversion and source-extraction helpers beyond first-pass `.docx` canonical-draft text extraction, source-reference triage, and version/source indexing
 - local project install mode
-- broader external review provider calibration beyond Claude/Codex, including Gemini after local authentication and local HTTP servers; Opencode is intentionally unsupported for paper review
+- broader external review provider calibration beyond authenticated Claude/Codex/Gemini CLI paths, especially local HTTP servers; provider invocation skips the current runtime when identified because self-review is not independent; Opencode is intentionally unsupported for paper review
 - public or team distribution policy
 
 ## Acceptance Criteria
@@ -493,7 +499,7 @@ Tool acceptance:
 Immediate next work:
 
 1. Harden import further only where real use requires PDF/spreadsheet handling or very-large-folder review.
-2. Complete Gemini real-capture calibration after local authentication and decide whether to add local HTTP server support.
+2. Continue real-paper calibration for combined Claude/Gemini external review behavior and decide whether local HTTP server support is worth adding.
 3. Decide whether public/team distribution is needed beyond private-repo release discipline.
 4. Continue one-by-one agent calibration from completed examples and future real paper trials.
 5. Revisit agents after real-use calibration.

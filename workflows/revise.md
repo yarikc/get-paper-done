@@ -23,7 +23,7 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 
 Read the current draft and review. If `.paper/READER-FEEDBACK.md` exists, read it as input to feedback handling, not as direct edit authority. If `.paper/FEEDBACK-PLAN.md` exists, read it before proposing or applying changes.
 
-If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to approve, revise, or ignore the plan. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
+If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to approve, revise, or ignore the plan. The `Recommendation` column is the generated default; the `User Override` column takes precedence for any row where the user changed it. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
 
 If `.paper/STRATEGY.md` has status `Revise Before Drafting` or `No-Go`, stop unless the user explicitly overrides the strategy block. Cite the primary blocker from `Strategy Blockers` when present.
 
@@ -51,6 +51,7 @@ Before editing, identify:
 - below-target improvement gate items from `.paper/REVIEW.md`
 - approved external feedback to incorporate
 - approved reader feedback to incorporate
+- user overrides in `.paper/FEEDBACK-PLAN.md`
 - feedback explicitly ignored or deferred
 - claims needing support or removal
 - fact-check findings requiring source, softening, removal, reframe, or current verification

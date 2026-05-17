@@ -557,6 +557,33 @@ function validateStateDrift(paperDir) {
   return issues;
 }
 
+function hasInlineReviewComment(line) {
+  const trimmed = line.trim();
+  if (trimmed.startsWith('//')) return true;
+  if (/<!--\s*(?:(YC|GPD|feedback)\b\s*:?)?.+-->/i.test(trimmed)) return true;
+  const slashIndex = line.indexOf('//');
+  if (slashIndex <= 0) return false;
+  if (line.includes('://')) return false;
+  const before = line[slashIndex - 1];
+  return !before || /\s/.test(before);
+}
+
+function validateUnresolvedExportComments(paperDir) {
+  const final = readIfExists(metaPath(paperDir, 'exports/FINAL.md'));
+  if (!final) return [];
+  const comments = final
+    .split(/\r?\n/)
+    .map((line, index) => ({ line, index: index + 1 }))
+    .filter(({ line }) => hasInlineReviewComment(line));
+  if (comments.length === 0) return [];
+  return [issue(
+    'semantic.export_unresolved_review_comments',
+    'HIGH',
+    'exports/FINAL.md',
+    `contains ${comments.length} unresolved inline review comment(s); run gpd feedback before treating the export as final`,
+  )];
+}
+
 const deferralOnlyInstruction = /\b(keep as|add later|if publishing|if public|defer until|defer to|not blocking|no blocking revisions)\b/i;
 
 function validateReviewRewriteInstructions(paperDir) {
@@ -1060,6 +1087,7 @@ function validateSemanticPaper(paperDir) {
     ...validateResearchSourceCoverage(paperDir),
     ...validateResearchCounterevidence(paperDir),
     ...validateExportMetadataLeak(paperDir),
+    ...validateUnresolvedExportComments(paperDir),
     ...validateStateDrift(paperDir),
     ...validateReviewRewriteInstructions(paperDir),
     ...validateBelowTargetImprovementGate(paperDir),

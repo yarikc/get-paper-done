@@ -20,6 +20,12 @@ const {
   formatExternalReviewProgress,
 } = require('./external-review');
 const {
+  captureFeedback,
+  printFeedbackCapture,
+  reviewPack,
+  printReviewPack,
+} = require('./review-feedback');
+const {
   status,
   printStatus,
   nextAction,
@@ -41,6 +47,10 @@ module.exports = {
   reviewExternal,
   printExternalReviewResult,
   formatExternalReviewProgress,
+  captureFeedback,
+  printFeedbackCapture,
+  reviewPack,
+  printReviewPack,
   status,
   printStatus,
   nextAction,

@@ -1129,6 +1129,17 @@ function testExportMetadataLeakFails() {
   assert(result.stdout.includes('internal metadata'));
 }
 
+function testUnresolvedExportCommentsFail() {
+  const paperDir = makePaper('semantic-export-comments');
+  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n\nThis claim needs work. //YC unclear ask\n');
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('exports/FINAL.md'));
+  assert(result.stdout.includes('unresolved inline review comment'));
+  assert(result.stdout.includes('gpd feedback'));
+}
+
 function testStateMarkdownJsonDriftFails() {
   const paperDir = makePaper('semantic-state-drift');
   writeArtifact(paperDir, 'STATE.md', [
@@ -1187,6 +1198,7 @@ testBriefEvidenceSourceIdsPass();
 testSourceCoverageWarnsWithoutFailing();
 testCounterevidenceWarnsWithoutFailing();
 testExportMetadataLeakFails();
+testUnresolvedExportCommentsFail();
 testStateMarkdownJsonDriftFails();
 testWeakReviewInstructionFails();
 testConcreteReviewInstructionPasses();

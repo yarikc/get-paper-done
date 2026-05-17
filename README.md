@@ -200,15 +200,39 @@ When GPD exports a paper, read:
 .paper/exports/FINAL.md
 ```
 
-If you add comments there, run:
+To see the exact review target:
+
+```bash
+gpd review-pack --paper ~/papers/metadata-strategy
+```
+
+If you add inline comments there, capture them with:
+
+```bash
+gpd feedback --paper ~/papers/metadata-strategy
+```
+
+Then continue in Claude/Codex:
 
 ```text
 /gpd-review
 ```
 
-GPD captures the comments, plans the handling, applies approved changes to
-`.paper/DRAFT.md`, and regenerates `FINAL.md` on export. You review the final
-paper; GPD keeps the draft as the editable source of truth.
+GPD captures comments into `READER-FEEDBACK.md`, creates a pending
+`FEEDBACK-PLAN.md` with default recommendations, and waits for approval before
+revision. You can approve the recommendations or override selected rows in the
+`User Override` column. Approved changes are applied to `.paper/DRAFT.md`;
+export regenerates `FINAL.md`. You review the final paper; GPD keeps the draft
+as the editable source of truth.
+
+For external model review, `gpd review-external` sends the reviewer the paper
+state, classification, grill context, decisions, brief, research, outline,
+draft, fact-check, review, prior feedback, and export when present. It writes
+each raw reviewer capture to `.paper/external-reviews/`, writes the active
+combined review to `EXTERNAL-REVIEWS.md`, and breaks deduplicated
+HIGH/MEDIUM/LOW concerns into recommended `FEEDBACK-PLAN.md` rows for approval
+or override. When you ask for multiple reviewers in one command, GPD prints the
+combined recommendation list when the command finishes.
 
 ## Moving Backward Is Normal
 
@@ -268,6 +292,9 @@ gpd status
 gpd validate
 gpd validate --semantic
 gpd export
+gpd review-pack
+gpd feedback
+gpd review-external --models claude,codex,gemini --current-runtime codex
 gpd update claude
 gpd update codex
 ```
@@ -275,6 +302,9 @@ gpd update codex
 Use `gpd next` for the compact answer. Use `gpd status` when you want full
 artifact presence. Use `gpd validate --semantic` before treating a paper as
 example-quality, publication-ready, or ready for long-term handoff.
+When invoking external reviewers, exclude the runtime currently helping you.
+For example, pass `--current-runtime codex` from Codex or `--current-runtime
+claude` from Claude so GPD skips self-review and records the skip.
 
 ## Documentation
 

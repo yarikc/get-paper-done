@@ -33,7 +33,7 @@ function tempDir(name) {
 
 function testHelpShowsCalibratedExternalReviewProviders() {
   const output = run(['help']);
-  assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini'));
+  assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini --current-runtime codex'));
   assert(output.includes('next                         Show only the next recommended action and why'));
   assert(output.includes('gpd next --paper ~/papers/metadata-strategy'));
 }
@@ -596,7 +596,7 @@ function testExportCommandWritesFinalAndState() {
   const output = run(['export', '--paper', paperDir]);
   assert(output.includes('exports/FINAL.md'));
   assert(output.includes('review: read .paper/exports/FINAL.md'));
-  assert(output.includes('if you add comments: run /gpd-review'));
+  assert(output.includes('if you add comments: run gpd feedback, then /gpd-review'));
 
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
   assert(fs.existsSync(finalPath));
@@ -617,6 +617,69 @@ function testExportCommandWritesFinalAndState() {
   assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
   assert.strictEqual(status.next, '/gpd-status');
   assert(status.userAction.includes('Read .paper/exports/FINAL.md'));
+}
+
+function testReviewPackAndFeedbackCaptureFinalComments() {
+  const dir = tempDir('gpd-review-pack-test');
+  run(['init', '--location', dir, '--slug', 'review-pack', '--title', 'Review Pack']);
+  const paperDir = path.join(dir, 'review-pack');
+  const meta = path.join(paperDir, '.paper');
+
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), [
+    '# Draft',
+    '',
+    '## Working Title',
+    '',
+    'Review Pack Paper',
+    '',
+    '## Draft Body',
+    '',
+    'This is the exported body.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+
+  run(['export', '--paper', paperDir]);
+  const finalPath = path.join(meta, 'exports', 'FINAL.md');
+  fs.appendFileSync(finalPath, '\n//YC The ask is still unclear for the target reader.\n');
+
+  const packOutput = run(['review-pack', '--paper', paperDir]);
+  assert(packOutput.includes(`review target: ${finalPath}`));
+  assert(packOutput.includes('editable source: .paper/DRAFT.md'));
+  assert(packOutput.includes('capture: gpd feedback'));
+
+  const captureOutput = run(['feedback', '--paper', paperDir]);
+  assert(captureOutput.includes('comments captured: 1'));
+  assert(captureOutput.includes('next: /gpd-status'));
+
+  const readerFeedback = fs.readFileSync(path.join(meta, 'READER-FEEDBACK.md'), 'utf8');
+  assert(readerFeedback.includes('**Source:** inline user comments'));
+  assert(readerFeedback.includes('The ask is still unclear for the target reader.'));
+  assert(readerFeedback.includes('| Ask clarity |'));
+
+  const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
+  assert(feedbackPlan.includes('**Status:** Pending user approval'));
+  assert(feedbackPlan.includes('No draft or upstream artifact has been changed.'));
+  assert(feedbackPlan.includes('The ask is still unclear for the target reader.'));
+
+  const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  assert.strictEqual(updatedState.status, 'Feedback Pending');
+  assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Pending user approval');
 }
 
 function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
@@ -799,26 +862,52 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
 
   const reviewDir = tempDir('gpd-external-review-source');
   const reviewPath = path.join(reviewDir, 'claude-review.md');
-  fs.writeFileSync(reviewPath, '# Claude Review\n\nHIGH: Ask is unclear.\n');
+  fs.writeFileSync(reviewPath, [
+    '# Claude Review',
+    '',
+    '## Highest-Priority Concerns',
+    '',
+    '### HIGH — Ask is unclear',
+    '',
+    'The paper does not make a decidable executive ask.',
+    '',
+    '### MEDIUM — Evidence is thin',
+    '',
+    'Research sources do not support the main claim.',
+    '',
+    '## Specific Suggested Changes',
+    '',
+    '1. Rewrite Section 8 as decidable actions.',
+    '',
+  ].join('\n'));
 
   const output = run(['review-external', '--paper', paperDir, '--review-file', `claude=${reviewPath}`]);
   assert(output.includes('reviews captured: 1'));
   assert(output.includes('empty reviews: 0'));
+  assert(output.includes('feedback items: 3'));
   assert(output.includes('next: /gpd-status'));
 
   const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
   assert(externalReviews.includes('## claude Review'));
   assert(externalReviews.includes('**Source:** claude-review.md'));
-  assert(externalReviews.includes('HIGH: Ask is unclear.'));
+  assert(externalReviews.includes('### HIGH — Ask is unclear'));
   assert(!externalReviews.includes(reviewDir));
   assert(externalReviews.includes('does not revise the draft'));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('**Status:** Pending user approval'));
   assert(feedbackPlan.includes('## Below-Target Items'));
-  assert(feedbackPlan.includes('HIGH: Ask is unclear.'));
-  assert(feedbackPlan.includes('Needs decision'));
-  assert(feedbackPlan.includes('Ask user'));
+  assert(feedbackPlan.includes('HIGH: Ask is unclear - The paper does not make a decidable executive ask.'));
+  assert(feedbackPlan.includes('MEDIUM: Evidence is thin - Research sources do not support the main claim.'));
+  assert(feedbackPlan.includes('Rewrite Section 8 as decidable actions.'));
+  assert(feedbackPlan.includes('| # | Feedback | Source(s) | Assessment | Recommendation | Proposed Handling | User Override | Affected Artifact |'));
+  assert(feedbackPlan.includes('HIGH - Pending approval'));
+  assert(feedbackPlan.includes('MEDIUM - Pending approval'));
+  assert(feedbackPlan.includes('ACTION - Pending approval'));
+  assert(feedbackPlan.includes('Recommend incorporate'));
+  assert(feedbackPlan.includes('Recommend discuss'));
+  assert(feedbackPlan.includes('Recommend map to approved concern'));
+  assert(feedbackPlan.includes('None yet - user may override with incorporate / discuss / defer / ignore.'));
   assert(feedbackPlan.includes('No draft or upstream artifact has been changed.'));
 
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
@@ -831,6 +920,125 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   assert.strictEqual(status.artifacts['EXTERNAL-REVIEWS.md'], true);
   assert.strictEqual(status.artifacts['FEEDBACK-PLAN.md'], true);
   assert.strictEqual(status.next, '/gpd-status');
+}
+
+function testReviewExternalParsesGeminiSeverityFormat() {
+  const dir = tempDir('gpd-review-external-gemini-format-test');
+  run(['init', '--location', dir, '--slug', 'gemini-format-review', '--title', 'Gemini Format Review']);
+  const paperDir = path.join(dir, 'gemini-format-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe operating layer is abstract.\n');
+
+  const reviewDir = tempDir('gpd-gemini-review-source');
+  const reviewPath = path.join(reviewDir, 'gemini-review.md');
+  fs.writeFileSync(reviewPath, [
+    '# External Review',
+    '',
+    '## Highest-Priority Concerns',
+    '',
+    '### 1. The Recursive Ownership Gap (Severity: HIGH)',
+    '**Issue:** Who governs the governor?',
+    '**Critique:** The operating layer can become the new bottleneck.',
+    '',
+    '### 2. Deliverable Overlap (Severity: MEDIUM)',
+    '**Issue:** Context packs and decision records overlap.',
+    '**Critique:** Sponsors cannot map the list to budget.',
+    '',
+    '## Specific Suggested Changes',
+    '',
+    '### Section 4: Operating Layer',
+    '',
+    '* **Section 4:** Define the human-by-exception trigger.',
+    '* **Section 5:** Collapse the deliverables into product families.',
+    '',
+  ].join('\n'));
+
+  const output = run(['review-external', '--paper', paperDir, '--review-file', `gemini=${reviewPath}`]);
+  assert(output.includes('feedback items: 4'));
+
+  const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
+  assert(feedbackPlan.includes('HIGH: The Recursive Ownership Gap'));
+  assert(feedbackPlan.includes('MEDIUM: Deliverable Overlap'));
+  assert(feedbackPlan.includes('Section 4: Define the human-by-exception trigger.'));
+  assert(feedbackPlan.includes('Section 5: Collapse the deliverables into product families.'));
+  assert(feedbackPlan.includes('Recommend incorporate'));
+  assert(feedbackPlan.includes('Recommend discuss'));
+  assert(feedbackPlan.includes('Recommend map to approved concern'));
+}
+
+function testReviewExternalCombinesAndStoresMultipleReviewers() {
+  const dir = tempDir('gpd-review-external-combined-test');
+  run(['init', '--location', dir, '--slug', 'combined-review', '--title', 'Combined Review']);
+  const paperDir = path.join(dir, 'combined-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const reviewDir = tempDir('gpd-combined-review-source');
+  const claudePath = path.join(reviewDir, 'claude-review.md');
+  fs.writeFileSync(claudePath, [
+    '# Claude Review',
+    '',
+    '## Highest-Priority Concerns',
+    '',
+    '### HIGH — Recursive ownership gap',
+    '',
+    'The paper does not say who governs the governor.',
+    '',
+    '### MEDIUM — Deliverable overlap',
+    '',
+    'Context packs and decision records overlap.',
+    '',
+  ].join('\n'));
+  const geminiPath = path.join(reviewDir, 'gemini-review.md');
+  fs.writeFileSync(geminiPath, [
+    '# Gemini Review',
+    '',
+    '## Highest-Priority Concerns',
+    '',
+    '### 1. Recursive Ownership Gap (Severity: HIGH)',
+    '**Issue:** The same architecture function owns constraints and exceptions.',
+    '',
+    '### 2. Deliverable Bloat vs. Differentiation (Severity: MEDIUM)',
+    '**Issue:** Context packs, decision memory, and agentic assets sound overlapping.',
+    '',
+    '### 2. Counterfactual is abstract (Severity: HIGH)',
+    '**Issue:** The paper needs a concrete failure story.',
+    '',
+  ].join('\n'));
+
+  const output = run([
+    'review-external',
+    '--paper',
+    paperDir,
+    '--review-file',
+    `claude=${claudePath}`,
+    '--review-file',
+    `gemini=${geminiPath}`,
+  ]);
+  assert(output.includes('reviews captured: 2'));
+  assert(output.includes('feedback items: 3'));
+  assert(output.includes('raw feedback items: 5'));
+  assert(output.includes('stored reviews:'));
+  assert(output.includes('combined recommendations:'));
+  assert(output.includes('Recommend incorporate [claude, gemini]'));
+
+  const storedDir = path.join(meta, 'external-reviews');
+  const storedFiles = fs.readdirSync(storedDir).filter((file) => file.endsWith('.md'));
+  assert.strictEqual(storedFiles.length, 2);
+  assert(storedFiles.some((file) => file.includes('claude')));
+  assert(storedFiles.some((file) => file.includes('gemini')));
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('## Stored Reviewer Files'));
+  assert(externalReviews.includes('.paper/external-reviews/'));
+  assert(!externalReviews.includes(reviewDir));
+
+  const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
+  assert(feedbackPlan.includes('Recursive Ownership Gap') || feedbackPlan.includes('Recursive ownership gap'));
+  assert(feedbackPlan.includes('| claude, gemini | HIGH - Pending approval | Recommend incorporate |'));
+  assert(feedbackPlan.includes('Counterfactual is abstract'));
+  assert(feedbackPlan.includes('Deliverable overlap') || feedbackPlan.includes('Deliverable Bloat'));
+  assert(feedbackPlan.includes('| claude, gemini | MEDIUM - Pending approval | Recommend discuss |'));
 }
 
 function testReviewExternalInvokesProviderModel() {
@@ -853,6 +1061,19 @@ function testReviewExternalInvokesProviderModel() {
   state.strategy.required_unblock_action = 'none';
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
   fs.writeFileSync(path.join(meta, 'PROJECT.md'), '# Project\n\nProvider invocation test.\n');
+  fs.writeFileSync(path.join(meta, 'STATE.md'), '# State\n\nStatus: Draft Complete.\n');
+  fs.writeFileSync(path.join(meta, 'config.json'), '{"classification":{"purpose":"strategy_paper"}}\n');
+  fs.writeFileSync(path.join(meta, 'PAPER-CONTEXT.md'), '# Paper Context\n\nCanonical term: operating layer.\n');
+  fs.writeFileSync(path.join(meta, 'DECISIONS.md'), '# Decisions\n\n## PDR-001\n\nStatus: accepted\nDate: 2026-05-17\nDecision: Use operating layer.\n');
+  fs.writeFileSync(path.join(meta, 'STRATEGY.md'), '# Strategy\n\nStatus: Go.\n');
+  fs.writeFileSync(path.join(meta, 'RESEARCH.md'), '# Research\n\nResearch summary.\n');
+  fs.writeFileSync(path.join(meta, 'RESEARCH.json'), '{"research_plan":{"question":"test"},"source_registry":[],"evidence_matrix":[]}\n');
+  fs.writeFileSync(path.join(meta, 'FACT-CHECK.md'), '# Fact Check\n\nVerified.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\nReady.\n');
+  fs.writeFileSync(path.join(meta, 'READER-FEEDBACK.md'), '# Reader Feedback\n\nAsk clarity: 3.\n');
+  fs.writeFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), '# Feedback Handling Plan\n\n**Status:** Approved.\n');
+  fs.mkdirSync(path.join(meta, 'exports'), { recursive: true });
+  fs.writeFileSync(path.join(meta, 'exports', 'FINAL.md'), '# Final\n\nReading copy.\n');
   fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
 
   const providerDir = tempDir('gpd-provider-bin');
@@ -861,17 +1082,18 @@ function testReviewExternalInvokesProviderModel() {
   fs.writeFileSync(providerPath, [
     '#!/bin/sh',
     `printf '%s\\n' "$@" > "${argsPath}"`,
-    'if grep -q "The ask is unclear"; then',
-    '  echo "HIGH: Provider saw draft context."',
+    'prompt=$(cat)',
+    'if printf "%s" "$prompt" | grep -q "The ask is unclear" && printf "%s" "$prompt" | grep -q "Research Plan And Evidence Results" && printf "%s" "$prompt" | grep -q "Paper Decision Records" && printf "%s" "$prompt" | grep -q "Machine State" && printf "%s" "$prompt" | grep -q "Exported Reading Copy"; then',
+    '  echo "HIGH: Provider saw full paper context."',
     'else',
-    '  echo "LOW: Missing draft context."',
+    '  echo "LOW: Missing full paper context."',
     'fi',
     '',
   ].join('\n'));
   fs.chmodSync(providerPath, 0o755);
 
   const output = run(
-    ['review-external', '--paper', paperDir, '--models', 'claude', '--timeout-ms', '5000'],
+    ['review-external', '--paper', paperDir, '--models', 'claude', '--current-runtime', 'none', '--timeout-ms', '5000'],
     { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
   );
   assert(output.includes('external review: claude: running'));
@@ -884,14 +1106,14 @@ function testReviewExternalInvokesProviderModel() {
   const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
   assert(externalReviews.includes('## claude Review'));
   assert(externalReviews.includes('**Source:** provider:claude'));
-  assert(externalReviews.includes('HIGH: Provider saw draft context.'));
+  assert(externalReviews.includes('HIGH: Provider saw full paper context.'));
   assert(externalReviews.includes('installed provider CLIs'));
   assert(!externalReviews.includes(providerDir));
   assert(!externalReviews.includes('gpd-review-'));
   assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), '-p\n');
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
-  assert(feedbackPlan.includes('HIGH: Provider saw draft context.'));
+  assert(feedbackPlan.includes('HIGH: Provider saw full paper context.'));
   assert(feedbackPlan.includes('Pending user approval'));
 }
 
@@ -915,7 +1137,7 @@ function testReviewExternalUsesCodexProviderArgs() {
   fs.chmodSync(providerPath, 0o755);
 
   const output = run(
-    ['review-external', '--paper', paperDir, '--models', 'codex', '--timeout-ms', '5000'],
+    ['review-external', '--paper', paperDir, '--models', 'codex', '--current-runtime', 'none', '--timeout-ms', '5000'],
     { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
   );
   assert(output.includes('reviews captured: 1'));
@@ -946,7 +1168,7 @@ function testReviewExternalUsesGeminiProviderArgs() {
   fs.chmodSync(providerPath, 0o755);
 
   const output = run(
-    ['review-external', '--paper', paperDir, '--models', 'gemini', '--timeout-ms', '5000'],
+    ['review-external', '--paper', paperDir, '--models', 'gemini', '--current-runtime', 'none', '--timeout-ms', '5000'],
     { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
   );
   assert(output.includes('reviews captured: 1'));
@@ -955,6 +1177,52 @@ function testReviewExternalUsesGeminiProviderArgs() {
 
   const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
   assert(externalReviews.includes('HIGH: Gemini provider saw draft context.'));
+}
+
+function testReviewExternalSkipsCurrentRuntimeProvider() {
+  const dir = tempDir('gpd-review-external-self-skip-test');
+  run(['init', '--location', dir, '--slug', 'self-skip-review', '--title', 'Self Skip Review']);
+  const paperDir = path.join(dir, 'self-skip-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nBody.\n');
+
+  const providerDir = tempDir('gpd-self-skip-provider-bin');
+  const codexPath = path.join(providerDir, 'codex');
+  const codexMarkerPath = path.join(providerDir, 'codex-ran.txt');
+  fs.writeFileSync(codexPath, [
+    '#!/bin/sh',
+    `echo "ran" > "${codexMarkerPath}"`,
+    'cat >/dev/null',
+    'echo "HIGH: Codex should not have run."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(codexPath, 0o755);
+
+  const claudePath = path.join(providerDir, 'claude');
+  fs.writeFileSync(claudePath, [
+    '#!/bin/sh',
+    'cat >/dev/null',
+    'echo "HIGH: Independent reviewer ran."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(claudePath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'codex,claude', '--current-runtime', 'codex', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('external review: codex: skipped_self_review'));
+  assert(output.includes('external review: claude: running'));
+  assert(output.includes('reviews captured: 1'));
+  assert(output.includes('review issues: 1'));
+  assert(output.includes('- codex: skipped_self_review (provider:codex)'));
+  assert(output.includes('- claude: captured (provider:claude)'));
+  assert(!fs.existsSync(codexMarkerPath));
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
+  assert(externalReviews.includes('Skipped provider "codex" because the current runtime is "codex".'));
+  assert(externalReviews.includes('HIGH: Independent reviewer ran.'));
+  assert(!externalReviews.includes('HIGH: Codex should not have run.'));
 }
 
 function testReviewExternalDoesNotUseOpencodeForPapers() {
@@ -977,7 +1245,7 @@ function testReviewExternalDoesNotUseOpencodeForPapers() {
   fs.chmodSync(providerPath, 0o755);
 
   const output = run(
-    ['review-external', '--paper', paperDir, '--models', 'opencode', '--timeout-ms', '5000'],
+    ['review-external', '--paper', paperDir, '--models', 'opencode', '--current-runtime', 'none', '--timeout-ms', '5000'],
     { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
   );
   assert(output.includes('external review: opencode: unsupported'));
@@ -1090,14 +1358,18 @@ testImportVersionSourceIndexGroupsMaterial();
 testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
+testReviewPackAndFeedbackCaptureFinalComments();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();
 testExportCommandBlocksBelowTargetReadyReview();
 testReviewExternalCollectsReviewAndStopsAtApprovalGate();
+testReviewExternalParsesGeminiSeverityFormat();
+testReviewExternalCombinesAndStoresMultipleReviewers();
 testReviewExternalInvokesProviderModel();
 testReviewExternalUsesCodexProviderArgs();
 testReviewExternalUsesGeminiProviderArgs();
+testReviewExternalSkipsCurrentRuntimeProvider();
 testReviewExternalDoesNotUseOpencodeForPapers();
 testReviewExternalRecordsMissingProvider();
 testReviewExternalRequiresDraft();

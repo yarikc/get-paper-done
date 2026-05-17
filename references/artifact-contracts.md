@@ -148,8 +148,10 @@ Required headings:
 
 Required tables:
 
-- Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `Affected Artifact`
+- Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `User Override`, `Affected Artifact`
 - Below-Target Items: `#`, `Issue`, `Target Bar Impact`, `Action`, `Reason`
+
+`Recommendation` is the default generated handling. `User Override` is the explicit override point; if populated, revision must follow the override instead of the generated recommendation.
 
 ### `EXTERNAL-REVIEWS.md`
 

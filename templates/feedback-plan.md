@@ -6,13 +6,13 @@
 
 ## Summary
 
-[Short summary of the feedback and recommended path.]
+[Short summary of the feedback and recommended path. State that recommendations are defaults and the user may override any row before revision.]
 
 ## Proposed Handling
 
-| # | Feedback | Source(s) | Assessment | Recommendation | Proposed Handling | Affected Artifact |
-|---|----------|-----------|------------|----------------|-------------------|-------------------|
-| 1 | [Feedback] | [Reviewer] | [Valid / Partly valid / Not useful / Conflicts with intent / Needs decision] | [Incorporate / Ignore / Defer / Ask user] | [Concrete action or reason to ignore] | [DRAFT / BRIEF / RESEARCH / OUTLINE] |
+| # | Feedback | Source(s) | Assessment | Recommendation | Proposed Handling | User Override | Affected Artifact |
+|---|----------|-----------|------------|----------------|-------------------|---------------|-------------------|
+| 1 | [Feedback] | [Reviewer] | [HIGH / MEDIUM / LOW / ACTION - Pending approval] | [Recommend incorporate / Recommend discuss / Recommend defer / Recommend ask user] | [Default handling] | [Optional user override: incorporate / discuss / defer / ignore] | [DRAFT / BRIEF / RESEARCH / OUTLINE] |
 
 ## Below-Target Items
 
@@ -48,6 +48,7 @@ Options:
 
 - Approve all recommended handling
 - Approve only incorporate items
+- Override selected rows in the `User Override` column
 - Discuss decisions first
 - Revise the handling plan
 - Ignore external feedback

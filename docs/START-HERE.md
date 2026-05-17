@@ -176,13 +176,20 @@ When GPD exports the paper, review this file:
 
 If you add comments to it, run:
 
+```bash
+gpd feedback --paper ~/papers/my-paper
+```
+
+Then run:
+
 ```text
 /gpd-review
 ```
 
-GPD will capture the comments, plan the handling, revise `.paper/DRAFT.md`,
-and regenerate `FINAL.md`. You review the final reading copy; GPD keeps
-`DRAFT.md` as the source of truth.
+Use `gpd review-pack --paper ~/papers/my-paper` whenever you are unsure which
+file to review. GPD captures comments, plans the handling, revises
+`.paper/DRAFT.md` only after approval, and regenerates `FINAL.md`. You review
+the final reading copy; GPD keeps `DRAFT.md` as the source of truth.
 
 ## Moving Backward Is Normal
 
@@ -222,8 +229,9 @@ When you or another model reviews the paper, capture that read before revising:
 ```
 
 Feedback goes into `READER-FEEDBACK.md`. Handling goes into
-`FEEDBACK-PLAN.md`. Revision should happen only after the handling plan is
-approved.
+`FEEDBACK-PLAN.md`. The plan includes default recommendations and a `User
+Override` column for rows you want to change. Revision should happen only after
+the handling plan is approved.
 
 ## Paper Types
 

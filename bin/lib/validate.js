@@ -156,6 +156,7 @@ const markdownContracts = {
         'Assessment',
         'Recommendation',
         'Proposed Handling',
+        'User Override',
         'Affected Artifact',
       ],
       ['#', 'Issue', 'Target Bar Impact', 'Action', 'Reason'],

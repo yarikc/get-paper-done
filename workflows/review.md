@@ -111,7 +111,8 @@ Capture the feedback as evidence for review planning, not as permission to rewri
 
 ```text
 user reviews .paper/exports/FINAL.md
-  -> /gpd-review captures comments and plans handling
+  -> gpd feedback captures comments into READER-FEEDBACK.md and FEEDBACK-PLAN.md
+  -> /gpd-review reviews the captured feedback and plan
   -> /gpd-revise edits .paper/DRAFT.md
   -> /gpd-export regenerates .paper/exports/FINAL.md
 ```
@@ -132,7 +133,7 @@ Backward-compatible aliases:
 
 If no external review flag is present, skip to Step 7.
 
-CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, and records stdout/stderr into `.paper/EXTERNAL-REVIEWS.md` plus a pending `.paper/FEEDBACK-PLAN.md`. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
+CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, stores each reviewer capture under `.paper/external-reviews/`, records the active combined review in `.paper/EXTERNAL-REVIEWS.md`, and writes a pending `.paper/FEEDBACK-PLAN.md`. The generated prompt includes state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. The feedback plan deduplicates overlapping reviewer concerns and decomposes captured HIGH/MEDIUM/LOW concerns into separate recommendation rows. Pass `--current-runtime claude`, `--current-runtime codex`, or the matching runtime name when known; the CLI skips that provider because self-review is not independent. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
 
 ## 3. Detect Available Reviewers
 
@@ -153,16 +154,17 @@ curl -s --max-time 2 "http://localhost:8080/v1/models" >/dev/null 2>&1 && echo "
 Selection rules:
 
 - `--external` with no model list: include all available reviewers except the current runtime's own CLI when it can be identified.
-- `--models <list>`: include only requested reviewers that are available.
+- `--models <list>`: include only requested reviewers that are available, then skip the current runtime's own CLI when it can be identified.
 - Legacy `--all`: same as `--external`.
 - Legacy specific flags: same as `--models <requested reviewers>`.
 - If none are available, write that result into `.paper/EXTERNAL-REVIEWS.md`, update `.paper/STATE.md` and `.paper/STATE.json`, and stop after local review.
 
 Current runtime skip rule:
 
-- If running inside Claude Code, skip `claude` unless the user explicitly requested `--claude`.
-- If running inside Cursor, skip `cursor` unless explicitly requested.
-- Otherwise, do not guess too aggressively; external diversity is useful.
+- If running inside Claude Code, skip `claude`.
+- If running inside Codex, skip `codex`.
+- If running inside Cursor, skip `cursor`.
+- If runtime detection is unclear, pass `--current-runtime <claude|codex|cursor>` rather than guessing.
 
 ## 4. Build External Review Prompt
 
@@ -248,7 +250,7 @@ If a reviewer fails or returns empty output, record the failure in `.paper/EXTER
 
 ## 6. Write External Reviews And Feedback Plan
 
-Create `.paper/EXTERNAL-REVIEWS.md` using `templates/external-reviews.md`.
+Create `.paper/EXTERNAL-REVIEWS.md` using `templates/external-reviews.md`. If reviewer-specific captures exist under `.paper/external-reviews/`, preserve them as raw source records and use `EXTERNAL-REVIEWS.md` as the combined active view.
 
 Include:
 
@@ -288,7 +290,7 @@ Do not edit `.paper/DRAFT.md` during review. Review proposes action; revision ap
 
 ## 7. Approval Gate
 
-Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` summary and ask the user how to proceed.
+Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` summary and ask the user how to proceed. Treat the `Recommendation` column as the generated default. Tell the user they can approve it as-is or override selected rows by editing/filling `User Override`; revision must honor any populated override.
 
 Use AskUserQuestion when available:
 
@@ -298,6 +300,7 @@ Use AskUserQuestion when available:
   - "Approve plan" -- Use the feedback handling plan during `/gpd-revise`
   - "Discuss first" -- Review decision items and unresolved trade-offs
   - "Revise plan" -- Adjust the feedback handling plan before revision
+  - "Override rows" -- Change selected `User Override` cells, then revise
   - "Ignore external" -- Keep local review only
 
 If AskUserQuestion is unavailable, ask the same question in plain text and wait.

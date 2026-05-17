@@ -577,7 +577,7 @@ function userActionHint(state) {
   const a = state.artifacts;
   const next = state.next;
   if (a['exports/FINAL.md'] && next === '/gpd-status') {
-    return 'Read .paper/exports/FINAL.md. If you add comments there, run /gpd-review; GPD will capture the comments, revise DRAFT.md, and regenerate FINAL.md.';
+    return 'Read .paper/exports/FINAL.md. If you add comments there, run gpd feedback, then /gpd-review; GPD will capture the comments, revise DRAFT.md after approval, and regenerate FINAL.md.';
   }
   if (next === '/gpd-export') {
     return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';

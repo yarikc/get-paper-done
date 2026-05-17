@@ -23,6 +23,10 @@ const {
   printArtifactValidation,
   listMarkdownItems,
   formatExternalReviewProgress,
+  reviewPack,
+  printReviewPack,
+  captureFeedback,
+  printFeedbackCapture,
 } = require('./lib/workspace');
 
 function printHelp() {
@@ -35,6 +39,8 @@ Commands:
   init                         Create a new paper workspace
   import                       Import an existing paper folder/file into a workspace
   export                       Export reviewed draft to .paper/exports/FINAL.md
+  review-pack                  Show the one file to review and how to comment
+  feedback                     Capture inline review comments into feedback artifacts
   review-external              Collect external review text into review artifacts
   status                       Show current paper workspace state
   next                         Show only the next recommended action and why
@@ -54,6 +60,7 @@ Options:
   --max-file-bytes BYTES       Import skip threshold for individual source files
   --review-file REVIEWER=FILE  External review file to collect; repeatable
   --models LIST                Invoke external reviewer CLIs, comma-separated
+  --current-runtime NAME       Exclude current runtime from external provider review
   --timeout-ms MS              External reviewer timeout in milliseconds
   --reviewer NAME              Reviewer name for stdin review input
   --stdin                      Read one external review from stdin
@@ -72,8 +79,10 @@ Examples:
   gpd doctor codex
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
+  gpd review-pack --paper ~/papers/metadata-strategy
+  gpd feedback --paper ~/papers/metadata-strategy
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
-  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini
+  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini --current-runtime codex
   gpd export --paper ~/papers/metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
   gpd next --paper ~/papers/metadata-strategy
@@ -139,6 +148,9 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--models') {
       args.models = argv[i + 1];
+      i += 1;
+    } else if (arg === '--current-runtime') {
+      args.currentRuntime = argv[i + 1];
       i += 1;
     } else if (arg === '--timeout-ms') {
       args.timeoutMs = Number(argv[i + 1]);
@@ -217,6 +229,22 @@ function main(argv) {
     const result = exportPaper(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printExport(result);
+    return;
+  }
+
+  if (command === 'review-pack') {
+    const args = parseWorkspaceOptions(rest);
+    const result = reviewPack(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printReviewPack(result);
+    return;
+  }
+
+  if (command === 'feedback') {
+    const args = parseWorkspaceOptions(rest);
+    const result = captureFeedback(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printFeedbackCapture(result);
     return;
   }
 
