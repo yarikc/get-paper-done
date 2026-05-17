@@ -7,6 +7,7 @@
     "metadata",
     "research_plan",
     "research_brief",
+    "source_ranking",
     "source_registry",
     "evidence_matrix",
     "synthesis_matrix",
@@ -76,6 +77,99 @@
         },
         "depth_rationale": { "type": "string" },
         "source_mode_rationale": { "type": "string" },
+        "source_lanes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["lane", "purpose", "planned_source_types", "expected_examples", "status"],
+            "properties": {
+              "lane": {
+                "type": "string",
+                "enum": [
+                  "official_regulatory_standards",
+                  "empirical_counterevidence",
+                  "industry_trend_market",
+                  "practitioner_operating_model"
+                ]
+              },
+              "purpose": { "type": "string" },
+              "planned_source_types": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["official", "academic", "industry", "news", "analyst", "blog", "user_provided", "other"]
+                }
+              },
+              "expected_examples": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "status": {
+                "type": "string",
+                "enum": ["planned", "covered", "not_applicable", "missing"]
+              }
+            }
+          }
+        },
+        "author_language_queries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["phrase", "source_artifact", "derived_queries", "why_it_matters"],
+            "properties": {
+              "phrase": { "type": "string" },
+              "source_artifact": { "type": "string" },
+              "derived_queries": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "why_it_matters": { "type": "string" }
+            }
+          }
+        },
+        "expected_source_checkpoint": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asked", "user_response", "sources_expected"],
+          "properties": {
+            "asked": { "type": "boolean" },
+            "user_response": { "type": "string" },
+            "sources_expected": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "missed_source_audit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "status", "miss_category", "reason", "prevention"],
+            "properties": {
+              "source": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["open", "resolved", "deferred"]
+              },
+              "miss_category": {
+                "type": "string",
+                "enum": [
+                  "absent_source_lane",
+                  "source_added_after_research",
+                  "underweighted_source_type",
+                  "terminology_mismatch",
+                  "not_discoverable",
+                  "agent_error"
+                ]
+              },
+              "reason": { "type": "string" },
+              "prevention": { "type": "string" }
+            }
+          }
+        },
         "user_feedback": { "type": "string" }
       }
     },
@@ -87,6 +181,45 @@
         "key_findings": { "type": "array" }
       }
     },
+    "source_ranking": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "source_id",
+          "rank_group",
+          "role",
+          "why_picked",
+          "ranking_reason",
+          "limitations"
+        ],
+        "properties": {
+          "rank": { "type": "integer" },
+          "source_id": { "type": "string" },
+          "rank_group": {
+            "type": "string",
+            "enum": ["primary_anchor", "secondary_anchor", "trend_evidence", "failure_mode_evidence", "analogy", "background"]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "primary_regulatory_anchor",
+              "lifecycle_control_anchor",
+              "industry_trend_evidence",
+              "failure_mode_evidence",
+              "analogy_source",
+              "counterevidence",
+              "background"
+            ]
+          },
+          "why_picked": { "type": "string" },
+          "ranking_reason": { "type": "string" },
+          "limitations": { "type": "string" }
+        }
+      }
+    },
     "source_registry": {
       "type": "array",
       "items": {
@@ -96,6 +229,7 @@
           "id",
           "title",
           "url_or_path",
+          "rank_group",
           "source_type",
           "authority",
           "freshness",
@@ -103,12 +237,21 @@
           "specificity",
           "bias_or_agenda",
           "stance",
+          "why_picked",
+          "short_summary",
+          "relevant_points",
+          "use_in_paper",
+          "limitations",
           "notes"
         ],
         "properties": {
           "id": { "type": "string" },
           "title": { "type": "string" },
           "url_or_path": { "type": "string" },
+          "rank_group": {
+            "type": "string",
+            "enum": ["primary_anchor", "secondary_anchor", "trend_evidence", "failure_mode_evidence", "analogy", "background"]
+          },
           "source_type": {
             "type": "string",
             "enum": ["official", "academic", "industry", "news", "analyst", "blog", "user_provided", "other"]
@@ -134,6 +277,14 @@
             "type": "string",
             "enum": ["supportive", "neutral", "critical", "mixed"]
           },
+          "why_picked": { "type": "string" },
+          "short_summary": { "type": "string" },
+          "relevant_points": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "use_in_paper": { "type": "string" },
+          "limitations": { "type": "string" },
           "claim_support": {
             "type": "array",
             "items": {
@@ -209,6 +360,24 @@
             "enum": ["keep", "support_more", "soften", "narrow", "caveat", "drop"]
           },
           "notes": { "type": "string" }
+        }
+      }
+    },
+    "evidence_nuggets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim_id", "nugget", "source_ids", "use_in_draft", "caveat"],
+        "properties": {
+          "claim_id": { "type": "string" },
+          "nugget": { "type": "string" },
+          "source_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "use_in_draft": { "type": "string" },
+          "caveat": { "type": "string" }
         }
       }
     },

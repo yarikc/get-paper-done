@@ -23,6 +23,13 @@ Reader feedback found a blocking strategy failure: the memo defined a static evi
 | 9 | Automation should create observed evidence, not only maintain owner-declared data. | Human reader | Valid | Incorporate | Add observed evidence plus owner attestation language. | DRAFT.md, FACT-CHECK.md, exports/FINAL.md |
 | 10 | AI scope is under-supported; the paper needs to address traditional AI and LLM deployments, especially where SDLC dependency tooling does not cover model/provider, prompt/configuration, retrieval/source, and tool-permission risk. | Human reader | Valid | Incorporate | Route back through research and add NIST AI RMF, NIST Generative AI Profile, OWASP LLM Top 10, and NCSC secure AI guidance; add AI runtime inventory to the control record. | RESEARCH.json, RESEARCH.md, BRIEF.md, STRATEGY.md, OUTLINE.md, DRAFT.md, FACT-CHECK.md, REVIEW.md, exports/FINAL.md |
 
+## Below-Target Items
+
+| # | Issue | Target Bar Impact | Action | Reason |
+|---|-------|-------------------|--------|--------|
+| 1 | Original memo had weak evidence and ask clarity. | Blocked export until AI runtime evidence and decision rules were added. | Incorporate | Human feedback identified a real below-target failure in the core decision memo. |
+| 2 | Detailed evidence ID schema, lifecycle-state enum, packet template, threshold catalog, and recertification cadence. | Does not block memo export because these are implementation artifacts after approval. | Defer | The memo should stay concise and decision-oriented. |
+
 ## Incorporate
 
 - Redefine the paper's ask as a lightweight supply-chain control process.

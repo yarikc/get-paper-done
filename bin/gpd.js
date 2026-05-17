@@ -22,6 +22,7 @@ const {
   validateArtifact,
   printArtifactValidation,
   listMarkdownItems,
+  formatExternalReviewProgress,
 } = require('./lib/workspace');
 
 function printHelp() {
@@ -72,7 +73,7 @@ Examples:
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
-  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,opencode
+  gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini
   gpd export --paper ~/papers/metadata-strategy
   gpd status --paper ~/papers/metadata-strategy
   gpd next --paper ~/papers/metadata-strategy
@@ -221,7 +222,12 @@ function main(argv) {
 
   if (command === 'review-external') {
     const args = parseWorkspaceOptions(rest);
-    const result = reviewExternal(args);
+    const result = reviewExternal({
+      ...args,
+      onProgress: args.json
+        ? undefined
+        : (event) => console.log(`external review: ${formatExternalReviewProgress(event)}`),
+    });
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printExternalReviewResult(result);
     return;

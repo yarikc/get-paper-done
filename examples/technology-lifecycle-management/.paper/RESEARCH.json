@@ -12,9 +12,14 @@
       {
         "id": "RQ1",
         "question": "Do regulatory and supervisory sources support treating technology and cyber risk as an enterprise-wide management discipline?",
-        "mapped_claims": ["C1", "C3"],
+        "mapped_claims": [
+          "C1",
+          "C3"
+        ],
         "why_it_matters": "The draft makes source-sensitive claims about supervisory expectations and operated evidence.",
-        "planned_source_types": ["official"],
+        "planned_source_types": [
+          "official"
+        ],
         "search_queries": [
           "OSFI B-13 technology cyber risk management guideline",
           "OSFI technology and cyber risk management effective January 2024"
@@ -23,9 +28,15 @@
       {
         "id": "RQ2",
         "question": "Do operational resilience expectations support mapping dependencies, ownership, critical operations, and end-to-end technology/process relationships?",
-        "mapped_claims": ["C1", "C2", "C3"],
+        "mapped_claims": [
+          "C1",
+          "C2",
+          "C3"
+        ],
         "why_it_matters": "The paper argues for live signals, ownership, dependency visibility, and resilience-oriented lifecycle management.",
-        "planned_source_types": ["official"],
+        "planned_source_types": [
+          "official"
+        ],
         "search_queries": [
           "OSFI E-21 operational risk management resilience dependency mapping critical operations",
           "OSFI E-21 full adherence September 2026"
@@ -34,9 +45,14 @@
       {
         "id": "RQ3",
         "question": "Do financial-institution technology examination sources support architecture, infrastructure, operations governance, asset/process/third-party interconnection, and operational adequacy?",
-        "mapped_claims": ["C2", "C3"],
+        "mapped_claims": [
+          "C2",
+          "C3"
+        ],
         "why_it_matters": "The paper needs support for architecture as a coherence and operating-risk mechanism rather than just a design function.",
-        "planned_source_types": ["official"],
+        "planned_source_types": [
+          "official"
+        ],
         "search_queries": [
           "FFIEC Architecture Infrastructure Operations booklet governance risk management operations assets third party"
         ]
@@ -44,9 +60,14 @@
       {
         "id": "RQ4",
         "question": "Does security-maintenance guidance support the claim that ongoing maintenance, patching, updates, and vulnerability management are lifecycle obligations rather than optional cleanup?",
-        "mapped_claims": ["C1", "C4"],
+        "mapped_claims": [
+          "C1",
+          "C4"
+        ],
         "why_it_matters": "The draft treats modernization and lifecycle upkeep as active risk reduction, not discretionary engineering work.",
-        "planned_source_types": ["official"],
+        "planned_source_types": [
+          "official"
+        ],
         "search_queries": [
           "NIST SP 800-40 Rev 4 enterprise patch management preventive maintenance technology"
         ]
@@ -54,9 +75,15 @@
       {
         "id": "RQ5",
         "question": "What parts of the imported draft remain strategic judgment rather than externally evidenced fact?",
-        "mapped_claims": ["C2", "C4"],
+        "mapped_claims": [
+          "C2",
+          "C4"
+        ],
         "why_it_matters": "The paper should distinguish externally supported risk expectations from internal operating-model recommendations.",
-        "planned_source_types": ["user_provided", "official"],
+        "planned_source_types": [
+          "user_provided",
+          "official"
+        ],
         "search_queries": []
       }
     ],
@@ -72,35 +99,49 @@
         "finding": "Technology and cyber risk guidance supports enterprise management of technology risks, but should be described as expectation-aligned rather than as a direct mandate for this specific lifecycle model.",
         "confidence": "high",
         "why_it_matters": "Prevents regulatory overclaiming while preserving the case for lifecycle discipline.",
-        "sources": ["S1"]
+        "sources": [
+          "S1"
+        ]
       },
       {
         "id": "K2",
         "finding": "Operational resilience guidance supports mapping critical operations and internal / external dependencies, including technology, processes, third parties, and connections.",
         "confidence": "high",
         "why_it_matters": "Supports the paper's argument for live evidence, dependency visibility, and resilience-oriented lifecycle signals.",
-        "sources": ["S2"]
+        "sources": [
+          "S2"
+        ]
       },
       {
         "id": "K3",
         "finding": "Financial-institution IT examination guidance supports architecture, infrastructure, operations governance and risk management as areas examiners assess, including assets, processes, and third-party interconnection.",
         "confidence": "high",
         "why_it_matters": "Supports the architecture facilitator role and the need for coherent operating visibility.",
-        "sources": ["S3"]
+        "sources": [
+          "S3"
+        ]
       },
       {
         "id": "K4",
         "finding": "NIST patch-management guidance supports treating updates, upgrades, and patching as ongoing preventive maintenance that reduces risk and supports mission delivery.",
         "confidence": "high",
         "why_it_matters": "Supports the claim that technology lifecycle obligations continue after adoption and include modernization / maintenance work.",
-        "sources": ["S4"]
+        "sources": [
+          "S4"
+        ]
       },
       {
         "id": "K5",
         "finding": "The imported draft's domain-owner model, four lifecycle decisions, and pilot ask are plausible strategic recommendations, but external sources do not directly validate them as the only or required operating model.",
         "confidence": "medium",
         "why_it_matters": "The outline should frame these as the recommended implementation path, not as a regulatory fact.",
-        "sources": ["S5", "S1", "S2", "S3", "S4"]
+        "sources": [
+          "S5",
+          "S1",
+          "S2",
+          "S3",
+          "S4"
+        ]
       }
     ]
   },
@@ -116,7 +157,15 @@
       "specificity": "high",
       "bias_or_agenda": "Prudential supervisory guidance; authoritative for federally regulated financial institutions in its jurisdiction.",
       "stance": "supportive",
-      "notes": "Supports technology and cyber risk management expectations and risk-based enterprise governance framing."
+      "notes": "Supports technology and cyber risk management expectations and risk-based enterprise governance framing.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Supports technology and cyber risk management expectations and risk-based enterprise governance framing.",
+      "relevant_points": [
+        "Supports technology and cyber risk management expectations and risk-based enterprise governance framing."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Prudential supervisory guidance; authoritative for federally regulated financial institutions in its jurisdiction."
     },
     {
       "id": "S2",
@@ -129,7 +178,15 @@
       "specificity": "high",
       "bias_or_agenda": "Prudential supervisory guidance; authoritative for federally regulated financial institutions in its jurisdiction.",
       "stance": "supportive",
-      "notes": "Supports critical operations, end-to-end dependency mapping, governance, operational risk limits, and resilience concepts."
+      "notes": "Supports critical operations, end-to-end dependency mapping, governance, operational risk limits, and resilience concepts.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Supports critical operations, end-to-end dependency mapping, governance, operational risk limits, and resilience concepts.",
+      "relevant_points": [
+        "Supports critical operations, end-to-end dependency mapping, governance, operational risk limits, and resilience concepts."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Prudential supervisory guidance; authoritative for federally regulated financial institutions in its jurisdiction."
     },
     {
       "id": "S3",
@@ -142,7 +199,15 @@
       "specificity": "medium",
       "bias_or_agenda": "US financial institution examination guidance announcement; authoritative for examiner focus, less specific than the full booklet.",
       "stance": "supportive",
-      "notes": "Supports examiner focus on architecture/infrastructure/operations, governance, risk management, operations, and interconnections among assets, processes, and third-party providers."
+      "notes": "Supports examiner focus on architecture/infrastructure/operations, governance, risk management, operations, and interconnections among assets, processes, and third-party providers.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "short_summary": "Supports examiner focus on architecture/infrastructure/operations, governance, risk management, operations, and interconnections among assets, processes, and third-party providers.",
+      "relevant_points": [
+        "Supports examiner focus on architecture/infrastructure/operations, governance, risk management, operations, and interconnections among assets, processes, and third-party providers."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "US financial institution examination guidance announcement; authoritative for examiner focus, less specific than the full booklet."
     },
     {
       "id": "S4",
@@ -155,7 +220,15 @@
       "specificity": "medium",
       "bias_or_agenda": "Cybersecurity guidance; broadly applicable, not financial-sector specific.",
       "stance": "supportive",
-      "notes": "Supports patching, updates, upgrades, and preventive maintenance as ongoing technology-management obligations."
+      "notes": "Supports patching, updates, upgrades, and preventive maintenance as ongoing technology-management obligations.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "short_summary": "Supports patching, updates, upgrades, and preventive maintenance as ongoing technology-management obligations.",
+      "relevant_points": [
+        "Supports patching, updates, upgrades, and preventive maintenance as ongoing technology-management obligations."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Cybersecurity guidance; broadly applicable, not financial-sector specific."
     },
     {
       "id": "S5",
@@ -168,7 +241,15 @@
       "specificity": "high",
       "bias_or_agenda": "Author's proposed strategic framing; useful for intent, not external evidence.",
       "stance": "supportive",
-      "notes": "Private source used for the operating-model proposal, pilot ask, and intended executive audience. The source text is not included in the committed example."
+      "notes": "Private source used for the operating-model proposal, pilot ask, and intended executive audience. The source text is not included in the committed example.",
+      "rank_group": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "short_summary": "Private source used for the operating-model proposal, pilot ask, and intended executive audience. The source text is not included in the committed example.",
+      "relevant_points": [
+        "Private source used for the operating-model proposal, pilot ask, and intended executive audience. The source text is not included in the committed example."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Author's proposed strategic framing; useful for intent, not external evidence."
     }
   ],
   "evidence_matrix": [
@@ -176,8 +257,15 @@
       "claim_id": "C1",
       "claim": "Technology accumulation is a lifecycle problem, not just an intake problem.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ1", "RQ4"],
-      "supporting_sources": ["S1", "S4", "S5"],
+      "research_questions": [
+        "RQ1",
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S4",
+        "S5"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -188,8 +276,16 @@
       "claim_id": "C2",
       "claim": "Federated technology delivery needs shared lifecycle visibility without centralizing every decision.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ2", "RQ3", "RQ5"],
-      "supporting_sources": ["S2", "S3", "S5"],
+      "research_questions": [
+        "RQ2",
+        "RQ3",
+        "RQ5"
+      ],
+      "supporting_sources": [
+        "S2",
+        "S3",
+        "S5"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "weak",
       "confidence": "medium",
@@ -200,8 +296,17 @@
       "claim_id": "C3",
       "claim": "Live operational signals are a stronger proof standard than paper attestation for lifecycle decisions.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ1", "RQ2", "RQ3"],
-      "supporting_sources": ["S1", "S2", "S3", "S5"],
+      "research_questions": [
+        "RQ1",
+        "RQ2",
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -212,8 +317,14 @@
       "claim_id": "C4",
       "claim": "Modernization and retirement should be treated as positive lifecycle outcomes.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ4", "RQ5"],
-      "supporting_sources": ["S4", "S5"],
+      "research_questions": [
+        "RQ4",
+        "RQ5"
+      ],
+      "supporting_sources": [
+        "S4",
+        "S5"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "weak",
       "confidence": "medium",
@@ -224,8 +335,14 @@
       "claim_id": "C5",
       "claim": "Regulatory and resilience expectations make lifecycle evidence more important for regulated institutions.",
       "claim_type": "factual",
-      "research_questions": ["RQ1", "RQ2"],
-      "supporting_sources": ["S1", "S2"],
+      "research_questions": [
+        "RQ1",
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S2"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -236,9 +353,17 @@
       "claim_id": "C6",
       "claim": "The proposed domain-owner model and four lifecycle decisions are the right implementation path.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ5"],
-      "supporting_sources": ["S5"],
-      "contradicting_sources": ["S1", "S2", "S3"],
+      "research_questions": [
+        "RQ5"
+      ],
+      "supporting_sources": [
+        "S5"
+      ],
+      "contradicting_sources": [
+        "S1",
+        "S2",
+        "S3"
+      ],
       "strength_of_support": "weak",
       "confidence": "medium",
       "recommended_handling": "caveat",
@@ -296,7 +421,12 @@
     {
       "id": "X1",
       "issue": "Official sources support governance, risk management, dependency mapping, and maintenance, but do not prescribe the draft's specific domain-owner / four-decision model.",
-      "sources_in_tension": ["S1", "S2", "S3", "S5"],
+      "sources_in_tension": [
+        "S1",
+        "S2",
+        "S3",
+        "S5"
+      ],
       "possible_explanations": [
         "The draft is proposing an implementation model built on top of broader expectations.",
         "The operating model is an internal design recommendation rather than an externally sourced fact."
@@ -307,7 +437,10 @@
     {
       "id": "X2",
       "issue": "Live telemetry is directionally supported, but the draft implies more instrumentation maturity than may exist at pilot start.",
-      "sources_in_tension": ["S2", "S5"],
+      "sources_in_tension": [
+        "S2",
+        "S5"
+      ],
       "possible_explanations": [
         "The draft describes the desired end state rather than the pilot starting condition.",
         "The paper needs a minimum viable signal set."
@@ -342,7 +475,12 @@
   "draft_support_notes": [
     {
       "section": "Why now",
-      "recommended_evidence": ["S1", "S2", "S3", "S4"],
+      "recommended_evidence": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
       "how_to_use": "Use official sources to support risk environment and supervisory expectation themes; avoid claiming that they require the exact proposed model.",
       "strength_of_language": "moderate",
       "cautions": "Do not overstate regulatory specificity or source claims about AI-accelerated security timelines without additional sources.",
@@ -350,7 +488,11 @@
     },
     {
       "section": "Ownership and architecture role",
-      "recommended_evidence": ["S2", "S3", "S5"],
+      "recommended_evidence": [
+        "S2",
+        "S3",
+        "S5"
+      ],
       "how_to_use": "Use official guidance to support governance/accountability and architecture/operations risk context; use the draft for the proposed facilitator design.",
       "strength_of_language": "cautious",
       "cautions": "Frame domain ownership as a recommended model to validate, not as an externally proven requirement.",
@@ -358,7 +500,11 @@
     },
     {
       "section": "Tools and evidence",
-      "recommended_evidence": ["S1", "S2", "S4"],
+      "recommended_evidence": [
+        "S1",
+        "S2",
+        "S4"
+      ],
       "how_to_use": "Use these sources to justify risk management, dependency mapping, and ongoing maintenance signals.",
       "strength_of_language": "moderate",
       "cautions": "Name minimum viable signal set; do not imply complete telemetry is already available.",
@@ -368,22 +514,30 @@
   "facts_safe_to_use": [
     {
       "fact": "OSFI B-13 is official technology and cyber risk management guidance for federally regulated financial institutions.",
-      "sources": ["S1"],
+      "sources": [
+        "S1"
+      ],
       "confidence": "high"
     },
     {
       "fact": "OSFI E-21 addresses operational risk management and resilience and includes expectations around governance, critical operations, and dependency mapping.",
-      "sources": ["S2"],
+      "sources": [
+        "S2"
+      ],
       "confidence": "high"
     },
     {
       "fact": "FFIEC's AIO booklet announcement identifies architecture, infrastructure, operations, governance, risk management, and interconnections among assets, processes, and third-party providers as examiner-relevant areas.",
-      "sources": ["S3"],
+      "sources": [
+        "S3"
+      ],
       "confidence": "high"
     },
     {
       "fact": "NIST SP 800-40 Rev. 4 frames enterprise patch management as preventive maintenance that reduces risk and supports mission delivery.",
-      "sources": ["S4"],
+      "sources": [
+        "S4"
+      ],
       "confidence": "high"
     }
   ],
@@ -409,6 +563,53 @@
       "claim": "Frontier-model capability is compressing the security timeline.",
       "why": "The current standard research pass did not source this claim. It may be true or useful, but it needs additional evidence if retained.",
       "recommended_reframe": "Security and vulnerability-management expectations make weak inventory, delayed patching, and unmanaged dependencies harder to defend."
+    }
+  ],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Prudential supervisory guidance; authoritative for federally regulated financial institutions in its jurisdiction."
+    },
+    {
+      "rank": 2,
+      "source_id": "S2",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Prudential supervisory guidance; authoritative for federally regulated financial institutions in its jurisdiction."
+    },
+    {
+      "rank": 3,
+      "source_id": "S3",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (medium relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "US financial institution examination guidance announcement; authoritative for examiner focus, less specific than the full booklet."
+    },
+    {
+      "rank": 4,
+      "source_id": "S4",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (medium relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Cybersecurity guidance; broadly applicable, not financial-sector specific."
+    },
+    {
+      "rank": 5,
+      "source_id": "S5",
+      "rank_group": "background",
+      "role": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Author's proposed strategic framing; useful for intent, not external evidence."
     }
   ]
 }

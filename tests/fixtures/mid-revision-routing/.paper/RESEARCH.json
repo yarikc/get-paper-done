@@ -12,18 +12,30 @@
       {
         "id": "RQ1",
         "question": "Does separating decision-ready review from advisory intake reduce review-cycle time?",
-        "mapped_claims": ["C1"],
+        "mapped_claims": [
+          "C1"
+        ],
         "why_it_matters": "The pilot should rest on cycle-time evidence, not preference.",
-        "planned_source_types": ["user_provided"],
-        "search_queries": ["synthetic review cycle packet sample"]
+        "planned_source_types": [
+          "user_provided"
+        ],
+        "search_queries": [
+          "synthetic review cycle packet sample"
+        ]
       },
       {
         "id": "RQ2",
         "question": "Does narrower intake reduce avoidable rework?",
-        "mapped_claims": ["C2"],
+        "mapped_claims": [
+          "C2"
+        ],
         "why_it_matters": "The draft currently makes this claim more strongly than the evidence supports.",
-        "planned_source_types": ["user_provided"],
-        "search_queries": ["synthetic rework source follow up"]
+        "planned_source_types": [
+          "user_provided"
+        ],
+        "search_queries": [
+          "synthetic rework source follow up"
+        ]
       }
     ],
     "depth_rationale": "The paper is an internal decision memo with meaningful operating consequences.",
@@ -62,7 +74,15 @@
           "rationale": "Mentions rework categories but does not prove avoided rework."
         }
       ],
-      "notes": "Use only as fixture evidence."
+      "notes": "Use only as fixture evidence.",
+      "rank_group": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "short_summary": "Use only as fixture evidence.",
+      "relevant_points": [
+        "Use only as fixture evidence."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Synthetic fixture data created for tests."
     },
     {
       "id": "S2",
@@ -87,7 +107,15 @@
           "rationale": "Completeness may relate to rework but does not directly measure it."
         }
       ],
-      "notes": "Supports packet completeness, not avoided rework."
+      "notes": "Supports packet completeness, not avoided rework.",
+      "rank_group": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and medium specificity for this paper.",
+      "short_summary": "Supports packet completeness, not avoided rework.",
+      "relevant_points": [
+        "Supports packet completeness, not avoided rework."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Synthetic fixture data created for tests."
     }
   ],
   "evidence_matrix": [
@@ -95,8 +123,13 @@
       "claim_id": "C1",
       "claim": "Decision-ready packet review is faster than mixed advisory intake in the synthetic sample.",
       "claim_type": "factual",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S1", "S2"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S2"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -107,8 +140,12 @@
       "claim_id": "C2",
       "claim": "The pilot will reduce avoidable rework.",
       "claim_type": "causal",
-      "research_questions": ["RQ2"],
-      "supporting_sources": ["S1"],
+      "research_questions": [
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S1"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "weak",
       "confidence": "low",
@@ -117,7 +154,11 @@
     }
   ],
   "synthesis_matrix": {
-    "themes": ["cycle_time", "packet_quality", "rework_gap"],
+    "themes": [
+      "cycle_time",
+      "packet_quality",
+      "rework_gap"
+    ],
     "rows": [
       {
         "theme": "cycle_time",
@@ -155,5 +196,25 @@
   ],
   "claims_to_drop_or_reframe": [
     "The pilot will reduce avoidable rework."
+  ],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "background",
+      "role": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Synthetic fixture data created for tests."
+    },
+    {
+      "rank": 2,
+      "source_id": "S2",
+      "rank_group": "background",
+      "role": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Synthetic fixture data created for tests."
+    }
   ]
 }

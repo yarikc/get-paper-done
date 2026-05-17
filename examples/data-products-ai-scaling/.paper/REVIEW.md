@@ -53,6 +53,15 @@ The revised draft is ready for internal export. The opening now states the reque
 - Add a direct case study if the paper needs to claim measurable AI delivery improvement.
 - Convert the draft source anchors into formal citations during export if desired.
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious internal strategy examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** Evidence sufficiency is adequate for internal strategy but below publication quality; direct AI outcome case evidence is still thin.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Public-publication citations and direct case evidence are deferred because this example is scoped to internal strategy export, not an external publication.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

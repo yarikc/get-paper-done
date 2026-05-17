@@ -114,16 +114,39 @@ function testResearchEnumFailureIsActionable() {
   const dir = tempDir('gpd-artifact-research-enum-test');
   const badResearch = path.join(dir, 'RESEARCH.json');
   const research = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'research.json'), 'utf8'));
+  research.source_ranking[0].rank_group = 'whatever_is_newest';
+  research.source_ranking[0].role = 'vibes_anchor';
+  research.research_plan.source_lanes[0].lane = 'influencer_threads';
+  research.research_plan.source_lanes[0].status = 'vibes';
+  research.research_plan.missed_source_audit = [
+    {
+      source: 'Important Source',
+      status: 'forgotten',
+      miss_category: 'bad_luck',
+      reason: 'It was not searched.',
+      prevention: 'Add a better source lane.',
+    },
+  ];
   research.evidence_matrix[0].claim_type = 'vibes';
   research.evidence_matrix[0].strength_of_support = 'pretty_good';
   research.evidence_matrix[0].recommended_handling = 'wing_it';
+  research.evidence_nuggets[0].source_ids = 'S1';
+  research.evidence_nuggets[0].extra = 'not allowed';
   fs.writeFileSync(badResearch, JSON.stringify(research, null, 2));
 
   const result = runFail(['validate-artifact', '--path', badResearch]);
   assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('RESEARCH.json: $.source_ranking[0].rank_group must be one of primary_anchor, secondary_anchor, trend_evidence, failure_mode_evidence, analogy, background'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_ranking[0].role must be one of primary_regulatory_anchor, lifecycle_control_anchor, industry_trend_evidence, failure_mode_evidence, analogy_source, counterevidence, background'));
+  assert(result.stdout.includes('RESEARCH.json: $.research_plan.source_lanes[0].lane must be one of official_regulatory_standards, empirical_counterevidence, industry_trend_market, practitioner_operating_model'));
+  assert(result.stdout.includes('RESEARCH.json: $.research_plan.source_lanes[0].status must be one of planned, covered, not_applicable, missing'));
+  assert(result.stdout.includes('RESEARCH.json: $.research_plan.missed_source_audit[0].status must be one of open, resolved, deferred'));
+  assert(result.stdout.includes('RESEARCH.json: $.research_plan.missed_source_audit[0].miss_category must be one of absent_source_lane, source_added_after_research, underweighted_source_type, terminology_mismatch, not_discoverable, agent_error'));
   assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].claim_type must be one of factual, causal, strategic_judgment, technical_mechanism, market_trend, recommendation'));
   assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].strength_of_support must be one of strong, moderate, weak, none'));
   assert(result.stdout.includes('RESEARCH.json: $.evidence_matrix[0].recommended_handling must be one of keep, support_more, soften, narrow, caveat, drop'));
+  assert(result.stdout.includes('RESEARCH.json: $.evidence_nuggets[0].source_ids expected array, got string'));
+  assert(result.stdout.includes('RESEARCH.json: $.evidence_nuggets[0].extra is not allowed'));
 }
 
 function testResearchPlanSourceTypeFailureIsActionable() {
@@ -142,9 +165,11 @@ function testResearchSourceRegistryFailureIsActionable() {
   const dir = tempDir('gpd-artifact-research-source-test');
   const badResearch = path.join(dir, 'RESEARCH.json');
   const research = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'research.json'), 'utf8'));
+  research.source_registry[0].rank_group = 'homepage';
   research.source_registry[0].source_type = 'newsletter_thread';
   research.source_registry[0].authority = 'legendary';
   research.source_registry[0].stance = 'cheerleading';
+  research.source_registry[0].relevant_points = 'trust me';
   research.source_registry[0].claim_support[0].support = 'vibes';
   research.source_registry[0].claim_support[0].unexpected = true;
   research.source_registry[0].unexpected = true;
@@ -152,9 +177,11 @@ function testResearchSourceRegistryFailureIsActionable() {
 
   const result = runFail(['validate-artifact', '--path', badResearch]);
   assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].rank_group must be one of primary_anchor, secondary_anchor, trend_evidence, failure_mode_evidence, analogy, background'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].source_type must be one of official, academic, industry, news, analyst, blog, user_provided, other'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].authority must be one of high, medium, low'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].stance must be one of supportive, neutral, critical, mixed'));
+  assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].relevant_points expected array, got string'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].claim_support[0].support must be one of direct, partial, topical_only, contradicts, not_checked'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].claim_support[0].unexpected is not allowed'));
   assert(result.stdout.includes('RESEARCH.json: $.source_registry[0].unexpected is not allowed'));

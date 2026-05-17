@@ -60,6 +60,7 @@ Stale context risks:
 - `FACT-CHECK.md` has HIGH issues or claims marked verify-before-publication: do not export without user acknowledgement.
 - `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
 - `FEEDBACK-PLAN.md` pending approval: do not revise until user approves handling.
+- `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export: route to `/gpd-revise`.
 - `STATE.json` `grill.status` is not `Complete`, or required `grill.resolved_decisions` are missing: recommend `/gpd-grill` before `/gpd-brief`.
 - `PAPER-CONTEXT.md` or `DECISIONS.md` newer than `BRIEF.md`: recommend `/gpd-brief` so the formal brief absorbs the clarified context.
 - An agent detects unresolved thesis, audience, term, scope, proof-standard, or non-goal ambiguity after downstream work exists: recommend `/gpd-grill` first, then `/gpd-brief` after resolution.
@@ -122,15 +123,26 @@ Use this order:
 20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-status`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
 21. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
 22. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
-23. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
-24. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
-25. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
-26. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
-27. Final exists and is current → paper appears exported; recommend `/gpd-status` or archive/next-paper planning unless new changes are planned.
+23. `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export → `/gpd-revise`.
+24. Approved `FEEDBACK-PLAN.md` indicates changes needed → `/gpd-revise`.
+25. `exports/FINAL.md` missing and review is ready → `/gpd-export`.
+26. `DRAFT.md`, `FACT-CHECK.md`, or `REVIEW.md` is newer than `exports/FINAL.md` → `/gpd-export`.
+27. Before treating a reviewed/exported paper as example-quality or handoff-ready, recommend running `gpd validate --semantic --paper <paper-dir>` from the shell. If semantic validation reports HIGH issues, recommend the earliest affected workflow stage before archive/export confidence.
+28. Final exists and is current → paper appears exported; recommend `/gpd-status` or archive/next-paper planning unless new changes are planned.
 
 Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, not permission to skip structurally required artifacts. For example, do not recommend `/gpd-export` unless a draft and review exist, and do not recommend `/gpd-draft` unless an outline exists.
 
-## 5. Context Guidance
+## 5. Human Action Hint
+
+Users should not need to remember the whole workflow. Always include a short "what you do now" line after the next command:
+
+- If next is `/gpd-export`: "Run export, then review `.paper/exports/FINAL.md`."
+- If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add comments there, run `/gpd-review`."
+- If next is `/gpd-review` and `exports/FINAL.md` exists: "Review will capture comments from the exported reading copy into feedback artifacts before revision."
+- If next is `/gpd-revise`: "Revision edits `.paper/DRAFT.md`; export regenerates `.paper/exports/FINAL.md`."
+- Otherwise: "Run the recommended command, then run `/gpd-status` again."
+
+## 6. Context Guidance
 
 Always include context guidance:
 
@@ -148,7 +160,7 @@ Default guidance:
 - Before `/gpd-review`: clear context after drafting; read draft, reader feedback if present, and upstream artifacts.
 - Before `/gpd-revise`: clear context after review; read approved feedback plan, reader feedback if present, and draft.
 
-## 6. Output Format
+## 7. Output Format
 
 Return:
 
@@ -161,6 +173,7 @@ Return:
 - **State file says:** [summary]
 - **Suggested next command:** `/gpd-...`
 - **Why:** [one or two sentences]
+- **What you do now:** [one sentence from the Human Action Hint section]
 
 ## Artifact Health
 

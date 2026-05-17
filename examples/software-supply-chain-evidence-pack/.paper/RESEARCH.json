@@ -12,82 +12,143 @@
       {
         "id": "RQ1",
         "question": "Which public source supports SBOM as a software transparency mechanism?",
-        "mapped_claims": ["C1"],
+        "mapped_claims": [
+          "C1"
+        ],
         "why_it_matters": "The memo should not treat dependency visibility as an invented internal preference.",
-        "planned_source_types": ["official"],
-        "search_queries": ["CISA software bill of materials SBOM overview"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "CISA software bill of materials SBOM overview"
+        ]
       },
       {
         "id": "RQ2",
         "question": "Which public source identifies minimum SBOM elements?",
-        "mapped_claims": ["C2"],
+        "mapped_claims": [
+          "C2"
+        ],
         "why_it_matters": "The memo needs to show that dependency records have recognized minimum fields.",
-        "planned_source_types": ["official"],
-        "search_queries": ["CISA 2025 Minimum Elements Software Bill of Materials SBOM"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "CISA 2025 Minimum Elements Software Bill of Materials SBOM"
+        ]
       },
       {
         "id": "RQ3",
         "question": "Which public source supports using SSDF as secure-development attestation framing?",
-        "mapped_claims": ["C3"],
+        "mapped_claims": [
+          "C3"
+        ],
         "why_it_matters": "The control process needs a defensible secure-development reference without inventing a new control taxonomy.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NIST SP 800-218 Secure Software Development Framework"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NIST SP 800-218 Secure Software Development Framework"
+        ]
       },
       {
         "id": "RQ4",
         "question": "Which public source supports cybersecurity supply-chain risk management as an enterprise concern?",
-        "mapped_claims": ["C4"],
+        "mapped_claims": [
+          "C4"
+        ],
         "why_it_matters": "The memo needs to connect pilot evidence to risk management, not just engineering hygiene.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NIST SP 800-161 Rev. 1 cybersecurity supply chain risk management"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NIST SP 800-161 Rev. 1 cybersecurity supply chain risk management"
+        ]
       },
       {
         "id": "RQ5",
         "question": "Which public source explains provenance as verifiable artifact production information?",
-        "mapped_claims": ["C5"],
+        "mapped_claims": [
+          "C5"
+        ],
         "why_it_matters": "The control record needs a source-backed reason to ask where and how artifacts were produced.",
-        "planned_source_types": ["official"],
-        "search_queries": ["SLSA provenance where when how artifact produced"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "SLSA provenance where when how artifact produced"
+        ]
       },
       {
         "id": "RQ6",
         "question": "Which public source supports open-source project health scoring as an input?",
-        "mapped_claims": ["C6"],
+        "mapped_claims": [
+          "C6"
+        ],
         "why_it_matters": "The control process should use project health signals carefully and not overstate them.",
-        "planned_source_types": ["official"],
-        "search_queries": ["OpenSSF Scorecard open source project security posture"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "OpenSSF Scorecard open source project security posture"
+        ]
       },
       {
         "id": "RQ7",
         "question": "Which public source supports treating AI systems as lifecycle risk-management artifacts rather than one-time demos?",
-        "mapped_claims": ["C13"],
+        "mapped_claims": [
+          "C13"
+        ],
         "why_it_matters": "The memo claims AI scope and needs source-backed lifecycle framing.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NIST AI Risk Management Framework design development deployment use evaluation"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NIST AI Risk Management Framework design development deployment use evaluation"
+        ]
       },
       {
         "id": "RQ8",
         "question": "Which public source supports generative AI-specific monitoring and lifecycle governance?",
-        "mapped_claims": ["C14"],
+        "mapped_claims": [
+          "C14"
+        ],
         "why_it_matters": "LLM systems can change behavior through model, prompt, retrieval, or provider changes outside normal software release evidence.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NIST AI 600-1 Generative AI Profile lifecycle risk management"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NIST AI 600-1 Generative AI Profile lifecycle risk management"
+        ]
       },
       {
         "id": "RQ9",
         "question": "Which public source identifies LLM-specific risks relevant to supply chain, plugins, agency, and sensitive information?",
-        "mapped_claims": ["C15", "C16"],
+        "mapped_claims": [
+          "C15",
+          "C16"
+        ],
         "why_it_matters": "The control record needs AI-specific fields rather than only conventional SBOM and build provenance fields.",
-        "planned_source_types": ["official"],
-        "search_queries": ["OWASP Top 10 for Large Language Model Applications supply chain plugins excessive agency sensitive information"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "OWASP Top 10 for Large Language Model Applications supply chain plugins excessive agency sensitive information"
+        ]
       },
       {
         "id": "RQ10",
         "question": "Which public source applies secure development, deployment, operation, and maintenance principles to systems that use AI and third-party AI services?",
-        "mapped_claims": ["C17"],
+        "mapped_claims": [
+          "C17"
+        ],
         "why_it_matters": "The memo needs a source-backed reason to include AI systems built on third-party tools and services.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NCSC Guidelines for secure AI system development third party tools services"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NCSC Guidelines for secure AI system development third party tools services"
+        ]
       }
     ],
     "depth_rationale": "The paper is a concise internal decision memo, but it affects deployment approval and risk acceptance, so each material source claim needs explicit source IDs.",
@@ -132,7 +193,15 @@
           "rationale": "The source supports the dependency-transparency category but not the exact internal control process."
         }
       ],
-      "notes": "Verified public CISA page on 2026-05-13."
+      "notes": "Verified public CISA page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "short_summary": "Verified public CISA page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public CISA page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Government cybersecurity guidance and coordination page."
     },
     {
       "id": "S2",
@@ -162,7 +231,15 @@
           "rationale": "The source supports a dependency inventory requirement, but not the full proposed control process."
         }
       ],
-      "notes": "Verified public CISA page on 2026-05-13."
+      "notes": "Verified public CISA page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public CISA page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public CISA page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Draft/update guidance for SBOM minimum elements."
     },
     {
       "id": "S3",
@@ -187,7 +264,15 @@
           "rationale": "The source supports the secure-development attestation category but not the exact internal attestation form."
         }
       ],
-      "notes": "Verified public NIST CSRC page on 2026-05-13."
+      "notes": "Verified public NIST CSRC page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public NIST CSRC page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public NIST CSRC page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Official secure software development framework."
     },
     {
       "id": "S4",
@@ -237,7 +322,15 @@
           "rationale": "The source supports risk management accountability but not the exact observed-evidence and owner-attestation workflow."
         }
       ],
-      "notes": "Verified public NIST CSRC page on 2026-05-13."
+      "notes": "Verified public NIST CSRC page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public NIST CSRC page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public NIST CSRC page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Official cybersecurity supply-chain risk management guidance."
     },
     {
       "id": "S5",
@@ -262,7 +355,15 @@
           "rationale": "The source supports the provenance category but not a universal requirement for every early pilot."
         }
       ],
-      "notes": "Verified public SLSA specification page on 2026-05-13."
+      "notes": "Verified public SLSA specification page on 2026-05-13.",
+      "rank_group": "secondary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public SLSA specification page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public SLSA specification page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Open software supply-chain specification."
     },
     {
       "id": "S6",
@@ -287,7 +388,15 @@
           "rationale": "The source supports project health signal use but not treating the score as final approval."
         }
       ],
-      "notes": "Verified public OpenSSF page on 2026-05-13."
+      "notes": "Verified public OpenSSF page on 2026-05-13.",
+      "rank_group": "secondary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "short_summary": "Verified public OpenSSF page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public OpenSSF page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Open-source security initiative describing its own project."
     },
     {
       "id": "S7",
@@ -317,7 +426,15 @@
           "rationale": "The source supports AI lifecycle governance but not the exact refresh triggers."
         }
       ],
-      "notes": "Verified public NIST page on 2026-05-13."
+      "notes": "Verified public NIST page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "short_summary": "Verified public NIST page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public NIST page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Official voluntary AI risk management framework."
     },
     {
       "id": "S8",
@@ -352,7 +469,15 @@
           "rationale": "The source supports generative AI risk-management scope but not the exact AI runtime field list."
         }
       ],
-      "notes": "Verified public NIST page on 2026-05-13."
+      "notes": "Verified public NIST page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public NIST page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public NIST page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Official generative AI profile for the NIST AI RMF."
     },
     {
       "id": "S9",
@@ -387,7 +512,15 @@
           "rationale": "The source supports the need to revisit LLM risk when relevant runtime dependencies or permissions change."
         }
       ],
-      "notes": "Verified public OWASP page on 2026-05-13."
+      "notes": "Verified public OWASP page on 2026-05-13.",
+      "rank_group": "secondary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public OWASP page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public OWASP page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Open security project focused on LLM application risks."
     },
     {
       "id": "S10",
@@ -422,7 +555,15 @@
           "rationale": "The source supports secure AI review for systems built on third-party tools and services but not the exact field list."
         }
       ],
-      "notes": "Verified public NCSC page on 2026-05-13."
+      "notes": "Verified public NCSC page on 2026-05-13.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public NCSC page on 2026-05-13.",
+      "relevant_points": [
+        "Verified public NCSC page on 2026-05-13."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Government cybersecurity guidance for AI system providers."
     }
   ],
   "evidence_matrix": [
@@ -430,8 +571,12 @@
       "claim_id": "C1",
       "claim": "SBOMs support software component transparency and dependency visibility.",
       "claim_type": "factual",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S1"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S1"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -442,8 +587,12 @@
       "claim_id": "C2",
       "claim": "CISA minimum-elements guidance supports asking for consistent SBOM fields when software components are in scope.",
       "claim_type": "factual",
-      "research_questions": ["RQ2"],
-      "supporting_sources": ["S2"],
+      "research_questions": [
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S2"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -454,8 +603,12 @@
       "claim_id": "C3",
       "claim": "NIST SSDF provides a public reference for secure software development practices.",
       "claim_type": "factual",
-      "research_questions": ["RQ3"],
-      "supporting_sources": ["S3"],
+      "research_questions": [
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S3"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -466,8 +619,12 @@
       "claim_id": "C4",
       "claim": "Cybersecurity supply-chain risk management is an enterprise risk-management concern, not only an engineering hygiene issue.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "high",
@@ -478,8 +635,12 @@
       "claim_id": "C5",
       "claim": "SLSA provenance describes verifiable information about where, when, and how software artifacts were produced.",
       "claim_type": "factual",
-      "research_questions": ["RQ5"],
-      "supporting_sources": ["S5"],
+      "research_questions": [
+        "RQ5"
+      ],
+      "supporting_sources": [
+        "S5"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -490,8 +651,12 @@
       "claim_id": "C6",
       "claim": "OpenSSF Scorecard can inform review of open-source project health, but it should not be treated as a standalone approval gate.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ6"],
-      "supporting_sources": ["S6"],
+      "research_questions": [
+        "RQ6"
+      ],
+      "supporting_sources": [
+        "S6"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -502,8 +667,28 @@
       "claim_id": "C7",
       "claim": "High-risk AI and software deployments should use a lightweight supply-chain control process.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ1", "RQ2", "RQ3", "RQ5", "RQ6", "RQ7", "RQ8", "RQ9", "RQ10"],
-      "supporting_sources": ["S1", "S2", "S3", "S5", "S6", "S7", "S8", "S9", "S10"],
+      "research_questions": [
+        "RQ1",
+        "RQ2",
+        "RQ3",
+        "RQ5",
+        "RQ6",
+        "RQ7",
+        "RQ8",
+        "RQ9",
+        "RQ10"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S2",
+        "S3",
+        "S5",
+        "S6",
+        "S7",
+        "S8",
+        "S9",
+        "S10"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -514,9 +699,15 @@
       "claim_id": "C8",
       "claim": "The control process should be lightweight and should standardize existing approval questions rather than create a separate approval process.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
-      "contradicting_sources": ["Caution: public sources do not define this exact internal process-burden balance."],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
+      "contradicting_sources": [
+        "Caution: public sources do not define this exact internal process-burden balance."
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -526,9 +717,15 @@
       "claim_id": "C9",
       "claim": "Pilot owner, independent reviewer, and decision owner are proposed internal roles for operating the control process.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
-      "contradicting_sources": ["Caution: public sources support risk accountability but do not define this role split."],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
+      "contradicting_sources": [
+        "Caution: public sources support risk accountability but do not define this role split."
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -538,9 +735,15 @@
       "claim_id": "C10",
       "claim": "The pilot supply-chain control record should refresh when dependencies, promoted artifacts, deployment status, or material exceptions change.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
-      "contradicting_sources": ["Caution: public sources support ongoing supply-chain risk management but do not define these exact refresh triggers."],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
+      "contradicting_sources": [
+        "Caution: public sources support ongoing supply-chain risk management but do not define these exact refresh triggers."
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -550,9 +753,15 @@
       "claim_id": "C11",
       "claim": "Human review should happen by exception rather than as a standing handoff for every build.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
-      "contradicting_sources": ["Caution: public sources support risk management but do not define this automation-by-default review model."],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
+      "contradicting_sources": [
+        "Caution: public sources support risk management but do not define this automation-by-default review model."
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -562,9 +771,15 @@
       "claim_id": "C12",
       "claim": "Automated checks should create observed evidence where possible, while the owner attests to gaps and reviewers handle exceptions.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
-      "contradicting_sources": ["Caution: public sources support risk management but do not define this observed-evidence and owner-attestation workflow."],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
+      "contradicting_sources": [
+        "Caution: public sources support risk management but do not define this observed-evidence and owner-attestation workflow."
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -574,8 +789,12 @@
       "claim_id": "C13",
       "claim": "AI systems should be treated as lifecycle risk-management artifacts across design, development, deployment, use, and evaluation.",
       "claim_type": "factual",
-      "research_questions": ["RQ7"],
-      "supporting_sources": ["S7"],
+      "research_questions": [
+        "RQ7"
+      ],
+      "supporting_sources": [
+        "S7"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -586,8 +805,12 @@
       "claim_id": "C14",
       "claim": "Generative AI systems need risk identification, measurement, monitoring, and governance that account for AI-specific lifecycle behavior.",
       "claim_type": "factual",
-      "research_questions": ["RQ8"],
-      "supporting_sources": ["S8"],
+      "research_questions": [
+        "RQ8"
+      ],
+      "supporting_sources": [
+        "S8"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -598,8 +821,12 @@
       "claim_id": "C15",
       "claim": "LLM applications have risk categories that conventional software dependency checks may not fully cover, including supply-chain vulnerabilities, insecure plugin design, excessive agency, and sensitive information disclosure.",
       "claim_type": "factual",
-      "research_questions": ["RQ9"],
-      "supporting_sources": ["S9"],
+      "research_questions": [
+        "RQ9"
+      ],
+      "supporting_sources": [
+        "S9"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -610,9 +837,17 @@
       "claim_id": "C16",
       "claim": "High-risk LLM deployments should expose model/provider dependencies, prompt or configuration versions, retrieval data sources, and tool or plugin permissions for review.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ8", "RQ9"],
-      "supporting_sources": ["S8", "S9"],
-      "contradicting_sources": ["Caution: public sources identify relevant AI risk categories but do not mandate this exact field list."],
+      "research_questions": [
+        "RQ8",
+        "RQ9"
+      ],
+      "supporting_sources": [
+        "S8",
+        "S9"
+      ],
+      "contradicting_sources": [
+        "Caution: public sources identify relevant AI risk categories but do not mandate this exact field list."
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -622,8 +857,12 @@
       "claim_id": "C17",
       "claim": "Secure AI guidance applies to AI systems built from scratch and systems built on tools and services provided by others.",
       "claim_type": "factual",
-      "research_questions": ["RQ10"],
-      "supporting_sources": ["S10"],
+      "research_questions": [
+        "RQ10"
+      ],
+      "supporting_sources": [
+        "S10"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -751,6 +990,98 @@
     {
       "claim": "OWASP LLM Top 10 mandates this control-record template.",
       "why": "OWASP supports LLM risk categories but does not mandate this exact internal workflow or evidence template."
+    }
+  ],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Government cybersecurity guidance and coordination page."
+    },
+    {
+      "rank": 2,
+      "source_id": "S2",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Draft/update guidance for SBOM minimum elements."
+    },
+    {
+      "rank": 3,
+      "source_id": "S3",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Official secure software development framework."
+    },
+    {
+      "rank": 4,
+      "source_id": "S4",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Official cybersecurity supply-chain risk management guidance."
+    },
+    {
+      "rank": 5,
+      "source_id": "S5",
+      "rank_group": "secondary_anchor",
+      "role": "lifecycle_control_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Open software supply-chain specification."
+    },
+    {
+      "rank": 6,
+      "source_id": "S6",
+      "rank_group": "secondary_anchor",
+      "role": "lifecycle_control_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Open-source security initiative describing its own project."
+    },
+    {
+      "rank": 7,
+      "source_id": "S7",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Official voluntary AI risk management framework."
+    },
+    {
+      "rank": 8,
+      "source_id": "S8",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Official generative AI profile for the NIST AI RMF."
+    },
+    {
+      "rank": 9,
+      "source_id": "S9",
+      "rank_group": "secondary_anchor",
+      "role": "lifecycle_control_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Open security project focused on LLM application risks."
+    },
+    {
+      "rank": 10,
+      "source_id": "S10",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Government cybersecurity guidance for AI system providers."
     }
   ]
 }

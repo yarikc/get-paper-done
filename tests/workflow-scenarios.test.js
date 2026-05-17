@@ -207,6 +207,25 @@ function testReviewVerdictRoutesToRevise() {
   assert.strictEqual(statusJson(paperDir).next, '/gpd-revise');
 }
 
+function testBelowTargetGateRoutesToRevise() {
+  const paperDir = completePaper('review-below-target');
+  writeArtifact(paperDir, 'REVIEW.md', [
+    '# Review',
+    '',
+    '## Verdict',
+    '',
+    'Ready',
+    '',
+    '## Below-Target Improvement Gate',
+    '',
+    '- **Immediate improvement required before export:** Yes',
+    '- **If yes, required action:** /gpd-revise before export',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-revise');
+}
+
 function testPendingFeedbackPlanBlocksAutomaticRevise() {
   const paperDir = completePaper('feedback-pending');
   const state = readState(paperDir);
@@ -281,6 +300,7 @@ testFactCheckChangeRoutesBackToReview();
 testFactCheckRecommendedResearchRoutesBackToResearch();
 testFactCheckRecommendedReviseRoutesToRevise();
 testReviewVerdictRoutesToRevise();
+testBelowTargetGateRoutesToRevise();
 testPendingFeedbackPlanBlocksAutomaticRevise();
 testPendingFeedbackPlanBlocksStaleMtimeRefresh();
 testReaderFeedbackRoutesToReviewBeforeRevision();

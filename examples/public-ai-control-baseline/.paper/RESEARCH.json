@@ -12,50 +12,86 @@
       {
         "id": "RQ1",
         "question": "Which public source supports using Govern, Map, Measure, and Manage as AI risk-management framing?",
-        "mapped_claims": ["C1"],
+        "mapped_claims": [
+          "C1"
+        ],
         "why_it_matters": "The memo should not invent its own governance framing.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NIST AI Risk Management Framework Govern Map Measure Manage"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NIST AI Risk Management Framework Govern Map Measure Manage"
+        ]
       },
       {
         "id": "RQ2",
         "question": "Which public source supports treating generative AI risks as requiring profile-specific handling?",
-        "mapped_claims": ["C2"],
+        "mapped_claims": [
+          "C2"
+        ],
         "why_it_matters": "The baseline should explain why generic controls are not enough.",
-        "planned_source_types": ["official"],
-        "search_queries": ["NIST AI 600-1 Generative AI Profile"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NIST AI 600-1 Generative AI Profile"
+        ]
       },
       {
         "id": "RQ3",
         "question": "Which public source supports prompt injection as a specific LLM application risk?",
-        "mapped_claims": ["C3"],
+        "mapped_claims": [
+          "C3"
+        ],
         "why_it_matters": "The pilot baseline needs a concrete LLM security control area.",
-        "planned_source_types": ["official"],
-        "search_queries": ["OWASP LLM01 prompt injection"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "OWASP LLM01 prompt injection"
+        ]
       },
       {
-      "id": "RQ4",
-      "question": "Which public source supports lifecycle security controls for AI systems?",
-      "mapped_claims": ["C4"],
-      "why_it_matters": "The baseline should cover design, deployment, and operation, not only model behavior.",
-      "planned_source_types": ["official"],
-      "search_queries": ["NCSC CISA Guidelines for secure AI system development"]
+        "id": "RQ4",
+        "question": "Which public source supports lifecycle security controls for AI systems?",
+        "mapped_claims": [
+          "C4"
+        ],
+        "why_it_matters": "The baseline should cover design, deployment, and operation, not only model behavior.",
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "NCSC CISA Guidelines for secure AI system development"
+        ]
       },
       {
         "id": "RQ5",
         "question": "What operating mechanism makes the baseline governable after approval?",
-        "mapped_claims": ["C5"],
+        "mapped_claims": [
+          "C5"
+        ],
         "why_it_matters": "A baseline without repeatable evidence fields, status values, and recertification gates becomes a one-time memo rather than governance.",
-        "planned_source_types": ["official"],
-        "search_queries": ["AI governance evidence lifecycle controls"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "AI governance evidence lifecycle controls"
+        ]
       },
       {
         "id": "RQ6",
         "question": "What accountability model makes pilot attestations reviewable after approval?",
-        "mapped_claims": ["C6"],
+        "mapped_claims": [
+          "C6"
+        ],
         "why_it_matters": "A baseline needs named operating and validation responsibilities, not only evidence fields.",
-        "planned_source_types": ["official"],
-        "search_queries": ["AI risk governance accountability secure AI lifecycle responsibilities"]
+        "planned_source_types": [
+          "official"
+        ],
+        "search_queries": [
+          "AI risk governance accountability secure AI lifecycle responsibilities"
+        ]
       }
     ],
     "depth_rationale": "The paper is an internal decision memo with control consequences, so each material claim needs a public source ID.",
@@ -100,7 +136,15 @@
           "rationale": "The framework supports governance accountability, but not the memo's exact internal role names."
         }
       ],
-      "notes": "Verified public DOI on 2026-05-12."
+      "notes": "Verified public DOI on 2026-05-12.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public DOI on 2026-05-12.",
+      "relevant_points": [
+        "Verified public DOI on 2026-05-12."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Voluntary public risk-management framework."
     },
     {
       "id": "S2",
@@ -120,7 +164,15 @@
           "rationale": "The publication is a generative AI profile of the AI RMF and supports profile-specific treatment."
         }
       ],
-      "notes": "Verified NIST publication page and DOI on 2026-05-12."
+      "notes": "Verified NIST publication page and DOI on 2026-05-12.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified NIST publication page and DOI on 2026-05-12.",
+      "relevant_points": [
+        "Verified NIST publication page and DOI on 2026-05-12."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "NIST profile for generative AI risk management."
     },
     {
       "id": "S3",
@@ -140,7 +192,15 @@
           "rationale": "The source defines prompt injection as an LLM application risk and describes unintended model behavior."
         }
       ],
-      "notes": "Verified public OWASP GenAI page on 2026-05-12."
+      "notes": "Verified public OWASP GenAI page on 2026-05-12.",
+      "rank_group": "secondary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public OWASP GenAI page on 2026-05-12.",
+      "relevant_points": [
+        "Verified public OWASP GenAI page on 2026-05-12."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Community security framework focused on generative AI application risk."
     },
     {
       "id": "S4",
@@ -170,7 +230,15 @@
           "rationale": "The guidance supports lifecycle security responsibilities, but the exact accountability table is an internal operating-design proposal."
         }
       ],
-      "notes": "Verified public NCSC guidance page on 2026-05-12."
+      "notes": "Verified public NCSC guidance page on 2026-05-12.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Verified public NCSC guidance page on 2026-05-12.",
+      "relevant_points": [
+        "Verified public NCSC guidance page on 2026-05-12."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Government cybersecurity guidance co-sealed with CISA and international partners."
     }
   ],
   "evidence_matrix": [
@@ -178,8 +246,12 @@
       "claim_id": "C1",
       "claim": "NIST AI RMF supports organizing AI risk management through Govern, Map, Measure, and Manage functions.",
       "claim_type": "factual",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S1"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S1"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -190,8 +262,12 @@
       "claim_id": "C2",
       "claim": "Generative AI needs profile-specific risk handling beyond generic AI governance.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ2"],
-      "supporting_sources": ["S2"],
+      "research_questions": [
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S2"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -202,8 +278,12 @@
       "claim_id": "C3",
       "claim": "Prompt injection should be treated as a specific pilot control topic.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ3"],
-      "supporting_sources": ["S3"],
+      "research_questions": [
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S3"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -214,8 +294,12 @@
       "claim_id": "C4",
       "claim": "Secure AI guidance supports lifecycle controls across design, development, deployment, and operation.",
       "claim_type": "factual",
-      "research_questions": ["RQ4"],
-      "supporting_sources": ["S4"],
+      "research_questions": [
+        "RQ4"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "strong",
       "confidence": "high",
@@ -226,8 +310,13 @@
       "claim_id": "C5",
       "claim": "A baseline is only governable if it creates a repeatable pilot control record with evidence fields, status values, validation gates, and recertification triggers.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ5"],
-      "supporting_sources": ["S1", "S4"],
+      "research_questions": [
+        "RQ5"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S4"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -238,8 +327,13 @@
       "claim_id": "C6",
       "claim": "A pilot baseline needs named roles for operating the control record and validating attestations.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ6"],
-      "supporting_sources": ["S1", "S4"],
+      "research_questions": [
+        "RQ6"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S4"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -248,7 +342,13 @@
     }
   ],
   "synthesis_matrix": {
-    "themes": ["risk_framing", "genai_profile", "llm_security", "secure_lifecycle", "operating_accountability"],
+    "themes": [
+      "risk_framing",
+      "genai_profile",
+      "llm_security",
+      "secure_lifecycle",
+      "operating_accountability"
+    ],
     "rows": [
       {
         "theme": "risk_framing",
@@ -295,7 +395,14 @@
   },
   "contradictions": [
     {
-      "claim_ids": ["C1", "C2", "C3", "C4", "C5", "C6"],
+      "claim_ids": [
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "C5",
+        "C6"
+      ],
       "summary": "No contradicting public source was added because the claims are limited to source framing, profile-specific risk attention, prompt-injection risk, secure lifecycle guidance, and clearly labeled internal operating-design proposals. The paper does not claim internal outcome proof."
     }
   ],
@@ -320,5 +427,43 @@
   ],
   "claims_to_drop_or_reframe": [
     "The baseline guarantees secure generative AI pilots."
+  ],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Voluntary public risk-management framework."
+    },
+    {
+      "rank": 2,
+      "source_id": "S2",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "NIST profile for generative AI risk management."
+    },
+    {
+      "rank": 3,
+      "source_id": "S3",
+      "rank_group": "secondary_anchor",
+      "role": "lifecycle_control_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Community security framework focused on generative AI application risk."
+    },
+    {
+      "rank": 4,
+      "source_id": "S4",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Government cybersecurity guidance co-sealed with CISA and international partners."
+    }
   ]
 }

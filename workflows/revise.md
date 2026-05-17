@@ -48,6 +48,7 @@ Default mode:
 Before editing, identify:
 
 - required fixes
+- below-target improvement gate items from `.paper/REVIEW.md`
 - approved external feedback to incorporate
 - approved reader feedback to incorporate
 - feedback explicitly ignored or deferred
@@ -58,6 +59,8 @@ Before editing, identify:
 - audience objections not handled
 - author voice characteristics and strong existing material to preserve
 - publication-readiness issues in title, opening, section flow, tone consistency, redundancy control, draft residue, and ending
+
+If `.paper/REVIEW.md` contains a `Below-Target Improvement Gate` with `Immediate improvement required before export: Yes`, handle those items before export. Apply any `apply_now` or equivalent items that do not require new author decisions. If an item cannot be applied safely, record it in `.paper/FEEDBACK-PLAN.md`, `.paper/REVIEW.md`, or the draft change log with a concrete deferral reason. Do not export a serious paper while known fixable below-target issues remain only as suggestions.
 
 Revision boundary:
 
@@ -84,6 +87,8 @@ Edit in layers when running an editorial mode:
 5. Publication readiness: title, opening, placeholders, citation/source placeholder consistency, ending, target channel readiness.
 
 Revise `.paper/DRAFT.md` in place only when feedback is approved or the user explicitly requested an edit mode. Preserve any strong material unless it conflicts with the approved review, brief, strategy, evidence, or audience profile.
+
+Do not edit `.paper/exports/FINAL.md` as the durable source. If the user commented on `FINAL.md`, use those comments as feedback, apply approved changes to `.paper/DRAFT.md`, then route to `/gpd-export` so `FINAL.md` is regenerated.
 
 Include a short change log for any draft modification:
 

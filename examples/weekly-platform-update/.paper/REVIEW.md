@@ -51,6 +51,15 @@ Include only when multiple audience personas are selected.
 
 - None required.
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** Lite-mode internal update quality; 9/10 publication bar does not apply.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** None for a low-risk status update; evidence quality and mechanism detail are intentionally lightweight.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Research and fact-check artifacts are deferred unless the update adds strategy, budget, external, or regulated claims.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

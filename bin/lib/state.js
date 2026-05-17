@@ -217,12 +217,22 @@ function parseMarkdownField(markdown, label) {
   if (!markdown) return null;
   const target = `**${label.toLowerCase()}:**`;
   for (const line of markdown.split(/\r?\n/)) {
-    const normalized = line.trim().toLowerCase();
+    const trimmed = line.trim().replace(/^-+\s*/, '');
+    const normalized = trimmed.toLowerCase();
     if (normalized.startsWith(target)) {
-      return stripMarkdownValue(line.trim().slice(target.length));
+      return stripMarkdownValue(trimmed.slice(target.length));
     }
   }
   return null;
+}
+
+function sectionBetween(markdown, heading, nextHeadingPattern = /\n##\s+/) {
+  if (!markdown) return '';
+  const start = markdown.indexOf(heading);
+  if (start === -1) return '';
+  const rest = markdown.slice(start + heading.length);
+  const next = rest.search(nextHeadingPattern);
+  return next === -1 ? rest : rest.slice(0, next);
 }
 
 function parseStrategyFallback(strategyMarkdown) {
@@ -276,6 +286,13 @@ function factCheckRecommendedAction(state) {
 
 function reviewVerdict(state) {
   return parseHeadingValue(artifactContent(state.paperDir, 'REVIEW.md'), 'Verdict');
+}
+
+function reviewBelowTargetRequiresRevision(state) {
+  const review = artifactContent(state.paperDir, 'REVIEW.md');
+  const gate = sectionBetween(review, '## Below-Target Improvement Gate');
+  const immediate = parseMarkdownField(gate, 'Immediate improvement required before export');
+  return /^yes\b/i.test(immediate || '');
 }
 
 function artifactState(paperDir) {
@@ -377,6 +394,7 @@ function suggestedNext(state) {
 
   const verdict = reviewVerdict(state);
   if (verdict === 'Revise' || verdict === 'Rework') return '/gpd-revise';
+  if (reviewBelowTargetRequiresRevision(state)) return '/gpd-revise';
   if (a['exports/FINAL.md']) {
     if (
       artifactNewerThan(state.paperDir, 'DRAFT.md', 'exports/FINAL.md')
@@ -406,6 +424,7 @@ function status(input = {}) {
   if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
   const state = artifactState(paperDir);
   state.next = suggestedNext(state);
+  state.userAction = userActionHint(state);
   return state;
 }
 
@@ -419,6 +438,7 @@ function printStatus(state) {
     console.log(`- ${exists ? 'ok' : 'missing'} ${name}`);
   }
   console.log(`next: ${state.next}`);
+  console.log(`user action: ${state.userAction}`);
 }
 
 function contextForCommand(command) {
@@ -454,7 +474,7 @@ function contextForCommand(command) {
   if (base === '/gpd-review') {
     return {
       clear_context: 'Yes, after drafting or fact-check.',
-      read: ['DRAFT.md', 'REVIEW.md if present', 'READER-FEEDBACK.md if present', 'upstream artifacts as needed'],
+      read: ['DRAFT.md', 'exports/FINAL.md if present or user reviewed it', 'REVIEW.md if present', 'READER-FEEDBACK.md if present', 'upstream artifacts as needed'],
       avoid: ['rewriting before feedback handling is approved'],
     };
   }
@@ -462,7 +482,7 @@ function contextForCommand(command) {
     return {
       clear_context: 'Yes, after review.',
       read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'READER-FEEDBACK.md if present'],
-      avoid: ['unapproved feedback items'],
+      avoid: ['unapproved feedback items', 'editing exports/FINAL.md as the source of truth'],
     };
   }
   if (base === '/gpd-export') {
@@ -538,6 +558,7 @@ function explainNext(state) {
   }
   const verdict = reviewVerdict(state);
   if ((verdict === 'Revise' || verdict === 'Rework') && next === '/gpd-revise') return `REVIEW.md verdict is ${verdict}, so revision is the next controlled step.`;
+  if (reviewBelowTargetRequiresRevision(state) && next === '/gpd-revise') return 'REVIEW.md says below-target items require immediate improvement before export.';
   if (a['exports/FINAL.md'] && next === '/gpd-status') return 'The export is current, so there is no required next writing stage.';
   if (a['exports/FINAL.md'] && next === '/gpd-export') return 'The draft, fact-check, or review changed after export, so FINAL.md needs regeneration.';
   if (!a['RESEARCH.json'] && next === '/gpd-research') return 'Structured research is missing, so research is the next required artifact.';
@@ -552,6 +573,24 @@ function explainNext(state) {
   return 'This is the earliest stage that appears necessary from the current artifact state.';
 }
 
+function userActionHint(state) {
+  const a = state.artifacts;
+  const next = state.next;
+  if (a['exports/FINAL.md'] && next === '/gpd-status') {
+    return 'Read .paper/exports/FINAL.md. If you add comments there, run /gpd-review; GPD will capture the comments, revise DRAFT.md, and regenerate FINAL.md.';
+  }
+  if (next === '/gpd-export') {
+    return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';
+  }
+  if (next === '/gpd-review' && a['exports/FINAL.md']) {
+    return 'If comments were added to .paper/exports/FINAL.md, /gpd-review should capture them into READER-FEEDBACK.md and FEEDBACK-PLAN.md before revision.';
+  }
+  if (next === '/gpd-revise') {
+    return 'Revise applies approved feedback to .paper/DRAFT.md. Do not hand-edit FINAL.md as the durable source; export regenerates it.';
+  }
+  return 'Run the recommended command. After it finishes, run gpd next or /gpd-status again.';
+}
+
 function nextAction(input = {}) {
   const state = status(input);
   return {
@@ -562,6 +601,7 @@ function nextAction(input = {}) {
     primaryBlocker: state.primaryBlocker,
     stateSource: state.stateSource,
     context: contextForCommand(state.next),
+    userAction: state.userAction,
   };
 }
 
@@ -574,6 +614,7 @@ function printNext(result) {
   console.log(`clear context: ${result.context.clear_context}`);
   console.log(`read: ${result.context.read.join(', ')}`);
   console.log(`avoid: ${result.context.avoid.join(', ')}`);
+  console.log(`user action: ${result.userAction}`);
 }
 
 function validate(input = {}) {

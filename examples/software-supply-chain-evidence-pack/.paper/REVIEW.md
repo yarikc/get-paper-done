@@ -42,6 +42,15 @@ No blocking revision required after the control-process, decision-rule, and exce
 | "Owner declaration" versus "verified evidence" | "How Decisions Use The Record" and "Operating Rule" | The memo separates observed evidence from owner attestation and routes exceptions to review. |
 | "This says AI but only discusses software supply chain" | "Why This Is Needed" and "What The Control Record Contains" | The memo adds model/provider, prompt/configuration, retrieval/source, and tool-permission evidence as AI runtime control fields. |
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious internal control examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** None requiring revision before export; evidence sufficiency is scored below perfect because public sources support evidence categories, not proof that the internal process will improve outcomes.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Outcome measurement is deferred because the memo asks to approve the minimum control process, not claim proven approval-speed or risk-reduction outcomes.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

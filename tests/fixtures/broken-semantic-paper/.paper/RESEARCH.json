@@ -12,10 +12,17 @@
       {
         "id": "RQ1",
         "question": "What evidence supports the recommendation?",
-        "mapped_claims": ["C1"],
+        "mapped_claims": [
+          "C1"
+        ],
         "why_it_matters": "The claim drives the paper recommendation.",
-        "planned_source_types": ["official", "academic"],
-        "search_queries": ["data products AI scaling evidence"]
+        "planned_source_types": [
+          "official",
+          "academic"
+        ],
+        "search_queries": [
+          "data products AI scaling evidence"
+        ]
       }
     ],
     "depth_rationale": "Standard internal strategy paper.",
@@ -38,7 +45,15 @@
       "specificity": "medium",
       "bias_or_agenda": "None",
       "stance": "supportive",
-      "notes": "Broad official guidance."
+      "notes": "Broad official guidance.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "short_summary": "Broad official guidance.",
+      "relevant_points": [
+        "Broad official guidance."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "None"
     }
   ],
   "evidence_matrix": [
@@ -46,8 +61,12 @@
       "claim_id": "C1",
       "claim": "Domain ownership improves meaning.",
       "claim_type": "technical_mechanism",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S1"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S1"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -58,8 +77,12 @@
       "claim_id": "C2",
       "claim": "The workflow may reduce review cycle time directionally.",
       "claim_type": "factual",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S1"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S1"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "weak",
       "confidence": "low",
@@ -76,5 +99,16 @@
   "draft_support_notes": [],
   "facts_safe_to_use": [],
   "claims_to_soften": [],
-  "claims_to_drop_or_reframe": []
+  "claims_to_drop_or_reframe": [],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "None"
+    }
+  ]
 }

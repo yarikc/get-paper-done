@@ -10,6 +10,7 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 - .paper/RESEARCH.md if present
 - .paper/OUTLINE.md
 - .paper/DRAFT.md
+- .paper/exports/FINAL.md if present, especially when the user reviewed the exported paper
 - .paper/FACT-CHECK.md if present
 - .paper/READER-FEEDBACK.md if present
 - references/review-rubrics.md
@@ -25,6 +26,8 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 ## 1. Local Review
 
 Read all context and the current draft.
+
+If `.paper/exports/FINAL.md` exists, treat it as the user's reading copy. Scan it for inline comments, `.feedback` companion files, or user-marked review notes. The export is not the editing source of truth; comments on `FINAL.md` must be captured into `.paper/READER-FEEDBACK.md` and `.paper/FEEDBACK-PLAN.md`, then applied later to `.paper/DRAFT.md` through `/gpd-revise`.
 
 Use `.paper/config.json` classification as the review contract:
 
@@ -66,12 +69,22 @@ Audience review must use the fixed seven-dimension rubric from `references/audie
 
 Every score of 3 or below must include an actionable rewrite instruction.
 
+Apply the below-target improvement rule:
+
+- For serious internal, executive, external, high-risk, regulated, or flagship papers, use 9/10 as the default target quality bar unless `.paper/BRIEF.md` or `.paper/config.json` sets a different bar.
+- If the review gives an overall rating below the target bar, any score below 5, or any concrete fixable issue, do not stop at critique.
+- Classify each below-target issue as `apply_now`, `defer_with_reason`, or `not_applicable`.
+- If an issue is fixable within the current paper goal and does not require new author decisions, mark it `apply_now` and route to `/gpd-revise` before export.
+- If the paper is marked `Ready` despite fixable below-target issues, explain exactly why export is still acceptable or change the verdict to `Revise`.
+- Do not tell the user the paper is below target and then leave the first obvious improvements unapplied unless the user explicitly asks for review only.
+
 Write `.paper/REVIEW.md` with:
 
 - verdict
 - score table
 - required fixes
 - suggested improvements
+- below-target improvement gate
 - unsupported or risky claims
 - fact-check findings summary when `.paper/FACT-CHECK.md` exists
 - audience review scorecard
@@ -84,7 +97,7 @@ Use review stance first. Do not praise before identifying the highest-impact iss
 
 ## 1.5 Reader Feedback Capture
 
-If the user provides paper feedback inline, through a `.feedback` file, or by pointing to notes that are not already captured in `.paper/READER-FEEDBACK.md`, create or update `.paper/READER-FEEDBACK.md` using `templates/reader-feedback.md`.
+If the user provides paper feedback inline, through a `.feedback` file, in `.paper/exports/FINAL.md`, or by pointing to notes that are not already captured in `.paper/READER-FEEDBACK.md`, create or update `.paper/READER-FEEDBACK.md` using `templates/reader-feedback.md`.
 
 Reader feedback must use the five-signal structure:
 
@@ -94,7 +107,14 @@ Reader feedback must use the five-signal structure:
 - Evidence
 - Ask clarity
 
-Capture the feedback as evidence for review planning, not as permission to rewrite. If feedback requires changes, route it through `.paper/FEEDBACK-PLAN.md` before `/gpd-revise`.
+Capture the feedback as evidence for review planning, not as permission to rewrite. If feedback requires changes, route it through `.paper/FEEDBACK-PLAN.md` before `/gpd-revise`. The simple exported-paper loop is:
+
+```text
+user reviews .paper/exports/FINAL.md
+  -> /gpd-review captures comments and plans handling
+  -> /gpd-revise edits .paper/DRAFT.md
+  -> /gpd-export regenerates .paper/exports/FINAL.md
+```
 
 ## 2. External Review Flag Detection
 
@@ -108,11 +128,11 @@ External review is enabled when either simplified external flag is present:
 Backward-compatible aliases:
 
 - `--all`: treat as `--external`
-- individual model flags such as `--claude`, `--gemini`, `--codex`, `--opencode`, `--qwen`, `--cursor`, `--ollama`, `--lm-studio`, and `--llama-cpp`: treat as `--external --models ...`
+- individual model flags such as `--claude`, `--gemini`, `--codex`, `--qwen`, `--cursor`, `--ollama`, `--lm-studio`, and `--llama-cpp`: treat as `--external --models ...`
 
 If no external review flag is present, skip to Step 7.
 
-CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation sends the generated review prompt to those CLIs and records stdout/stderr into `.paper/EXTERNAL-REVIEWS.md` plus a pending `.paper/FEEDBACK-PLAN.md`. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI.
+CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, and records stdout/stderr into `.paper/EXTERNAL-REVIEWS.md` plus a pending `.paper/FEEDBACK-PLAN.md`. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
 
 ## 3. Detect Available Reviewers
 
@@ -122,7 +142,6 @@ Check which external reviewers are available:
 command -v gemini >/dev/null 2>&1 && echo "gemini:available" || echo "gemini:missing"
 command -v claude >/dev/null 2>&1 && echo "claude:available" || echo "claude:missing"
 command -v codex >/dev/null 2>&1 && echo "codex:available" || echo "codex:missing"
-command -v opencode >/dev/null 2>&1 && echo "opencode:available" || echo "opencode:missing"
 command -v qwen >/dev/null 2>&1 && echo "qwen:available" || echo "qwen:missing"
 command -v cursor >/dev/null 2>&1 && echo "cursor:available" || echo "cursor:missing"
 
@@ -213,9 +232,8 @@ Recommended command patterns:
 
 ```bash
 cat /tmp/gpd-review-prompt.md | gemini -p "" > /tmp/gpd-review-gemini.md 2>/tmp/gpd-review-gemini.err
-cat /tmp/gpd-review-prompt.md | claude -p - > /tmp/gpd-review-claude.md 2>/tmp/gpd-review-claude.err
+cat /tmp/gpd-review-prompt.md | claude -p > /tmp/gpd-review-claude.md 2>/tmp/gpd-review-claude.err
 cat /tmp/gpd-review-prompt.md | codex exec --skip-git-repo-check - > /tmp/gpd-review-codex.md 2>/tmp/gpd-review-codex.err
-cat /tmp/gpd-review-prompt.md | opencode run - > /tmp/gpd-review-opencode.md 2>/tmp/gpd-review-opencode.err
 cat /tmp/gpd-review-prompt.md | qwen - > /tmp/gpd-review-qwen.md 2>/tmp/gpd-review-qwen.err
 cat /tmp/gpd-review-prompt.md | cursor agent -p --mode ask --trust > /tmp/gpd-review-cursor.md 2>/tmp/gpd-review-cursor.err
 ```

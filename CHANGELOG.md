@@ -30,10 +30,11 @@ Initial working release.
 - Install/update CLI for Claude and Codex runtimes.
 - Workspace CLI helpers: `gpd init`, `gpd import`, `gpd next`, `gpd status`, `gpd validate`, `gpd list-audiences`, and `gpd list-profiles`.
 - External-review helper: `gpd review-external` writes captured review text to `.paper/EXTERNAL-REVIEWS.md`, can invoke selected installed provider CLIs with `--models`, creates a pending `.paper/FEEDBACK-PLAN.md`, and stops at the approval gate without revising the draft.
+- External-review provider invocation now prints provider-level progress so users can see each model move through running, captured, empty, missing, failed, or unsupported states instead of waiting on an opaque background command.
 - Claude provider calibration for `gpd review-external --models claude`, including corrected `claude -p` stdin invocation.
 - Codex provider calibration for `gpd review-external --models codex`, confirming `codex exec --skip-git-repo-check -` stdin invocation.
-- Opencode provider calibration for `gpd review-external --models opencode`, confirming `opencode run -` stdin invocation.
 - Gemini provider argument correction for `gpd review-external --models gemini`, using `gemini -p ""` with stdin; real capture requires local Gemini authentication.
+- Opencode is intentionally unsupported for paper external review after local paper-review calibration proved it unreliable for this workflow.
 - `gpd next` compact guidance for the next recommended workflow action, why it is next, and what context to read or avoid.
 - `gpd next` now explains missing required artifacts before falling back to saved `STATE.json` recommendations.
 - Slimmer README and `docs/START-HERE.md` onboarding focused on first use, with dense mechanics left to reference docs.

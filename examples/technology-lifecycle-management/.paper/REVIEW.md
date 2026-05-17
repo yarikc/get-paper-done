@@ -34,6 +34,15 @@ The revised draft is ready for export as an anonymized example draft. It is deci
 | Decision usefulness | 4 | The closing now gives the sponsor three concrete approvals. | - |
 | Structural flow | 4 | The argument sequence is coherent and avoids the imported draft's meandering structure. | - |
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious internal examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** Evidence sufficiency remains below target because internal examples and precise regulatory citations are limited.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Additional internal examples and section-level regulatory citations are deferred because this artifact is an anonymized example, not a publication or real approval packet.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

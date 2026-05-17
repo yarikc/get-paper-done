@@ -12,18 +12,33 @@
       {
         "id": "RQ1",
         "question": "Did review cycle time improve within the synthetic pilot scope?",
-        "mapped_claims": ["C1"],
+        "mapped_claims": [
+          "C1"
+        ],
         "why_it_matters": "The primary recommendation depends on a bounded time-improvement claim.",
-        "planned_source_types": ["user_provided", "industry"],
-        "search_queries": ["synthetic review cycle time pilot baseline endpoint sample"]
+        "planned_source_types": [
+          "user_provided",
+          "industry"
+        ],
+        "search_queries": [
+          "synthetic review cycle time pilot baseline endpoint sample"
+        ]
       },
       {
         "id": "RQ2",
         "question": "Did rework decrease without overextending the conclusion?",
-        "mapped_claims": ["C2", "C3"],
+        "mapped_claims": [
+          "C2",
+          "C3"
+        ],
         "why_it_matters": "The memo must distinguish operating signal from enterprise proof.",
-        "planned_source_types": ["user_provided", "analyst"],
-        "search_queries": ["synthetic rework item pilot sample limitation"]
+        "planned_source_types": [
+          "user_provided",
+          "analyst"
+        ],
+        "search_queries": [
+          "synthetic rework item pilot sample limitation"
+        ]
       }
     ],
     "depth_rationale": "Standard research is sufficient because this is a short internal memo, but numerical claims require explicit metric support.",
@@ -73,7 +88,15 @@
           "support": "partial",
           "rationale": "Supports continuing the pilot, but not the exact named next-quarter categories by itself."
         }
-      ]
+      ],
+      "rank_group": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "short_summary": "Records 20 sampled review packets over one quarter, with baseline and endpoint cycle time and rework counts.",
+      "relevant_points": [
+        "Records 20 sampled review packets over one quarter, with baseline and endpoint cycle time and rework counts."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Internal pilot log may favor operational improvement narrative."
     },
     {
       "id": "S2",
@@ -98,7 +121,15 @@
           "support": "contradicts",
           "rationale": "Could be misused to imply broader proof if cited without the caution source."
         }
-      ]
+      ],
+      "rank_group": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "short_summary": "Supports review cycle time moving from 10 days to 7 days over the pilot sample.",
+      "relevant_points": [
+        "Supports review cycle time moving from 10 days to 7 days over the pilot sample."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Operational extract captures queue timing but not downstream outcome quality."
     },
     {
       "id": "S3",
@@ -123,7 +154,15 @@
           "support": "partial",
           "rationale": "Supports continuing the pilot as a process-learning step, but not broad rollout."
         }
-      ]
+      ],
+      "rank_group": "trend_evidence",
+      "why_picked": "Selected because it is a industry source with high relevance and medium specificity for this paper.",
+      "short_summary": "Supports average rework items moving from 6 to 4 per packet in the same sample.",
+      "relevant_points": [
+        "Supports average rework items moving from 6 to 4 per packet in the same sample."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Practitioner-style metric review emphasizes process signal."
     },
     {
       "id": "S4",
@@ -158,7 +197,15 @@
           "support": "direct",
           "rationale": "Supports a controlled continuation rather than broad rollout."
         }
-      ]
+      ],
+      "rank_group": "trend_evidence",
+      "why_picked": "Selected because it is a analyst source with high relevance and medium specificity for this paper.",
+      "short_summary": "Warns that a one-quarter pilot should not be converted into enterprise ROI, compliance, or benchmark claims.",
+      "relevant_points": [
+        "Warns that a one-quarter pilot should not be converted into enterprise ROI, compliance, or benchmark claims."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Cautionary source emphasizes sampling limits and repeatability risk."
     }
   ],
   "evidence_matrix": [
@@ -166,9 +213,16 @@
       "claim_id": "C1",
       "claim": "In the synthetic one-quarter pilot, median review cycle time moved from 10 days to 7 days, a 30 percent reduction across 20 sampled review packets.",
       "claim_type": "factual",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S1", "S2"],
-      "contradicting_sources": ["S4"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S2"
+      ],
+      "contradicting_sources": [
+        "S4"
+      ],
       "strength_of_support": "strong",
       "confidence": "high",
       "recommended_handling": "keep",
@@ -178,9 +232,16 @@
       "claim_id": "C2",
       "claim": "Average rework items moved from 6 to 4 per packet, a 33 percent reduction across the same 20 sampled review packets over one quarter.",
       "claim_type": "factual",
-      "research_questions": ["RQ2"],
-      "supporting_sources": ["S1", "S3"],
-      "contradicting_sources": ["S4"],
+      "research_questions": [
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S3"
+      ],
+      "contradicting_sources": [
+        "S4"
+      ],
       "strength_of_support": "strong",
       "confidence": "high",
       "recommended_handling": "keep",
@@ -190,9 +251,16 @@
       "claim_id": "C3",
       "claim": "The pilot evidence is not sufficient to claim enterprise ROI, compliance improvement, or broad productivity improvement.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ2"],
-      "supporting_sources": ["S4"],
-      "contradicting_sources": ["S1", "S2"],
+      "research_questions": [
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S4"
+      ],
+      "contradicting_sources": [
+        "S1",
+        "S2"
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -202,8 +270,15 @@
       "claim_id": "C4",
       "claim": "The next quarter should continue the pilot for payment exception triage, access reviews, and model-change packets before any broader rollout claim.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ1", "RQ2"],
-      "supporting_sources": ["S1", "S3", "S4"],
+      "research_questions": [
+        "RQ1",
+        "RQ2"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S3",
+        "S4"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -212,7 +287,12 @@
     }
   ],
   "synthesis_matrix": {
-    "themes": ["cycle_time", "rework", "scope_limits", "next_quarter"],
+    "themes": [
+      "cycle_time",
+      "rework",
+      "scope_limits",
+      "next_quarter"
+    ],
     "rows": [
       {
         "theme": "cycle_time",
@@ -247,13 +327,17 @@
     {
       "claim_id": "C1",
       "issue": "Pilot improvement may not repeat with more complex review packets.",
-      "source_ids": ["S4"],
+      "source_ids": [
+        "S4"
+      ],
       "handling": "Keep pilot scope and sample size in the sentence."
     },
     {
       "claim_id": "C2",
       "issue": "Lower rework may reflect easier packet mix rather than process quality.",
-      "source_ids": ["S4"],
+      "source_ids": [
+        "S4"
+      ],
       "handling": "Call it a pilot signal, not proof."
     }
   ],
@@ -264,7 +348,12 @@
   "draft_support_notes": [
     {
       "section": "Metric Evidence",
-      "source_ids": ["S1", "S2", "S3", "S4"],
+      "source_ids": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
       "support_strength": "strong for pilot metrics",
       "cautions": "Do not remove baseline, sample, or timeframe."
     }
@@ -272,12 +361,18 @@
   "facts_safe_to_use": [
     {
       "fact": "Median review cycle time moved from 10 days to 7 days across 20 sampled review packets over one quarter.",
-      "source_ids": ["S1", "S2"],
+      "source_ids": [
+        "S1",
+        "S2"
+      ],
       "confidence": "high"
     },
     {
       "fact": "Average rework items moved from 6 to 4 per packet across the same sample.",
-      "source_ids": ["S1", "S3"],
+      "source_ids": [
+        "S1",
+        "S3"
+      ],
       "confidence": "high"
     }
   ],
@@ -291,6 +386,44 @@
     {
       "claim": "The pilot proves enterprise ROI.",
       "handling": "Drop until finance-backed analysis exists."
+    }
+  ],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "background",
+      "role": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Internal pilot log may favor operational improvement narrative."
+    },
+    {
+      "rank": 2,
+      "source_id": "S2",
+      "rank_group": "background",
+      "role": "background",
+      "why_picked": "Selected because it is a user_provided source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Operational extract captures queue timing but not downstream outcome quality."
+    },
+    {
+      "rank": 3,
+      "source_id": "S3",
+      "rank_group": "trend_evidence",
+      "role": "industry_trend_evidence",
+      "why_picked": "Selected because it is a industry source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Practitioner-style metric review emphasizes process signal."
+    },
+    {
+      "rank": 4,
+      "source_id": "S4",
+      "rank_group": "trend_evidence",
+      "role": "industry_trend_evidence",
+      "why_picked": "Selected because it is a analyst source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Cautionary source emphasizes sampling limits and repeatability risk."
     }
   ]
 }

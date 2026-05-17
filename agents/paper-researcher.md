@@ -73,11 +73,25 @@ Build a research plan with:
 - claim mapping
 - planned source types
 - initial search queries
+- source-lane coverage
+- author-language query expansion
 - known user-provided/imported source locations
 - strategy/brief conflicts, if any
 - likely gaps or contradictions to investigate
+- expected-source checkpoint question
 
 Before collecting sources, present the plan and ask whether to proceed, edit the plan, or narrow scope.
+
+Research plans for serious papers must include source-lane coverage unless explicitly out of scope:
+
+- official/regulatory/standards lane
+- empirical/counterevidence lane
+- industry trend lane
+- practitioner/operating-model lane
+
+For architecture, platform, AI delivery, or engineering operating-model papers, include an architecture-practitioner ecosystem pass when relevant. Search credible practitioner communities such as InfoQ, Thoughtworks, Martin Fowler, Team Topologies, CNCF/platform engineering, DORA, and comparable field sources. Treat these sources as practitioner evidence or analogies, not as official proof.
+
+Extract distinctive author language from `.paper/PAPER-CONTEXT.md`, `.paper/DECISIONS.md`, `.paper/BRIEF.md`, and grill-derived artifacts. Convert the author's own phrases into query terms. Do not rely only on generic market terms. Examples include `engineering flow`, `world model`, `context engineering`, `agentic harness`, `spec-driven development`, `declarative architecture`, `decision boundaries`, `guardrails`, and `human by exception`.
 
 ## 3. Collect And Triage Sources
 
@@ -92,6 +106,8 @@ For each candidate source, evaluate:
 
 Only keep sources worth citing or useful for contradiction/gap analysis.
 
+Before finalizing the retained source set, run an expected-source checkpoint. Ask whether the author expected any source, standard, author, community, company report, or paper that is missing. If the author is unavailable, self-check whether any required source lane is thin or absent and record that as a gap.
+
 ## 4. Research Evidence For And Against
 
 For each major claim, find or identify:
@@ -102,6 +118,7 @@ For each major claim, find or identify:
 - source gaps
 - confidence level
 - implications for thesis, caveats, or recommendations
+- 1-3 prose-ready evidence nuggets where available
 
 Prefer:
 
@@ -114,6 +131,8 @@ Prefer:
 
 Use current web research when the claim is time-sensitive, market-specific, regulatory, product-specific, or likely to have changed.
 
+Evidence nuggets are not generic summaries. Each nugget should identify the fact, mechanism, definition, example, or caution; the source ID; the claim or section it helps; and the caveat on how strong the wording can be.
+
 ## 5. Build Matrices And Draft Support Notes
 
 Create:
@@ -124,6 +143,7 @@ Create:
 - contradictions: issue -> sources in tension -> possible explanations -> recommended handling
 - open questions
 - draft support notes by outline/draft section when section context exists
+- source-lane coverage, thin lanes, and author-language queries when they materially affect source discovery
 
 ## 6. Compress
 
@@ -151,6 +171,8 @@ For every cited source that may support a material claim, record `source_registr
 - `not_checked` when the source has not been checked against that claim.
 
 Do not put a source in `evidence_matrix[*].supporting_sources` for a claim when its claim-support entry is only `topical_only`, `contradicts`, or `not_checked`.
+
+If the user later provides important sources that were missed, update the research package with a missed-source audit. Classify the miss as one or more of: `absent_source_lane`, `source_added_after_research`, `underweighted_source_type`, `terminology_mismatch`, `not_discoverable`, or `agent_error`. Record what search lane, query expansion, or source preference would have prevented the miss.
 
 ## 8. Write Or Return Research
 

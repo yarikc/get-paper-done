@@ -65,6 +65,17 @@ Use this section only when the paper proposes governance, controls, standards, g
 
 - [Improvement]
 
+## Below-Target Improvement Gate
+
+Use this section when any score is below 5, the reviewer gives an overall rating below the target quality bar, or the reviewer names fixable issues while still marking the paper Ready.
+
+- **Target quality bar:** [9/10 for serious internal/external papers, or paper-specific target from BRIEF/config]
+- **Current rating if given:** [rating or "Not stated"]
+- **Fixable gaps below target:** [list concrete issues, or "None"]
+- **Immediate improvement required before export:** [Yes / No]
+- **If yes, required action:** [Apply fixes through `/gpd-revise`, or explain why deferred]
+- **Deferred items and reason:** [Only defer if not appropriate for this paper/cycle]
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

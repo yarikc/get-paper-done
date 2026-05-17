@@ -32,6 +32,15 @@ Ready
 |---------|-----------------------|---------------|----------------------|
 | Executive ask versus technical proof | CxO and architect | Decision usefulness wins | Keep concise |
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious papers unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** Evidence sufficiency is below target.
+- **Immediate improvement required before export:** Yes
+- **If yes, required action:** Add concrete evidence support before export.
+- **Deferred items and reason:** N/A
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

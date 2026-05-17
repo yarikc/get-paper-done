@@ -116,6 +116,7 @@ const markdownContracts = {
       '## Scores',
       '## Required Fixes',
       '## Audience Review Scorecard',
+      '## Below-Target Improvement Gate',
       '## Unsupported Or Risky Claims',
       '## Revision Plan',
       '## Done Checklist',
@@ -140,6 +141,7 @@ const markdownContracts = {
       '# Feedback Handling Plan',
       '## Summary',
       '## Proposed Handling',
+      '## Below-Target Items',
       '## Incorporate',
       '## Ignore',
       '## Defer',
@@ -156,6 +158,7 @@ const markdownContracts = {
         'Proposed Handling',
         'Affected Artifact',
       ],
+      ['#', 'Issue', 'Target Bar Impact', 'Action', 'Reason'],
     ],
   },
   'EXTERNAL-REVIEWS.md': {

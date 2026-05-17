@@ -20,6 +20,50 @@
     ],
     "depth_rationale": "",
     "source_mode_rationale": "",
+    "source_lanes": [
+      {
+        "lane": "official_regulatory_standards",
+        "purpose": "",
+        "planned_source_types": ["official"],
+        "expected_examples": [],
+        "status": "planned"
+      },
+      {
+        "lane": "empirical_counterevidence",
+        "purpose": "",
+        "planned_source_types": ["academic", "industry", "news"],
+        "expected_examples": [],
+        "status": "planned"
+      },
+      {
+        "lane": "industry_trend_market",
+        "purpose": "",
+        "planned_source_types": ["industry", "analyst", "news"],
+        "expected_examples": [],
+        "status": "planned"
+      },
+      {
+        "lane": "practitioner_operating_model",
+        "purpose": "",
+        "planned_source_types": ["industry", "blog", "other"],
+        "expected_examples": [],
+        "status": "planned"
+      }
+    ],
+    "author_language_queries": [
+      {
+        "phrase": "",
+        "source_artifact": "PAPER-CONTEXT.md",
+        "derived_queries": [],
+        "why_it_matters": ""
+      }
+    ],
+    "expected_source_checkpoint": {
+      "asked": false,
+      "user_response": "",
+      "sources_expected": []
+    },
+    "missed_source_audit": [],
     "user_feedback": ""
   },
   "research_brief": {
@@ -34,11 +78,23 @@
       }
     ]
   },
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "",
+      "ranking_reason": "",
+      "limitations": ""
+    }
+  ],
   "source_registry": [
     {
       "id": "S1",
       "title": "",
       "url_or_path": "",
+      "rank_group": "primary_anchor",
       "source_type": "official",
       "authority": "high",
       "freshness": "recent",
@@ -46,6 +102,13 @@
       "specificity": "high",
       "bias_or_agenda": "",
       "stance": "supportive",
+      "why_picked": "",
+      "short_summary": "",
+      "relevant_points": [
+        ""
+      ],
+      "use_in_paper": "",
+      "limitations": "",
       "claim_support": [
         {
           "claim_id": "C1",
@@ -68,6 +131,15 @@
       "confidence": "medium",
       "recommended_handling": "support_more",
       "notes": ""
+    }
+  ],
+  "evidence_nuggets": [
+    {
+      "claim_id": "C1",
+      "nugget": "",
+      "source_ids": ["S1"],
+      "use_in_draft": "",
+      "caveat": ""
     }
   ],
   "synthesis_matrix": {

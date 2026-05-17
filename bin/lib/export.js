@@ -171,7 +171,9 @@ function exportPaper(input = {}) {
       '## Notes',
       '',
       '- Internal export created at `.paper/exports/FINAL.md`.',
-      '- Run `/gpd-status` to decide whether to archive, revise, or start another paper.',
+      '- Review `.paper/exports/FINAL.md` as the reading copy.',
+      '- If you add comments to `FINAL.md`, run `/gpd-review`; approved changes will be applied to `.paper/DRAFT.md` and exported again.',
+      '- Run `/gpd-status` whenever you are unsure what to do next.',
       '',
     ].join('\n'),
     input.dryRun,
@@ -188,6 +190,8 @@ function printExport(result) {
   console.log(`paper: ${result.paperDir}`);
   console.log(`export: ${result.finalPath}`);
   if (result.forced) console.log('warning: exported with --force');
+  console.log('review: read .paper/exports/FINAL.md');
+  console.log('if you add comments: run /gpd-review');
 }
 
 module.exports = {

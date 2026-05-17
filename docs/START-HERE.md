@@ -84,7 +84,21 @@ You can also create a paper from the AI runtime:
 
 ## The Workflow
 
-The mental model is:
+You do not need to memorize the whole sequence. Use this rule:
+
+```bash
+gpd next
+```
+
+or:
+
+```text
+/gpd-status
+```
+
+Run what GPD recommends, then ask for status again.
+
+The mental model underneath is:
 
 ```text
 clarify -> support -> shape -> draft -> check -> revise -> export
@@ -139,7 +153,9 @@ Draft one controlled section at a time from approved artifacts.
 ```
 
 Fact-check tests material claims. Review tests audience fit, ask clarity,
-evidence, objections, structure, and decision usefulness.
+evidence, objections, structure, and decision usefulness. If review finds
+fixable issues below the paper's quality bar, GPD routes them through revision
+before export instead of treating them as optional notes.
 
 ### Revise And Export
 
@@ -149,6 +165,24 @@ evidence, objections, structure, and decision usefulness.
 ```
 
 Revise applies approved fixes. Export creates `.paper/exports/FINAL.md`.
+
+## Reviewing The Export
+
+When GPD exports the paper, review this file:
+
+```text
+.paper/exports/FINAL.md
+```
+
+If you add comments to it, run:
+
+```text
+/gpd-review
+```
+
+GPD will capture the comments, plan the handling, revise `.paper/DRAFT.md`,
+and regenerate `FINAL.md`. You review the final reading copy; GPD keeps
+`DRAFT.md` as the source of truth.
 
 ## Moving Backward Is Normal
 

@@ -33,7 +33,7 @@ function tempDir(name) {
 
 function testHelpShowsCalibratedExternalReviewProviders() {
   const output = run(['help']);
-  assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,opencode'));
+  assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini'));
   assert(output.includes('next                         Show only the next recommended action and why'));
   assert(output.includes('gpd next --paper ~/papers/metadata-strategy'));
 }
@@ -258,12 +258,14 @@ function testNextCommandShowsCompactGuidance() {
   assert(output.includes('next: /gpd-grill'));
   assert(output.includes('why: The mandatory grill gate is incomplete'));
   assert(output.includes('clear context:'));
+  assert(output.includes('user action: Run the recommended command'));
   assert(!output.includes('artifacts:'));
 
   const json = JSON.parse(run(['next', '--paper', paperDir, '--json']));
   assert.strictEqual(json.next, '/gpd-grill');
   assert(json.why.includes('mandatory grill gate'));
   assert.strictEqual(json.context.clear_context, 'No, unless the import/intake chat is noisy.');
+  assert(json.userAction.includes('Run the recommended command'));
 }
 
 function testInitWithoutSlugUsesSubdirectory() {
@@ -593,6 +595,8 @@ function testExportCommandWritesFinalAndState() {
 
   const output = run(['export', '--paper', paperDir]);
   assert(output.includes('exports/FINAL.md'));
+  assert(output.includes('review: read .paper/exports/FINAL.md'));
+  assert(output.includes('if you add comments: run /gpd-review'));
 
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
   assert(fs.existsSync(finalPath));
@@ -612,6 +616,7 @@ function testExportCommandWritesFinalAndState() {
   const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
   assert.strictEqual(status.next, '/gpd-status');
+  assert(status.userAction.includes('Read .paper/exports/FINAL.md'));
 }
 
 function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
@@ -724,6 +729,51 @@ function testExportCommandHonorsStatusRouting() {
   assert(!fs.existsSync(path.join(meta, 'exports', 'FINAL.md')));
 }
 
+function testExportCommandBlocksBelowTargetReadyReview() {
+  const dir = tempDir('gpd-export-below-target-test');
+  run(['init', '--location', dir, '--slug', 'below-target', '--title', 'Below Target']);
+  const paperDir = path.join(dir, 'below-target');
+  const meta = path.join(paperDir, '.paper');
+
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'RESEARCH.json'), '{"research_plan":{},"source_registry":[],"evidence_matrix":[]}\n');
+  fs.writeFileSync(path.join(meta, 'OUTLINE.md'), '# Outline\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nBody.\n');
+  fs.writeFileSync(path.join(meta, 'FACT-CHECK.md'), '# Fact And Claims Check\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), [
+    '# Review',
+    '',
+    '## Verdict',
+    '',
+    'Ready',
+    '',
+    '## Below-Target Improvement Gate',
+    '',
+    '- **Immediate improvement required before export:** Yes',
+    '- **If yes, required action:** /gpd-revise before export',
+    '',
+  ].join('\n'));
+
+  const failed = runFail(['export', '--paper', paperDir]);
+  assert.strictEqual(failed.status, 1);
+  assert(failed.stderr.includes('Current paper state recommends /gpd-revise'));
+  assert(!fs.existsSync(path.join(meta, 'exports', 'FINAL.md')));
+}
+
 function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   const dir = tempDir('gpd-review-external-test');
   run(['init', '--location', dir, '--slug', 'external-review', '--title', 'External Review']);
@@ -765,6 +815,7 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('**Status:** Pending user approval'));
+  assert(feedbackPlan.includes('## Below-Target Items'));
   assert(feedbackPlan.includes('HIGH: Ask is unclear.'));
   assert(feedbackPlan.includes('Needs decision'));
   assert(feedbackPlan.includes('Ask user'));
@@ -823,6 +874,9 @@ function testReviewExternalInvokesProviderModel() {
     ['review-external', '--paper', paperDir, '--models', 'claude', '--timeout-ms', '5000'],
     { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
   );
+  assert(output.includes('external review: claude: running'));
+  assert(output.includes('external review: claude: captured'));
+  assert(output.includes('provider progress:'));
   assert(output.includes('reviews captured: 1'));
   assert(output.includes('review issues: 0'));
   assert(output.includes('- claude: captured (provider:claude)'));
@@ -903,7 +957,7 @@ function testReviewExternalUsesGeminiProviderArgs() {
   assert(externalReviews.includes('HIGH: Gemini provider saw draft context.'));
 }
 
-function testReviewExternalUsesOpencodeProviderArgs() {
+function testReviewExternalDoesNotUseOpencodeForPapers() {
   const dir = tempDir('gpd-review-external-opencode-provider-test');
   run(['init', '--location', dir, '--slug', 'opencode-provider-review', '--title', 'Opencode Provider Review']);
   const paperDir = path.join(dir, 'opencode-provider-review');
@@ -912,10 +966,10 @@ function testReviewExternalUsesOpencodeProviderArgs() {
 
   const providerDir = tempDir('gpd-opencode-provider-bin');
   const providerPath = path.join(providerDir, 'opencode');
-  const argsPath = path.join(providerDir, 'opencode-args.txt');
+  const markerPath = path.join(providerDir, 'opencode-ran.txt');
   fs.writeFileSync(providerPath, [
     '#!/bin/sh',
-    `printf '%s\\n' "$@" > "${argsPath}"`,
+    `echo "ran" > "${markerPath}"`,
     'cat >/dev/null',
     'echo "HIGH: Opencode provider saw draft context."',
     '',
@@ -926,12 +980,14 @@ function testReviewExternalUsesOpencodeProviderArgs() {
     ['review-external', '--paper', paperDir, '--models', 'opencode', '--timeout-ms', '5000'],
     { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
   );
-  assert(output.includes('reviews captured: 1'));
-  assert(output.includes('- opencode: captured (provider:opencode)'));
-  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), 'run\n-\n');
+  assert(output.includes('external review: opencode: unsupported'));
+  assert(output.includes('reviews captured: 0'));
+  assert(output.includes('- opencode: unsupported (provider:opencode)'));
+  assert(!fs.existsSync(markerPath));
 
   const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
-  assert(externalReviews.includes('HIGH: Opencode provider saw draft context.'));
+  assert(externalReviews.includes('Provider "opencode" is not supported by this CLI slice.'));
+  assert(externalReviews.includes('Supported providers: gemini, claude, codex, qwen, cursor'));
 }
 
 function testReviewExternalRecordsMissingProvider() {
@@ -956,7 +1012,7 @@ function testReviewExternalRecordsMissingProvider() {
 
   const externalReviews = fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEWS.md'), 'utf8');
   assert(externalReviews.includes('Provider "definitely-missing-reviewer" is not supported by this CLI slice.'));
-  assert(externalReviews.includes('Supported providers: gemini, claude, codex, opencode, qwen, cursor'));
+  assert(externalReviews.includes('Supported providers: gemini, claude, codex, qwen, cursor'));
   assert(fs.existsSync(path.join(meta, 'FEEDBACK-PLAN.md')));
 }
 
@@ -1037,11 +1093,12 @@ testExportCommandWritesFinalAndState();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();
+testExportCommandBlocksBelowTargetReadyReview();
 testReviewExternalCollectsReviewAndStopsAtApprovalGate();
 testReviewExternalInvokesProviderModel();
 testReviewExternalUsesCodexProviderArgs();
 testReviewExternalUsesGeminiProviderArgs();
-testReviewExternalUsesOpencodeProviderArgs();
+testReviewExternalDoesNotUseOpencodeForPapers();
 testReviewExternalRecordsMissingProvider();
 testReviewExternalRequiresDraft();
 testMalformedInputs();

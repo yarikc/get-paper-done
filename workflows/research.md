@@ -67,8 +67,20 @@ Identify:
 - sources already supplied by the user
 - source gaps
 - draft or outline sections needing support
+- author-specific terms, phrases, examples, and communities named during grill/brief that should become search queries
 
 Infer research questions from `.paper/BRIEF.md`, reconciled with `.paper/STRATEGY.md` when present. Map each research question to one or more claims.
+
+Build source-lane coverage into the plan. For serious papers, include at least these lanes unless explicitly out of scope:
+
+- **Official/regulatory/standards lane:** authority sources for obligations, definitions, rules, and durable requirements.
+- **Empirical/counterevidence lane:** studies, benchmarks, failure cases, or credible evidence that narrows or challenges the thesis.
+- **Industry trend lane:** current market, adoption, product, or operating-model evidence.
+- **Practitioner/operating-model lane:** credible practitioner communities, architecture/engineering sources, implementation patterns, and field-tested mechanisms accepted by the target audience.
+
+For architecture, engineering operating-model, platform, or AI-delivery papers, the practitioner/operating-model lane must include searches for architecture-practitioner sources when relevant, such as InfoQ, Thoughtworks, Martin Fowler, Team Topologies, CNCF/platform engineering, DORA, and comparable domain communities. Use these sources as practitioner support or analogies, not as regulatory proof.
+
+Expand queries from author language. Extract distinctive phrases from `.paper/PAPER-CONTEXT.md`, `.paper/DECISIONS.md`, `.paper/BRIEF.md`, and grill-derived notes, then turn them into search terms. Examples: `engineering flow`, `world model`, `context engineering`, `agentic harness`, `spec-driven development`, `declarative architecture`, `decision boundaries`, `guardrails`, `human by exception`, or any domain-specific phrase the author uses.
 
 Build a research plan with:
 
@@ -78,9 +90,12 @@ Build a research plan with:
 - claim mapping
 - planned source types
 - initial search queries
+- source-lane coverage
+- author-language query expansion
 - known user-provided/imported source locations
 - strategy/brief conflicts, if any
 - likely gaps and contradictions to investigate
+- expected-source checkpoint asking whether the author expects specific sources, standards, authors, communities, or competitor papers to appear
 
 Before collecting sources, present the plan and ask whether to proceed, edit the plan, or change depth/source mode.
 
@@ -117,6 +132,12 @@ Source preference:
 - reputable industry analyses for market/industry claims
 - credible practitioner sources only when appropriate for the audience proof standard
 
+Before finalizing the retained source set, perform an expected-source checkpoint:
+
+- Ask whether the author expected any source, standard, author, community, company report, or paper that is missing.
+- If the author is unavailable and the paper is serious, self-check whether one of the required source lanes is thin or absent.
+- If a lane is thin, either add sources or record the gap explicitly in `open_questions` and `draft_support_notes`.
+
 ## 4. Extract Evidence
 
 For each major claim, explicitly classify:
@@ -130,6 +151,13 @@ For each major claim, explicitly classify:
 
 Separate facts from interpretations. Extract useful facts, numbers, dates, definitions, mechanisms, caveats, limitations, and short quote candidates.
 
+For each core claim, extract evidence nuggets useful to the writer and reviewer. A source ID alone is not enough. Record 1-3 concise items per core claim where available:
+
+- fact, mechanism, definition, example, or caution
+- exact source ID
+- how it should be used in prose
+- caveat or limit on the wording it supports
+
 ## 5. Build Matrices
 
 Create `.paper/RESEARCH.json` using `templates/research.json`.
@@ -137,7 +165,9 @@ Create `.paper/RESEARCH.json` using `templates/research.json`.
 Include:
 
 - research plan and user feedback
+- source-lane coverage and author-language query expansion when used
 - research brief
+- source ranking that makes source priority explicit
 - source registry
 - evidence matrix
 - synthesis matrix
@@ -148,20 +178,48 @@ Include:
 - claims to soften
 - claims to drop or reframe
 
+For every retained source, make the source useful to a human reviewer. `source_registry[*]` must include:
+
+- `rank_group`
+- `why_picked`
+- `short_summary`
+- `relevant_points`
+- `use_in_paper`
+- `limitations`
+
+`relevant_points` should be prose-ready evidence nuggets, not generic summaries. A downstream drafter should be able to turn them into a sentence without opening the source.
+
+Use `source_ranking` to show the ordered evidence hierarchy. Rank sources by fit for this paper, not only freshness. For example, an old but current official regulatory source can outrank a recent vendor or consulting source for a regulated-architecture claim, while recent industry or empirical sources may outrank old regulatory sources for claims about current AI adoption.
+
 If `.paper/OUTLINE.md` or `.paper/DRAFT.md` exists, add section-level draft support notes. If a draft exists but sections needing support are not specified, infer sections that make strong claims without clear evidence.
 
 ## 6. Write A Short Markdown Index
 
-Write `.paper/RESEARCH.md` as a short human-readable index to `.paper/RESEARCH.json`.
+Write `.paper/RESEARCH.md` as a human-readable research packet for source review. It should summarize the same evidence package without forcing the user to inspect JSON.
 
 It should include:
 
 - evidence verdict
+- source ranking
+- source cards with why picked, short summary, relevant information picked, how to use it, and limitations
+- source-lane coverage and any thin lanes
+- author-language queries that materially affected source discovery
 - key findings
 - highest-risk contradictions
 - claims to soften/drop
 - open questions that block drafting
 - pointer that `.paper/RESEARCH.json` is canonical
+
+If the user later provides important sources that research missed, update the research package and add a missed-source audit note. Classify each miss as one or more of:
+
+- `absent_source_lane`
+- `source_added_after_research`
+- `underweighted_source_type`
+- `terminology_mismatch`
+- `not_discoverable`
+- `agent_error`
+
+Record what workflow change would have prevented the miss.
 
 Do not duplicate the full source registry or matrices in Markdown unless explicitly requested.
 

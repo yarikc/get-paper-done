@@ -62,6 +62,15 @@ The memo is ready as a compact internal decision paper. It now starts from the p
 - In the follow-up checklist, turn each source-backed control area into an owner, evidence field, and approval gate.
 - Keep implementation detail in the follow-up checklist unless it is needed for approval.
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious internal control examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** None before internal export; follow-up checklist detail is implementation work after approval.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Implementation checklist expansion is deferred because the memo's job is approval of the baseline, not full template design.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

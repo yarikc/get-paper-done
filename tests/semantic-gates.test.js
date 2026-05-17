@@ -85,8 +85,59 @@ function makePaper(slug = 'semantic') {
   return paperDir;
 }
 
+function researchRankGroup(source) {
+  if (source.source_type === 'official' && source.authority === 'high') return 'primary_anchor';
+  if (source.source_type === 'official') return 'secondary_anchor';
+  if (source.source_type === 'academic') return 'failure_mode_evidence';
+  if (['industry', 'news', 'analyst'].includes(source.source_type)) return 'trend_evidence';
+  if (source.source_type === 'blog') return 'analogy';
+  return 'background';
+}
+
+function researchRole(rankGroup) {
+  if (rankGroup === 'primary_anchor') return 'primary_regulatory_anchor';
+  if (rankGroup === 'secondary_anchor') return 'lifecycle_control_anchor';
+  if (rankGroup === 'trend_evidence') return 'industry_trend_evidence';
+  if (rankGroup === 'failure_mode_evidence') return 'failure_mode_evidence';
+  if (rankGroup === 'analogy') return 'analogy_source';
+  return 'background';
+}
+
+function completeResearchContract(research) {
+  if (!Array.isArray(research.source_registry)) return research;
+  research.source_registry = research.source_registry.map((source) => {
+    const rankGroup = source.rank_group || researchRankGroup(source);
+    const supportIds = Array.isArray(source.claim_support)
+      ? source.claim_support.map((entry) => entry.claim_id).join(', ')
+      : 'unspecified';
+    return {
+      ...source,
+      rank_group: rankGroup,
+      why_picked: source.why_picked || `Selected for ${rankGroup} coverage in this test research package.`,
+      short_summary: source.short_summary || source.notes || 'Synthetic source summary.',
+      relevant_points: Array.isArray(source.relevant_points)
+        ? source.relevant_points
+        : [`Supports mapped claim IDs: ${supportIds}.`],
+      use_in_paper: source.use_in_paper || 'Use for source-traceable test claim support.',
+      limitations: source.limitations || source.bias_or_agenda || 'Synthetic source limitation.',
+    };
+  });
+  if (!Array.isArray(research.source_ranking)) {
+    research.source_ranking = research.source_registry.map((source, index) => ({
+      rank: index + 1,
+      source_id: source.id,
+      rank_group: source.rank_group,
+      role: researchRole(source.rank_group),
+      why_picked: source.why_picked,
+      ranking_reason: `Ranked for test source coverage using ${source.authority || 'unknown'} authority and ${source.relevance || 'unknown'} relevance.`,
+      limitations: source.limitations,
+    }));
+  }
+  return research;
+}
+
 function baseResearch(overrides = {}) {
-  return {
+  return completeResearchContract({
     metadata: {
       topic: 'Semantic gates',
       scope: 'Test',
@@ -167,7 +218,7 @@ function baseResearch(overrides = {}) {
     claims_to_soften: [],
     claims_to_drop_or_reframe: [],
     ...overrides,
-  };
+  });
 }
 
 function writeBrief(paperDir, evidenceValue) {
@@ -217,7 +268,11 @@ function writeOutline(paperDir) {
   ].join('\n'));
 }
 
-function writeReview(paperDir, score = 4, instruction = '-') {
+function writeReview(paperDir, score = 4, instruction = '-', gate = {}) {
+  const immediate = gate.immediate || 'No';
+  const action = gate.action || 'N/A';
+  const deferred = gate.deferred || 'Deferred because this fixture is testing review-instruction semantics, not publication readiness.';
+  const verdict = gate.verdict || 'Ready';
   writeOutline(paperDir);
   writeArtifact(paperDir, 'DRAFT.md', '# Draft\n\n## Draft Body\n\nBody.\n');
   writeArtifact(paperDir, 'REVIEW.md', [
@@ -225,7 +280,7 @@ function writeReview(paperDir, score = 4, instruction = '-') {
     '',
     '## Verdict',
     '',
-    'Ready',
+    verdict,
     '',
     '## Scores',
     '',
@@ -248,6 +303,15 @@ function writeReview(paperDir, score = 4, instruction = '-') {
     '| Jargon appropriateness | 4 | Why | - |',
     '| Decision usefulness | 4 | Why | - |',
     '| Structural flow | 4 | Why | - |',
+    '',
+    '## Below-Target Improvement Gate',
+    '',
+    '- **Target quality bar:** 9/10 for serious papers unless brief/config says otherwise.',
+    '- **Current rating if given:** Not stated',
+    `- **Fixable gaps below target:** ${score < 5 ? 'Evidence sufficiency score is below target.' : 'None.'}`,
+    `- **Immediate improvement required before export:** ${immediate}`,
+    `- **If yes, required action:** ${action}`,
+    `- **Deferred items and reason:** ${deferred}`,
     '',
     '## Unsupported Or Risky Claims',
     '',
@@ -1099,6 +1163,25 @@ function testConcreteReviewInstructionPasses() {
   assert.strictEqual(result.ok, true);
 }
 
+function testReadyReviewWithRequiredImprovementFails() {
+  const paperDir = makePaper('semantic-review-below-target-ready');
+  writeReview(
+    paperDir,
+    4,
+    '-',
+    {
+      immediate: 'Yes',
+      action: '/gpd-revise before export',
+      deferred: 'N/A',
+      verdict: 'Ready',
+    },
+  );
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('Verdict is Ready but Below-Target Improvement Gate requires immediate improvement before export'));
+}
+
 testBriefEvidencePlaceholdersFailAfterResearch();
 testBriefEvidenceSourceIdsPass();
 testSourceCoverageWarnsWithoutFailing();
@@ -1107,6 +1190,7 @@ testExportMetadataLeakFails();
 testStateMarkdownJsonDriftFails();
 testWeakReviewInstructionFails();
 testConcreteReviewInstructionPasses();
+testReadyReviewWithRequiredImprovementFails();
 testReasoningSpineRestatementWarns();
 testGenericAudienceConflictWarns();
 testFactCheckSafeSourceAlignmentWarns();

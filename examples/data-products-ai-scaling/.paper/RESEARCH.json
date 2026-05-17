@@ -12,26 +12,56 @@
       {
         "id": "RQ1",
         "question": "What evidence supports the claim that AI scaling depends on trusted, governed, reusable data rather than model tooling alone?",
-        "mapped_claims": ["C1"],
+        "mapped_claims": [
+          "C1"
+        ],
         "why_it_matters": "This is the executive-level investment premise.",
-        "planned_source_types": ["official", "academic", "industry"],
-        "search_queries": ["enterprise AI data quality governance trusted data", "NIST AI RMF data quality governance"]
+        "planned_source_types": [
+          "official",
+          "academic",
+          "industry"
+        ],
+        "search_queries": [
+          "enterprise AI data quality governance trusted data",
+          "NIST AI RMF data quality governance"
+        ]
       },
       {
         "id": "RQ2",
         "question": "How do data mesh and data product sources define domain ownership, product thinking, and platform responsibilities?",
-        "mapped_claims": ["C2", "C3"],
+        "mapped_claims": [
+          "C2",
+          "C3"
+        ],
         "why_it_matters": "The paper must avoid vague use of data product language.",
-        "planned_source_types": ["official", "industry", "blog"],
-        "search_queries": ["data mesh domain ownership data products common platform", "domain aligned data products governance platform"]
+        "planned_source_types": [
+          "official",
+          "industry",
+          "blog"
+        ],
+        "search_queries": [
+          "data mesh domain ownership data products common platform",
+          "domain aligned data products governance platform"
+        ]
       },
       {
         "id": "RQ3",
         "question": "What counterarguments show that domain-aligned data products can increase fragmentation or governance burden?",
-        "mapped_claims": ["C2", "C3", "C4"],
+        "mapped_claims": [
+          "C2",
+          "C3",
+          "C4"
+        ],
         "why_it_matters": "The strongest objection must be handled honestly for architect credibility.",
-        "planned_source_types": ["industry", "analyst", "blog"],
-        "search_queries": ["data mesh challenges fragmentation governance", "data products operating model challenges"]
+        "planned_source_types": [
+          "industry",
+          "analyst",
+          "blog"
+        ],
+        "search_queries": [
+          "data mesh challenges fragmentation governance",
+          "data products operating model challenges"
+        ]
       }
     ],
     "depth_rationale": "Standard depth is enough for this internal strategy example, but evidence must include official guidance, practitioner framing, and standards context.",
@@ -46,28 +76,48 @@
         "finding": "Data mesh and data-product sources consistently emphasize domain ownership plus product thinking, but not domain autonomy without standards.",
         "confidence": "high",
         "why_it_matters": "This supports the paper's balance between domain alignment and common platform governance.",
-        "sources": ["S1", "S2", "S4", "S8", "S12", "S13", "S15"]
+        "sources": [
+          "S1",
+          "S2",
+          "S4",
+          "S8",
+          "S12",
+          "S13",
+          "S15"
+        ]
       },
       {
         "id": "K2",
         "finding": "Official and standards sources treat data quality, lineage, governance, and monitoring as important AI risk and reliability concerns.",
         "confidence": "high",
         "why_it_matters": "This supports the claim that AI scaling depends on data controls as well as model tooling.",
-        "sources": ["S9", "S10", "S11"]
+        "sources": [
+          "S9",
+          "S10",
+          "S11"
+        ]
       },
       {
         "id": "K3",
         "finding": "The evidence does not prove a simple causal claim that data products improve AI business outcomes.",
         "confidence": "medium",
         "why_it_matters": "The paper should frame the thesis as a strategic operating-model judgment, not a measured universal fact.",
-        "sources": ["S1", "S4", "S9"]
+        "sources": [
+          "S1",
+          "S4",
+          "S9"
+        ]
       },
       {
         "id": "K4",
         "finding": "Academic, analyst, and practitioner-oriented industry sources reinforce that data products, data mesh, and data fabric remain socio-technical operating-model choices, not purely technical installs.",
         "confidence": "medium",
         "why_it_matters": "This strengthens the recommendation to start with high-value use cases and explicit governance rather than a broad taxonomy rollout.",
-        "sources": ["S12", "S14", "S15"]
+        "sources": [
+          "S12",
+          "S14",
+          "S15"
+        ]
       }
     ]
   },
@@ -83,7 +133,15 @@
       "specificity": "high",
       "bias_or_agenda": "Cloud-platform framing; Microsoft architecture perspective.",
       "stance": "supportive",
-      "notes": "Useful for domain-aligned data ownership and data product framing."
+      "notes": "Useful for domain-aligned data ownership and data product framing.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for domain-aligned data ownership and data product framing.",
+      "relevant_points": [
+        "Useful for domain-aligned data ownership and data product framing."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Cloud-platform framing; Microsoft architecture perspective."
     },
     {
       "id": "S2",
@@ -96,7 +154,15 @@
       "specificity": "high",
       "bias_or_agenda": "Azure-centered enterprise architecture guidance.",
       "stance": "supportive",
-      "notes": "Useful for domain ownership, federated responsibilities, and operating model."
+      "notes": "Useful for domain ownership, federated responsibilities, and operating model.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for domain ownership, federated responsibilities, and operating model.",
+      "relevant_points": [
+        "Useful for domain ownership, federated responsibilities, and operating model."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Azure-centered enterprise architecture guidance."
     },
     {
       "id": "S3",
@@ -109,7 +175,15 @@
       "specificity": "high",
       "bias_or_agenda": "Azure scenario guidance; may simplify institution-specific constraints.",
       "stance": "supportive",
-      "notes": "Directly relevant to regulated financial services context."
+      "notes": "Directly relevant to regulated financial services context.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Directly relevant to regulated financial services context.",
+      "relevant_points": [
+        "Directly relevant to regulated financial services context."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Azure scenario guidance; may simplify institution-specific constraints."
     },
     {
       "id": "S4",
@@ -122,7 +196,15 @@
       "specificity": "high",
       "bias_or_agenda": "Google Cloud framing.",
       "stance": "supportive",
-      "notes": "Useful for shared platform functions, data product ownership, governance, and discovery."
+      "notes": "Useful for shared platform functions, data product ownership, governance, and discovery.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for shared platform functions, data product ownership, governance, and discovery.",
+      "relevant_points": [
+        "Useful for shared platform functions, data product ownership, governance, and discovery."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Google Cloud framing."
     },
     {
       "id": "S5",
@@ -135,7 +217,15 @@
       "specificity": "high",
       "bias_or_agenda": "Google Cloud implementation guidance.",
       "stance": "supportive",
-      "notes": "Useful for the mechanics of data products as consumer-facing assets."
+      "notes": "Useful for the mechanics of data products as consumer-facing assets.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for the mechanics of data products as consumer-facing assets.",
+      "relevant_points": [
+        "Useful for the mechanics of data products as consumer-facing assets."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Google Cloud implementation guidance."
     },
     {
       "id": "S6",
@@ -148,7 +238,15 @@
       "specificity": "medium",
       "bias_or_agenda": "AWS explanatory content.",
       "stance": "supportive",
-      "notes": "Useful for simple executive explanation, less useful for deep operating-model critique."
+      "notes": "Useful for simple executive explanation, less useful for deep operating-model critique.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "short_summary": "Useful for simple executive explanation, less useful for deep operating-model critique.",
+      "relevant_points": [
+        "Useful for simple executive explanation, less useful for deep operating-model critique."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "AWS explanatory content."
     },
     {
       "id": "S7",
@@ -161,7 +259,15 @@
       "specificity": "high",
       "bias_or_agenda": "AWS implementation framing.",
       "stance": "supportive",
-      "notes": "Useful for domain ownership, federated governance, and self-serve platform language."
+      "notes": "Useful for domain ownership, federated governance, and self-serve platform language.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for domain ownership, federated governance, and self-serve platform language.",
+      "relevant_points": [
+        "Useful for domain ownership, federated governance, and self-serve platform language."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "AWS implementation framing."
     },
     {
       "id": "S8",
@@ -174,7 +280,15 @@
       "specificity": "medium",
       "bias_or_agenda": "Originator/advocate perspective; useful but not neutral.",
       "stance": "supportive",
-      "notes": "Useful for principles and terminology; should be balanced with practical challenges."
+      "notes": "Useful for principles and terminology; should be balanced with practical challenges.",
+      "rank_group": "trend_evidence",
+      "why_picked": "Selected because it is a industry source with high relevance and medium specificity for this paper.",
+      "short_summary": "Useful for principles and terminology; should be balanced with practical challenges.",
+      "relevant_points": [
+        "Useful for principles and terminology; should be balanced with practical challenges."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Originator/advocate perspective; useful but not neutral."
     },
     {
       "id": "S9",
@@ -187,7 +301,15 @@
       "specificity": "medium",
       "bias_or_agenda": "Risk-management framework rather than data platform architecture guidance.",
       "stance": "neutral",
-      "notes": "Useful for grounding AI scaling in risk, data quality, validation, governance, and monitoring concerns."
+      "notes": "Useful for grounding AI scaling in risk, data quality, validation, governance, and monitoring concerns.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "short_summary": "Useful for grounding AI scaling in risk, data quality, validation, governance, and monitoring concerns.",
+      "relevant_points": [
+        "Useful for grounding AI scaling in risk, data quality, validation, governance, and monitoring concerns."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Risk-management framework rather than data platform architecture guidance."
     },
     {
       "id": "S10",
@@ -200,7 +322,15 @@
       "specificity": "medium",
       "bias_or_agenda": "Standards summary; full standard may require access.",
       "stance": "neutral",
-      "notes": "Useful for showing that ML data quality is a recognized standards concern."
+      "notes": "Useful for showing that ML data quality is a recognized standards concern.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "short_summary": "Useful for showing that ML data quality is a recognized standards concern.",
+      "relevant_points": [
+        "Useful for showing that ML data quality is a recognized standards concern."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Standards summary; full standard may require access."
     },
     {
       "id": "S11",
@@ -213,7 +343,15 @@
       "specificity": "medium",
       "bias_or_agenda": "Standards summary; full standard may require access.",
       "stance": "neutral",
-      "notes": "Useful for connecting data quality governance to AI/ML systems."
+      "notes": "Useful for connecting data quality governance to AI/ML systems.",
+      "rank_group": "primary_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "short_summary": "Useful for connecting data quality governance to AI/ML systems.",
+      "relevant_points": [
+        "Useful for connecting data quality governance to AI/ML systems."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Standards summary; full standard may require access."
     },
     {
       "id": "S12",
@@ -226,7 +364,15 @@
       "specificity": "high",
       "bias_or_agenda": "Conceptual academic synthesis; stronger for definitions and research gaps than for implementation proof.",
       "stance": "neutral",
-      "notes": "Useful for distinguishing data products, data mesh, and data fabric and for framing unresolved organizational questions."
+      "notes": "Useful for distinguishing data products, data mesh, and data fabric and for framing unresolved organizational questions.",
+      "rank_group": "failure_mode_evidence",
+      "why_picked": "Selected because it is a academic source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for distinguishing data products, data mesh, and data fabric and for framing unresolved organizational questions.",
+      "relevant_points": [
+        "Useful for distinguishing data products, data mesh, and data fabric and for framing unresolved organizational questions."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Conceptual academic synthesis; stronger for definitions and research gaps than for implementation proof."
     },
     {
       "id": "S13",
@@ -239,7 +385,15 @@
       "specificity": "high",
       "bias_or_agenda": "Originating advocacy article; useful for principles but should not be treated as neutral evidence.",
       "stance": "supportive",
-      "notes": "Useful for the original data mesh argument, domain ownership, product thinking, self-serve platform, and federated governance."
+      "notes": "Useful for the original data mesh argument, domain ownership, product thinking, self-serve platform, and federated governance.",
+      "rank_group": "analogy",
+      "why_picked": "Selected because it is a blog source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for the original data mesh argument, domain ownership, product thinking, self-serve platform, and federated governance.",
+      "relevant_points": [
+        "Useful for the original data mesh argument, domain ownership, product thinking, self-serve platform, and federated governance."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Originating advocacy article; useful for principles but should not be treated as neutral evidence."
     },
     {
       "id": "S14",
@@ -252,7 +406,15 @@
       "specificity": "medium",
       "bias_or_agenda": "Analyst framing; focused on data fabric rather than data mesh.",
       "stance": "critical",
-      "notes": "Useful as counterweight showing that metadata-assisted integration and fabric patterns may solve some problems differently than domain-aligned mesh programs."
+      "notes": "Useful as counterweight showing that metadata-assisted integration and fabric patterns may solve some problems differently than domain-aligned mesh programs.",
+      "rank_group": "trend_evidence",
+      "why_picked": "Selected because it is a analyst source with medium relevance and medium specificity for this paper.",
+      "short_summary": "Useful as counterweight showing that metadata-assisted integration and fabric patterns may solve some problems differently than domain-aligned mesh programs.",
+      "relevant_points": [
+        "Useful as counterweight showing that metadata-assisted integration and fabric patterns may solve some problems differently than domain-aligned mesh programs."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Analyst framing; focused on data fabric rather than data mesh."
     },
     {
       "id": "S15",
@@ -265,7 +427,15 @@
       "specificity": "high",
       "bias_or_agenda": "Practitioner/consulting perspective; example-led and favorable to data mesh.",
       "stance": "supportive",
-      "notes": "Useful for practical adoption lessons and for reinforcing that data mesh requires operating-model, process, and technology changes."
+      "notes": "Useful for practical adoption lessons and for reinforcing that data mesh requires operating-model, process, and technology changes.",
+      "rank_group": "trend_evidence",
+      "why_picked": "Selected because it is a industry source with high relevance and high specificity for this paper.",
+      "short_summary": "Useful for practical adoption lessons and for reinforcing that data mesh requires operating-model, process, and technology changes.",
+      "relevant_points": [
+        "Useful for practical adoption lessons and for reinforcing that data mesh requires operating-model, process, and technology changes."
+      ],
+      "use_in_paper": "Use for mapped claim support and source-traceable evidence in this paper.",
+      "limitations": "Practitioner/consulting perspective; example-led and favorable to data mesh."
     }
   ],
   "evidence_matrix": [
@@ -273,8 +443,15 @@
       "claim_id": "C1",
       "claim": "AI scaling is constrained by data ownership, quality, semantics, access, lineage, and control gaps, not only by model tooling.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S9", "S10", "S11", "S12"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S9",
+        "S10",
+        "S11",
+        "S12"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -285,9 +462,24 @@
       "claim_id": "C2",
       "claim": "Domain-aligned data products improve AI delivery only when ownership and consumption contracts are explicit.",
       "claim_type": "technical_mechanism",
-      "research_questions": ["RQ2", "RQ3"],
-      "supporting_sources": ["S1", "S2", "S4", "S5", "S7", "S12", "S13", "S15"],
-      "contradicting_sources": ["S8", "S14"],
+      "research_questions": [
+        "RQ2",
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S2",
+        "S4",
+        "S5",
+        "S7",
+        "S12",
+        "S13",
+        "S15"
+      ],
+      "contradicting_sources": [
+        "S8",
+        "S14"
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "support_more",
@@ -297,9 +489,22 @@
       "claim_id": "C3",
       "claim": "A common governed platform is what keeps domain alignment from becoming fragmentation.",
       "claim_type": "technical_mechanism",
-      "research_questions": ["RQ2", "RQ3"],
-      "supporting_sources": ["S1", "S4", "S5", "S7", "S12", "S13", "S15"],
-      "contradicting_sources": ["S14"],
+      "research_questions": [
+        "RQ2",
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S1",
+        "S4",
+        "S5",
+        "S7",
+        "S12",
+        "S13",
+        "S15"
+      ],
+      "contradicting_sources": [
+        "S14"
+      ],
       "strength_of_support": "moderate",
       "confidence": "medium",
       "recommended_handling": "keep",
@@ -309,8 +514,16 @@
       "claim_id": "C4",
       "claim": "The pattern should be adopted incrementally around high-value AI use cases, not rolled out as a broad taxonomy exercise.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ3"],
-      "supporting_sources": ["S4", "S7", "S9", "S12", "S15"],
+      "research_questions": [
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S4",
+        "S7",
+        "S9",
+        "S12",
+        "S15"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -321,8 +534,13 @@
       "claim_id": "C5",
       "claim": "Data-product programs should measure reuse and friction reduction, not product count.",
       "claim_type": "recommendation",
-      "research_questions": ["RQ3"],
-      "supporting_sources": ["S12", "S15"],
+      "research_questions": [
+        "RQ3"
+      ],
+      "supporting_sources": [
+        "S12",
+        "S15"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "weak",
       "confidence": "low",
@@ -333,8 +551,14 @@
       "claim_id": "C6",
       "claim": "Product metadata, quality expectations, lineage, and access controls need to support downstream AI risk assessment.",
       "claim_type": "strategic_judgment",
-      "research_questions": ["RQ1"],
-      "supporting_sources": ["S9", "S10", "S11"],
+      "research_questions": [
+        "RQ1"
+      ],
+      "supporting_sources": [
+        "S9",
+        "S10",
+        "S11"
+      ],
       "contradicting_sources": [],
       "strength_of_support": "moderate",
       "confidence": "medium",
@@ -343,7 +567,12 @@
     }
   ],
   "synthesis_matrix": {
-    "themes": ["domain ownership", "common platform", "AI data risk", "fragmentation risk"],
+    "themes": [
+      "domain ownership",
+      "common platform",
+      "AI data risk",
+      "fragmentation risk"
+    ],
     "rows": [
       {
         "theme": "Domain ownership needs shared constraints",
@@ -385,16 +614,34 @@
     {
       "id": "CON1",
       "issue": "Domain alignment can improve ownership but can also increase inconsistency if standards and incentives are weak.",
-      "sources_in_tension": ["S1", "S4", "S8", "S14", "S15"],
-      "possible_explanations": ["Different maturity assumptions", "Architecture guidance underweights organizational incentives"],
+      "sources_in_tension": [
+        "S1",
+        "S4",
+        "S8",
+        "S14",
+        "S15"
+      ],
+      "possible_explanations": [
+        "Different maturity assumptions",
+        "Architecture guidance underweights organizational incentives"
+      ],
       "stronger_source_for_this_paper": "S4",
       "recommended_handling": "Address as the central counterargument, not a footnote."
     },
     {
       "id": "CON2",
       "issue": "Official platform guidance supports the mechanism but may overstate how easily enterprises can implement it.",
-      "sources_in_tension": ["S1", "S4", "S7", "S12", "S15"],
-      "possible_explanations": ["Vendor guidance simplifies operating-model change", "Architecture patterns omit funding and accountability friction"],
+      "sources_in_tension": [
+        "S1",
+        "S4",
+        "S7",
+        "S12",
+        "S15"
+      ],
+      "possible_explanations": [
+        "Vendor guidance simplifies operating-model change",
+        "Architecture patterns omit funding and accountability friction"
+      ],
       "stronger_source_for_this_paper": "S9",
       "recommended_handling": "Use risk-aware language and require pilot-based adoption."
     }
@@ -425,7 +672,11 @@
   "draft_support_notes": [
     {
       "section": "Opening problem",
-      "recommended_evidence": ["S9", "S10", "S11"],
+      "recommended_evidence": [
+        "S9",
+        "S10",
+        "S11"
+      ],
       "how_to_use": "Ground the AI scaling problem in data quality, governance, and risk, not just platform efficiency.",
       "strength_of_language": "cautious",
       "cautions": "Do not claim data quality is always the primary bottleneck.",
@@ -433,7 +684,16 @@
     },
     {
       "section": "Mechanism",
-      "recommended_evidence": ["S1", "S2", "S4", "S5", "S7", "S12", "S13", "S15"],
+      "recommended_evidence": [
+        "S1",
+        "S2",
+        "S4",
+        "S5",
+        "S7",
+        "S12",
+        "S13",
+        "S15"
+      ],
       "how_to_use": "Explain domain ownership, data product interfaces, discovery, access, lineage, quality, and governance as a connected mechanism.",
       "strength_of_language": "moderate",
       "cautions": "Avoid turning this into a generic data mesh explainer.",
@@ -441,7 +701,14 @@
     },
     {
       "section": "Counterargument",
-      "recommended_evidence": ["S8", "S1", "S4", "S12", "S14", "S15"],
+      "recommended_evidence": [
+        "S8",
+        "S1",
+        "S4",
+        "S12",
+        "S14",
+        "S15"
+      ],
       "how_to_use": "State the fragmentation risk directly and answer it with shared platform services and governance constraints.",
       "strength_of_language": "strong",
       "cautions": "Do not dismiss the objection; it is the paper's main credibility test.",
@@ -451,17 +718,27 @@
   "facts_safe_to_use": [
     {
       "fact": "Major cloud providers publish architecture guidance for data mesh and data-product patterns.",
-      "sources": ["S1", "S4", "S6", "S7"],
+      "sources": [
+        "S1",
+        "S4",
+        "S6",
+        "S7"
+      ],
       "confidence": "high"
     },
     {
       "fact": "NIST publishes an AI Risk Management Framework that can be used to ground AI governance and risk discussion.",
-      "sources": ["S9"],
+      "sources": [
+        "S9"
+      ],
       "confidence": "high"
     },
     {
       "fact": "ISO has standards in the 5259 series focused on AI/ML data quality and data quality governance.",
-      "sources": ["S10", "S11"],
+      "sources": [
+        "S10",
+        "S11"
+      ],
       "confidence": "high"
     }
   ],
@@ -482,6 +759,143 @@
       "claim": "The foundation is in place for enterprise AI scaling.",
       "why": "No direct evidence about any specific organization's readiness exists in this example.",
       "recommended_reframe": "The architecture and operating-model foundation required for AI scaling can be built incrementally around high-value use cases."
+    }
+  ],
+  "source_ranking": [
+    {
+      "rank": 1,
+      "source_id": "S1",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Cloud-platform framing; Microsoft architecture perspective."
+    },
+    {
+      "rank": 2,
+      "source_id": "S2",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Azure-centered enterprise architecture guidance."
+    },
+    {
+      "rank": 3,
+      "source_id": "S3",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Azure scenario guidance; may simplify institution-specific constraints."
+    },
+    {
+      "rank": 4,
+      "source_id": "S4",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Google Cloud framing."
+    },
+    {
+      "rank": 5,
+      "source_id": "S5",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Google Cloud implementation guidance."
+    },
+    {
+      "rank": 6,
+      "source_id": "S6",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (medium relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "AWS explanatory content."
+    },
+    {
+      "rank": 7,
+      "source_id": "S7",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "AWS implementation framing."
+    },
+    {
+      "rank": 8,
+      "source_id": "S8",
+      "rank_group": "trend_evidence",
+      "role": "industry_trend_evidence",
+      "why_picked": "Selected because it is a industry source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Originator/advocate perspective; useful but not neutral."
+    },
+    {
+      "rank": 9,
+      "source_id": "S9",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Risk-management framework rather than data platform architecture guidance."
+    },
+    {
+      "rank": 10,
+      "source_id": "S10",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with medium relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (medium relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Standards summary; full standard may require access."
+    },
+    {
+      "rank": 11,
+      "source_id": "S11",
+      "rank_group": "primary_anchor",
+      "role": "primary_regulatory_anchor",
+      "why_picked": "Selected because it is a official source with high relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Standards summary; full standard may require access."
+    },
+    {
+      "rank": 12,
+      "source_id": "S12",
+      "rank_group": "failure_mode_evidence",
+      "role": "failure_mode_evidence",
+      "why_picked": "Selected because it is a academic source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (high), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Conceptual academic synthesis; stronger for definitions and research gaps than for implementation proof."
+    },
+    {
+      "rank": 13,
+      "source_id": "S13",
+      "rank_group": "analogy",
+      "role": "analogy_source",
+      "why_picked": "Selected because it is a blog source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Originating advocacy article; useful for principles but should not be treated as neutral evidence."
+    },
+    {
+      "rank": 14,
+      "source_id": "S14",
+      "rank_group": "trend_evidence",
+      "role": "industry_trend_evidence",
+      "why_picked": "Selected because it is a analyst source with medium relevance and medium specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (medium relevance), specificity (medium), and usefulness for the paper claims.",
+      "limitations": "Analyst framing; focused on data fabric rather than data mesh."
+    },
+    {
+      "rank": 15,
+      "source_id": "S15",
+      "rank_group": "trend_evidence",
+      "role": "industry_trend_evidence",
+      "why_picked": "Selected because it is a industry source with high relevance and high specificity for this paper.",
+      "ranking_reason": "Ranked by source authority (medium), scope fit (high relevance), specificity (high), and usefulness for the paper claims.",
+      "limitations": "Practitioner/consulting perspective; example-led and favorable to data mesh."
     }
   ]
 }

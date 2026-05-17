@@ -14,6 +14,16 @@
 |---|----------|-----------|------------|----------------|-------------------|-------------------|
 | 1 | [Feedback] | [Reviewer] | [Valid / Partly valid / Not useful / Conflicts with intent / Needs decision] | [Incorporate / Ignore / Defer / Ask user] | [Concrete action or reason to ignore] | [DRAFT / BRIEF / RESEARCH / OUTLINE] |
 
+## Below-Target Items
+
+Use this section when `REVIEW.md` includes a Below-Target Improvement Gate or the user challenges a rating below the target bar.
+
+| # | Issue | Target Bar Impact | Action | Reason |
+|---|-------|-------------------|--------|--------|
+| 1 | [Issue keeping paper below target] | [Why it affects quality/rating] | [Apply now / Defer / Ask user / Not applicable] | [Reason] |
+
+If `Action` is `Apply now`, revise before export. If `Action` is `Defer`, state why deferral is compatible with this paper's purpose, audience, risk, and mode.
+
 ## Incorporate
 
 - [Feedback to incorporate and how]
@@ -41,4 +51,3 @@ Options:
 - Discuss decisions first
 - Revise the handling plan
 - Ignore external feedback
-

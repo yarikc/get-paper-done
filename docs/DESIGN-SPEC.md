@@ -119,8 +119,8 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `DECISIONS.md` | Paper decision records for hard-to-reconstruct thesis, audience, scope, source, and positioning choices |
 | `BRIEF.md` | Thesis, claims, opposing view, reader promise, scope, definition of done |
 | `STRATEGY.md` | Strategic readiness gate, paper job, posture, decision usefulness, scope |
-| `RESEARCH.json` | Canonical source registry, claim-support metadata, evidence matrix, synthesis, contradictions, gaps |
-| `RESEARCH.md` | Human-readable index to `RESEARCH.json` |
+| `RESEARCH.json` | Canonical source-lane coverage, author-language queries, source ranking, source cards, claim-support metadata, evidence nuggets, evidence matrix, synthesis, contradictions, gaps, and missed-source audit |
+| `RESEARCH.md` | Human-readable research packet with source lanes, expected-source checkpoint notes, source ranking, why each source was picked, short summaries, extracted relevant points, evidence nuggets, caveats, missed-source audit notes, and links back to `RESEARCH.json` |
 | `OUTLINE.md` | Argument architecture, reader journey, section architecture, evidence placement, objection handling, mode-specific diagnostics |
 | `DRAFT.md` | Current draft body, section drafting state, and draft notes |
 | `REVIEW.md` | Local review findings and revision plan |
@@ -162,6 +162,18 @@ Setup creates only the artifacts required to start. Later stages create their ar
 
 ## Workflow
 
+### User-Facing Rule
+
+Users should not be expected to memorize the full stage sequence. The default user behavior is:
+
+```text
+run `gpd next` or `/gpd-status`
+run the recommended command
+repeat
+```
+
+After export, the user reviews `.paper/exports/FINAL.md`. If they add comments there, `/gpd-review` captures the comments into feedback artifacts, `/gpd-revise` applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
+
 ### Stage Semantics
 
 | Stage | Primary command | Gate | Mandatory? | Writes | Transition rule |
@@ -172,11 +184,11 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | Grill | `/gpd-grill` | Required decision keys complete | Mandatory for new/imported papers | `PAPER-CONTEXT.md`, `DECISIONS.md`, `STATE.json.grill` | Route to `/gpd-brief` only after author intent, thesis, reader, terms, scope, proof standard, counterargument, and non-goals are confirmed. |
 | Brief | `/gpd-brief` | Brief contract clarity | Mandatory | `BRIEF.md` | Continue when classification, thesis, claims, reader promise, scope, objections, source assumptions, and open questions are clear enough to test. |
 | Strategy gate | Produced by `/gpd-brief`; recorded in `STRATEGY.md` | Strategy status | Mandatory gate, not a separate user command | `STRATEGY.md` | `Go` allows research/outline. `Revise Before Drafting` or `No-Go` routes back to brief/grill/audience unless explicitly overridden. |
-| Research | `/gpd-research` | Evidence sufficiency | Required for standard/flagship; conditional for lite | `RESEARCH.json`, `RESEARCH.md` | Continue when sources, claim support, counterevidence, and source gaps are explicit. |
+| Research | `/gpd-research` | Evidence sufficiency | Required for standard/flagship; conditional for lite | `RESEARCH.json`, `RESEARCH.md` | Continue when source lanes, expected-source checkpoint, source ranking, why-picked rationale, evidence nuggets, claim support, counterevidence, and source gaps are explicit. |
 | Outline | `/gpd-outline` | Argument structure | Required before serious drafting | `OUTLINE.md` | Continue when reader journey, claims, objections, and evidence hooks are coherent. |
 | Draft | `/gpd-draft` | Draft body exists | Required | `DRAFT.md` | Prefer `--next-section` until the paper body is complete; full draft only for short or explicit cases. |
 | Fact-check | `/gpd-fact-check` | Material claim safety | Required for standard/flagship; conditional for lite | `FACT-CHECK.md` | Keep, soften, remove, verify, or route claims back to research/revise. |
-| Review | `/gpd-review` | Review verdict | Required before export | `REVIEW.md`, optionally `READER-FEEDBACK.md` and `FEEDBACK-PLAN.md` | Ready routes to export; revise/rework routes to feedback planning or revision. |
+| Review | `/gpd-review` | Review verdict and below-target gate | Required before export | `REVIEW.md`, optionally `READER-FEEDBACK.md` and `FEEDBACK-PLAN.md` | Ready routes to export only when the below-target gate does not require immediate improvement. Revise/rework, or Ready with immediate below-target fixes, routes to revision. |
 | Revise | `/gpd-revise` | Approved fix application | Conditional | `DRAFT.md` and state updates | Apply only approved feedback/fact-check/review fixes, then refresh stale downstream stages. |
 | Export | `/gpd-export`, `gpd export` | Final handoff current | Required for final output | `exports/FINAL.md` | Allowed when draft/review state is ready and export is not stale. |
 
@@ -302,6 +314,8 @@ Review never edits the draft directly.
 
 Local review writes `REVIEW.md`.
 
+`REVIEW.md` includes a below-target improvement gate. For serious internal, executive, external, high-risk, regulated, or flagship papers, the default target bar is 9/10 unless the brief or config says otherwise. If review scores any dimension below 5, gives an overall rating below target, or names a concrete fixable issue, the review must decide whether immediate revision is required before export. A paper cannot be treated as ready merely because the critique is written down.
+
 Reader feedback writes:
 
 - `READER-FEEDBACK.md`
@@ -421,6 +435,7 @@ gpd next
 gpd status
 gpd validate
 gpd review-external --review-file reviewer=<path>
+gpd review-external --models claude,codex,gemini
 gpd list-audiences
 gpd list-profiles
 ```
@@ -433,7 +448,7 @@ Remaining tool maturity requires:
 
 - deeper import conversion and source-extraction helpers beyond first-pass `.docx` canonical-draft text extraction, source-reference triage, and version/source indexing
 - local project install mode
-- broader external review provider calibration beyond Claude/Codex/opencode, including Gemini after local authentication and local HTTP servers
+- broader external review provider calibration beyond Claude/Codex, including Gemini after local authentication and local HTTP servers; Opencode is intentionally unsupported for paper review
 - public or team distribution policy
 
 ## Acceptance Criteria

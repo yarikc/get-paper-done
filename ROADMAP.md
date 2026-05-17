@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.45/10 as a writing framework and 9.15/10 as an installable private-repo tool as of 2026-05-15
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/opencode-calibrated provider invocation, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, Gemini real-capture calibration after authentication, local HTTP provider support, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex provider invocation, external-review provider progress output, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, Gemini real-capture calibration after authentication, local HTTP provider support, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -47,6 +47,7 @@ Current issue alignment:
 - `#16`: RFC-5 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
 - `#17`: RFC-6 mobile review packs for away-from-desktop review; useful capability backlog item, but should start as manual validation and review-pack export/import rather than a mobile app or vendor integration.
 - `#18`: closed mandatory grill gate and reusable paper context records; follow-up cleanup now clarifies grandfathered examples, indexes examples/fixtures, and tightens validation for grill companion artifacts.
+- `#20`: review/comment UX simplification; reuse the proven GSD cross-AI review shape where it fits: selected reviewers are visible, reviewer invocation progresses sequentially with per-provider status, failures are recorded rather than hidden, results are durable, the summary tells the user what decision is needed, and paper changes still wait behind the `FEEDBACK-PLAN.md` approval gate.
 
 ## Main Line Preserved During RFC-5 Detour
 
@@ -150,7 +151,7 @@ Plan-change rule:
 19. Completed: added first-pass `.docx` canonical-draft text extraction for `gpd import`, preserving the original file under `original/`, writing extracted paragraph text to `.paper/DRAFT.md`, recording extraction provenance in `.paper/IMPORT.md`, and covering the behavior with a synthetic DOCX regression test.
 20. Completed: added import-time detection of unverified source-reference candidates from Markdown, text, and `.docx` material, recording URLs, DOIs, named standards/source families, and source/reference lines in `.paper/IMPORT.md` without creating `RESEARCH.json`.
 21. Completed: added a `Version / Source Index` to `.paper/IMPORT.md`, grouping copied files by likely role, ranking signal, modified time, recommended downstream stage, and rationale without changing routing or generating downstream artifacts.
-22. Completed: calibrated the real opencode CLI path on a synthetic public paper, confirmed `opencode run -`, corrected Gemini args to `gemini -p ""` with stdin based on CLI help, and added regression assertions for both provider argument shapes. Gemini real capture remains blocked until local browser authentication is completed.
+22. Completed: calibrated the real opencode CLI path on a synthetic public paper, confirmed `opencode run -`, corrected Gemini args to `gemini -p ""` with stdin based on CLI help, and added regression assertions for both provider argument shapes. Later paper-review calibration removed Opencode from supported paper reviewers because the local path proved unreliable for this workflow. Gemini real capture remains blocked until local browser authentication is completed.
 23. Completed: added CLI-only `gpd next` as a compact read-only guide for the next command, why it is next, and what context to read or avoid, while keeping `/gpd-status` as the Claude/Codex dashboard.
 24. Completed: simplified README and `docs/START-HERE.md` into onboarding/front-door docs with a product story, output preview, first-paper path, and clarify/support/shape/draft/check/revise/export loop; dense workflow mechanics stay in `docs/DESIGN-SPEC.md`.
 25. Completed: ran a temporary public-source onboarding calibration paper using `gpd next` between stages. The command routed correctly, but the calibration exposed that explanations could prefer saved `STATE.json` over the more helpful missing-artifact reason; fixed by prioritizing missing research/outline/draft/fact-check/review explanations before saved-state fallback.
@@ -206,8 +207,9 @@ Next work should validate behavior under real use before adding more RFC surface
 30. Completed: added `.docx` canonical-draft text extraction for `gpd import` without adding package dependencies or committing binary/private fixture material.
 31. Completed: added import-time source-reference triage for Markdown, text, and `.docx` imports, explicitly leaving verification to research/fact-check.
 32. Completed: added import version/source indexing so `IMPORT.md` shows canonical draft, alternate drafts, source/reference material, review feedback, outlines/specs, assets, notes, and unclear files with downstream-stage guidance.
-33. Completed: calibrated `gpd review-external --models opencode` against the real opencode CLI on a synthetic public paper. Gemini is installed and argument-corrected but blocked by local authentication before real capture.
-34. Next main-line slice: decide whether to complete Gemini authentication/calibration, start PDF/spreadsheet import handling, or pause broad hardening for another real-paper workflow validation.
+33. Completed: calibrated `gpd review-external --models opencode` against the real opencode CLI on a synthetic public paper, then removed Opencode from supported paper reviewers after a later real-paper trial showed it was unreliable for this workflow. Gemini is installed and argument-corrected but blocked by local authentication before real capture.
+34. Completed: added visible provider-level progress to `gpd review-external --models` so users see each reviewer move through running, captured, empty, missing, failed, or unsupported states instead of waiting on an opaque background terminal.
+35. Next main-line slice: decide whether to complete Gemini authentication/calibration, start PDF/spreadsheet import handling, or pause broad hardening for another real-paper workflow validation.
 
 ## Completed Design Simplifications
 
@@ -606,7 +608,7 @@ Implemented:
 ```bash
 gpd review-external --review-file claude=/tmp/claude-review.md
 gpd review-external --stdin --reviewer claude
-gpd review-external --models claude,codex,opencode
+gpd review-external --models claude,codex,gemini
 ```
 
 Needed:

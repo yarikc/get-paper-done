@@ -16,8 +16,9 @@ What you see: a few commands and a `.paper/` folder.
 What the system protects: author intent, audience fit, evidence, argument
 structure, fact-checking, feedback, and revision state.
 
-New here? Read [docs/START-HERE.md](docs/START-HERE.md), then run `gpd next` or
-`/gpd-status` whenever you are unsure what to do.
+New here? Read [docs/START-HERE.md](docs/START-HERE.md). After that, you do
+not need to memorize the workflow. Run `gpd next` or `/gpd-status`; GPD tells
+you the next command and what you should review.
 
 ## Why Use It
 
@@ -95,7 +96,21 @@ You can also create the paper interactively from the AI runtime:
 
 ## How It Works
 
-The loop is simple:
+You do not need to remember every command. The operating rule is:
+
+```bash
+gpd next
+```
+
+or inside Claude/Codex:
+
+```text
+/gpd-status
+```
+
+Run the recommended command, then ask for status again.
+
+The underlying loop is:
 
 ```text
 clarify -> support -> shape -> draft -> check -> revise -> export
@@ -162,8 +177,8 @@ Fact-check tests material claims for support, exaggeration, stale claims,
 contradiction, and citation risk.
 
 Review tests audience fit, ask clarity, evidence, objections, structure, and
-decision usefulness. Human or model feedback is captured before revision work
-starts.
+decision usefulness. Fixable below-target issues route to revision before
+export; human or model feedback is captured before revision work starts.
 
 ### 6. Revise And Export
 
@@ -176,6 +191,24 @@ Revise applies approved fixes from review, fact-check, or feedback planning. It
 is not an open-ended rewrite step.
 
 Export produces the final Markdown handoff in `.paper/exports/FINAL.md`.
+
+### Reviewing The Final Paper
+
+When GPD exports a paper, read:
+
+```text
+.paper/exports/FINAL.md
+```
+
+If you add comments there, run:
+
+```text
+/gpd-review
+```
+
+GPD captures the comments, plans the handling, applies approved changes to
+`.paper/DRAFT.md`, and regenerates `FINAL.md` on export. You review the final
+paper; GPD keeps the draft as the editable source of truth.
 
 ## Moving Backward Is Normal
 

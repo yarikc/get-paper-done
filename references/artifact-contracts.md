@@ -10,7 +10,7 @@ JSON artifacts must parse and conform to the schemas in `references/schemas/`.
 |----------|--------|---------|
 | `.paper/STATE.json` | `references/schemas/state.schema.json` | Machine-readable workspace state, blockers, feedback state, and next command. |
 | `.paper/config.json` | `references/schemas/config.schema.json` | Paper workflow configuration and feature toggles. |
-| `.paper/RESEARCH.json` | `references/schemas/research.schema.json` | Canonical structured research, source registry, claim-support metadata, evidence matrix, synthesis, gaps, and draft support notes. |
+| `.paper/RESEARCH.json` | `references/schemas/research.schema.json` | Canonical structured research, source-lane coverage, author-language queries, source ranking, source cards, claim-support metadata, evidence nuggets, evidence matrix, synthesis, gaps, missed-source audit, and draft support notes. |
 
 The in-repo schema validator intentionally supports a small JSON Schema subset:
 
@@ -109,6 +109,7 @@ Required headings:
 - `## Scores`
 - `## Required Fixes`
 - `## Audience Review Scorecard`
+- `## Below-Target Improvement Gate`
 - `## Unsupported Or Risky Claims`
 - `## Revision Plan`
 - `## Done Checklist`
@@ -118,6 +119,8 @@ Required tables:
 - Scores: `Dimension`, `Score`, `Notes`
 - Audience Review Scorecard: `Dimension`, `Score`, `Why`, `Actionable Rewrite Instruction If 3 Or Below`
 - Unsupported Or Risky Claims: `Claim`, `Issue`, `Recommended Fix`
+
+Below-Target Improvement Gate is required because a paper can be marked `Ready` while still having named, fixable issues. If any review score is below 5, any overall rating is below the paper's target quality bar, or the reviewer names fixable gaps, the gate must say whether those gaps require immediate revision before export or are deliberately deferred with a reason. Do not leave below-target findings as commentary only.
 
 Audience Review Scorecard must include exactly these seven dimensions:
 
@@ -136,6 +139,7 @@ Required headings:
 - `# Feedback Handling Plan`
 - `## Summary`
 - `## Proposed Handling`
+- `## Below-Target Items`
 - `## Incorporate`
 - `## Ignore`
 - `## Defer`
@@ -145,6 +149,7 @@ Required headings:
 Required tables:
 
 - Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `Affected Artifact`
+- Below-Target Items: `#`, `Issue`, `Target Bar Impact`, `Action`, `Reason`
 
 ### `EXTERNAL-REVIEWS.md`
 

@@ -49,6 +49,15 @@ The memo is decision-useful and appropriately bounded. It gives the sponsor a cl
 
 - None required before export.
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious internal examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** Evidence quality and technical credibility are bounded by synthetic pilot metrics, but the memo does not make rollout, ROI, or compliance claims.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Broader rollout evidence is deferred because the paper only asks to continue one quarter of review-cycle measurement.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

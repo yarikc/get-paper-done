@@ -17,6 +17,7 @@ const {
 const {
   reviewExternal,
   printExternalReviewResult,
+  formatExternalReviewProgress,
 } = require('./external-review');
 const {
   status,
@@ -39,6 +40,7 @@ module.exports = {
   printExport,
   reviewExternal,
   printExternalReviewResult,
+  formatExternalReviewProgress,
   status,
   printStatus,
   nextAction,

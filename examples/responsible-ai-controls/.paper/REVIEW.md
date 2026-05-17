@@ -53,6 +53,15 @@ The draft is ready as a synthetic external example. It states a bounded thesis, 
 - Add a public disclosure example if the paper is adapted into a longer article.
 - Add jurisdiction-specific review only if the paper makes legal or regulatory claims.
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious external examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** Real publication would require verified public citations and jurisdiction-specific review.
+- **Immediate improvement required before export:** No
+- **If yes, required action:** N/A
+- **Deferred items and reason:** Real-publication source replacement is deferred because this fixture is intentionally synthetic and bounded as an example-quality external draft.
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

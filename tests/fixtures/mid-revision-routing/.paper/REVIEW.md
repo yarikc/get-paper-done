@@ -51,6 +51,15 @@ The draft has a clear decision ask and a usable structure, but it should not be 
 - Move the evidence-limit paragraph closer to the claim it qualifies.
 - Use source IDs beside the cycle-time claim in the revised draft.
 
+## Below-Target Improvement Gate
+
+- **Target quality bar:** 9/10 for serious internal decision examples unless brief/config sets a different bar.
+- **Current rating if given:** Not stated
+- **Fixable gaps below target:** Avoided-rework claim is under-supported and publication readiness is below target.
+- **Immediate improvement required before export:** Yes
+- **If yes, required action:** Run `/gpd-research`, revise the avoided-rework claim, and re-run fact-check.
+- **Deferred items and reason:** N/A
+
 ## Unsupported Or Risky Claims
 
 | Claim | Issue | Recommended Fix |

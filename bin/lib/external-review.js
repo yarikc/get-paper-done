@@ -20,10 +20,22 @@ const providerCommands = {
   gemini: { command: 'gemini', args: ['-p', ''] },
   claude: { command: 'claude', args: ['-p'] },
   codex: { command: 'codex', args: ['exec', '--skip-git-repo-check', '-'] },
-  opencode: { command: 'opencode', args: ['run', '-'] },
   qwen: { command: 'qwen', args: ['-'] },
   cursor: { command: 'cursor', args: ['agent', '-p', '--mode', 'ask', '--trust'] },
 };
+
+function supportedProviders() {
+  return Object.keys(providerCommands);
+}
+
+function emitProgress(input, event) {
+  if (typeof input.onProgress === 'function') input.onProgress(event);
+}
+
+function formatExternalReviewProgress(event) {
+  const detail = event.detail ? ` - ${event.detail}` : '';
+  return `${event.reviewer}: ${event.status}${detail}`;
+}
 
 function reviewerSlug(value, fallback = 'external-reviewer') {
   return String(value || fallback)
@@ -184,16 +196,28 @@ function providerFailureReview(reviewer, source, content, status = 'failed') {
 function invokeProvider(model, prompt, input = {}) {
   const config = providerCommands[model];
   if (!config) {
+    emitProgress(input, {
+      reviewer: model,
+      source: `provider:${model}`,
+      status: 'unsupported',
+      detail: `supported providers: ${supportedProviders().join(', ')}`,
+    });
     return providerFailureReview(
       model,
       `provider:${model}`,
-      `Provider "${model}" is not supported by this CLI slice. Supported providers: ${Object.keys(providerCommands).join(', ')}.`,
+      `Provider "${model}" is not supported by this CLI slice. Supported providers: ${supportedProviders().join(', ')}.`,
       'unsupported',
     );
   }
 
   const found = executablePath(config.command);
   if (!found) {
+    emitProgress(input, {
+      reviewer: model,
+      source: `provider:${model}`,
+      status: 'missing',
+      detail: `CLI "${config.command}" was not found on PATH`,
+    });
     return providerFailureReview(
       model,
       `provider:${model}`,
@@ -203,6 +227,12 @@ function invokeProvider(model, prompt, input = {}) {
   }
 
   if (input.dryRun) {
+    emitProgress(input, {
+      reviewer: model,
+      source: `provider:${model}`,
+      status: 'planned',
+      detail: `would invoke "${config.command} ${config.args.join(' ')}"`,
+    });
     return providerFailureReview(
       model,
       `provider:${model}`,
@@ -212,6 +242,12 @@ function invokeProvider(model, prompt, input = {}) {
   }
 
   const timeoutMs = input.timeoutMs || 120000;
+  emitProgress(input, {
+    reviewer: model,
+    source: `provider:${model}`,
+    status: 'running',
+    detail: `invoking "${config.command} ${config.args.join(' ')}" with ${timeoutMs}ms timeout`,
+  });
   const result = spawnSync(found, config.args, {
     input: prompt,
     encoding: 'utf8',
@@ -221,6 +257,12 @@ function invokeProvider(model, prompt, input = {}) {
 
   if (result.error) {
     const timedOut = result.error.code === 'ETIMEDOUT';
+    emitProgress(input, {
+      reviewer: model,
+      source: `provider:${model}`,
+      status: timedOut ? 'timed_out' : 'failed',
+      detail: timedOut ? `timed out after ${timeoutMs}ms` : result.error.message,
+    });
     return providerFailureReview(
       model,
       `provider:${model}`,
@@ -234,6 +276,12 @@ function invokeProvider(model, prompt, input = {}) {
   const stdout = (result.stdout || '').trim();
   const stderr = (result.stderr || '').trim();
   if (result.status !== 0) {
+    emitProgress(input, {
+      reviewer: model,
+      source: `provider:${model}`,
+      status: 'failed',
+      detail: `exited with status ${result.status}`,
+    });
     return providerFailureReview(
       model,
       `provider:${model}`,
@@ -246,6 +294,12 @@ function invokeProvider(model, prompt, input = {}) {
     );
   }
 
+  emitProgress(input, {
+    reviewer: model,
+    source: `provider:${model}`,
+    status: stdout ? 'captured' : 'empty',
+    detail: stdout ? 'review text captured' : 'provider returned no review text',
+  });
   return {
     reviewer: model,
     source: `provider:${model}`,
@@ -370,6 +424,12 @@ function feedbackPlanMarkdown({ reviews, createdAt }) {
 |---|----------|-----------|------------|----------------|-------------------|-------------------|
 ${rows}
 
+## Below-Target Items
+
+| # | Issue | Target Bar Impact | Action | Reason |
+|---|-------|-------------------|--------|--------|
+| 1 | External review may identify below-target issues. | Unknown until the user evaluates captured feedback. | Ask user | External feedback is captured as proposed handling, not automatic rewrite authority. |
+
 ## Incorporate
 
 ${incorporate}
@@ -429,9 +489,17 @@ function reviewExternal(input = {}) {
   }
   const createdAt = new Date().toISOString();
   const dryRun = Boolean(input.dryRun);
+  const providerProgress = [];
+  const reviewInput = {
+    ...input,
+    onProgress: (event) => {
+      providerProgress.push(event);
+      emitProgress(input, event);
+    },
+  };
   const reviews = [
-    ...readReviewInputs(input),
-    ...invokeProviderReviews(input, paperDir),
+    ...readReviewInputs(reviewInput),
+    ...invokeProviderReviews(reviewInput, paperDir),
   ];
 
   writeFile(
@@ -451,6 +519,7 @@ function reviewExternal(input = {}) {
     reviewsCaptured: reviews.filter((review) => review.status === 'captured').length,
     reviewsEmpty: reviews.filter((review) => review.status !== 'captured').length,
     reviewsFailed: reviews.filter((review) => ['failed', 'missing', 'unsupported'].includes(review.status)).length,
+    providerProgress,
     reviewers: reviews.map((review) => ({
       reviewer: review.reviewer,
       source: review.source,
@@ -467,6 +536,12 @@ function printExternalReviewResult(result) {
   console.log(`reviews captured: ${result.reviewsCaptured}`);
   console.log(`empty reviews: ${result.reviewsEmpty}`);
   console.log(`review issues: ${result.reviewsFailed}`);
+  if (result.providerProgress && result.providerProgress.length > 0) {
+    console.log('provider progress:');
+    for (const event of result.providerProgress) {
+      console.log(`- ${formatExternalReviewProgress(event)}`);
+    }
+  }
   for (const review of result.reviewers) {
     console.log(`- ${review.reviewer}: ${review.status} (${review.source})`);
   }
@@ -477,6 +552,7 @@ function printExternalReviewResult(result) {
 
 module.exports = {
   buildExternalReviewPrompt,
+  formatExternalReviewProgress,
   reviewExternal,
   printExternalReviewResult,
 };

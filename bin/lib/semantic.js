@@ -584,6 +584,97 @@ function validateReviewRewriteInstructions(paperDir) {
   return issues;
 }
 
+function parseHeadingValue(markdown, heading) {
+  if (!markdown) return null;
+  const lines = markdown.split(/\r?\n/);
+  const target = `## ${heading.toLowerCase()}`;
+  for (let i = 0; i < lines.length; i += 1) {
+    if (lines[i].trim().toLowerCase() !== target) continue;
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const value = lines[j].trim();
+      if (value.startsWith('## ')) return null;
+      if (value) return value.replace(/`/g, '').trim();
+    }
+  }
+  return null;
+}
+
+function numericScoresInSection(markdown, heading) {
+  const table = parseFirstTable(sectionBetween(markdown, heading));
+  return table.rows
+    .map((row) => Number.parseFloat(row.Score))
+    .filter((score) => Number.isFinite(score));
+}
+
+function hasNonEmptyListItem(section) {
+  return section
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .some((line) => /^-\s+/.test(line) && !/\b(none|n\/a)\b/i.test(line));
+}
+
+function validateBelowTargetImprovementGate(paperDir) {
+  const review = readIfExists(metaPath(paperDir, 'REVIEW.md'));
+  if (!review) return [];
+
+  const gate = sectionBetween(review, '## Below-Target Improvement Gate');
+  if (!gate.trim()) return [];
+
+  const scores = [
+    ...numericScoresInSection(review, '## Scores'),
+    ...numericScoresInSection(review, '## Audience Review Scorecard'),
+  ];
+  const hasBelowTargetScore = scores.some((score) => score < 5);
+  const requiredFixes = sectionBetween(review, '## Required Fixes');
+  const hasRequiredFix = hasNonEmptyListItem(requiredFixes);
+  const needsGateDecision = hasBelowTargetScore || hasRequiredFix;
+  if (!needsGateDecision) return [];
+
+  const issues = [];
+  const immediate = parseMarkdownField(gate, 'Immediate improvement required before export');
+  const deferred = parseMarkdownField(gate, 'Deferred items and reason');
+  const requiredAction = parseMarkdownField(gate, 'If yes, required action');
+  const verdict = parseHeadingValue(review, 'Verdict');
+
+  if (!immediate || !/^(yes|no)\b/i.test(immediate)) {
+    issues.push(issue(
+      'semantic.review_below_target_gate_missing_decision',
+      'HIGH',
+      'REVIEW.md',
+      'Below-Target Improvement Gate must say whether immediate improvement is required before export',
+    ));
+  }
+
+  if (/^yes\b/i.test(immediate || '') && verdict === 'Ready') {
+    issues.push(issue(
+      'semantic.review_ready_with_required_improvement',
+      'HIGH',
+      'REVIEW.md',
+      'Verdict is Ready but Below-Target Improvement Gate requires immediate improvement before export',
+    ));
+  }
+
+  if (/^yes\b/i.test(immediate || '') && (!requiredAction || /^(n\/a|none|-)\.?$/i.test(requiredAction.trim()))) {
+    issues.push(issue(
+      'semantic.review_below_target_action_missing',
+      'HIGH',
+      'REVIEW.md',
+      'Below-Target Improvement Gate requires immediate improvement but does not name a required action',
+    ));
+  }
+
+  if (/^no\b/i.test(immediate || '') && (!deferred || /^(n\/a|none|-)\.?$/i.test(deferred.trim()))) {
+    issues.push(issue(
+      'semantic.review_below_target_deferral_missing',
+      'MEDIUM',
+      'REVIEW.md',
+      'Below-target scores or required fixes are present, but deferred items and reason are empty',
+    ));
+  }
+
+  return issues;
+}
+
 function recommendationSection(markdown) {
   const lines = String(markdown || '').split(/\r?\n/);
   for (let i = 0; i < lines.length; i += 1) {
@@ -971,6 +1062,7 @@ function validateSemanticPaper(paperDir) {
     ...validateExportMetadataLeak(paperDir),
     ...validateStateDrift(paperDir),
     ...validateReviewRewriteInstructions(paperDir),
+    ...validateBelowTargetImprovementGate(paperDir),
     ...validateRecommendationSpecificityInArtifact(paperDir, 'DRAFT.md'),
     ...validateRecommendationSpecificityInArtifact(paperDir, 'exports/FINAL.md'),
     ...validateProseSaturationInArtifact(paperDir, 'DRAFT.md'),
