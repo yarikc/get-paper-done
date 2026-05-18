@@ -188,7 +188,7 @@ function printDoctor(result) {
   console.log(`status: ${result.ok ? 'ok' : 'needs install/update'}`);
 }
 
-function main(argv) {
+async function main(argv) {
   const command = argv[0] || 'help';
   const rest = argv.slice(1);
 
@@ -250,7 +250,7 @@ function main(argv) {
 
   if (command === 'review-external') {
     const args = parseWorkspaceOptions(rest);
-    const result = reviewExternal({
+    const result = await reviewExternal({
       ...args,
       onProgress: args.json
         ? undefined
@@ -311,7 +311,10 @@ function main(argv) {
 }
 
 try {
-  main(process.argv.slice(2));
+  main(process.argv.slice(2)).catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
 } catch (err) {
   console.error(err.message);
   process.exit(1);

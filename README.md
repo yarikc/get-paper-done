@@ -234,6 +234,12 @@ HIGH/MEDIUM/LOW concerns into recommended `FEEDBACK-PLAN.md` rows for approval
 or override. When you ask for multiple reviewers in one command, GPD prints the
 combined recommendation list when the command finishes.
 
+Provider CLIs run with a timeout. If a reviewer hangs, GPD records the timeout
+as a review issue, requests cleanup for the provider process tree, and still
+writes the feedback artifacts for the providers that completed. If the command
+is interrupted, GPD also attempts to clean up active provider processes before
+exiting.
+
 ## Moving Backward Is Normal
 
 If review finds that the ask is weak, the answer may not be another draft pass.

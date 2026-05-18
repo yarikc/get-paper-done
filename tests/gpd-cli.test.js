@@ -1179,6 +1179,52 @@ function testReviewExternalUsesGeminiProviderArgs() {
   assert(externalReviews.includes('HIGH: Gemini provider saw draft context.'));
 }
 
+function testReviewExternalProviderTimeoutCleansUpProcessTree() {
+  const dir = tempDir('gpd-review-external-timeout-provider-test');
+  run(['init', '--location', dir, '--slug', 'timeout-provider-review', '--title', 'Timeout Provider Review']);
+  const paperDir = path.join(dir, 'timeout-provider-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const providerDir = tempDir('gpd-timeout-provider-bin');
+  const providerPath = path.join(providerDir, 'gemini');
+  const childPidPath = path.join(providerDir, 'child-pid.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `( sleep 30 ) &`,
+    `echo "$!" > "${childPidPath}"`,
+    'cat >/dev/null',
+    'wait',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'gemini', '--current-runtime', 'none', '--timeout-ms', '1500'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('external review: gemini: timed_out'));
+  assert(output.includes('- gemini: timed_out (provider:gemini)'));
+  assert(output.includes('review issues: 1'));
+
+  const childPid = Number(fs.readFileSync(childPidPath, 'utf8').trim());
+  assert(Number.isFinite(childPid));
+  let childStillRunning = true;
+  try {
+    process.kill(childPid, 0);
+  } catch (err) {
+    childStillRunning = false;
+  }
+  assert.strictEqual(childStillRunning, false);
+
+  const timeoutReviewPath = fs.existsSync(path.join(meta, 'FEEDBACK-EXTERNAL.md'))
+    ? path.join(meta, 'FEEDBACK-EXTERNAL.md')
+    : path.join(meta, 'EXTERNAL-REVIEWS.md');
+  const externalReviews = fs.readFileSync(timeoutReviewPath, 'utf8');
+  assert(externalReviews.includes('Provider CLI "gemini" timed out after 1500ms.'));
+  assert(externalReviews.includes('GPD requested cleanup for the provider process tree.'));
+}
+
 function testReviewExternalSkipsCurrentRuntimeProvider() {
   const dir = tempDir('gpd-review-external-self-skip-test');
   run(['init', '--location', dir, '--slug', 'self-skip-review', '--title', 'Self Skip Review']);
@@ -1369,6 +1415,7 @@ testReviewExternalCombinesAndStoresMultipleReviewers();
 testReviewExternalInvokesProviderModel();
 testReviewExternalUsesCodexProviderArgs();
 testReviewExternalUsesGeminiProviderArgs();
+testReviewExternalProviderTimeoutCleansUpProcessTree();
 testReviewExternalSkipsCurrentRuntimeProvider();
 testReviewExternalDoesNotUseOpencodeForPapers();
 testReviewExternalRecordsMissingProvider();

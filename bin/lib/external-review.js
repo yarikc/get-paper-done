@@ -3,7 +3,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { spawnSync } = require('child_process');
+const { spawn, spawnSync } = require('child_process');
 
 const {
   expandHome,
@@ -23,6 +23,9 @@ const providerCommands = {
   qwen: { command: 'qwen', args: ['-'] },
   cursor: { command: 'cursor', args: ['agent', '-p', '--mode', 'ask', '--trust'] },
 };
+
+const activeProviderChildren = new Set();
+let providerSignalHandlersInstalled = false;
 
 function supportedProviders() {
   return Object.keys(providerCommands);
@@ -243,7 +246,122 @@ function providerSelfReviewSkip(model, currentRuntime, input = {}) {
   );
 }
 
-function invokeProvider(model, prompt, input = {}) {
+function killProviderProcess(child, signal = 'SIGTERM') {
+  if (!child || !child.pid) return false;
+  try {
+    if (process.platform === 'win32') {
+      const result = spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f'], {
+        stdio: 'ignore',
+      });
+      if (result.status === 0) return true;
+      return child.kill(signal);
+    }
+    process.kill(-child.pid, signal);
+    return true;
+  } catch (err) {
+    try {
+      child.kill(signal);
+      return true;
+    } catch (fallbackErr) {
+      return false;
+    }
+  }
+}
+
+function cleanupActiveProviderProcesses() {
+  let cleaned = false;
+  for (const child of activeProviderChildren) {
+    cleaned = killProviderProcess(child, 'SIGTERM') || cleaned;
+  }
+  return cleaned;
+}
+
+function installProviderSignalHandlers() {
+  if (providerSignalHandlersInstalled) return;
+  providerSignalHandlersInstalled = true;
+  for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
+    process.once(signal, () => {
+      cleanupActiveProviderProcesses();
+      process.exit(signal === 'SIGINT' ? 130 : 143);
+    });
+  }
+}
+
+function runProviderCommand(commandPath, args, prompt, timeoutMs) {
+  return new Promise((resolve) => {
+    let settled = false;
+    let timedOut = false;
+    let killed = false;
+    let stdout = '';
+    let stderr = '';
+    let timeoutTimer = null;
+    let killTimer = null;
+    const maxBuffer = 10 * 1024 * 1024;
+    const child = spawn(commandPath, args, {
+      detached: process.platform !== 'win32',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    activeProviderChildren.add(child);
+    installProviderSignalHandlers();
+
+    function finish(result) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutTimer);
+      clearTimeout(killTimer);
+      activeProviderChildren.delete(child);
+      resolve({
+        ...result,
+        stdout,
+        stderr,
+        timedOut,
+        killed,
+        pid: child.pid,
+      });
+    }
+
+    function stopForTimeout() {
+      timedOut = true;
+      killed = killProviderProcess(child, 'SIGTERM');
+      killTimer = setTimeout(() => {
+        killed = killProviderProcess(child, 'SIGKILL') || killed;
+      }, 1000);
+    }
+
+    timeoutTimer = setTimeout(stopForTimeout, timeoutMs);
+
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+      if (stdout.length > maxBuffer) {
+        stderr += '\nProvider stdout exceeded 10MB capture limit.';
+        killed = killProviderProcess(child, 'SIGTERM') || killed;
+      }
+    });
+
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+      if (stderr.length > maxBuffer) {
+        stderr += '\nProvider stderr exceeded 10MB capture limit.';
+        killed = killProviderProcess(child, 'SIGTERM') || killed;
+      }
+    });
+
+    child.on('error', (error) => {
+      finish({ error });
+    });
+
+    child.on('close', (status, signal) => {
+      finish({ status, signal });
+    });
+
+    child.stdin.on('error', () => {
+      // The provider may close stdin early. The exit status will carry the outcome.
+    });
+    child.stdin.end(prompt);
+  });
+}
+
+async function invokeProvider(model, prompt, input = {}) {
   const config = providerCommands[model];
   if (!config) {
     emitProgress(input, {
@@ -298,27 +416,34 @@ function invokeProvider(model, prompt, input = {}) {
     status: 'running',
     detail: `invoking "${config.command} ${config.args.join(' ')}" with ${timeoutMs}ms timeout`,
   });
-  const result = spawnSync(found, config.args, {
-    input: prompt,
-    encoding: 'utf8',
-    maxBuffer: 10 * 1024 * 1024,
-    timeout: timeoutMs,
-  });
+  const result = await runProviderCommand(found, config.args, prompt, timeoutMs);
 
-  if (result.error) {
-    const timedOut = result.error.code === 'ETIMEDOUT';
+  if (result.timedOut) {
     emitProgress(input, {
       reviewer: model,
       source: `provider:${model}`,
-      status: timedOut ? 'timed_out' : 'failed',
-      detail: timedOut ? `timed out after ${timeoutMs}ms` : result.error.message,
+      status: 'timed_out',
+      detail: `timed out after ${timeoutMs}ms; provider process tree cleanup ${result.killed ? 'requested' : 'failed'}`,
     });
     return providerFailureReview(
       model,
       `provider:${model}`,
-      timedOut
-        ? `Provider CLI "${config.command}" timed out after ${timeoutMs}ms.`
-        : `Provider CLI "${config.command}" failed: ${result.error.message}`,
+      `Provider CLI "${config.command}" timed out after ${timeoutMs}ms. GPD requested cleanup for the provider process tree.`,
+      'timed_out',
+    );
+  }
+
+  if (result.error) {
+    emitProgress(input, {
+      reviewer: model,
+      source: `provider:${model}`,
+      status: 'failed',
+      detail: result.error.message,
+    });
+    return providerFailureReview(
+      model,
+      `provider:${model}`,
+      `Provider CLI "${config.command}" failed: ${result.error.message}`,
       'failed',
     );
   }
@@ -358,7 +483,7 @@ function invokeProvider(model, prompt, input = {}) {
   };
 }
 
-function invokeProviderReviews(input = {}, paperDir) {
+async function invokeProviderReviews(input = {}, paperDir) {
   const models = parseModels(input.models);
   if (models.length === 0) return [];
   const currentRuntime = detectCurrentRuntime(input);
@@ -367,12 +492,15 @@ function invokeProviderReviews(input = {}, paperDir) {
   const prompt = needsPrompt ? buildExternalReviewPrompt(paperDir) : '';
   const tempPrompt = needsPrompt ? writeTempPrompt(prompt, Boolean(input.dryRun)) : null;
   try {
-    return models.map((model) => {
+    const reviews = [];
+    for (const model of models) {
       if (currentRuntime && model === currentRuntime) {
-        return providerSelfReviewSkip(model, currentRuntime, input);
+        reviews.push(providerSelfReviewSkip(model, currentRuntime, input));
+      } else {
+        reviews.push(await invokeProvider(model, prompt, input));
       }
-      return invokeProvider(model, prompt, input);
-    });
+    }
+    return reviews;
   } finally {
     if (tempPrompt) fs.rmSync(tempPrompt.tempDir, { recursive: true, force: true });
   }
@@ -908,7 +1036,7 @@ function updateFeedbackState(paperDir, dryRun) {
   return nextState;
 }
 
-function reviewExternal(input = {}) {
+async function reviewExternal(input = {}) {
   const paperState = status(input);
   const paperDir = paperState.paperDir;
   if (!paperState.artifacts['DRAFT.md']) {
@@ -926,7 +1054,7 @@ function reviewExternal(input = {}) {
   };
   const reviews = [
     ...readReviewInputs(reviewInput),
-    ...invokeProviderReviews(reviewInput, paperDir),
+    ...await invokeProviderReviews(reviewInput, paperDir),
   ];
   const rawFeedbackItems = feedbackItemsForReviews(reviews);
   const feedbackItems = dedupeFeedbackItems(rawFeedbackItems);
@@ -954,7 +1082,7 @@ function reviewExternal(input = {}) {
     paperDir,
     reviewsCaptured: reviews.filter((review) => review.status === 'captured').length,
     reviewsEmpty: reviews.filter((review) => review.status !== 'captured').length,
-    reviewsFailed: reviews.filter((review) => ['failed', 'missing', 'unsupported', 'skipped_self_review'].includes(review.status)).length,
+    reviewsFailed: reviews.filter((review) => ['failed', 'missing', 'unsupported', 'skipped_self_review', 'timed_out'].includes(review.status)).length,
     feedbackItems: feedbackItems.length,
     rawFeedbackItems: rawFeedbackItems.length,
     providerProgress,
