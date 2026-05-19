@@ -369,6 +369,7 @@ function artifactState(paperDir) {
     'REVIEW.md',
     'FEEDBACK-READER.md',
     'FEEDBACK-EXTERNAL.md',
+    'EXTERNAL-REVIEW-RUN.json',
     'FEEDBACK-PLAN.md',
     'REVISION-CHECK.md',
     'REVISION-LOG.md',

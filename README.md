@@ -248,6 +248,21 @@ HIGH/MEDIUM/LOW concerns into recommended `FEEDBACK-PLAN.md` items for approval
 or override. When you ask for multiple reviewers in one command, GPD prints the
 combined recommendation list when the command finishes.
 
+Each run also writes `.paper/EXTERNAL-REVIEW-RUN.json`. That file records the
+review target, context artifacts sent, requested providers, current-runtime
+skip setting, timeout, isolated working-directory policy, safe provider
+command/argument shape, reviewer status, and raw feedback paths. GPD does not
+yet force an exact provider model, temperature, or reasoning budget; those are
+recorded as provider CLI defaults or unknown unless a provider-specific path
+sets them. Exceptions: Claude paper review defaults to `claude -p --model opus
+--effort high`, because final paper review is a low-frequency,
+high-consequence reasoning task; Gemini paper review defaults to `gemini -p ""
+-m gemini-2.5-pro --output-format text --approval-mode plan --skip-trust`,
+using the stable Pro model for reasoning-heavy review. Provider CLIs run from
+an isolated temporary directory and are explicitly instructed to return the full
+review on stdout, so accidental reviewer-created files do not land in the paper
+or repo.
+
 Provider CLIs run with a timeout. If a reviewer hangs, GPD records the timeout
 as a review issue, requests cleanup for the provider process tree, and still
 writes the feedback artifacts for the providers that completed. If the command

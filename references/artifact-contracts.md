@@ -216,6 +216,19 @@ Required headings:
 
 No table contract is required. External review content can come from different reviewers and provider formats, so validation only checks that raw feedback and summary sections have a durable place to land.
 
+### `EXTERNAL-REVIEW-RUN.json`
+
+Created by `gpd review-external` alongside `FEEDBACK-EXTERNAL.md`.
+
+Required intent:
+
+- record review run ID and timestamp
+- record review target and editable source
+- record context artifacts included in the review prompt
+- record requested provider names, current-runtime skip setting, timeout, isolated working-directory policy, safe provider command/argument shape, provider status, and raw feedback paths
+- explicitly state when exact model, temperature, output tokens, or reasoning budget are provider CLI defaults or unknown rather than controlled by GPD
+- avoid local temp prompt paths or absolute provider binary paths
+
 ### `FEEDBACK-READER.md`
 
 Required headings:

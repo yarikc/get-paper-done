@@ -17,12 +17,44 @@ const {
 } = require('./state');
 
 const providerCommands = {
-  gemini: { command: 'gemini', args: ['-p', ''] },
-  claude: { command: 'claude', args: ['-p'] },
+  gemini: {
+    command: 'gemini',
+    args: ['-p', '', '-m', 'gemini-2.5-pro', '--output-format', 'text', '--approval-mode', 'plan', '--skip-trust'],
+    exactModel: 'gemini-2.5-pro',
+    effort: 'default-thinking',
+  },
+  claude: {
+    command: 'claude',
+    args: ['-p', '--model', 'opus', '--effort', 'high'],
+    exactModel: 'opus',
+    effort: 'high',
+  },
   codex: { command: 'codex', args: ['exec', '--skip-git-repo-check', '-'] },
   qwen: { command: 'qwen', args: ['-'] },
   cursor: { command: 'cursor', args: ['agent', '-p', '--mode', 'ask', '--trust'] },
 };
+
+const externalReviewContextArtifacts = [
+  ['STATE.md', 'State Summary'],
+  ['STATE.json', 'Machine State'],
+  ['config.json', 'Paper Config And Classification'],
+  ['PROJECT.md', 'Project'],
+  ['PAPER-CONTEXT.md', 'Grill Context'],
+  ['DECISIONS.md', 'Paper Decision Records'],
+  ['PERSONA.md', 'Persona'],
+  ['AUDIENCE.md', 'Audience'],
+  ['BRIEF.md', 'Brief'],
+  ['STRATEGY.md', 'Strategy Gate'],
+  ['RESEARCH.md', 'Research Summary'],
+  ['RESEARCH.json', 'Research Plan And Evidence Results'],
+  ['OUTLINE.md', 'Outline'],
+  ['DRAFT.md', 'Draft'],
+  ['exports/FINAL.md', 'Exported Reading Copy'],
+  ['FACT-CHECK.md', 'Fact Check'],
+  ['REVIEW.md', 'Local Review'],
+  ['FEEDBACK-READER.md', 'Reader Feedback'],
+  ['FEEDBACK-PLAN.md', 'Prior Feedback Plan'],
+];
 
 const activeProviderChildren = new Set();
 let providerSignalHandlersInstalled = false;
@@ -168,26 +200,12 @@ function buildExternalReviewPrompt(paperDir) {
     '',
     'You are reviewing a serious paper draft. Provide direct, skeptical, useful feedback.',
     'Use the full paper workspace context below. Treat `.paper/DRAFT.md` as the editable source of truth and `.paper/exports/FINAL.md` as the user-facing reading copy when present.',
+    'Print the full review in your stdout response. Do not create, modify, save, or reference any local files. Do not answer with a pointer to a file.',
     '',
-    artifactSection(paperDir, 'STATE.md', 'State Summary'),
-    artifactSection(paperDir, 'STATE.json', 'Machine State'),
-    artifactSection(paperDir, 'config.json', 'Paper Config And Classification'),
-    artifactSection(paperDir, 'PROJECT.md', 'Project'),
-    artifactSection(paperDir, 'PAPER-CONTEXT.md', 'Grill Context'),
-    artifactSection(paperDir, 'DECISIONS.md', 'Paper Decision Records'),
-    artifactSection(paperDir, 'PERSONA.md', 'Persona'),
-    artifactSection(paperDir, 'AUDIENCE.md', 'Audience'),
-    artifactSection(paperDir, 'BRIEF.md', 'Brief'),
-    artifactSection(paperDir, 'STRATEGY.md', 'Strategy Gate'),
-    artifactSection(paperDir, 'RESEARCH.md', 'Research Summary'),
-    artifactSection(paperDir, 'RESEARCH.json', 'Research Plan And Evidence Results'),
-    artifactSection(paperDir, 'OUTLINE.md', 'Outline'),
-    artifactSection(paperDir, 'DRAFT.md', 'Draft'),
+    ...externalReviewContextArtifacts
+      .filter(([artifactName]) => artifactName !== 'exports/FINAL.md')
+      .map(([artifactName, title]) => artifactSection(paperDir, artifactName, title)),
     promptSection(paperDir, 'Exported Reading Copy', ['exports/FINAL.md']),
-    artifactSection(paperDir, 'FACT-CHECK.md', 'Fact Check'),
-    artifactSection(paperDir, 'REVIEW.md', 'Local Review'),
-    artifactSection(paperDir, 'FEEDBACK-READER.md', 'Reader Feedback'),
-    artifactSection(paperDir, 'FEEDBACK-PLAN.md', 'Prior Feedback Plan'),
     '## Review Instructions',
     '',
     'Review the draft for:',
@@ -228,6 +246,97 @@ function providerFailureReview(reviewer, source, content, status = 'failed') {
     source,
     content,
     status,
+  };
+}
+
+function reviewRunId(createdAt) {
+  return `EXT-${String(createdAt).replace(/[-:.]/g, '').replace(/\D/g, '').slice(0, 17)}`;
+}
+
+function reviewTargetForPaper(paperDir) {
+  const finalPath = path.join(paperDir, '.paper', 'exports', 'FINAL.md');
+  if (fs.existsSync(finalPath)) return '.paper/exports/FINAL.md';
+  return '.paper/DRAFT.md';
+}
+
+function contextArtifactProvenance(paperDir) {
+  return externalReviewContextArtifacts.map(([artifactName, title]) => {
+    const relativePath = `.paper/${artifactName}`;
+    return {
+      artifact: relativePath,
+      title,
+      included: fs.existsSync(path.join(paperDir, '.paper', artifactName)),
+    };
+  });
+}
+
+function reviewSourceType(review) {
+  if (review.source === 'stdin') return 'stdin';
+  if (review.source.startsWith('provider:')) return 'provider';
+  return 'file';
+}
+
+function providerReviewConfig(model, input = {}) {
+  const config = providerCommands[model];
+  return {
+    provider: model,
+    source: `provider:${model}`,
+    supported: Boolean(config),
+    command: config ? config.command : null,
+    args: config ? [...config.args] : [],
+    timeout_ms: input.timeoutMs || 120000,
+    exact_model: config?.exactModel || 'provider_cli_default_or_unknown',
+    temperature: null,
+    max_output_tokens: null,
+    reasoning_budget: config?.effort || null,
+    working_directory_policy: config ? 'isolated_temp_directory' : null,
+    configuration_control: config
+      ? (config.exactModel
+        ? 'GPD controls provider CLI command, argument shape, prompt, timeout, and configured model/effort for this provider. Temperature and max output tokens remain provider CLI defaults unless later configured.'
+        : 'GPD controls provider CLI command, argument shape, prompt, and timeout; exact model/settings are inherited from the local provider CLI unless configured outside GPD.')
+      : 'Unsupported provider; no model or CLI configuration was invoked.',
+  };
+}
+
+function reviewRunProvenance({
+  paperDir,
+  input,
+  createdAt,
+  reviews,
+  storedReviews,
+}) {
+  const requestedProviders = parseModels(input.models);
+  const currentRuntime = detectCurrentRuntime(input);
+  const providerConfigs = requestedProviders.map((model) => {
+    const review = reviews.find((item) => item.source === `provider:${model}`) || null;
+    return {
+      ...providerReviewConfig(model, input),
+      current_runtime_match: Boolean(currentRuntime && model === currentRuntime),
+      status: review ? review.status : 'not_run',
+      raw_feedback_path: storedReviews.find((item) => item.reviewer === model)?.relativePath || null,
+    };
+  });
+  const reviewerInputs = reviews.map((review) => ({
+    reviewer: review.reviewer,
+    source_type: reviewSourceType(review),
+    source: review.source,
+    status: review.status,
+    raw_feedback_path: storedReviews.find((item) => item.reviewer === review.reviewer)?.relativePath || null,
+  }));
+
+  return {
+    review_run_id: reviewRunId(createdAt),
+    created_at: createdAt,
+    gpd_command: 'gpd review-external',
+    review_target: reviewTargetForPaper(paperDir),
+    editable_source: '.paper/DRAFT.md',
+    requested_providers: requestedProviders,
+    current_runtime: requestedProviders.length > 0 ? (currentRuntime || null) : null,
+    timeout_ms: input.timeoutMs || 120000,
+    exact_model_policy: 'GPD records provider CLI command/args and timeout. Exact model, temperature, output tokens, and reasoning budget are provider CLI defaults unless later configured with provider-specific flags.',
+    provider_configs: providerConfigs,
+    reviewer_inputs: reviewerInputs,
+    context_artifacts: contextArtifactProvenance(paperDir),
   };
 }
 
@@ -287,7 +396,7 @@ function installProviderSignalHandlers() {
   }
 }
 
-function runProviderCommand(commandPath, args, prompt, timeoutMs) {
+function runProviderCommand(commandPath, args, prompt, timeoutMs, options = {}) {
   return new Promise((resolve) => {
     let settled = false;
     let timedOut = false;
@@ -298,6 +407,7 @@ function runProviderCommand(commandPath, args, prompt, timeoutMs) {
     let killTimer = null;
     const maxBuffer = 10 * 1024 * 1024;
     const child = spawn(commandPath, args, {
+      cwd: options.cwd || undefined,
       detached: process.platform !== 'win32',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -416,7 +526,9 @@ async function invokeProvider(model, prompt, input = {}) {
     status: 'running',
     detail: `invoking "${config.command} ${config.args.join(' ')}" with ${timeoutMs}ms timeout`,
   });
-  const result = await runProviderCommand(found, config.args, prompt, timeoutMs);
+  const result = await runProviderCommand(found, config.args, prompt, timeoutMs, {
+    cwd: input.providerCwd,
+  });
 
   if (result.timedOut) {
     emitProgress(input, {
@@ -491,18 +603,25 @@ async function invokeProviderReviews(input = {}, paperDir) {
 
   const prompt = needsPrompt ? buildExternalReviewPrompt(paperDir) : '';
   const tempPrompt = needsPrompt ? writeTempPrompt(prompt, Boolean(input.dryRun)) : null;
+  const providerTempDir = needsPrompt && !input.dryRun
+    ? fs.mkdtempSync(path.join(os.tmpdir(), 'gpd-provider-review-'))
+    : null;
   try {
     const reviews = [];
     for (const model of models) {
       if (currentRuntime && model === currentRuntime) {
         reviews.push(providerSelfReviewSkip(model, currentRuntime, input));
       } else {
-        reviews.push(await invokeProvider(model, prompt, input));
+        reviews.push(await invokeProvider(model, prompt, {
+          ...input,
+          providerCwd: providerTempDir,
+        }));
       }
     }
     return reviews;
   } finally {
     if (tempPrompt) fs.rmSync(tempPrompt.tempDir, { recursive: true, force: true });
+    if (providerTempDir) fs.rmSync(providerTempDir, { recursive: true, force: true });
   }
 }
 
@@ -1182,7 +1301,7 @@ function storeIndividualReviews(paperDir, reviews, createdAt, dryRun) {
 }
 
 function externalReviewsMarkdown({
-  reviews, paperDir, createdAt, storedReviews = [], combinedItems = [],
+  reviews, paperDir, createdAt, storedReviews = [], combinedItems = [], reviewRunPath = null,
 }) {
   const draftReviewed = fs.existsSync(path.join(paperDir, '.paper', 'DRAFT.md'))
     ? '.paper/DRAFT.md'
@@ -1219,10 +1338,11 @@ function externalReviewsMarkdown({
 **Reviewed at:** ${createdAt}
 **Reviewers:** ${reviewerList}
 **Draft reviewed:** ${draftReviewed}
+**Review run provenance:** ${reviewRunPath ? `\`${reviewRunPath}\`` : 'Not recorded'}
 
 ## Review Prompt Summary
 
-External review text was collected by \`gpd review-external\` from ${modeText}. Provider invocation, when used, sends the generated review prompt to selected installed CLIs and captures their stdout/stderr. This command records captured feedback and creates a pending feedback plan; it does not revise the draft.
+External review text was collected by \`gpd review-external\` from ${modeText}. Provider invocation, when used, sends the generated review prompt to selected installed CLIs and captures their stdout/stderr. The review-run provenance file records the requested providers, current-runtime skip setting, timeout, safe provider command/argument shape, context artifacts, raw feedback paths, and whether exact model/settings were controlled by GPD or inherited from provider CLI defaults. This command records captured feedback and creates a pending feedback plan; it does not revise the draft.
 
 ## Stored Reviewer Files
 
@@ -1395,7 +1515,21 @@ async function reviewExternal(input = {}) {
   const rawFeedbackItems = feedbackItemsForReviews(reviews);
   const feedbackItems = dedupeFeedbackItems(rawFeedbackItems);
   const storedReviews = storeIndividualReviews(paperDir, reviews, createdAt, dryRun);
+  const reviewRun = reviewRunProvenance({
+    paperDir,
+    input: reviewInput,
+    createdAt,
+    reviews,
+    storedReviews,
+  });
+  const reviewRunPath = path.join(paperDir, '.paper', 'EXTERNAL-REVIEW-RUN.json');
+  const relativeReviewRunPath = '.paper/EXTERNAL-REVIEW-RUN.json';
 
+  writeFile(
+    reviewRunPath,
+    `${JSON.stringify(reviewRun, null, 2)}\n`,
+    dryRun,
+  );
   writeFile(
     path.join(paperDir, '.paper', 'FEEDBACK-EXTERNAL.md'),
     externalReviewsMarkdown({
@@ -1404,6 +1538,7 @@ async function reviewExternal(input = {}) {
       createdAt,
       storedReviews,
       combinedItems: feedbackItems,
+      reviewRunPath: relativeReviewRunPath,
     }),
     dryRun,
   );
@@ -1434,6 +1569,7 @@ async function reviewExternal(input = {}) {
       source: review.source,
       status: review.status,
     })),
+    reviewRunPath,
     externalReviewsPath: path.join(paperDir, '.paper', 'FEEDBACK-EXTERNAL.md'),
     feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
     next: '/gpd-status',
@@ -1470,6 +1606,7 @@ function printExternalReviewResult(result) {
       console.log(`- ${item.index}. ${item.recommendation} [${item.reviewers}]: ${item.feedback}`);
     }
   }
+  console.log(`review run: ${result.reviewRunPath}`);
   console.log(`external feedback: ${result.externalReviewsPath}`);
   console.log(`feedback plan: ${result.feedbackPlanPath}`);
   console.log(`next: ${result.next}`);

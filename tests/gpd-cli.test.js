@@ -1312,14 +1312,31 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   assert(output.includes('reviews captured: 1'));
   assert(output.includes('empty reviews: 0'));
   assert(output.includes('feedback items: 3'));
+  assert(output.includes('review run:'));
   assert(output.includes('next: /gpd-status'));
 
   const externalReviews = fs.readFileSync(path.join(meta, 'FEEDBACK-EXTERNAL.md'), 'utf8');
   assert(externalReviews.includes('## claude Review'));
   assert(externalReviews.includes('**Source:** claude-review.md'));
+  assert(externalReviews.includes('**Review run provenance:** `.paper/EXTERNAL-REVIEW-RUN.json`'));
   assert(externalReviews.includes('### HIGH — Ask is unclear'));
   assert(!externalReviews.includes(reviewDir));
   assert(externalReviews.includes('does not revise the draft'));
+  assert(externalReviews.includes('whether exact model/settings were controlled by GPD or inherited from provider CLI defaults'));
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.gpd_command, 'gpd review-external');
+  assert.strictEqual(reviewRun.review_target, '.paper/DRAFT.md');
+  assert.strictEqual(reviewRun.editable_source, '.paper/DRAFT.md');
+  assert.deepStrictEqual(reviewRun.requested_providers, []);
+  assert.strictEqual(reviewRun.current_runtime, null);
+  assert(reviewRun.context_artifacts.some((item) => item.artifact === '.paper/STATE.json' && item.included));
+  assert(reviewRun.context_artifacts.some((item) => item.artifact === '.paper/exports/FINAL.md' && !item.included));
+  assert.strictEqual(reviewRun.reviewer_inputs[0].reviewer, 'claude');
+  assert.strictEqual(reviewRun.reviewer_inputs[0].source_type, 'file');
+  assert.strictEqual(reviewRun.reviewer_inputs[0].source, 'claude-review.md');
+  assert(reviewRun.reviewer_inputs[0].raw_feedback_path.includes('.paper/feedback-external/'));
+  assert(!JSON.stringify(reviewRun).includes(reviewDir));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('**Status:** Pending user approval'));
@@ -1595,11 +1612,14 @@ function testReviewExternalInvokesProviderModel() {
   const providerDir = tempDir('gpd-provider-bin');
   const providerPath = path.join(providerDir, 'claude');
   const argsPath = path.join(providerDir, 'claude-args.txt');
+  const cwdPath = path.join(providerDir, 'claude-cwd.txt');
   fs.writeFileSync(providerPath, [
     '#!/bin/sh',
     `printf '%s\\n' "$@" > "${argsPath}"`,
+    `pwd > "${cwdPath}"`,
+    'printf "provider side effect\\n" > REVIEW.md',
     'prompt=$(cat)',
-    'if printf "%s" "$prompt" | grep -q "The ask is unclear" && printf "%s" "$prompt" | grep -q "Research Plan And Evidence Results" && printf "%s" "$prompt" | grep -q "Paper Decision Records" && printf "%s" "$prompt" | grep -q "Machine State" && printf "%s" "$prompt" | grep -q "Exported Reading Copy"; then',
+    'if printf "%s" "$prompt" | grep -q "The ask is unclear" && printf "%s" "$prompt" | grep -q "Research Plan And Evidence Results" && printf "%s" "$prompt" | grep -q "Paper Decision Records" && printf "%s" "$prompt" | grep -q "Machine State" && printf "%s" "$prompt" | grep -q "Exported Reading Copy" && printf "%s" "$prompt" | grep -q "Print the full review in your stdout response" && printf "%s" "$prompt" | grep -q "Do not create, modify, save, or reference any local files"; then',
     '  echo "HIGH: Provider saw full paper context."',
     'else',
     '  echo "LOW: Missing full paper context."',
@@ -1624,9 +1644,36 @@ function testReviewExternalInvokesProviderModel() {
   assert(externalReviews.includes('**Source:** provider:claude'));
   assert(externalReviews.includes('HIGH: Provider saw full paper context.'));
   assert(externalReviews.includes('installed provider CLIs'));
+  assert(externalReviews.includes('**Review run provenance:** `.paper/EXTERNAL-REVIEW-RUN.json`'));
   assert(!externalReviews.includes(providerDir));
   assert(!externalReviews.includes('gpd-review-'));
-  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), '-p\n');
+  assert.strictEqual(
+    fs.readFileSync(argsPath, 'utf8'),
+    '-p\n--model\nopus\n--effort\nhigh\n',
+  );
+  const providerCwd = fs.readFileSync(cwdPath, 'utf8').trim();
+  assert(providerCwd.includes('gpd-provider-review-'));
+  assert(!fs.existsSync(path.join(process.cwd(), 'REVIEW.md')));
+  assert(!fs.existsSync(path.join(paperDir, 'REVIEW.md')));
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.review_target, '.paper/exports/FINAL.md');
+  assert.deepStrictEqual(reviewRun.requested_providers, ['claude']);
+  assert.strictEqual(reviewRun.current_runtime, null);
+  assert.strictEqual(reviewRun.timeout_ms, 5000);
+  assert.strictEqual(reviewRun.provider_configs[0].provider, 'claude');
+  assert.strictEqual(reviewRun.provider_configs[0].command, 'claude');
+  assert.deepStrictEqual(
+    reviewRun.provider_configs[0].args,
+    ['-p', '--model', 'opus', '--effort', 'high'],
+  );
+  assert.strictEqual(reviewRun.provider_configs[0].status, 'captured');
+  assert.strictEqual(reviewRun.provider_configs[0].exact_model, 'opus');
+  assert.strictEqual(reviewRun.provider_configs[0].reasoning_budget, 'high');
+  assert.strictEqual(reviewRun.provider_configs[0].working_directory_policy, 'isolated_temp_directory');
+  assert(reviewRun.provider_configs[0].configuration_control.includes('configured model/effort'));
+  assert(reviewRun.context_artifacts.some((item) => item.artifact === '.paper/exports/FINAL.md' && item.included));
+  assert(!JSON.stringify(reviewRun).includes(providerDir));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('**Feedback:** Provider saw full paper context.'));
@@ -1674,9 +1721,12 @@ function testReviewExternalUsesGeminiProviderArgs() {
   const providerDir = tempDir('gpd-gemini-provider-bin');
   const providerPath = path.join(providerDir, 'gemini');
   const argsPath = path.join(providerDir, 'gemini-args.txt');
+  const cwdPath = path.join(providerDir, 'gemini-cwd.txt');
   fs.writeFileSync(providerPath, [
     '#!/bin/sh',
     `printf '%s\\n' "$@" > "${argsPath}"`,
+    `pwd > "${cwdPath}"`,
+    'printf "provider side effect\\n" > REVIEW.md',
     'cat >/dev/null',
     'echo "HIGH: Gemini provider saw draft context."',
     '',
@@ -1689,10 +1739,26 @@ function testReviewExternalUsesGeminiProviderArgs() {
   );
   assert(output.includes('reviews captured: 1'));
   assert(output.includes('- gemini: captured (provider:gemini)'));
-  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), '-p\n\n');
+  assert.strictEqual(
+    fs.readFileSync(argsPath, 'utf8'),
+    '-p\n\n-m\ngemini-2.5-pro\n--output-format\ntext\n--approval-mode\nplan\n--skip-trust\n',
+  );
+  const providerCwd = fs.readFileSync(cwdPath, 'utf8').trim();
+  assert(providerCwd.includes('gpd-provider-review-'));
+  assert(!fs.existsSync(path.join(process.cwd(), 'REVIEW.md')));
+  assert(!fs.existsSync(path.join(paperDir, 'REVIEW.md')));
 
   const externalReviews = fs.readFileSync(path.join(meta, 'FEEDBACK-EXTERNAL.md'), 'utf8');
   assert(externalReviews.includes('HIGH: Gemini provider saw draft context.'));
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.provider_configs[0].exact_model, 'gemini-2.5-pro');
+  assert.strictEqual(reviewRun.provider_configs[0].reasoning_budget, 'default-thinking');
+  assert.strictEqual(reviewRun.provider_configs[0].working_directory_policy, 'isolated_temp_directory');
+  assert.deepStrictEqual(
+    reviewRun.provider_configs[0].args,
+    ['-p', '', '-m', 'gemini-2.5-pro', '--output-format', 'text', '--approval-mode', 'plan', '--skip-trust'],
+  );
 }
 
 function testReviewExternalProviderTimeoutCleansUpProcessTree() {
