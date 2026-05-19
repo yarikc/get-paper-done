@@ -218,19 +218,19 @@ Then continue in Claude/Codex:
 /gpd-review
 ```
 
-GPD captures comments into `READER-FEEDBACK.md`, creates a pending
+GPD captures comments into `FEEDBACK-READER.md`, creates a pending
 `FEEDBACK-PLAN.md` with default recommendations, and waits for approval before
-revision. You can approve the recommendations or override selected rows in the
-`User Override` column. Approved changes are applied to `.paper/DRAFT.md`;
+revision. You can approve the recommendations or override selected items in the
+`User Override` field. Approved changes are applied to `.paper/DRAFT.md`;
 export regenerates `FINAL.md`. You review the final paper; GPD keeps the draft
 as the editable source of truth.
 
 For external model review, `gpd review-external` sends the reviewer the paper
 state, classification, grill context, decisions, brief, research, outline,
 draft, fact-check, review, prior feedback, and export when present. It writes
-each raw reviewer capture to `.paper/external-reviews/`, writes the active
-combined review to `EXTERNAL-REVIEWS.md`, and breaks deduplicated
-HIGH/MEDIUM/LOW concerns into recommended `FEEDBACK-PLAN.md` rows for approval
+each raw reviewer capture to `.paper/feedback-external/`, writes the active
+combined review to `FEEDBACK-EXTERNAL.md`, and breaks deduplicated
+HIGH/MEDIUM/LOW concerns into recommended `FEEDBACK-PLAN.md` items for approval
 or override. When you ask for multiple reviewers in one command, GPD prints the
 combined recommendation list when the command finishes.
 

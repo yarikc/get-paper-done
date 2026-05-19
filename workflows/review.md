@@ -12,12 +12,12 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 - .paper/DRAFT.md
 - .paper/exports/FINAL.md if present, especially when the user reviewed the exported paper
 - .paper/FACT-CHECK.md if present
-- .paper/READER-FEEDBACK.md if present
+- .paper/FEEDBACK-READER.md if present
 - references/review-rubrics.md
 - references/audience-review-rubric.md
 - templates/review.md
-- templates/reader-feedback.md
-- templates/external-reviews.md
+- templates/feedback-reader.md
+- templates/feedback-external.md
 - templates/feedback-plan.md
 </required_reading>
 
@@ -27,7 +27,7 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 
 Read all context and the current draft.
 
-If `.paper/exports/FINAL.md` exists, treat it as the user's reading copy. Scan it for inline comments, `.feedback` companion files, or user-marked review notes. The export is not the editing source of truth; comments on `FINAL.md` must be captured into `.paper/READER-FEEDBACK.md` and `.paper/FEEDBACK-PLAN.md`, then applied later to `.paper/DRAFT.md` through `/gpd-revise`.
+If `.paper/exports/FINAL.md` exists, treat it as the user's reading copy. Scan it for inline comments, `.feedback` companion files, or user-marked review notes. The export is not the editing source of truth; comments on `FINAL.md` must be captured into `.paper/FEEDBACK-READER.md` and `.paper/FEEDBACK-PLAN.md`, then applied later to `.paper/DRAFT.md` through `/gpd-revise`.
 
 Use `.paper/config.json` classification as the review contract:
 
@@ -97,7 +97,7 @@ Use review stance first. Do not praise before identifying the highest-impact iss
 
 ## 1.5 Reader Feedback Capture
 
-If the user provides paper feedback inline, through a `.feedback` file, in `.paper/exports/FINAL.md`, or by pointing to notes that are not already captured in `.paper/READER-FEEDBACK.md`, create or update `.paper/READER-FEEDBACK.md` using `templates/reader-feedback.md`.
+If the user provides paper feedback inline, through a `.feedback` file, in `.paper/exports/FINAL.md`, or by pointing to notes that are not already captured in `.paper/FEEDBACK-READER.md`, create or update `.paper/FEEDBACK-READER.md` using `templates/feedback-reader.md`.
 
 Reader feedback must use the five-signal structure:
 
@@ -111,7 +111,7 @@ Capture the feedback as evidence for review planning, not as permission to rewri
 
 ```text
 user reviews .paper/exports/FINAL.md
-  -> gpd feedback captures comments into READER-FEEDBACK.md and FEEDBACK-PLAN.md
+  -> gpd feedback captures comments into FEEDBACK-READER.md and FEEDBACK-PLAN.md
   -> /gpd-review reviews the captured feedback and plan
   -> /gpd-revise edits .paper/DRAFT.md
   -> /gpd-export regenerates .paper/exports/FINAL.md
@@ -133,7 +133,7 @@ Backward-compatible aliases:
 
 If no external review flag is present, skip to Step 7.
 
-CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, stores each reviewer capture under `.paper/external-reviews/`, records the active combined review in `.paper/EXTERNAL-REVIEWS.md`, and writes a pending `.paper/FEEDBACK-PLAN.md`. The generated prompt includes state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. The feedback plan deduplicates overlapping reviewer concerns and decomposes captured HIGH/MEDIUM/LOW concerns into separate recommendation rows. Pass `--current-runtime claude`, `--current-runtime codex`, or the matching runtime name when known; the CLI skips that provider because self-review is not independent. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
+CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, stores each reviewer capture under `.paper/feedback-external/`, records the active combined review in `.paper/FEEDBACK-EXTERNAL.md`, and writes a pending `.paper/FEEDBACK-PLAN.md`. The generated prompt includes state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. The feedback plan deduplicates overlapping reviewer concerns and decomposes captured HIGH/MEDIUM/LOW concerns into a decision view plus numbered recommendation items with rationale. Pass `--current-runtime claude`, `--current-runtime codex`, or the matching runtime name when known; the CLI skips that provider because self-review is not independent. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
 
 ## 3. Detect Available Reviewers
 
@@ -157,7 +157,7 @@ Selection rules:
 - `--models <list>`: include only requested reviewers that are available, then skip the current runtime's own CLI when it can be identified.
 - Legacy `--all`: same as `--external`.
 - Legacy specific flags: same as `--models <requested reviewers>`.
-- If none are available, write that result into `.paper/EXTERNAL-REVIEWS.md`, update `.paper/STATE.md` and `.paper/STATE.json`, and stop after local review.
+- If none are available, write that result into `.paper/FEEDBACK-EXTERNAL.md`, update `.paper/STATE.md` and `.paper/STATE.json`, and stop after local review.
 
 Current runtime skip rule:
 
@@ -246,11 +246,11 @@ For local OpenAI-compatible servers, use their `/v1/chat/completions` endpoint a
 - LM Studio: `http://localhost:1234`
 - llama.cpp: `http://localhost:8080`
 
-If a reviewer fails or returns empty output, record the failure in `.paper/EXTERNAL-REVIEWS.md` and continue with other reviewers.
+If a reviewer fails or returns empty output, record the failure in `.paper/FEEDBACK-EXTERNAL.md` and continue with other reviewers.
 
-## 6. Write External Reviews And Feedback Plan
+## 6. Write External Feedback And Feedback Plan
 
-Create `.paper/EXTERNAL-REVIEWS.md` using `templates/external-reviews.md`. If reviewer-specific captures exist under `.paper/external-reviews/`, preserve them as raw source records and use `EXTERNAL-REVIEWS.md` as the combined active view.
+Create `.paper/FEEDBACK-EXTERNAL.md` using `templates/feedback-external.md`. If reviewer-specific captures exist under `.paper/feedback-external/`, preserve them as raw source records and use `FEEDBACK-EXTERNAL.md` as the combined active view.
 
 Include:
 
@@ -262,7 +262,7 @@ Include:
 - consensus summary
 - divergent views
 
-Then evaluate all feedback, including `.paper/REVIEW.md`, `.paper/FACT-CHECK.md`, and `.paper/READER-FEEDBACK.md` when present, and create `.paper/FEEDBACK-PLAN.md` using `templates/feedback-plan.md`.
+Then evaluate all feedback, including `.paper/REVIEW.md`, `.paper/FACT-CHECK.md`, and `.paper/FEEDBACK-READER.md` when present, and create `.paper/FEEDBACK-PLAN.md` using `templates/feedback-plan.md`.
 
 For each meaningful feedback item, classify:
 
@@ -272,7 +272,7 @@ For each meaningful feedback item, classify:
 - **Conflicts with intent:** ignore unless user changes goals
 - **Needs decision:** ask the user
 
-Recommendation values:
+Decision values:
 
 - `Incorporate`
 - `Ignore`
@@ -290,7 +290,7 @@ Do not edit `.paper/DRAFT.md` during review. Review proposes action; revision ap
 
 ## 7. Approval Gate
 
-Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` summary and ask the user how to proceed. Treat the `Recommendation` column as the generated default. Tell the user they can approve it as-is or override selected rows by editing/filling `User Override`; revision must honor any populated override.
+Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` summary and ask the user how to proceed. Treat the `Decision` field as the generated default. Tell the user they can approve it as-is or override selected items by editing/filling `User Override`; revision must honor any populated override.
 
 Use AskUserQuestion when available:
 
@@ -300,7 +300,7 @@ Use AskUserQuestion when available:
   - "Approve plan" -- Use the feedback handling plan during `/gpd-revise`
   - "Discuss first" -- Review decision items and unresolved trade-offs
   - "Revise plan" -- Adjust the feedback handling plan before revision
-  - "Override rows" -- Change selected `User Override` cells, then revise
+  - "Override items" -- Change selected `User Override` fields, then revise
   - "Ignore external" -- Keep local review only
 
 If AskUserQuestion is unavailable, ask the same question in plain text and wait.

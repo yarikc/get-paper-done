@@ -38,7 +38,7 @@ Regression coverage:
 
 ## Change History
 
-- 2026-05-13: Added calibration note after the supply-chain example became the first full `READER-FEEDBACK.md` to `FEEDBACK-PLAN.md` to backward-routing showcase. The note records that its remaining enumerations are definitional, not decorative prose saturation.
+- 2026-05-13: Added calibration note after the supply-chain example became the first full `FEEDBACK-READER.md` to `FEEDBACK-PLAN.md` to backward-routing showcase. The note records that its remaining enumerations are definitional, not decorative prose saturation.
 - 2026-05-14: Backfilled `examples/public-ai-control-baseline` with governance/control checklist artifacts and tightened one output paragraph after it tripped prose-saturation warnings. This confirmed the guidance can apply to a compact decision memo, while the saturation validator still correctly pushes long trigger lists out of body prose.
 
 ## Open Calibration Question

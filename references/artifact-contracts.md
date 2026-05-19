@@ -138,6 +138,7 @@ Required headings:
 
 - `# Feedback Handling Plan`
 - `## Summary`
+- `## Decision View`
 - `## Proposed Handling`
 - `## Below-Target Items`
 - `## Incorporate`
@@ -146,18 +147,22 @@ Required headings:
 - `## User Decisions Needed`
 - `## Approval Gate`
 
+Required numbered sections under `## Proposed Handling`:
+
+- Each feedback item uses `### N. Feedback Item`
+- Each item includes `Feedback`, `Source(s)`, `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, `User Override`, and `Affected Artifact`
+
 Required tables:
 
-- Proposed Handling: `#`, `Feedback`, `Source(s)`, `Assessment`, `Recommendation`, `Proposed Handling`, `User Override`, `Affected Artifact`
 - Below-Target Items: `#`, `Issue`, `Target Bar Impact`, `Action`, `Reason`
 
-`Recommendation` is the default generated handling. `User Override` is the explicit override point; if populated, revision must follow the override instead of the generated recommendation.
+`Decision` is the default generated handling, usually with severity when known. `Why It Matters` explains the consequence of accepting or ignoring the item. `Proposed Fix` states the concrete edit strategy if approved. `Guardrail` states what not to do when applying the fix. `User Override` is the explicit override point; if populated, revision must follow the override instead of the generated decision.
 
-### `EXTERNAL-REVIEWS.md`
+### `FEEDBACK-EXTERNAL.md`
 
 Required headings:
 
-- `# External Reviews`
+- `# External Feedback`
 - `## Review Prompt Summary`
 - `## Consensus Summary`
 - `### Shared Concerns`
@@ -167,7 +172,7 @@ Required headings:
 
 No table contract is required. External review content can come from different reviewers and provider formats, so validation only checks that raw feedback and summary sections have a durable place to land.
 
-### `READER-FEEDBACK.md`
+### `FEEDBACK-READER.md`
 
 Required headings:
 

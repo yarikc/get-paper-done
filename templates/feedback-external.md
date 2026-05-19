@@ -1,4 +1,4 @@
-# External Reviews
+# External Feedback
 
 **Reviewed at:** [timestamp]
 **Reviewers:** [reviewer list]

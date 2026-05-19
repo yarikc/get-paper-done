@@ -13,7 +13,7 @@ Draft the paper from the established context.
 - .paper/OUTLINE.md
 - .paper/DRAFT.md if present
 - .paper/REVIEW.md if redrafting from review comments
-- .paper/EXTERNAL-REVIEWS.md if redrafting from external model feedback
+- .paper/FEEDBACK-EXTERNAL.md if redrafting from external model feedback
 - .paper/FEEDBACK-PLAN.md if redrafting from approved feedback
 - templates/draft.md
 </required_reading>

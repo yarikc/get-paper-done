@@ -51,7 +51,7 @@ function reviewPack(input = {}) {
     reason: target.reason,
     commentSyntax: [
       '// comment text',
-      '//YC comment text',
+      '//USER comment text',
       '<!-- comment text -->',
       `${target.path}.feedback`,
     ],
@@ -81,7 +81,7 @@ function nearestContext(lines, lineIndex) {
 function stripCommentPrefix(value) {
   return value
     .replace(/^\/\//, '')
-    .replace(/^\s*(YC|GPD|feedback)\b\s*:?\s*/i, '')
+    .replace(/^\s*(USER|GPD|feedback)\b\s*:?\s*/i, '')
     .replace(/^<!--\s*/, '')
     .replace(/\s*-->$/, '')
     .trim();
@@ -254,25 +254,44 @@ ${questions}
 }
 
 function feedbackPlanMarkdown({ comments, createdAt }) {
-  const rows = comments.map((comment, index) => (
-    `| ${index + 1} | ${markdownEscape(comment.feedback)} | ${markdownEscape(comment.artifact)}:${comment.line} | Pending approval | Recommend discuss | Recommended default: discuss; incorporate if the comment clarifies intent, evidence, audience fit, or ask quality without expanding scope. | None yet - user may override with incorporate / discuss / defer / ignore. | DRAFT / BRIEF / RESEARCH / OUTLINE |`
-  )).join('\n');
+  const sections = comments.map((comment, index) => [
+    `### ${index + 1}. Feedback Item`,
+    '',
+    `- **Feedback:** ${markdownEscape(comment.feedback)}`,
+    `- **Source(s):** ${markdownEscape(comment.artifact)}:${comment.line}`,
+    '- **Decision:** Recommend discuss',
+    '- **Why It Matters:** This is direct reader friction on the exported paper, so it may reveal ambiguity the workflow missed.',
+    '- **Proposed Fix:** Discuss the comment, then incorporate it if it clarifies intent, evidence, audience fit, or ask quality without expanding scope.',
+    '- **Guardrail:** Do not apply the comment mechanically if it expands scope, weakens the paper purpose, or conflicts with approved author intent.',
+    '- **User Override:** None yet - user may override the decision or constrain the proposed fix before revision.',
+    '- **Affected Artifact:** DRAFT / BRIEF / RESEARCH / OUTLINE',
+    '',
+  ].join('\n')).join('\n');
+  const itemList = comments.map((_, index) => String(index + 1)).join(', ') || 'none';
 
   return `# Feedback Handling Plan
 
 **Created:** ${createdAt}
-**Based on:** \`.paper/READER-FEEDBACK.md\`
+**Based on:** \`.paper/FEEDBACK-READER.md\`
 **Status:** Pending user approval
 
 ## Summary
 
-\`gpd feedback\` captured inline review comments, assigned default recommendations, and stopped at the approval gate. No draft or upstream artifact has been changed. The user may override any row by editing the \`User Override\` column before revision.
+\`gpd feedback\` captured inline review comments, assigned default decisions, and stopped at the approval gate. No draft or upstream artifact has been changed. The user may override any item by editing the \`User Override\` field before revision.
+
+## Decision View
+
+**Recommended decision:** Discuss items ${itemList}; incorporate the comments that clarify intent, evidence, audience fit, or ask quality without expanding scope.
+
+**Why:** These comments came from the reading copy, so they represent actual reader friction rather than speculative reviewer advice.
+
+**What improves:** The next draft should be easier to understand and more aligned with the reader's decision needs.
+
+**How:** Approve or override each numbered item, revise the affected source artifacts, regenerate \`.paper/exports/FINAL.md\`, and validate that no unresolved comments remain in the export.
 
 ## Proposed Handling
 
-| # | Feedback | Source(s) | Assessment | Recommendation | Proposed Handling | User Override | Affected Artifact |
-|---|----------|-----------|------------|----------------|-------------------|---------------|-------------------|
-${rows}
+${sections}
 
 ## Below-Target Items
 
@@ -290,7 +309,7 @@ ${rows}
 
 ## Defer
 
-- Use the \`User Override\` column for comments that should not affect this revision.
+- Use the \`User Override\` field for comments that should not affect this revision.
 
 ## User Decisions Needed
 
@@ -302,9 +321,9 @@ Before changing \`.paper/DRAFT.md\` or upstream artifacts, present this plan to 
 
 Options:
 
-- Approve all recommended handling
+- Approve generated decisions
 - Approve only incorporate items
-- Override selected rows in the \`User Override\` column
+- Override selected items in the \`User Override\` field
 - Discuss decisions first
 - Revise the handling plan
 - Ignore captured feedback
@@ -345,7 +364,7 @@ function captureFeedback(input = {}) {
       paperDir,
       reviewTarget: target.path,
       commentsCaptured: 0,
-      readerFeedbackPath: path.join(paperDir, '.paper', 'READER-FEEDBACK.md'),
+      readerFeedbackPath: path.join(paperDir, '.paper', 'FEEDBACK-READER.md'),
       feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
       next: 'Add inline comments to the review target, then run gpd feedback again.',
     };
@@ -353,7 +372,7 @@ function captureFeedback(input = {}) {
 
   const createdAt = new Date().toISOString();
   const meta = path.join(paperDir, '.paper');
-  const readerFeedbackPath = path.join(meta, 'READER-FEEDBACK.md');
+  const readerFeedbackPath = path.join(meta, 'FEEDBACK-READER.md');
   const feedbackPlanPath = path.join(meta, 'FEEDBACK-PLAN.md');
   const previousReaderFeedback = readIfExists(readerFeedbackPath);
   const previousFeedbackPlan = readIfExists(feedbackPlanPath);

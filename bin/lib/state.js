@@ -311,8 +311,8 @@ function artifactState(paperDir) {
     'DRAFT.md',
     'FACT-CHECK.md',
     'REVIEW.md',
-    'READER-FEEDBACK.md',
-    'EXTERNAL-REVIEWS.md',
+    'FEEDBACK-READER.md',
+    'FEEDBACK-EXTERNAL.md',
     'FEEDBACK-PLAN.md',
     'STATE.md',
     'STATE.json',
@@ -386,8 +386,8 @@ function suggestedNext(state) {
     return '/gpd-review --deep';
   }
   if (
-    a['READER-FEEDBACK.md']
-    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'READER-FEEDBACK.md', 'FEEDBACK-PLAN.md'))
+    a['FEEDBACK-READER.md']
+    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))
   ) {
     return '/gpd-review';
   }
@@ -474,14 +474,14 @@ function contextForCommand(command) {
   if (base === '/gpd-review') {
     return {
       clear_context: 'Yes, after drafting or fact-check.',
-      read: ['DRAFT.md', 'exports/FINAL.md if present or user reviewed it', 'REVIEW.md if present', 'READER-FEEDBACK.md if present', 'upstream artifacts as needed'],
+      read: ['DRAFT.md', 'exports/FINAL.md if present or user reviewed it', 'REVIEW.md if present', 'FEEDBACK-READER.md if present', 'upstream artifacts as needed'],
       avoid: ['rewriting before feedback handling is approved'],
     };
   }
   if (base === '/gpd-revise') {
     return {
       clear_context: 'Yes, after review.',
-      read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'READER-FEEDBACK.md if present'],
+      read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'FEEDBACK-READER.md if present'],
       avoid: ['unapproved feedback items', 'editing exports/FINAL.md as the source of truth'],
     };
   }
@@ -551,8 +551,8 @@ function explainNext(state) {
     return 'The draft or fact-check changed after review, so review needs a refresh.';
   }
   if (
-    a['READER-FEEDBACK.md']
-    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'READER-FEEDBACK.md', 'FEEDBACK-PLAN.md'))
+    a['FEEDBACK-READER.md']
+    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))
   ) {
     return 'Reader feedback exists without a current feedback plan, so review should synthesize it before revision.';
   }
@@ -583,7 +583,7 @@ function userActionHint(state) {
     return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';
   }
   if (next === '/gpd-review' && a['exports/FINAL.md']) {
-    return 'If comments were added to .paper/exports/FINAL.md, /gpd-review should capture them into READER-FEEDBACK.md and FEEDBACK-PLAN.md before revision.';
+    return 'If comments were added to .paper/exports/FINAL.md, /gpd-review should capture them into FEEDBACK-READER.md and FEEDBACK-PLAN.md before revision.';
   }
   if (next === '/gpd-revise') {
     return 'Revise applies approved feedback to .paper/DRAFT.md. Do not hand-edit FINAL.md as the durable source; export regenerates it.';

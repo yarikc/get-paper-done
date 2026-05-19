@@ -47,8 +47,8 @@ function testTemplateArtifactsPassContracts() {
     'templates/outline.md',
     'templates/fact-check.md',
     'templates/review.md',
-    'templates/external-reviews.md',
-    'templates/reader-feedback.md',
+    'templates/feedback-external.md',
+    'templates/feedback-reader.md',
     'templates/feedback-plan.md',
     'templates/paper-context.md',
     'templates/decisions.md',
@@ -244,26 +244,26 @@ function testMarkdownContractRejectsMalformedHeading() {
 
 function testReaderFeedbackContractRejectsMissingSignal() {
   const dir = tempDir('gpd-artifact-reader-feedback-test');
-  const badFeedback = path.join(dir, 'READER-FEEDBACK.md');
-  const feedback = fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8')
+  const badFeedback = path.join(dir, 'FEEDBACK-READER.md');
+  const feedback = fs.readFileSync(path.join(repoRoot, 'templates', 'feedback-reader.md'), 'utf8')
     .replace('| Ask clarity | [1-5] | [phrase, section, or pattern] | [what to preserve or change] |\n', '');
   fs.writeFileSync(badFeedback, feedback);
 
   const result = runFail(['validate-artifact', '--path', badFeedback]);
   assert.strictEqual(result.status, 1);
-  assert(result.stdout.includes('READER-FEEDBACK.md: Five-Signal Scorecard missing signal "Ask clarity"'));
+  assert(result.stdout.includes('FEEDBACK-READER.md: Five-Signal Scorecard missing signal "Ask clarity"'));
 }
 
 function testExternalReviewsContractRequiresConsensusSections() {
-  const dir = tempDir('gpd-artifact-external-reviews-test');
-  const badReviews = path.join(dir, 'EXTERNAL-REVIEWS.md');
-  const reviews = fs.readFileSync(path.join(repoRoot, 'templates', 'external-reviews.md'), 'utf8')
+  const dir = tempDir('gpd-artifact-feedback-external-test');
+  const badReviews = path.join(dir, 'FEEDBACK-EXTERNAL.md');
+  const reviews = fs.readFileSync(path.join(repoRoot, 'templates', 'feedback-external.md'), 'utf8')
     .replace('### High-Risk Items\n\n- [Feedback that could materially change the thesis, evidence, or positioning]\n', '');
   fs.writeFileSync(badReviews, reviews);
 
   const result = runFail(['validate-artifact', '--path', badReviews]);
   assert.strictEqual(result.status, 1);
-  assert(result.stdout.includes('EXTERNAL-REVIEWS.md: Missing heading "### High-Risk Items"'));
+  assert(result.stdout.includes('FEEDBACK-EXTERNAL.md: Missing heading "### High-Risk Items"'));
 }
 
 function testFactCheckContractRequiresSafeClaimSections() {

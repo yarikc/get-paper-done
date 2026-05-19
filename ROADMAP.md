@@ -12,7 +12,7 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 - Current rating: 9.45/10 as a writing framework and 9.15/10 as an installable private-repo tool as of 2026-05-15
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
-The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader-feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/Gemini provider invocation, external-review provider progress output, reviewer-specific external-review storage, combined-review deduplication, current-runtime self-review skipping, full-workspace external-review prompt context, external-review feedback decomposition, generated feedback recommendations with user override, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, local HTTP provider support, and one-by-one agent calibration against real papers.
+The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/Gemini provider invocation, external-review provider progress output, reviewer-specific external-review storage, combined-review deduplication, current-runtime self-review skipping, full-workspace external-review prompt context, external-review feedback decomposition, generated feedback recommendations with user override, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, local HTTP provider support, and one-by-one agent calibration against real papers.
 
 Canonical design spec: [docs/DESIGN-SPEC.md](docs/DESIGN-SPEC.md).
 Detailed project review: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md).
@@ -32,7 +32,7 @@ To avoid spreading todos across docs and issues:
 
 Current issue alignment:
 
-- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, live public-source examples, reusable reader-feedback capture, governance/control-paper guidance, and messy import depth are now represented with regression coverage. The newest public-source calibration review produced reusable prompt/template guidance for defining the governed object early, explaining standards as context rather than authority signals, requiring evidence currency, and making human review exception-based.
+- `#2`: active umbrella for layered workflow/agent testing; clean-paper, imported-paper, lite update, evidence-heavy external, short quantitative, live public-source examples, reusable reader feedback capture, governance/control-paper guidance, and messy import depth are now represented with regression coverage. The newest public-source calibration review produced reusable prompt/template guidance for defining the governed object early, explaining standards as context rather than authority signals, requiring evidence currency, and making human review exception-based.
 - `#1`: broader test/evaluation program; remains open until more fixture diversity and deeper semantic checks exist.
 - `#6`: focused semantic-validation execution plan; deterministic gate slices exist, and deferred gates remain tracked there.
 - `#7`: prompt/validator calibration from example feedback; the initial calibration slice is complete, with future prompt calibration expected to come from additional paper trials.
@@ -47,7 +47,7 @@ Current issue alignment:
 - `#16`: RFC-5 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
 - `#17`: RFC-6 mobile review packs for away-from-desktop review; useful capability backlog item, but should start as manual validation and review-pack export/import rather than a mobile app or vendor integration.
 - `#18`: closed mandatory grill gate and reusable paper context records; follow-up cleanup now clarifies grandfathered examples, indexes examples/fixtures, and tightens validation for grill companion artifacts.
-- `#20`: review/comment UX simplification; first CLI slice implemented with `gpd review-pack`, `gpd feedback`, unresolved-export-comment validation, external-review provider progress, current-runtime self-review skipping, full-workspace external-review prompt context, reviewer-specific external-review storage, combined-review deduplication, feedback-plan decomposition of external review concerns, generated recommendations, and user overrides. Remaining future improvements should be driven by the next paper trial, not speculative UI surface.
+- `#20`: review/comment UX simplification; first CLI slice implemented with `gpd review-pack`, `gpd feedback`, unresolved-export-comment validation, external-review provider progress, current-runtime self-review skipping, full-workspace external-review prompt context, reviewer-specific external-review storage, combined-review deduplication, feedback-plan decomposition of external review concerns, generated decisions, and user overrides. Remaining future improvements should be driven by the next paper trial, not speculative UI surface.
 
 ## Main Line Preserved During RFC-5 Detour
 
@@ -126,7 +126,7 @@ Plan-change rule:
 ### Owning Issues
 
 - `#6` owns semantic-validation hardening: semantic issue IDs and claim-support example backfill.
-- `#2` owns example and fixture hardening plus workflow contract cleanup: pre-registration artifacts, fixture documentation, dedicated example-shape tests, workflow-state fixtures, classification enum consistency, reader-feedback artifact consistency, and messy-import depth coverage.
+- `#2` owns example and fixture hardening plus workflow contract cleanup: pre-registration artifacts, fixture documentation, dedicated example-shape tests, workflow-state fixtures, classification enum consistency, reader feedback artifact consistency, and messy-import depth coverage.
 
 ### Scope
 
@@ -141,9 +141,9 @@ Plan-change rule:
 9. Completed: added a compact live public-source example that uses real official public sources, records source verification, and proves claim-support metadata carries through research, fact-check, review, and export.
 10. Completed: promoted classification enums into `config.schema.json`, starter templates, brief/workflow guidance, docs, profile calibration, and example tests so `purpose/channel/risk/complexity/audience_shape` drive later stages instead of loose `paper_type` labels.
 11. Completed: codified the reusable "not new bureaucracy" rule for governance, control, standard, gate, review, and required-record papers in brief, draft, review, and rubric guidance.
-12. Completed: added reusable `READER-FEEDBACK.md` capture with five-signal template, artifact validation, review/revise/progress guidance, status routing, and documentation.
+12. Completed: added reusable `FEEDBACK-READER.md` capture with five-signal template, artifact validation, review/revise/progress guidance, status routing, and documentation.
 13. Completed: added a messy synthetic import fixture with expected findings and regression coverage for preservation, source/review classification, canonical draft selection, no downstream artifact generation, blocked strategy routing, and source-sensitive semantic warning.
-14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/EXTERNAL-REVIEWS.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `EXTERNAL-REVIEWS.md` artifact contract, and deliberately does not invoke external providers yet.
+14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/FEEDBACK-EXTERNAL.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `FEEDBACK-EXTERNAL.md` artifact contract, and deliberately does not invoke external providers yet.
 15. Completed: added a first provider-invocation slice for `gpd review-external --models`, limited to installed CLI providers with known stdin command patterns, temp prompt generation, timeout/error capture, and no local HTTP server support yet.
 16. Completed: calibrated the real Claude CLI path on a synthetic public paper, fixed the command from `claude -p -` to `claude -p`, and added a regression assertion for the argument shape.
 17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-status` before stale mtime refresh rules can send the paper backward.
@@ -194,13 +194,13 @@ Next work should validate behavior under real use before adding more RFC surface
 17. Completed: added `examples/public-ai-control-baseline`, a compact public-source decision memo that uses verified NIST, OWASP, and NCSC/CISA sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
 18. Completed: pre-registered and ran `examples/software-supply-chain-evidence-pack`, a second public-source decision memo using CISA, NIST, SLSA, OpenSSF, OWASP, and NCSC sources with source IDs, claim-support metadata, fact-check, review, export, and zero-warning semantic validation.
 19. Completed: reviewed the `software-supply-chain-evidence-pack` output against human feedback and repaired the example from a static evidence packet into a supply-chain control process for high-risk AI and software deployments, including pilots moving into production-like use, with a control record, standards context, AI runtime evidence, decision rules, refresh triggers, observed evidence, owner attestation, validation, and exception-based human review.
-20. Completed: promoted `software-supply-chain-evidence-pack` into the showcase feedback-loop example by adding `READER-FEEDBACK.md`, `FEEDBACK-PLAN.md`, `EXPECTED-FINDINGS.md`, README coverage, and regression assertions for the backward-routing quality fix.
+20. Completed: promoted `software-supply-chain-evidence-pack` into the showcase feedback-loop example by adding `FEEDBACK-READER.md`, `FEEDBACK-PLAN.md`, `EXPECTED-FINDINGS.md`, README coverage, and regression assertions for the backward-routing quality fix.
 21. Completed: codified the reusable control/governance-paper lesson into workflow guidance, templates, agents, rubrics, and consistency tests. The guidance is prompt/artifact guidance first, not a new validator: when a paper proposes controls, standards, gates, reviews, or required records, it must define the governed object early, explain why cited standards matter, name the required artifact, state whether evidence is static or current, name refresh triggers, explain how evidence changes decisions, and handle process burden with automation/observed evidence plus human-by-exception where appropriate.
 22. Completed: validated the reusable control/governance guidance against `examples/public-ai-control-baseline`, a smaller AI pilot control-baseline decision memo. The artifacts now show the control check in brief, outline, fact-check, and review, while the final memo stays concise and passes semantic validation without prose-saturation warnings.
 23. Completed: validated that governance/control guidance does not leak into ordinary non-governance examples by adding regression checks for the clean strategy paper, lite update, and short quantitative memo.
 24. Completed: added private-repo release/update guidance in `docs/RELEASE.md`, packaged it, added `npm run release:check`, and documented the release path in README.
 25. Completed: hardened `gpd import` with dry-run inventory, classification counts, copied-size reporting, warning output, `--max-file-bytes`, deterministic draft-candidate scoring, and richer `.paper/IMPORT.md` inventory.
-26. Completed: added `gpd review-external` collection wrapper for external review text, with tests for durable artifact output, pending feedback-plan routing, no local path leakage in the review artifact, the missing-draft failure path, and `EXTERNAL-REVIEWS.md` artifact validation.
+26. Completed: added `gpd review-external` collection wrapper for external review text, with tests for durable artifact output, pending feedback-plan routing, no local path leakage in the review artifact, the missing-draft failure path, and `FEEDBACK-EXTERNAL.md` artifact validation.
 27. Completed: added first-pass `gpd review-external --models` provider invocation for installed CLI providers, with tests using a fake provider binary and unsupported-provider capture.
 28. Completed: calibrated `gpd review-external --models claude` against the real Claude CLI on a synthetic public paper and fixed pending feedback-plan routing precedence.
 29. Completed: calibrated `gpd review-external --models codex` against the real Codex CLI on a synthetic public paper.
@@ -209,10 +209,10 @@ Next work should validate behavior under real use before adding more RFC surface
 32. Completed: added import version/source indexing so `IMPORT.md` shows canonical draft, alternate drafts, source/reference material, review feedback, outlines/specs, assets, notes, and unclear files with downstream-stage guidance.
 33. Completed: calibrated `gpd review-external --models opencode` against the real opencode CLI on a synthetic public paper, then removed Opencode from supported paper reviewers after a later real-paper trial showed it was unreliable for this workflow. Gemini is argument-corrected and calibrated for paper review when the local Gemini CLI is authenticated.
 34. Completed: added visible provider-level progress to `gpd review-external --models` so users see each reviewer move through running, captured, empty, missing, failed, skipped-self-review, or unsupported states instead of waiting on an opaque background terminal.
-35. Completed: added the first issue #20 review/comment UX slice: `gpd review-pack` shows the single review target and comment syntax, `gpd feedback` captures inline comments into `READER-FEEDBACK.md` and pending `FEEDBACK-PLAN.md`, and semantic validation flags unresolved inline comments left in `exports/FINAL.md`.
+35. Completed: added the first issue #20 review/comment UX slice: `gpd review-pack` shows the single review target and comment syntax, `gpd feedback` captures inline comments into `FEEDBACK-READER.md` and pending `FEEDBACK-PLAN.md`, and semantic validation flags unresolved inline comments left in `exports/FINAL.md`.
 36. Completed: improved `gpd review-external` after the private-paper trial so provider prompts include the full paper workspace context and generated `FEEDBACK-PLAN.md` rows decompose captured HIGH/MEDIUM/LOW concerns instead of collapsing a full review into one item.
-37. Completed: added generated recommendations and a `User Override` column to feedback plans, so the CLI proposes handling while keeping the author in control before revision.
-38. Completed: added reviewer-specific external-review storage under `.paper/external-reviews/`, combined-review deduplication, combined recommendation printing, and Gemini-style review parser support after the role-of-architect trial.
+37. Completed: added generated decisions, proposed fixes, guardrails, a top-level decision view, and a `User Override` field to feedback plans, so the CLI proposes handling while keeping the author in control before revision.
+38. Completed: added reviewer-specific external-review storage under `.paper/feedback-external/`, combined-review deduplication, combined recommendation printing, and Gemini-style review parser support after a private real-paper trial.
 39. Next main-line slice: finish the paused private-paper revision by approving or overriding the combined external-review feedback plan, applying accepted changes, exporting again, and using that trial to decide whether PDF/spreadsheet import handling, local HTTP provider support, or another workflow validation should follow.
 
 ## Completed Design Simplifications
@@ -234,7 +234,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Upgraded strategist into a challenge-first gatekeeper that can block research, outline, and drafting with `Revise Before Drafting` or `No-Go`, plus normalized `Strategy Blockers` for machine-routable "why not Go" decisions.
 - Added install/update CLI for Claude and Codex with runtime-neutral command placeholders, install manifest, update backups, dry-run, doctor, and version commands.
 - Added deterministic `gpd export` and structural `exports/FINAL.md` status awareness.
-- Added deterministic `gpd review-external` collection from files/stdin into `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md` with pending approval routing.
+- Added deterministic `gpd review-external` collection from files/stdin into `FEEDBACK-EXTERNAL.md` and `FEEDBACK-PLAN.md` with pending approval routing.
 - Added first-pass `gpd validate --semantic` gates for empty-but-well-formed artifact failures.
 - Added `examples/data-products-ai-scaling` plus regression coverage for a realistic completed clean-paper workspace.
 - Added `examples/technology-lifecycle-management` plus regression coverage for an anonymized imported-paper recovery workspace.
@@ -347,7 +347,7 @@ Current review design is strong but needs sharper feedback handling.
 
 Needed:
 
-- add examples of `EXTERNAL-REVIEWS.md`
+- add examples of `FEEDBACK-EXTERNAL.md`
 - define how conflicting model feedback is resolved
 - require feedback to map to affected artifact
 - extend `FEEDBACK-PLAN.md` examples to conflicting model feedback after external-review workflow is exercised

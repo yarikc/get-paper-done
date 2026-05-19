@@ -228,9 +228,9 @@ When you or another model reviews the paper, capture that read before revising:
 /gpd-review
 ```
 
-Feedback goes into `READER-FEEDBACK.md`. Handling goes into
+Feedback goes into `FEEDBACK-READER.md`. Handling goes into
 `FEEDBACK-PLAN.md`. The plan includes default recommendations and a `User
-Override` column for rows you want to change. Revision should happen only after
+Override` field for items you want to change. Revision should happen only after
 the handling plan is approved.
 
 ## Paper Types

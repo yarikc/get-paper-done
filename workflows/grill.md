@@ -144,7 +144,7 @@ Examples that usually do not qualify:
 - obvious copy edits
 - simple title changes
 - facts that belong in `RESEARCH.json`
-- feedback items that belong in `READER-FEEDBACK.md`
+- feedback items that belong in `FEEDBACK-READER.md`
 
 ## 7. Completion Criteria
 

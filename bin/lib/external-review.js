@@ -186,7 +186,7 @@ function buildExternalReviewPrompt(paperDir) {
     promptSection(paperDir, 'Exported Reading Copy', ['exports/FINAL.md']),
     artifactSection(paperDir, 'FACT-CHECK.md', 'Fact Check'),
     artifactSection(paperDir, 'REVIEW.md', 'Local Review'),
-    artifactSection(paperDir, 'READER-FEEDBACK.md', 'Reader Feedback'),
+    artifactSection(paperDir, 'FEEDBACK-READER.md', 'Reader Feedback'),
     artifactSection(paperDir, 'FEEDBACK-PLAN.md', 'Prior Feedback Plan'),
     '## Review Instructions',
     '',
@@ -559,6 +559,296 @@ function recommendationForSeverity(severity) {
   return 'Recommend ask user';
 }
 
+function itemNumbers(items, predicate) {
+  return items
+    .map((item, index) => (predicate(item, index) ? String(index + 1) : null))
+    .filter(Boolean);
+}
+
+function formatItemNumbers(items) {
+  return items.length > 0 ? items.join(', ') : 'none';
+}
+
+function decisionViewMarkdown(items) {
+  if (!items || items.length === 0) {
+    return `## Decision View
+
+**Recommended decision:** Decide whether to provide external review input or continue without external feedback.
+
+**Why:** No reviewer supplied actionable feedback, so there is no independent review signal to approve.
+
+**What improves:** The workflow stays explicit instead of pretending missing review is approval.
+
+**How:** Provide review files/stdin, run provider review, or explicitly skip external feedback for this revision.
+`;
+  }
+
+  const highItems = itemNumbers(items, (item) => item.severity === 'HIGH');
+  const sharedItems = itemNumbers(items, (item) => (
+    item.severity === 'MEDIUM'
+    && Array.isArray(item.reviewers)
+    && item.reviewers.length > 1
+  ));
+  const sharedItemSet = new Set(sharedItems);
+  const mediumItems = itemNumbers(items, (item, index) => (
+    item.severity === 'MEDIUM'
+    && !sharedItemSet.has(String(index + 1))
+  ));
+  const actionItems = itemNumbers(items, (item) => item.severity === 'ACTION');
+  const lowItems = itemNumbers(items, (item) => item.severity === 'LOW');
+  const lowText = lowItems.length > 0 ? `Defer LOW items ${formatItemNumbers(lowItems)} unless they are quick polish.` : 'No LOW items were extracted.';
+
+  return `## Decision View
+
+**Recommended decision:** Approve HIGH items ${formatItemNumbers(highItems)}. Also approve shared MEDIUM items ${formatItemNumbers(sharedItems)} if they sharpen the same approved concern. Discuss the remaining MEDIUM items ${formatItemNumbers(mediumItems)}. Apply ACTION items ${formatItemNumbers(actionItems)} only when they map to an approved concern. ${lowText}
+
+**Why:** HIGH items are likely to block decision usefulness, credibility, or audience trust. Shared items carry more signal because more than one reviewer converged on the concern. ACTION items are tactical suggestions; applying them without an approved parent concern can add noise.
+
+**What improves:** The paper should become easier to sponsor, easier to defend, and easier to revise because the feedback is reduced from a reviewer transcript into a ranked decision set.
+
+**How:** For each numbered item, approve the proposed fix, constrain it, or override it. Then revise the affected artifacts named in the accepted items, regenerate the export, and rerun review/validation before treating the paper as final.
+`;
+}
+
+function decisionRationaleForItem(item) {
+  const affected = item.affectedArtifact || 'DRAFT';
+  if (item.severity === 'HIGH') {
+    return `This high-severity concern can block the paper's decision usefulness or credibility; fixing it makes ${affected} more defensible for the intended audience.`;
+  }
+  if (item.severity === 'MEDIUM') {
+    return `This may not block the paper, but it can weaken clarity, audience fit, or persuasive force; resolving it should sharpen ${affected} without necessarily expanding scope.`;
+  }
+  if (item.severity === 'LOW') {
+    return `This is useful polish but unlikely to change the paper's decision value; handle it only if it is quick and low-risk.`;
+  }
+  if (item.severity === 'ACTION') {
+    return `This is a tactical edit, not a standalone strategic concern; apply it only when it supports an approved higher-level item.`;
+  }
+  return `The review signal is not classified clearly enough to act automatically; decide whether it should affect ${affected}.`;
+}
+
+function decisionLabelForItem(item) {
+  const recommendation = item.recommendation || recommendationForSeverity(item.severity);
+  const severity = item.severity && item.severity !== 'UNKNOWN' ? ` (${item.severity})` : '';
+  return `${recommendation}${severity}`;
+}
+
+function proposedFixForItem(item) {
+  const feedback = String(item.feedback || '').toLowerCase();
+  const reviewerFix = String(item.reviewerSuggestedFix || '').trim();
+  if (reviewerFix) return reviewerFix;
+  if (/front-loaded repetition|reader patience|opening.*executive summary|executive summary.*section 1|thesis.*stated.*three/.test(feedback)) {
+    return 'Separate the opening from the executive summary and Section 1: make the opening establish the operating-model shift and stakes, make the executive summary state the thesis and ask, and let Section 1 add only new evidence or pressure.';
+  }
+  if (/exception trigger|definition of an exception|human-by-exception.*abstract|human by exception.*abstract/.test(feedback)) {
+    return 'Define exception triggers concretely: unresolved boundary conflicts, failed validation, material data or identity exposure, model or third-party dependency changes, resilience impact, regulatory interpretation, or decisions outside approved patterns.';
+  }
+  if (/safely faster|safe acceleration|cycle time|time-to-production|rework|defect|escalation rate/.test(feedback)) {
+    return 'Anchor safe acceleration in a small set of baselineable measures, such as design/integration cycle time, routine escalation rate, reuse of context packs, traceability evidence completeness, and issues caught by validation harnesses before human review. State that exact targets belong in the follow-on capability charter.';
+  }
+  if (/section 4.*too much|eight distinct sub-topics|lost the thread|too much in one section/.test(feedback)) {
+    return 'Split or tighten Section 4 so it first defines the operating layer, then separately handles how it works, how it avoids bureaucracy, and how it is governed. Move secondary detail into shorter paragraphs or the capability section.';
+  }
+  if (/platform engineering objection|why architecture and not engineering platforms|platform.*objection|delivery substrate|cross-domain decision semantics|cross-domain interaction contract/.test(feedback)) {
+    return 'Answer the ownership objection directly: platform and engineering own delivery substrate and tool integration; architecture owns cross-domain decision semantics, constraints, evidence logic, and exception rules. Add one causal example showing why platform automation alone cannot decide cross-domain business, risk, data, and resilience trade-offs.';
+  }
+  if (/architect as builder|builder credibility|principal engineer|product designer|repo management|ci\/cd|executable policy/.test(feedback)) {
+    return 'Add a credibility note that this is a team capability and development path, not an instant expectation for every architect. Name the needed builder skills, the likely talent sources, and the fact that current architecture teams may need reskilling and closer partnership with engineering/platform teams.';
+  }
+  if (/talent gap|unrealistically broad|where these people come from|staffing|four-role architect|four substantial professions/.test(feedback)) {
+    return 'Add a credibility note that the role requires a changed staffing and development model: some capability must be built from senior engineering, platform, product, and domain talent, and architects should not be expected to be equally strong in every mode on day one.';
+  }
+  if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision|three lines of defense/.test(feedback)) {
+    return 'Add a failure-accountability paragraph: when the operating layer is wrong, ownership remains with the accountable human function; incidents should trigger evidence review, constraint/context updates, rollback or remediation, and periodic independent validation proportionate to risk.';
+  }
+  if (/decision memory.*resilience|stale or conflicting memory|conflicting boundary assumptions|accidental architecture hardens/.test(feedback)) {
+    return 'Frame decision memory as a resilience control: current, versioned, and reviewable decision memory helps prevent conflicting agent assumptions, supports diagnosis and rollback, and creates a feedback loop when stale context causes failure.';
+  }
+  if (/vendor reliance|vendor-affiliated|anti-vendor|direction of travel|independent measurement/.test(feedback)) {
+    return 'Add a short caveat that vendor-affiliated trend evidence is used for direction of travel and current practice signals, not as independent proof of the mandate.';
+  }
+  if (/anti-bureaucracy test|templates and meetings|strongest sentences|surface it/.test(feedback)) {
+    return 'Move the anti-bureaucracy test into the executive summary or opening ask so readers see early that the proposal is meant to reduce repeated ambiguity and routine review overhead, not add ceremony.';
+  }
+  if (/bureaucracy|overhead|approval ceremon|larger, more durable|governance/.test(feedback)) {
+    return 'Add a comparative overhead argument: the operating layer is not less control; it replaces repeated meeting-based review for routine decisions with reusable constraints, context, evidence, and human exception review. Name the concrete overhead it should reduce, such as re-litigation of settled decisions and bespoke review of routine integration choices.';
+  }
+  if (/transition|current state|existing.*forum|review board|legacy gate|escalation/.test(feedback)) {
+    return 'Add a short transition paragraph: existing architecture forums remain for material, high-risk, and exception decisions while routine decisions migrate only after context packs, executable constraints, evidence capture, and escalation paths are mature enough to trust.';
+  }
+  if (/cost|funding|investment|re-?org|multi-year|multi-million|capability shift|program/.test(feedback)) {
+    return 'Add a bounded scope paragraph and reflect it in the ask: this paper seeks agreement on the future architecture mandate and operating-layer direction, not approval of a full re-org, budget, or implementation plan. Name that a phased capability buildout and separate investment case would follow.';
+  }
+  if (/sonar|code review|verification bottleneck|per-commit|architecture review|different bottleneck/.test(feedback)) {
+    return 'Reframe the source as evidence of a broader verification-capacity problem, then bridge explicitly to architecture through decision volume: agents increase design proposals, integration choices, dependency decisions, and AI-runtime configuration decisions faster than human review forums can absorb.';
+  }
+  if (/mental model|abstract|what is this|versioned git|platform with an api|policy-as-code|knowledge base/.test(feedback)) {
+    return 'Add one concrete mental model for the architecture operating layer, such as a policy-as-code and curated-knowledge platform that engineers and agents query at decision time, while keeping implementation choices open.';
+  }
+  if (/four-decision|ask.*parallel|decisions are on the table|separate ask/.test(feedback)) {
+    return 'Refactor the ask into parallel executive decisions: approve the mandate shift, approve investment in the operating-layer capability, and approve new measures/incentives. Treat enablement-with-evidence as a property of the capability, not a separate decision.';
+  }
+  if (/g-sib scope|gsib scope|g-sib.*typography|gsib.*typography|systemically important|cross-jurisdiction|recovery|resolution|heterogeneous business lines/.test(feedback)) {
+    return 'Clarify why G-SIB scope matters: cross-jurisdictional obligations, systemic-importance expectations, heterogenous business lines, resilience and recovery implications, and higher evidentiary burden make the mandate more consequential than in a generic enterprise.';
+  }
+  if (/capability family names|forgettable|taxonomy labels|actionable handles|golden paths/.test(feedback)) {
+    return 'Rename or introduce the four capability families with more action-oriented handles, while preserving the precise definitions underneath.';
+  }
+  if (/adlc.*acronym|acronym that does no work|barely appears|drop the acronym/.test(feedback)) {
+    return 'Either use ADLC consistently as the named delivery model or remove the acronym and use plain "agentic delivery" language so the reader is not asked to carry unused terminology.';
+  }
+  if (/citation rigor|bracketed source ids|cannot click|per-citation links/.test(feedback)) {
+    return 'Make source lookup easier by adding per-source links or a compact source-id map for cited IDs, at least for the most important references used in body prose.';
+  }
+  if (/deliverable overlap|deliverable bloat|togaf|artifact catalog|product description|product families/.test(feedback)) {
+    return 'Recast the deliverables as a smaller set of operating-layer capabilities with outcomes, then list artifacts as examples under those capabilities instead of presenting a long taxonomy.';
+  }
+  if (/governor|recursive accountability|who governs|governs the harnesses/.test(feedback)) {
+    return 'Add an accountability paragraph for the operating layer itself: name ownership, change control, evidence review, and periodic validation of constraints, harnesses, context packs, and decision memory.';
+  }
+  if (/accidental architecture|shadow context|context packs|hallucinating|infer/.test(feedback)) {
+    return 'Add the shadow-context risk: if architects do not provide authoritative context packs and decision memory, agents will infer boundaries from local code and create accidental architecture at machine speed.';
+  }
+  if (/cross-agent|coordination|conflicting boundary decisions/.test(feedback)) {
+    return 'Add cross-agent coordination to the decision-memory capability: shared memory should prevent separate agents from making conflicting boundary or integration decisions in isolation.';
+  }
+  if (/harness effectiveness|productivity metric|caught by.*harness/.test(feedback)) {
+    return 'Add a metric for operating-layer quality: percentage of design flaws caught by automated harnesses versus human exception review.';
+  }
+  if (item.severity === 'ACTION') {
+    return 'Apply this only if it supports an approved higher-level feedback item; otherwise leave it as a tactical suggestion.';
+  }
+  return 'Needs human synthesis before revision. The CLI could not derive a concern-specific proposed fix with enough confidence.';
+}
+
+function proposedFixConfidenceForItem(item) {
+  const fix = proposedFixForItem(item);
+  if (/^Needs human synthesis before revision\./.test(fix)) return 'low';
+  if (item.reviewerSuggestedFix) return 'high';
+  if (item.severity === 'ACTION') return 'medium';
+  return 'medium';
+}
+
+function whyProposedFixAddressesItem(item) {
+  const feedback = String(item.feedback || '').toLowerCase();
+  if (proposedFixConfidenceForItem(item) === 'low') {
+    return 'The concern is specific enough to require a human-written remedy; applying a generic fix would risk changing the wrong part of the paper.';
+  }
+  if (/front-loaded repetition|reader patience|opening.*executive summary|executive summary.*section 1/.test(feedback)) {
+    return 'The fix reduces repeated thesis setup by giving the opening, executive summary, and first section distinct jobs.';
+  }
+  if (/exception trigger|definition of an exception|human-by-exception.*abstract|human by exception.*abstract/.test(feedback)) {
+    return 'The fix makes the human-by-exception model operational by naming the kinds of decisions that leave the automated path.';
+  }
+  if (/safely faster|safe acceleration|cycle time|time-to-production|rework|defect|escalation rate/.test(feedback)) {
+    return 'The fix turns the value claim into something a sponsor can baseline and later test without forcing a full KPI framework into the paper.';
+  }
+  if (/section 4.*too much|eight distinct sub-topics|lost the thread|too much in one section/.test(feedback)) {
+    return 'The fix addresses reader overload by separating definition, mechanism, objection handling, and governance instead of stacking them in one passage.';
+  }
+  if (/platform engineering objection|why architecture and not engineering platforms|platform.*objection|delivery substrate|cross-domain decision semantics|cross-domain interaction contract/.test(feedback)) {
+    return 'The fix answers why architecture owns cross-domain decision semantics while platform and engineering own the delivery substrate and integration path.';
+  }
+  if (/architect as builder|builder credibility|principal engineer|product designer|repo management|ci\/cd|executable policy|talent gap|four-role architect/.test(feedback)) {
+    return 'The fix makes the capability credible by framing it as a team development path rather than pretending every current architect already has all required skills.';
+  }
+  if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision/.test(feedback)) {
+    return 'The fix closes the control-loop objection by naming what happens when the operating layer itself produces or permits a bad decision.';
+  }
+  if (/g-sib scope|gsib scope|g-sib.*typography|gsib.*typography|systemically important|cross-jurisdiction/.test(feedback)) {
+    return 'The fix earns the G-SIB scope by separating broad regulated-bank obligations from the higher consequence and complexity of systemic institutions.';
+  }
+  if (/decision memory.*resilience|stale or conflicting memory|conflicting boundary assumptions|accidental architecture hardens/.test(feedback)) {
+    return 'The fix reframes decision memory from documentation into a control that helps prevent, diagnose, and correct conflicting machine-speed decisions.';
+  }
+  if (/vendor reliance|vendor-affiliated|anti-vendor|direction of travel|independent measurement/.test(feedback)) {
+    return 'The fix aligns the source caveat with the author persona by keeping vendor material directional rather than treating it as proof.';
+  }
+  if (/anti-bureaucracy test|templates and meetings|strongest sentences|surface it/.test(feedback)) {
+    return 'The fix moves a strong objection-handling sentence earlier so executive readers understand that the proposal reduces routine ceremony instead of adding it.';
+  }
+  if (item.reviewerSuggestedFix) {
+    return 'The fix comes from the reviewer-supplied remedy for this same concern, so it is safer than choosing a generic canned action.';
+  }
+  return 'The fix maps to the same concern category as the reviewer feedback and should be reviewed before revision.';
+}
+
+function guardrailForItem(item) {
+  const feedback = String(item.feedback || '').toLowerCase();
+  if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision|three lines of defense/.test(feedback)) {
+    return 'Do not imply the operating layer eliminates accountable ownership; keep failure handling explicit, inspectable, and proportionate to risk.';
+  }
+  if (/vendor reliance|vendor-affiliated|anti-vendor|direction of travel|independent measurement/.test(feedback)) {
+    return 'Do not overcorrect by removing useful current-practice signals; qualify them instead.';
+  }
+  if (/anti-bureaucracy test|templates and meetings|strongest sentences|surface it/.test(feedback)) {
+    return 'Do not duplicate the full Section 4 argument in the executive summary; surface only the test.';
+  }
+  if (/governor|recursive accountability|who governs|governs the harnesses/.test(feedback)) {
+    return 'Do not create a new unchecked governance body; make accountability inspectable, change-controlled, and proportionate to risk.';
+  }
+  if (/talent gap|unrealistically broad|where these people come from|staffing/.test(feedback)) {
+    return 'Do not imply every architect must instantly become a full SME, principal engineer, product owner, and product designer; frame this as a team capability and development path.';
+  }
+  if (/safely faster|safe acceleration|cycle time|time-to-production|rework|defect|escalation rate/.test(feedback)) {
+    return 'Do not overload the paper with a full KPI framework; use a few measures to make the value proposition concrete.';
+  }
+  if (/bureaucracy|overhead|approval ceremon|governance/.test(feedback)) {
+    return 'Do not claim the model eliminates governance or bureaucracy; argue that it changes the form of control so it scales better.';
+  }
+  if (/transition|current state|existing.*forum|review board|legacy gate/.test(feedback)) {
+    return 'Do not specify detailed forum retirement, ownership charts, or migration timelines without stronger organizational facts.';
+  }
+  if (/cost|funding|investment|re-?org|multi-year|multi-million|program/.test(feedback)) {
+    return 'Do not turn the paper into a budget request, org design, or delivery plan; keep the fix at mandate and approval-boundary level.';
+  }
+  if (/sonar|code review|verification bottleneck|architecture review/.test(feedback)) {
+    return 'Do not imply code-review data directly proves architecture-review failure; make the bridge explicit and bounded.';
+  }
+  if (/mental model|abstract|policy-as-code|knowledge base/.test(feedback)) {
+    return 'Do not lock the paper into a specific implementation architecture or vendor-style product design.';
+  }
+  if (/deliverable overlap|deliverable bloat|artifact catalog/.test(feedback)) {
+    return 'Do not delete important regulated-industry evidence needs; compress the framing without losing control substance.';
+  }
+  if (/g-sib|gsib|systemic|cross-jurisdiction/.test(feedback)) {
+    return 'Do not overclaim that every cited obligation is uniquely G-SIB-only; separate general regulated-bank obligations from G-SIB-specific stakes.';
+  }
+  if (item.severity === 'HIGH') {
+    return 'Address the blocker without broadening the paper into a white paper or implementation plan.';
+  }
+  if (item.severity === 'MEDIUM') {
+    return 'Keep the edit proportionate; do not expand scope for a clarity improvement.';
+  }
+  if (item.severity === 'ACTION') {
+    return 'Do not apply isolated tactical edits that create noise or conflict with the accepted revision strategy.';
+  }
+  return 'Do not revise automatically without a user decision.';
+}
+
+function conciseFeedbackForPlan(item) {
+  let feedback = cleanTableCell(item.feedback || '');
+  feedback = feedback.replace(/^(HIGH|MEDIUM|LOW|ACTION):\s*/i, '');
+  if (feedback.includes(' - ')) {
+    const splitAt = feedback.indexOf(' - ');
+    const title = feedback.slice(0, splitAt).trim();
+    const detail = feedback.slice(splitAt + 3).trim();
+    feedback = detail ? `${title}: ${detail}` : title;
+  }
+  if (feedback.length > 700) {
+    const excerpt = feedback.slice(0, 700);
+    const sentenceEnd = Math.max(
+      excerpt.lastIndexOf('. '),
+      excerpt.lastIndexOf('? '),
+      excerpt.lastIndexOf('! '),
+    );
+    feedback = sentenceEnd > 240
+      ? excerpt.slice(0, sentenceEnd + 1).trim()
+      : `${excerpt.slice(0, 697).trim()}...`;
+  }
+  return feedback;
+}
+
 function extractSection(content, headingPattern) {
   const lines = String(content || '').split(/\r?\n/);
   const start = lines.findIndex((line) => headingPattern.test(line.trim()));
@@ -592,6 +882,16 @@ function extractBulletItems(content) {
   return items;
 }
 
+function extractReviewerSuggestedFix(lines) {
+  const fixes = [];
+  for (const line of lines) {
+    const trimmed = trimMarkdownMarkers(line);
+    const match = trimmed.match(/^(?:fix|suggested fix|recommendation|recommended fix)\s*:\s*(.+)$/i);
+    if (match && match[1].trim()) fixes.push(trimMarkdownMarkers(match[1]));
+  }
+  return fixes.join(' ');
+}
+
 function severityHeading(line) {
   const prefixed = line.match(/^#{2,4}\s+(HIGH|MEDIUM|LOW)(?:-\d+)?(?:\s*[—:]\s*|\s+-\s+|\s+)(.+?)\s*$/i);
   if (prefixed) {
@@ -622,7 +922,7 @@ function extractReviewFeedbackItems(review) {
       proposedHandling: review.status === 'captured'
         ? handlingForSeverity('UNKNOWN')
         : 'Check whether this provider result should be ignored, retried, or replaced.',
-      affectedArtifact: 'EXTERNAL-REVIEWS',
+      affectedArtifact: 'FEEDBACK-EXTERNAL',
     }];
   }
 
@@ -643,10 +943,12 @@ function extractReviewFeedbackItems(review) {
       .map((line) => trimMarkdownMarkers(line))
       .find((line) => line && !/^fix:/i.test(line));
     const feedback = firstBody ? `${severity}: ${title} - ${firstBody}` : `${severity}: ${title}`;
+    const reviewerSuggestedFix = extractReviewerSuggestedFix(body);
     items.push({
       reviewer: review.reviewer,
       severity,
       feedback,
+      reviewerSuggestedFix,
       recommendation: recommendationForSeverity(severity),
       proposedHandling: handlingForSeverity(severity),
       affectedArtifact: affectedArtifactForFeedback(`${title} ${body.join(' ')}`),
@@ -802,6 +1104,10 @@ function mergeFeedbackItems(existing, incoming) {
     ...(existing.affectedArtifact || '').split('/').map((item) => item.trim()).filter(Boolean),
     ...(incoming.affectedArtifact || '').split('/').map((item) => item.trim()).filter(Boolean),
   ];
+  const suggestedFixes = [
+    ...(existing.suggestedFixes || [existing.reviewerSuggestedFix].filter(Boolean)),
+    ...(incoming.suggestedFixes || [incoming.reviewerSuggestedFix].filter(Boolean)),
+  ];
   const severity = severityFromRank(Math.max(existingRank, incomingRank));
   return {
     ...existing,
@@ -813,6 +1119,8 @@ function mergeFeedbackItems(existing, incoming) {
     reviewer: [...new Set(reviewers)].join(', '),
     reviewers: [...new Set(reviewers)],
     sources: [...new Set(sources)],
+    reviewerSuggestedFix: [...new Set(suggestedFixes)].join(' '),
+    suggestedFixes: [...new Set(suggestedFixes)],
     affectedArtifact: [...new Set(affectedArtifacts)].join(' / '),
     mergedCount: (existing.mergedCount || 1) + 1,
   };
@@ -857,7 +1165,7 @@ ${review.content || '[No review content captured.]'}
 }
 
 function storeIndividualReviews(paperDir, reviews, createdAt, dryRun) {
-  const reviewDir = path.join(paperDir, '.paper', 'external-reviews');
+  const reviewDir = path.join(paperDir, '.paper', 'feedback-external');
   const stored = [];
   for (const review of reviews) {
     const fileName = `${safeTimestamp(createdAt)}-${reviewerSlug(review.reviewer)}.md`;
@@ -867,7 +1175,7 @@ function storeIndividualReviews(paperDir, reviews, createdAt, dryRun) {
     stored.push({
       reviewer: review.reviewer,
       path: filePath,
-      relativePath: path.join('.paper', 'external-reviews', fileName),
+      relativePath: path.join('.paper', 'feedback-external', fileName),
     });
   }
   return stored;
@@ -906,7 +1214,7 @@ function externalReviewsMarkdown({
   }
   const modeText = modes.length > 0 ? modes.join(', ') : 'provided files or stdin';
 
-  return `# External Reviews
+  return `# External Feedback
 
 **Reviewed at:** ${createdAt}
 **Reviewers:** ${reviewerList}
@@ -946,37 +1254,65 @@ ${combinedItems.length > 0 ? combinedItems.slice(0, 8).map((item) => `- ${item.r
 
 function feedbackPlanMarkdown({ reviews, createdAt, feedbackItems }) {
   const combinedItems = feedbackItems || dedupeFeedbackItems(feedbackItemsForReviews(reviews));
-  const rows = reviews.length === 0
-    ? '| 1 | No external review input was provided. | gpd review-external | Needs decision | Recommend ask user | Provide review files/stdin or skip external feedback for this revision. | None yet - user may override. | EXTERNAL-REVIEWS |\n'
+  const sections = reviews.length === 0
+    ? [
+      '### 1. Feedback Item',
+      '',
+      '- **Feedback:** No external review input was provided.',
+      '- **Source(s):** gpd review-external',
+      '- **Decision:** Recommend ask user (needs decision)',
+      '- **Why It Matters:** No reviewer supplied actionable feedback, so the workflow should not treat missing independent review as approval.',
+      '- **Proposed Fix:** Provide review files/stdin, run provider review, or explicitly skip external feedback for this revision.',
+      '- **Guardrail:** Do not treat missing independent review as approval.',
+      '- **User Override:** None yet - user may override.',
+      '- **Affected Artifact:** FEEDBACK-EXTERNAL',
+      '',
+    ].join('\n')
     : combinedItems.map((item, index) => {
-      const assessment = item.severity && item.severity !== 'UNKNOWN' ? `${item.severity} - Pending approval` : 'Pending approval';
-      return `| ${index + 1} | ${cleanTableCell(item.feedback)} | ${cleanTableCell(item.reviewer)} | ${cleanTableCell(assessment)} | ${cleanTableCell(item.recommendation)} | ${cleanTableCell(item.proposedHandling)} | None yet - user may override with incorporate / discuss / defer / ignore. | ${cleanTableCell(item.affectedArtifact)} |`;
+      return [
+        `### ${index + 1}. Feedback Item`,
+        '',
+        `- **Feedback:** ${conciseFeedbackForPlan(item)}`,
+        `- **Source(s):** ${cleanTableCell(item.reviewer)}`,
+        `- **Decision:** ${cleanTableCell(decisionLabelForItem(item))}`,
+        `- **Why It Matters:** ${cleanTableCell(decisionRationaleForItem(item))}`,
+        `- **Reviewer Suggested Fix:** ${cleanTableCell(item.reviewerSuggestedFix || 'None captured.')}`,
+        `- **Proposed Fix:** ${cleanTableCell(proposedFixForItem(item))}`,
+        `- **Why This Fix Addresses It:** ${cleanTableCell(whyProposedFixAddressesItem(item))}`,
+        `- **Fix Confidence:** ${cleanTableCell(proposedFixConfidenceForItem(item))}`,
+        `- **Guardrail:** ${cleanTableCell(guardrailForItem(item))}`,
+        '- **User Override:** None yet - user may override the decision or constrain the proposed fix before revision.',
+        `- **Affected Artifact:** ${cleanTableCell(item.affectedArtifact)}`,
+        '',
+      ].join('\n');
     }).join('\n');
   const incorporate = reviews.length > 0
-    ? '- Recommended by default for HIGH items, unless the user writes an override in the table or rejects the premise.'
+    ? '- Recommended by default for HIGH items, unless the user writes an override in the relevant numbered section or rejects the premise.'
     : '- None.';
   const defer = reviews.length > 0
     ? '- Recommended by default for LOW items and ACTION items that do not map to an approved concern.'
     : '- None automatically.';
   const decisions = reviews.length > 0
-    ? '- Approve the recommendations as written or edit the \`User Override\` column before revision.'
+    ? '- Approve the generated decisions as written or edit the \`User Override\` field before revision.'
     : '- Decide whether to provide external review input or continue without it.';
 
   return `# Feedback Handling Plan
 
 **Created:** ${createdAt}
-**Based on:** \`.paper/EXTERNAL-REVIEWS.md\`
+**Based on:** \`.paper/FEEDBACK-EXTERNAL.md\`
 **Status:** Pending user approval
 
 ## Summary
 
-\`gpd review-external\` captured external review input, decomposed actionable concerns into the table below, assigned default recommendations, and stopped at the approval gate. No draft or upstream artifact has been changed. The user may override any row by editing the \`User Override\` column before revision.
+\`gpd review-external\` captured external review input, decomposed actionable concerns into the numbered sections below, assigned default decisions, and stopped at the approval gate. No draft or upstream artifact has been changed. The user may override any item by editing the \`User Override\` field before revision.
+
+\`Feedback\` summarizes the reviewer concern for fast decision-making. Full reviewer text remains in \`FEEDBACK-EXTERNAL.md\`.
+
+${decisionViewMarkdown(combinedItems)}
 
 ## Proposed Handling
 
-| # | Feedback | Source(s) | Assessment | Recommendation | Proposed Handling | User Override | Affected Artifact |
-|---|----------|-----------|------------|----------------|-------------------|---------------|-------------------|
-${rows}
+${sections}
 
 ## Below-Target Items
 
@@ -1006,9 +1342,9 @@ Before changing \`.paper/DRAFT.md\` or upstream artifacts, present this plan to 
 
 Options:
 
-- Approve all recommended handling
+- Approve generated decisions
 - Approve only incorporate items
-- Override selected rows in the \`User Override\` column
+- Override selected items in the \`User Override\` field
 - Discuss decisions first
 - Revise the handling plan
 - Ignore external feedback
@@ -1061,7 +1397,7 @@ async function reviewExternal(input = {}) {
   const storedReviews = storeIndividualReviews(paperDir, reviews, createdAt, dryRun);
 
   writeFile(
-    path.join(paperDir, '.paper', 'EXTERNAL-REVIEWS.md'),
+    path.join(paperDir, '.paper', 'FEEDBACK-EXTERNAL.md'),
     externalReviewsMarkdown({
       reviews,
       paperDir,
@@ -1089,7 +1425,7 @@ async function reviewExternal(input = {}) {
     storedReviews,
     feedbackRecommendations: feedbackItems.map((item, index) => ({
       index: index + 1,
-      feedback: item.feedback,
+      feedback: conciseFeedbackForPlan(item),
       reviewers: item.reviewer,
       recommendation: item.recommendation,
     })),
@@ -1098,7 +1434,7 @@ async function reviewExternal(input = {}) {
       source: review.source,
       status: review.status,
     })),
-    externalReviewsPath: path.join(paperDir, '.paper', 'EXTERNAL-REVIEWS.md'),
+    externalReviewsPath: path.join(paperDir, '.paper', 'FEEDBACK-EXTERNAL.md'),
     feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
     next: '/gpd-status',
   };
@@ -1129,12 +1465,12 @@ function printExternalReviewResult(result) {
     }
   }
   if (result.feedbackRecommendations && result.feedbackRecommendations.length > 0) {
-    console.log('combined recommendations:');
+    console.log('combined decisions:');
     for (const item of result.feedbackRecommendations) {
       console.log(`- ${item.index}. ${item.recommendation} [${item.reviewers}]: ${item.feedback}`);
     }
   }
-  console.log(`external reviews: ${result.externalReviewsPath}`);
+  console.log(`external feedback: ${result.externalReviewsPath}`);
   console.log(`feedback plan: ${result.feedbackPlanPath}`);
   console.log(`next: ${result.next}`);
 }

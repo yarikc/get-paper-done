@@ -29,8 +29,8 @@ Check which artifacts exist:
 - DRAFT.md
 - REVIEW.md
 - FACT-CHECK.md
-- EXTERNAL-REVIEWS.md
-- READER-FEEDBACK.md
+- FEEDBACK-EXTERNAL.md
+- FEEDBACK-READER.md
 - FEEDBACK-PLAN.md
 - PAPER-CONTEXT.md
 - DECISIONS.md
@@ -58,7 +58,7 @@ Stale context risks:
 - `OUTLINE.md` updated after `DRAFT.md`: draft may need refresh.
 - `DRAFT.md` updated after `FACT-CHECK.md`: fact-check may need refresh.
 - `FACT-CHECK.md` has HIGH issues or claims marked verify-before-publication: do not export without user acknowledgement.
-- `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
+- `FEEDBACK-READER.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
 - `FEEDBACK-PLAN.md` pending approval: do not revise until user approves handling.
 - `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export: route to `/gpd-revise`.
 - `STATE.json` `grill.status` is not `Complete`, or required `grill.resolved_decisions` are missing: recommend `/gpd-grill` before `/gpd-brief`.
@@ -118,8 +118,8 @@ Use this order:
 15. `DRAFT.md` missing → `/gpd-draft`.
 16. `FACT-CHECK.md` missing and draft contains sourced, factual, current, technical, market, regulatory, numerical, or publication-sensitive claims → `/gpd-fact-check --full`.
 17. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
-18. User wants external critique and `EXTERNAL-REVIEWS.md` missing → `/gpd-review --external`.
-19. `READER-FEEDBACK.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
+18. User wants external critique and `FEEDBACK-EXTERNAL.md` missing → `/gpd-review --external`.
+19. `FEEDBACK-READER.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
 20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-status`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
 21. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
 22. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.

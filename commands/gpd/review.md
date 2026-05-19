@@ -28,5 +28,5 @@ Backward-compatible aliases are accepted: `--audience-lite`, `--audience-deep`, 
 </execution_context>
 
 <process>
-Run the review workflow. Use a review stance: findings first, then summary. If user-provided reader feedback is present, capture it in `.paper/READER-FEEDBACK.md` and synthesize it into a handling plan. If `--external` or `--models` is present, collect external feedback, synthesize it into a handling plan, and ask before any revision is applied.
+Run the review workflow. Use a review stance: findings first, then summary. If user-provided reader feedback is present, capture it in `.paper/FEEDBACK-READER.md` and synthesize it into a handling plan. If `--external` or `--models` is present, collect external feedback, synthesize it into a handling plan, and ask before any revision is applied.
 </process>

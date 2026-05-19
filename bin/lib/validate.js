@@ -23,8 +23,8 @@ const artifactNameAliases = {
   'outline.md': 'OUTLINE.md',
   'fact-check.md': 'FACT-CHECK.md',
   'review.md': 'REVIEW.md',
-  'external-reviews.md': 'EXTERNAL-REVIEWS.md',
-  'reader-feedback.md': 'READER-FEEDBACK.md',
+  'feedback-external.md': 'FEEDBACK-EXTERNAL.md',
+  'feedback-reader.md': 'FEEDBACK-READER.md',
   'feedback-plan.md': 'FEEDBACK-PLAN.md',
   'paper-context.md': 'PAPER-CONTEXT.md',
   'decisions.md': 'DECISIONS.md',
@@ -140,6 +140,7 @@ const markdownContracts = {
     headings: [
       '# Feedback Handling Plan',
       '## Summary',
+      '## Decision View',
       '## Proposed Handling',
       '## Below-Target Items',
       '## Incorporate',
@@ -149,22 +150,12 @@ const markdownContracts = {
       '## Approval Gate',
     ],
     tables: [
-      [
-        '#',
-        'Feedback',
-        'Source(s)',
-        'Assessment',
-        'Recommendation',
-        'Proposed Handling',
-        'User Override',
-        'Affected Artifact',
-      ],
       ['#', 'Issue', 'Target Bar Impact', 'Action', 'Reason'],
     ],
   },
-  'EXTERNAL-REVIEWS.md': {
+  'FEEDBACK-EXTERNAL.md': {
     headings: [
-      '# External Reviews',
+      '# External Feedback',
       '## Review Prompt Summary',
       '## Consensus Summary',
       '### Shared Concerns',
@@ -174,7 +165,7 @@ const markdownContracts = {
     ],
     tables: [],
   },
-  'READER-FEEDBACK.md': {
+  'FEEDBACK-READER.md': {
     headings: [
       '# Reader Feedback',
       '## Source',
@@ -468,7 +459,7 @@ function validateAudienceScorecard(markdown) {
 }
 
 function validateReaderFeedbackScorecard(markdown) {
-  const contract = markdownContracts['READER-FEEDBACK.md'];
+  const contract = markdownContracts['FEEDBACK-READER.md'];
   const section = sectionBetween(markdown, '## Five-Signal Scorecard', /\n##\s+/);
   const rows = parseFirstTableRows(section);
   const signals = rows.map((row) => row[0]).filter(Boolean);
@@ -476,20 +467,48 @@ function validateReaderFeedbackScorecard(markdown) {
 
   for (const signal of contract.readerFeedbackSignals) {
     if (!signals.includes(signal)) {
-      issues.push(issue('HIGH', 'READER-FEEDBACK.md', `Five-Signal Scorecard missing signal "${signal}"`));
+      issues.push(issue('HIGH', 'FEEDBACK-READER.md', `Five-Signal Scorecard missing signal "${signal}"`));
     }
   }
 
   for (const signal of signals) {
     if (!contract.readerFeedbackSignals.includes(signal)) {
-      issues.push(issue('HIGH', 'READER-FEEDBACK.md', `Five-Signal Scorecard has unexpected signal "${signal}"`));
+      issues.push(issue('HIGH', 'FEEDBACK-READER.md', `Five-Signal Scorecard has unexpected signal "${signal}"`));
     }
   }
 
   for (const signal of contract.readerFeedbackSignals) {
     const count = signals.filter((item) => item === signal).length;
     if (count > 1) {
-      issues.push(issue('HIGH', 'READER-FEEDBACK.md', `Five-Signal Scorecard repeats signal "${signal}"`));
+      issues.push(issue('HIGH', 'FEEDBACK-READER.md', `Five-Signal Scorecard repeats signal "${signal}"`));
+    }
+  }
+
+  return issues;
+}
+
+function validateFeedbackPlanSections(markdown) {
+  const section = sectionBetween(markdown, '## Proposed Handling', /\n##\s+/);
+  const issues = [];
+  if (!/###\s+\d+\.\s+/.test(section)) {
+    issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', 'Proposed Handling must use numbered feedback item sections'));
+    return issues;
+  }
+
+  const requiredFields = [
+    'Feedback',
+    'Source(s)',
+    'Decision',
+    'Why It Matters',
+    'Proposed Fix',
+    'Guardrail',
+    'User Override',
+    'Affected Artifact',
+  ];
+  for (const field of requiredFields) {
+    const pattern = new RegExp(`\\*\\*${field.replace(/[()]/g, '\\$&')}:\\*\\*`);
+    if (!pattern.test(section)) {
+      issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', `Proposed Handling missing field "${field}"`));
     }
   }
 
@@ -658,8 +677,11 @@ function validateMarkdownArtifact(filePath) {
   if (artifact === 'REVIEW.md') {
     issues.push(...validateAudienceScorecard(markdown));
   }
-  if (artifact === 'READER-FEEDBACK.md') {
+  if (artifact === 'FEEDBACK-READER.md') {
     issues.push(...validateReaderFeedbackScorecard(markdown));
+  }
+  if (artifact === 'FEEDBACK-PLAN.md') {
+    issues.push(...validateFeedbackPlanSections(markdown));
   }
   if (artifact === 'STRATEGY.md') {
     issues.push(...validateStrategyValues(markdown, filePath));

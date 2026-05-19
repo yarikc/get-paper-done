@@ -262,18 +262,18 @@ function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
 
 function testReaderFeedbackRoutesToReviewBeforeRevision() {
   const paperDir = completePaper('reader-feedback');
-  writeArtifact(paperDir, 'READER-FEEDBACK.md', fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8'));
-  touchArtifact(paperDir, 'READER-FEEDBACK.md', 30);
+  writeArtifact(paperDir, 'FEEDBACK-READER.md', fs.readFileSync(path.join(repoRoot, 'templates', 'feedback-reader.md'), 'utf8'));
+  touchArtifact(paperDir, 'FEEDBACK-READER.md', 30);
 
   const status = statusJson(paperDir);
-  assert.strictEqual(status.artifacts['READER-FEEDBACK.md'], true);
+  assert.strictEqual(status.artifacts['FEEDBACK-READER.md'], true);
   assert.strictEqual(status.next, '/gpd-review');
 }
 
 function testHandledReaderFeedbackDoesNotStaleExport() {
   const paperDir = completePaper('handled-reader-feedback');
   writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n');
-  writeArtifact(paperDir, 'READER-FEEDBACK.md', fs.readFileSync(path.join(repoRoot, 'templates', 'reader-feedback.md'), 'utf8'));
+  writeArtifact(paperDir, 'FEEDBACK-READER.md', fs.readFileSync(path.join(repoRoot, 'templates', 'feedback-reader.md'), 'utf8'));
   writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
     '# Feedback Handling Plan',
     '',
@@ -281,7 +281,7 @@ function testHandledReaderFeedbackDoesNotStaleExport() {
     '',
   ].join('\n'));
   touchArtifact(paperDir, 'exports/FINAL.md', 30);
-  touchArtifact(paperDir, 'READER-FEEDBACK.md', 40);
+  touchArtifact(paperDir, 'FEEDBACK-READER.md', 40);
   touchArtifact(paperDir, 'FEEDBACK-PLAN.md', 50);
 
   assert.strictEqual(statusJson(paperDir).next, '/gpd-status');

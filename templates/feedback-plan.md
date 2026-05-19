@@ -1,18 +1,35 @@
 # Feedback Handling Plan
 
 **Created:** [timestamp]
-**Based on:** `.paper/REVIEW.md` and `.paper/EXTERNAL-REVIEWS.md`
+**Based on:** `.paper/REVIEW.md` and `.paper/FEEDBACK-EXTERNAL.md`
 **Status:** Pending user approval
 
 ## Summary
 
-[Short summary of the feedback and recommended path. State that recommendations are defaults and the user may override any row before revision.]
+[Short summary of the feedback and recommended path. State that recommendations are defaults and the user may override any item before revision.]
+
+## Decision View
+
+**Recommended decision:** [Approve / discuss / defer / ignore item groups]
+
+**Why:** [Why this recommendation is the right default]
+
+**What improves:** [What quality, audience, evidence, argument, or workflow outcome improves]
+
+**How:** [How the user should approve, constrain, or override the proposed fixes before revision/export]
 
 ## Proposed Handling
 
-| # | Feedback | Source(s) | Assessment | Recommendation | Proposed Handling | User Override | Affected Artifact |
-|---|----------|-----------|------------|----------------|-------------------|---------------|-------------------|
-| 1 | [Feedback] | [Reviewer] | [HIGH / MEDIUM / LOW / ACTION - Pending approval] | [Recommend incorporate / Recommend discuss / Recommend defer / Recommend ask user] | [Default handling] | [Optional user override: incorporate / discuss / defer / ignore] | [DRAFT / BRIEF / RESEARCH / OUTLINE] |
+### 1. Feedback Item
+
+- **Feedback:** [Feedback]
+- **Source(s):** [Reviewer]
+- **Decision:** [Recommend incorporate / discuss / defer / ask user, with severity when known]
+- **Why It Matters:** [Why this affects paper quality, decision usefulness, evidence, or audience trust]
+- **Proposed Fix:** [Concrete edit strategy if approved]
+- **Guardrail:** [What not to do when applying the fix]
+- **User Override:** [Optional override or constraint before revision]
+- **Affected Artifact:** [DRAFT / BRIEF / RESEARCH / OUTLINE]
 
 ## Below-Target Items
 
@@ -46,9 +63,9 @@ Before changing `.paper/DRAFT.md` or upstream artifacts, present this plan to th
 
 Options:
 
-- Approve all recommended handling
+- Approve generated decisions
 - Approve only incorporate items
-- Override selected rows in the `User Override` column
+- Override selected items in the `User Override` field
 - Discuss decisions first
 - Revise the handling plan
 - Ignore external feedback
