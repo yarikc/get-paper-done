@@ -39,7 +39,12 @@ Initial working release.
 - `REVISION-CHECK.md` artifact for substantive revisions, requiring before/after quality scoring for thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation before export.
 - Revision workflow now treats validators as advisory and explicitly blocks validator-driven edits that delete specificity, weaken evidence, flatten persona/voice, or reduce persuasive force.
 - Paper-local version snapshots under `.paper/versions/`, `REVISION-LOG.md`, and `gpd snapshot` for preserving paper artifacts, source notes, external-review captures, imported originals, and hash metadata before substantive revision.
+- `gpd revise` revision preflight now snapshots the current paper, records the active revision snapshot in state, and prints the exact restore command before controlled draft changes.
 - `gpd restore` now restores tracked files from a snapshot after first creating a safety snapshot of the current state.
+- `gpd status` and `gpd next` now show the latest restore command when a snapshot exists.
+- Generated artifact, revision-log, and installer writes now use a temp-file plus rename path so state, feedback, export, metadata, install assets, and manifests are not left partially overwritten by interrupted writes.
+- Import/init refusal for an existing paper workspace now explains how to recover: choose a different slug/location or run commands against the existing workspace with `--paper`.
+- `PAPER-CONTEXT.md` canonical-term validation now waits until review/export exists, avoiding false blocking of early partial drafts while still protecting reviewed papers.
 - `gpd export` now requires a current valid `REVISION-CHECK.md` before overwriting an existing `.paper/exports/FINAL.md` with a newer draft, then snapshots the prior export so a reviewed reading copy is recoverable.
 - `gpd next` and `gpd status` now use the stored exported draft hash for export freshness, avoiding false stale routing from a touched-but-unchanged `DRAFT.md` while still catching content changes with misleading mtimes.
 - Review/comment UX helper commands: `gpd review-pack` shows the single current review target and comment syntax; `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and a pending `FEEDBACK-PLAN.md` without mutating the draft.

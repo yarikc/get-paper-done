@@ -82,6 +82,10 @@ You can also create a paper from the AI runtime:
 /gpd-new
 ```
 
+Use `gpd init` when you want deterministic terminal setup. Use `/gpd-new` when
+you want interactive setup inside Claude or Codex. Both create the same kind of
+paper workspace.
+
 ## The Workflow
 
 You do not need to memorize the whole sequence. Use this rule:
@@ -185,6 +189,10 @@ If you add comments to it, run:
 gpd feedback --paper ~/papers/my-paper
 ```
 
+`gpd feedback` captures reader comments into feedback artifacts. `/gpd-review`
+evaluates the paper's quality, audience fit, evidence, and ask clarity. They
+are related, but they are not the same command.
+
 Then run:
 
 ```text
@@ -196,11 +204,18 @@ file to review. GPD captures comments, plans the handling, revises
 `.paper/DRAFT.md` only after approval, and regenerates `FINAL.md`. You review
 the final reading copy; GPD keeps `DRAFT.md` as the source of truth.
 
-For risky manual work, create a snapshot first:
+For revision work, prepare the revision first. This creates a recoverable
+snapshot and prints the restore command before the draft changes:
 
 ```bash
-gpd snapshot --paper ~/papers/my-paper --reason before_substantive_revision
+gpd revise --paper ~/papers/my-paper --trigger .paper/FEEDBACK-PLAN.md
 ```
+
+This matters because revision is where strong papers can be made worse. The
+snapshot preserves the known-good state before the edit, while
+`REVISION-CHECK.md` asks whether the edit improved or degraded the paper. If the
+revision regresses, restore the saved version instead of trying to rebuild it
+from memory.
 
 To recover a prior paper state:
 
@@ -213,6 +228,10 @@ Restore creates its own safety snapshot before it overwrites tracked files.
 ## Moving Backward Is Normal
 
 GPD is not a one-way conveyor belt.
+
+If `gpd next` tells you to run an earlier command, the system is repairing an
+upstream artifact before more downstream writing happens. This is intentional:
+fix that artifact, then run `gpd next` again.
 
 If review finds that the ask is unclear, GPD may route back to `/gpd-brief`.
 If the new brief needs stronger evidence, it routes to `/gpd-research`. If

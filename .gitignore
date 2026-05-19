@@ -4,3 +4,4 @@ node_modules/
 agents/.claude/
 docs/feedback*.md
 *.feedback
+.codex-handoff.md

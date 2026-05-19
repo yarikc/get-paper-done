@@ -160,7 +160,7 @@ Required tables:
 
 ### `REVISION-CHECK.md`
 
-Required when a substantive revision changes the draft before export or renewed review. The check must compare against a saved baseline, preferably a `.paper/versions/...` snapshot created before the revision.
+Required when a substantive revision changes the draft before export or renewed review. The check must compare against a saved baseline, preferably a `.paper/versions/...` snapshot created by `gpd revise` before the revision.
 
 Required headings:
 

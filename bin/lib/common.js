@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const os = require('os');
 
 const { root } = require('./installer');
 
@@ -30,8 +31,12 @@ function timestampSlug() {
 
 function expandHome(value) {
   if (!value) return value;
-  if (value === '~') return process.env.HOME || value;
-  if (value.startsWith('~/')) return path.join(process.env.HOME || '~', value.slice(2));
+  const home = process.env.HOME || os.homedir();
+  if ((value === '~' || value.startsWith('~/')) && !home) {
+    throw new Error('Cannot expand "~" because HOME is not set. Pass an absolute path instead.');
+  }
+  if (value === '~') return home;
+  if (value.startsWith('~/')) return path.join(home, value.slice(2));
   return value;
 }
 
@@ -48,7 +53,10 @@ function resolvePaperDir(input = {}) {
 function ensureNotExistingPaper(paperDir) {
   const paperMeta = path.join(paperDir, '.paper');
   if (fs.existsSync(paperMeta)) {
-    throw new Error(`Paper workspace already exists: ${paperMeta}`);
+    throw new Error(
+      `Refusing to overwrite existing paper workspace: ${paperDir}. `
+      + 'Choose a different --slug or --location, or run commands against this workspace with --paper.',
+    );
   }
 }
 
@@ -69,8 +77,23 @@ function writeFile(filePath, content, dryRun) {
     console.log(`would write ${filePath}`);
     return;
   }
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, content);
+  const dir = path.dirname(filePath);
+  fs.mkdirSync(dir, { recursive: true });
+  const tempPath = path.join(
+    dir,
+    `.${path.basename(filePath)}.${process.pid}.${Date.now()}.tmp`,
+  );
+  try {
+    fs.writeFileSync(tempPath, content);
+    fs.renameSync(tempPath, filePath);
+  } catch (err) {
+    try {
+      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    } catch (_) {
+      // Best effort cleanup only; preserve the original write error.
+    }
+    throw err;
+  }
 }
 
 function copyFile(src, dest, dryRun) {

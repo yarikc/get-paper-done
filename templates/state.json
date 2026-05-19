@@ -28,6 +28,7 @@
   },
   "versioning": {
     "last_snapshot_id": "",
+    "active_revision_snapshot_id": "",
     "last_export_snapshot_id": "",
     "last_restore_snapshot_id": "",
     "last_exported_draft_sha256": "",

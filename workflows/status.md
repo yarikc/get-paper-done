@@ -142,7 +142,7 @@ Users should not need to remember the whole workflow. Always include a short "wh
 - If next is `/gpd-export`: "Run export, then review `.paper/exports/FINAL.md`."
 - If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add comments there, run `gpd feedback`, then `/gpd-review`."
 - If next is `/gpd-review` and `exports/FINAL.md` exists: "Review will capture comments from the exported reading copy into feedback artifacts before revision."
-- If next is `/gpd-revise`: "Revision edits `.paper/DRAFT.md`; export regenerates `.paper/exports/FINAL.md`."
+- If next is `/gpd-revise`: "Run `gpd revise` first if no active snapshot exists. Revision edits `.paper/DRAFT.md`; export regenerates `.paper/exports/FINAL.md`."
 - Otherwise: "Run the recommended command, then run `/gpd-status` again."
 
 ## 6. Context Guidance
@@ -161,7 +161,7 @@ Default guidance:
 - Before `/gpd-draft`: clear context after outline; read `PERSONA.md`, `AUDIENCE.md`, `BRIEF.md`, `RESEARCH.json`, `OUTLINE.md`.
 - Before `/gpd-fact-check`: clear context after drafting; read `DRAFT.md`, compressed `RESEARCH.json`, `BRIEF.md`, `AUDIENCE.md`, and source policy. Avoid raw sources except for specific verification.
 - Before `/gpd-review`: clear context after drafting; read draft, reader feedback if present, and upstream artifacts.
-- Before `/gpd-revise`: clear context after review; read approved feedback plan, reader feedback if present, and draft.
+- Before `/gpd-revise`: clear context after review; read approved feedback plan, reader feedback if present, draft, and revision log if present.
 
 ## 7. Output Format
 

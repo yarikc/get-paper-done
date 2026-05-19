@@ -14,6 +14,11 @@ It shows the high-rigor end of the workflow:
 
 The paper is intentionally bounded. It explains why responsible AI work needs operational control evidence, but it does not claim a universal maturity model, regulatory guarantee, or measured outcome improvement.
 
+Current workflow note: this is a grandfathered example from before mandatory
+`PAPER-CONTEXT.md` and `DECISIONS.md`. New papers and new examples should
+include both artifacts; see `examples/software-supply-chain-evidence-pack` for
+the current shape.
+
 ## Known Limitations
 
 - Source records are synthetic; this fixture validates workflow shape, not real-world citation fidelity.

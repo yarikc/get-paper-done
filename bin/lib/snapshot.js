@@ -147,7 +147,8 @@ function appendRevisionLog(meta, metadata, dryRun) {
     return logPath;
   }
 
-  fs.appendFileSync(logPath, `\n${entry}`);
+  const existing = fs.readFileSync(logPath, 'utf8');
+  writeFile(logPath, `${existing}\n${entry}`, false);
   return logPath;
 }
 

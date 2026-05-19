@@ -78,6 +78,24 @@ function ensureParent(filePath) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
 }
 
+function atomicWriteFile(filePath, content) {
+  ensureParent(filePath);
+  const dir = path.dirname(filePath);
+  const base = path.basename(filePath);
+  const tempPath = path.join(dir, `.${base}.${process.pid}.${Date.now()}.tmp`);
+  try {
+    fs.writeFileSync(tempPath, content);
+    fs.renameSync(tempPath, filePath);
+  } catch (error) {
+    try {
+      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    } catch (_) {
+      // Best effort cleanup only; preserve the original write failure.
+    }
+    throw error;
+  }
+}
+
 function sameContent(filePath, content) {
   if (!fs.existsSync(filePath)) return false;
   return fs.readFileSync(filePath, 'utf8') === content;
@@ -105,8 +123,7 @@ function copyChangedFile(srcAbs, srcRel, destAbs, options, manifestFiles) {
   }
 
   if (changed) {
-    ensureParent(destAbs);
-    fs.writeFileSync(destAbs, content);
+    atomicWriteFile(destAbs, content);
     console.log(`${exists ? 'updated' : 'copied'} ${srcRel} -> ${destAbs}`);
   } else {
     console.log(`kept ${destAbs}`);
@@ -154,8 +171,7 @@ function installAssets(input = {}) {
     console.log(`would write manifest -> ${manifestPath}`);
     console.log(`Dry run complete for ${options.runtime} target ${options.target}.`);
   } else {
-    ensureParent(manifestPath);
-    fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    atomicWriteFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
     console.log(`wrote manifest -> ${manifestPath}`);
     console.log(`${options.action === 'update' ? 'Update' : 'Install'} complete for ${options.runtime} target ${options.target}.`);
   }

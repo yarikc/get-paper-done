@@ -159,6 +159,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-export` | Prepare final handoff |
 | `gpd review-pack` | Show the current review target, editable source, and comment syntax |
 | `gpd feedback` | Capture inline comments from the review target into reader feedback and feedback-plan artifacts |
+| `gpd revise` | Prepare a controlled revision by snapshotting current paper state and surfacing the restore command |
 | `gpd snapshot` | Preserve current tracked paper state before substantive revision or other risky work |
 | `gpd restore` | Restore tracked paper files from a snapshot after first creating a safety snapshot |
 
@@ -182,7 +183,7 @@ run the recommended command
 repeat
 ```
 
-After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a decision view and concise numbered items with `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, and `User Override`; any populated override wins over the generated decision. Before substantive revision, `gpd snapshot --reason before_substantive_revision` preserves the current paper artifacts under `.paper/versions/` with file hashes. `/gpd-revise` applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
+After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a decision view and concise numbered items with `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, and `User Override`; any populated override wins over the generated decision. Before substantive revision, `gpd revise --trigger <artifact>` preserves the current paper artifacts under `.paper/versions/` with file hashes, records the active revision snapshot in state, and prints the restore command. `/gpd-revise` then applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
 
 ### Stage Semantics
 
@@ -232,7 +233,7 @@ The grill gate and strategy gate may be overridden only by explicit user instruc
 
 Validation has two layers:
 
-1. Artifact-contract validation in `bin/lib/validate.js`. This checks required files, schemas, Markdown contracts, `PAPER-CONTEXT.md`, `DECISIONS.md`, and cross-artifact consistency such as canonical terms appearing in `DRAFT.md`.
+1. Artifact-contract validation in `bin/lib/validate.js`. This checks required files, schemas, Markdown contracts, `PAPER-CONTEXT.md`, `DECISIONS.md`, and cross-artifact consistency such as canonical terms appearing in `DRAFT.md` once the paper has reached review or export.
 2. Semantic lint-style validation in `bin/lib/semantic.js`. This checks paper-quality failure patterns such as stale evidence, weak reasoning spine, unsupported quantitative claims, and overloaded prose.
 
 `gpd validate --semantic` always runs layer 1 before layer 2. A validator does not need to live in `bin/lib/semantic.js` to block semantic validation output.

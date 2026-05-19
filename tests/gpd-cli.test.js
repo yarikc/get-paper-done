@@ -8,7 +8,7 @@ const { execFileSync, spawnSync } = require('child_process');
 
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
-const { slugify } = require('../bin/lib/common');
+const { expandHome, slugify, writeFile } = require('../bin/lib/common');
 const { requiredGrillDecisionKeys } = require('../bin/lib/contracts');
 
 function run(args, options = {}) {
@@ -34,6 +34,8 @@ function tempDir(name) {
 function testHelpShowsCalibratedExternalReviewProviders() {
   const output = run(['help']);
   assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini --current-runtime codex'));
+  assert(output.includes('revise                       Prepare revision by snapshotting current paper state'));
+  assert(output.includes('gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md'));
   assert(output.includes('next                         Show only the next recommended action and why'));
   assert(output.includes('gpd next --paper ~/papers/metadata-strategy'));
 }
@@ -148,6 +150,32 @@ function testListCommands() {
 
   const profiles = JSON.parse(run(['list-profiles', '--json']));
   assert(profiles.some((item) => item.slug === 'head-data-ai-architecture'));
+}
+
+function testCommonWriteFileAndHomeExpansion() {
+  const dir = tempDir('gpd-common-test');
+  const target = path.join(dir, 'nested', 'STATE.json');
+  writeFile(target, '{"version":1}\n', false);
+  writeFile(target, '{"version":2}\n', false);
+  assert.strictEqual(fs.readFileSync(target, 'utf8'), '{"version":2}\n');
+  assert.strictEqual(
+    fs.readdirSync(path.dirname(target)).filter((name) => name.includes('.tmp')).length,
+    0,
+  );
+  assert(!expandHome('~/gpd-test-path').startsWith('~'));
+}
+
+function testImportAgainstExistingWorkspaceExplainsRecoveryPath() {
+  const dir = tempDir('gpd-import-existing-workspace-test');
+  run(['init', '--location', dir, '--slug', 'existing-paper', '--title', 'Existing Paper']);
+  const source = path.join(dir, 'source.md');
+  fs.writeFileSync(source, '# Existing Paper\n\nSource body.\n');
+
+  const result = runFail(['import', '--source', source, '--location', dir, '--slug', 'existing-paper']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stderr.includes('Refusing to overwrite existing paper workspace'));
+  assert(result.stderr.includes('Choose a different --slug or --location'));
+  assert(result.stderr.includes('run commands against this workspace with --paper'));
 }
 
 function testInitStatusValidate() {
@@ -770,6 +798,70 @@ function testSnapshotCommandCreatesVersionAndRevisionLog() {
   const revisionLog = fs.readFileSync(path.join(meta, 'REVISION-LOG.md'), 'utf8');
   assert(revisionLog.includes(`# Revision Log`));
   assert(revisionLog.includes(metadata.version_id));
+
+  run(['snapshot', '--paper', paperDir, '--reason', 'second_snapshot']);
+  const updatedVersions = fs.readdirSync(versionsDir);
+  assert.strictEqual(updatedVersions.length, 2);
+  const updatedRevisionLog = fs.readFileSync(path.join(meta, 'REVISION-LOG.md'), 'utf8');
+  assert(updatedRevisionLog.includes(metadata.version_id));
+  assert(updatedRevisionLog.includes('second-snapshot'));
+  assert.strictEqual(
+    fs.readdirSync(meta).filter((name) => name.includes('REVISION-LOG.md') && name.endsWith('.tmp')).length,
+    0,
+  );
+}
+
+function testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore() {
+  const dir = tempDir('gpd-revise-preflight-test');
+  run(['init', '--location', dir, '--slug', 'revise-preflight', '--title', 'Revise Preflight']);
+  const paperDir = path.join(dir, 'revise-preflight');
+  const meta = path.join(paperDir, '.paper');
+  const draftPath = path.join(meta, 'DRAFT.md');
+  fs.writeFileSync(draftPath, '# Draft\n\nStrong version before risky revision.\n');
+  fs.writeFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), '# Feedback Plan\n\n## Status\n\nApproved.\n');
+
+  const output = run(['revise', '--paper', paperDir, '--trigger', '.paper/FEEDBACK-PLAN.md']);
+  assert(output.includes('snapshot before revision: .paper/versions/REV-'));
+  assert(output.includes('next: /gpd-revise'));
+  assert(output.includes(`restore: gpd restore --paper ${paperDir} --snapshot REV-`));
+  assert.strictEqual(fs.readFileSync(draftPath, 'utf8'), '# Draft\n\nStrong version before risky revision.\n');
+
+  const state = JSON.parse(fs.readFileSync(path.join(meta, 'STATE.json'), 'utf8'));
+  assert(state.versioning.last_snapshot_id.startsWith('REV-'));
+  assert.strictEqual(state.versioning.active_revision_snapshot_id, state.versioning.last_snapshot_id);
+  assert.strictEqual(state.suggested_next_command, '/gpd-revise');
+
+  const snapshotDraft = fs.readFileSync(
+    path.join(meta, 'versions', state.versioning.active_revision_snapshot_id, 'DRAFT.md'),
+    'utf8',
+  );
+  assert.strictEqual(snapshotDraft, '# Draft\n\nStrong version before risky revision.\n');
+
+  const statusOutput = run(['status', '--paper', paperDir]);
+  assert(statusOutput.includes(`latest snapshot: ${state.versioning.active_revision_snapshot_id}`));
+  assert(statusOutput.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
+
+  const nextOutput = run(['next', '--paper', paperDir]);
+  assert(nextOutput.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
+
+  fs.writeFileSync(draftPath, '# Draft\n\nRisky revised version after preflight.\n');
+  const postEditStatusOutput = run(['status', '--paper', paperDir]);
+  assert(postEditStatusOutput.includes(`latest snapshot: ${state.versioning.active_revision_snapshot_id}`));
+  assert(postEditStatusOutput.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
+
+  const statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.latestSnapshotId, state.versioning.active_revision_snapshot_id);
+  assert.strictEqual(statusJson.restoreCommand, `gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`);
+}
+
+function testReviseCommandRequiresDraft() {
+  const dir = tempDir('gpd-revise-missing-draft-test');
+  run(['init', '--location', dir, '--slug', 'revise-missing-draft', '--title', 'Revise Missing Draft']);
+  const paperDir = path.join(dir, 'revise-missing-draft');
+
+  const result = runFail(['revise', '--paper', paperDir]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stderr.includes('Cannot prepare revision because .paper/DRAFT.md is missing'));
 }
 
 function testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot() {
@@ -1811,6 +1903,8 @@ function testMalformedInputs() {
 testHelpShowsCalibratedExternalReviewProviders();
 testInstallerInstallDoctorRewriteAndBackup();
 testListCommands();
+testCommonWriteFileAndHomeExpansion();
+testImportAgainstExistingWorkspaceExplainsRecoveryPath();
 testInitStatusValidate();
 testStateJsonIsStatusSourceOfTruth();
 testStateJsonSuggestedNextIsStatusSourceOfTruth();
@@ -1830,6 +1924,8 @@ testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
 testNextUsesDraftHashForExportFreshness();
 testSnapshotCommandCreatesVersionAndRevisionLog();
+testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();
+testReviseCommandRequiresDraft();
 testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot();
 testRestoreCommandRejectsTamperedSnapshot();
 testExportCommandSnapshotsExistingFinalBeforeOverwrite();

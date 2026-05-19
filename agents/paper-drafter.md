@@ -30,7 +30,7 @@ Read before drafting:
 8. `.paper/OUTLINE.md` - approved structure
 9. `.paper/DRAFT.md` if present - current draft to preserve or revise from
 10. `.paper/REVIEW.md` when redrafting from review comments
-11. `.paper/EXTERNAL-REVIEWS.md` when redrafting from external model feedback
+11. `.paper/FEEDBACK-EXTERNAL.md` when redrafting from external model feedback
 12. `.paper/FEEDBACK-PLAN.md` when redrafting from approved feedback
 </required_reading>
 

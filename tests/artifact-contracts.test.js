@@ -319,7 +319,7 @@ function testDecisionsRejectPlaceholderContent() {
   assert(result.stdout.includes('DECISIONS.md: Contains unresolved template placeholder text'));
 }
 
-function testPaperContextTermsMustAppearInDraftWhenDraftExists() {
+function testPaperContextTermsMustAppearInDraftAfterReviewExists() {
   const dir = tempDir('gpd-artifact-paper-context-draft-test');
   const paperDir = path.join(dir, 'paper');
   const meta = path.join(paperDir, '.paper');
@@ -350,6 +350,7 @@ function testPaperContextTermsMustAppearInDraftWhenDraftExists() {
     '',
   ].join('\n'));
   fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThis draft never names the key term.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
 
   const issues = validatePaperArtifacts(paperDir, {
     'PAPER-CONTEXT.md': true,
@@ -357,6 +358,41 @@ function testPaperContextTermsMustAppearInDraftWhenDraftExists() {
   });
 
   assert(issues.some((item) => item.issue.includes('PAPER-CONTEXT.md: Canonical term "Governed object" does not appear in DRAFT.md')));
+}
+
+function testPaperContextTermsDoNotBlockEarlyDrafts() {
+  const dir = tempDir('gpd-artifact-paper-context-wip-test');
+  const paperDir = path.join(dir, 'paper');
+  const meta = path.join(paperDir, '.paper');
+  fs.mkdirSync(meta, { recursive: true });
+  fs.writeFileSync(path.join(meta, 'PAPER-CONTEXT.md'), [
+    '# Paper Context',
+    '',
+    '## Language',
+    '',
+    '**Operating layer**: The governed execution environment.',
+    '',
+    '## Relationships',
+    '',
+    '- Operating layer connects teams and agents.',
+    '',
+    '## Example Dialogue',
+    '',
+    '> **Author:** "What is the layer?"',
+    '',
+    '## Flagged Ambiguities',
+    '',
+    '- None.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nEarly partial draft.\n');
+
+  const issues = validatePaperArtifacts(paperDir, {
+    'PAPER-CONTEXT.md': true,
+    'DRAFT.md': true,
+  });
+
+  assert(!issues.some((item) => item.issue.includes('Canonical term')));
 }
 
 function testJsonSchemaAdditionalPropertiesAndPatternAreEnforced() {
@@ -619,7 +655,8 @@ testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
 testPaperContextRejectsPlaceholderContent();
 testDecisionsRejectPlaceholderContent();
-testPaperContextTermsMustAppearInDraftWhenDraftExists();
+testPaperContextTermsMustAppearInDraftAfterReviewExists();
+testPaperContextTermsDoNotBlockEarlyDrafts();
 testJsonSchemaAdditionalPropertiesAndPatternAreEnforced();
 testUnsupportedSchemaKeywordFailsSchemaDefinition();
 testUnknownArtifactFailsCli();

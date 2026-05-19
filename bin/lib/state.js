@@ -54,6 +54,7 @@ function defaultMachineState(input = {}) {
     },
     versioning: {
       last_snapshot_id: '',
+      active_revision_snapshot_id: '',
       last_export_snapshot_id: '',
       last_restore_snapshot_id: '',
       last_exported_draft_sha256: '',
@@ -313,6 +314,20 @@ function versioningState(state) {
     : {};
 }
 
+function latestSnapshotId(state) {
+  const versioning = versioningState(state);
+  return versioning.active_revision_snapshot_id
+    || versioning.last_snapshot_id
+    || versioning.last_export_snapshot_id
+    || versioning.last_restore_snapshot_id
+    || '';
+}
+
+function snapshotRestoreCommand(state) {
+  const snapshotId = latestSnapshotId(state);
+  return snapshotId ? `gpd restore --paper ${state.paperDir} --snapshot ${snapshotId}` : '';
+}
+
 function draftChangedSinceExport(state) {
   const versioning = versioningState(state);
   if (!state.artifacts['DRAFT.md'] || !state.artifacts['exports/FINAL.md']) return false;
@@ -468,6 +483,8 @@ function status(input = {}) {
   const state = artifactState(paperDir);
   state.next = suggestedNext(state);
   state.userAction = userActionHint(state);
+  state.latestSnapshotId = latestSnapshotId(state);
+  state.restoreCommand = snapshotRestoreCommand(state);
   return state;
 }
 
@@ -479,6 +496,10 @@ function printStatus(state) {
   console.log('artifacts:');
   for (const [name, exists] of Object.entries(state.artifacts)) {
     console.log(`- ${exists ? 'ok' : 'missing'} ${name}`);
+  }
+  if (state.latestSnapshotId) {
+    console.log(`latest snapshot: ${state.latestSnapshotId}`);
+    console.log(`restore: ${state.restoreCommand}`);
   }
   console.log(`next: ${state.next}`);
   console.log(`user action: ${state.userAction}`);
@@ -524,8 +545,8 @@ function contextForCommand(command) {
   if (base === '/gpd-revise') {
     return {
       clear_context: 'Yes, after review.',
-      read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'FEEDBACK-READER.md if present'],
-      avoid: ['unapproved feedback items', 'editing exports/FINAL.md as the source of truth'],
+      read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'FEEDBACK-READER.md if present', 'REVISION-LOG.md if present'],
+      avoid: ['editing without first running gpd revise or gpd snapshot', 'unapproved feedback items', 'editing exports/FINAL.md as the source of truth'],
     };
   }
   if (base === '/gpd-export') {
@@ -634,7 +655,11 @@ function userActionHint(state) {
     return 'If comments were added to .paper/exports/FINAL.md, /gpd-review should capture them into FEEDBACK-READER.md and FEEDBACK-PLAN.md before revision.';
   }
   if (next === '/gpd-revise') {
-    return 'Revise applies approved feedback to .paper/DRAFT.md. Do not hand-edit FINAL.md as the durable source; export regenerates it.';
+    const restore = snapshotRestoreCommand(state);
+    if (restore) {
+      return `Revise applies approved feedback to .paper/DRAFT.md. Prior state is restorable with: ${restore}`;
+    }
+    return 'Before editing, run gpd revise to snapshot the current paper. Then apply approved feedback to .paper/DRAFT.md; export regenerates FINAL.md.';
   }
   return 'Run the recommended command. After it finishes, run gpd next or /gpd-status again.';
 }
@@ -650,6 +675,8 @@ function nextAction(input = {}) {
     stateSource: state.stateSource,
     context: contextForCommand(state.next),
     userAction: state.userAction,
+    latestSnapshotId: state.latestSnapshotId,
+    restoreCommand: state.restoreCommand,
   };
 }
 
@@ -662,6 +689,7 @@ function printNext(result) {
   console.log(`clear context: ${result.context.clear_context}`);
   console.log(`read: ${result.context.read.join(', ')}`);
   console.log(`avoid: ${result.context.avoid.join(', ')}`);
+  if (result.restoreCommand) console.log(`restore: ${result.restoreCommand}`);
   console.log(`user action: ${result.userAction}`);
 }
 

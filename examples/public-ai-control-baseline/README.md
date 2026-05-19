@@ -6,6 +6,11 @@ It also acts as a second calibration point for governance/control-paper guidance
 
 Source verification date: 2026-05-12.
 
+Current workflow note: this is a grandfathered example from before mandatory
+`PAPER-CONTEXT.md` and `DECISIONS.md`. New papers and new examples should
+include both artifacts; see `examples/software-supply-chain-evidence-pack` for
+the current shape.
+
 Public sources used:
 
 - NIST AI Risk Management Framework 1.0

@@ -12,6 +12,11 @@ It shows the numerical-claim path:
 
 The paper is intentionally modest. It argues that a synthetic pilot improved review-cycle predictability, but it does not claim enterprise ROI, regulatory compliance, or generalizable benchmark performance.
 
+Current workflow note: this is a grandfathered example from before mandatory
+`PAPER-CONTEXT.md` and `DECISIONS.md`. New papers and new examples should
+include both artifacts; see `examples/software-supply-chain-evidence-pack` for
+the current shape.
+
 ## Known Limitations
 
 - Source records and metrics are synthetic; this fixture validates workflow shape, not real-world citation fidelity.

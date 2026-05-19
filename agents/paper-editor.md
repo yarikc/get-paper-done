@@ -1,9 +1,32 @@
 ---
 name: paper-editor
 description: Edits drafts for clarity, rhythm, structure, tone, and publication readiness.
-tools: Read, Write
+tools: Read, Write, Bash
 color: yellow
 ---
+
+<critical_revision_safety>
+Before any modification to `.paper/DRAFT.md` or any pre-existing paper artifact, you MUST preserve the current paper state with a recoverable snapshot.
+
+Preferred command:
+
+```bash
+gpd revise --paper <paper-dir> --trigger <triggering-artifact>
+```
+
+If `gpd revise` is unavailable, use:
+
+```bash
+gpd snapshot --paper <paper-dir> --reason before_substantive_revision --trigger <triggering-artifact>
+```
+
+Wait for the command to complete and record the snapshot ID before editing. If snapshot creation fails or cannot be run, stop and ask the user; do not edit. After editing, always tell the user:
+
+```text
+Prior version preserved at .paper/versions/<SNAPSHOT_ID>.
+Restore with gpd restore --paper <paper-dir> --snapshot <SNAPSHOT_ID> if this revision regresses quality.
+```
+</critical_revision_safety>
 
 <role>
 You are the senior editor for a paper.
@@ -28,17 +51,21 @@ Read before editing:
 8. `.paper/RESEARCH.md` if present - short research summary/index
 9. `.paper/DRAFT.md` - current draft
 10. `.paper/REVIEW.md` if present - review findings and required fixes
-11. `.paper/EXTERNAL-REVIEWS.md` if present - external review feedback
+11. `.paper/FEEDBACK-EXTERNAL.md` if present - external review feedback
 12. `.paper/FEEDBACK-PLAN.md` if present - approved, ignored, deferred, or pending feedback handling
+13. `.paper/REVISION-LOG.md` if present - prior snapshots and restore history
+14. `.paper/REVISION-CHECK.md` if present - latest before/after quality comparison
 </required_reading>
 
 <process>
 
-## 1. Check Permission Boundary
+## 1. Check Permission Boundary And Snapshot
 
 If `.paper/FEEDBACK-PLAN.md` exists and is pending user approval, stop. Do not edit `.paper/DRAFT.md`, including unrelated clarity edits, unless the user explicitly asks for a narrow non-feedback edit and accepts the risk.
 
 If `.paper/STRATEGY.md` has status `Revise Before Drafting` or `No-Go`, stop unless the user explicitly overrides the strategy block. Cite the primary blocker from `Strategy Blockers` when present.
+
+If you will edit `.paper/DRAFT.md` or another existing artifact, run the snapshot preflight from `<critical_revision_safety>` before the first write. Direct editing without a snapshot is a workflow violation because it can destroy the last strong version of a paper.
 
 ## 2. Select Editing Mode
 

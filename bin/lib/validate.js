@@ -773,6 +773,9 @@ function validatePaperContextTermsUsedInDraft(meta) {
   const contextPath = path.join(meta, 'PAPER-CONTEXT.md');
   const draftPath = path.join(meta, 'DRAFT.md');
   if (!fs.existsSync(contextPath) || !fs.existsSync(draftPath)) return [];
+  const reviewedOrExported = fs.existsSync(path.join(meta, 'REVIEW.md'))
+    || fs.existsSync(path.join(meta, 'exports', 'FINAL.md'));
+  if (!reviewedOrExported) return [];
 
   const context = fs.readFileSync(contextPath, 'utf8');
   const draft = fs.readFileSync(draftPath, 'utf8').toLowerCase();

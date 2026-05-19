@@ -10,6 +10,11 @@ The example shows a second completed workflow shape beyond the data-products exa
 - deep outline, rewritten draft, fact-check, review, revision, and export
 - clean `gpd validate --semantic` output
 
+Current workflow note: this is a grandfathered example from before mandatory
+`PAPER-CONTEXT.md` and `DECISIONS.md`. New papers and new examples should
+include both artifacts; see `examples/software-supply-chain-evidence-pack` for
+the current shape.
+
 ## What To Inspect
 
 - `.paper/RESEARCH.json` shows source registry and claim-to-evidence mapping.

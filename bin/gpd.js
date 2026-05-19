@@ -31,6 +31,8 @@ const {
   printSnapshot,
   restoreSnapshot,
   printRestore,
+  prepareRevision,
+  printRevisionPreparation,
 } = require('./lib/workspace');
 
 function printHelp() {
@@ -44,7 +46,8 @@ Commands:
   import                       Import an existing paper folder/file into a workspace
   export                       Export reviewed draft to .paper/exports/FINAL.md
   review-pack                  Show the one file to review and how to comment
-  feedback                     Capture inline review comments into feedback artifacts
+  feedback                     Capture reader comments; /gpd-review evaluates paper quality
+  revise                       Prepare revision by snapshotting current paper state
   snapshot                     Preserve current paper artifacts before risky work
   restore                      Restore paper artifacts from a snapshot
   review-external              Collect external review text into review artifacts
@@ -91,6 +94,7 @@ Examples:
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-pack --paper ~/papers/metadata-strategy
   gpd feedback --paper ~/papers/metadata-strategy
+  gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md
   gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
   gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
@@ -102,6 +106,9 @@ Examples:
   gpd validate --semantic --paper ~/papers/metadata-strategy
   gpd validate-artifact --path ~/papers/metadata-strategy/.paper/STATE.json
   gpd list-audiences
+
+Review distinction:
+  /gpd-review evaluates the paper. gpd feedback captures reader comments.
 `);
 }
 
@@ -269,6 +276,14 @@ async function main(argv) {
     const result = captureFeedback(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printFeedbackCapture(result);
+    return;
+  }
+
+  if (command === 'revise') {
+    const args = parseWorkspaceOptions(rest);
+    const result = prepareRevision(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printRevisionPreparation(result);
     return;
   }
 

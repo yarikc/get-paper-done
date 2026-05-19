@@ -4,6 +4,7 @@ description: Apply approved feedback or run a controlled editorial pass on the c
 allowed-tools:
   - Read
   - Write
+  - Bash
   - AskUserQuestion
 ---
 
@@ -13,6 +14,20 @@ allowed-tools:
 
 <process>
 Run the revise workflow.
+
+Before any edit to `.paper/DRAFT.md` or another existing paper artifact, run the CLI preflight and capture the snapshot ID:
+
+```bash
+gpd revise --paper <paper-dir> --trigger <triggering-artifact>
+```
+
+If `gpd revise` is unavailable, stop and ask the user before falling back to `gpd snapshot --paper <paper-dir> --reason before_substantive_revision --trigger <triggering-artifact>`. Do not edit first and snapshot later.
+
+After the edit, report the restore command printed by the CLI:
+
+```text
+Restore with gpd restore --paper <paper-dir> --snapshot <SNAPSHOT_ID> if this revision regresses quality.
+```
 
 Accepted intent flags:
 

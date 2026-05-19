@@ -94,6 +94,9 @@ You can also create the paper interactively from the AI runtime:
 /gpd-new
 ```
 
+`gpd init` is deterministic terminal setup. `/gpd-new` is interactive setup
+inside Claude or Codex. Both create the same kind of paper workspace.
+
 ## How It Works
 
 You do not need to remember every command. The operating rule is:
@@ -193,6 +196,10 @@ evidence, structure, ask, audience handling, persona, or voice, GPD requires a
 snapshot plus `REVISION-CHECK.md` before export so fixes do not quietly make
 the paper worse. Snapshots include the paper artifacts, source notes, external
 review captures, imported originals, and hash metadata for integrity checks.
+The benefit is practical: before a risky revision starts, GPD preserves the
+known-good paper state, prints the restore command, and keeps rollback separate
+from the quality review. If the new draft regresses, you can recover the prior
+tracked files instead of reconstructing them from memory or chat history.
 
 Export produces the final Markdown handoff in `.paper/exports/FINAL.md`. If
 that file already exists, `gpd export` requires a current `REVISION-CHECK.md`
@@ -293,7 +300,7 @@ Main writing commands:
 | `/gpd-outline` | Design the argument path |
 | `/gpd-draft` | Draft from approved artifacts |
 | `/gpd-fact-check` | Check material claims |
-| `/gpd-review` | Review audience fit and paper quality |
+| `/gpd-review` | Evaluate audience fit and paper quality |
 | `/gpd-revise` | Apply approved fixes |
 | `/gpd-export` | Create final Markdown output |
 
@@ -305,6 +312,7 @@ gpd status
 gpd validate
 gpd validate --semantic
 gpd export
+gpd revise --trigger .paper/FEEDBACK-PLAN.md
 gpd snapshot --reason before_substantive_revision
 gpd restore --snapshot REV-20260519T143205123-before-substantive-revision
 gpd review-pack
@@ -313,6 +321,9 @@ gpd review-external --models claude,codex,gemini --current-runtime codex
 gpd update claude
 gpd update codex
 ```
+
+`/gpd-review` evaluates the paper. `gpd feedback` captures reader comments into
+feedback artifacts for planning and revision.
 
 Use `gpd next` for the compact answer. Use `gpd status` when you want full
 artifact presence. Use `gpd validate --semantic` before treating a paper as

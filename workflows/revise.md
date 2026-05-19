@@ -17,6 +17,7 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 - .paper/FEEDBACK-EXTERNAL.md if present
 - .paper/FEEDBACK-READER.md if present
 - .paper/FEEDBACK-PLAN.md if present
+- .paper/REVISION-LOG.md if present
 - .paper/REVISION-CHECK.md if present
 </required_reading>
 
@@ -75,13 +76,13 @@ A revision is substantive when it changes, removes, adds, compresses, reorders, 
 
 Typos, punctuation, formatting, link fixes, and narrow sentence-level clarity edits are not substantive unless they change claim meaning, emphasis, or voice.
 
-Before any substantive revision, create a paper-local snapshot:
+Before any substantive revision, run the CLI revision preflight. It creates the paper-local snapshot, records it in state, and prints the restore command:
 
 ```bash
-gpd snapshot --paper <paper-dir> --reason before_substantive_revision --trigger .paper/FEEDBACK-PLAN.md
+gpd revise --paper <paper-dir> --trigger .paper/FEEDBACK-PLAN.md
 ```
 
-If the revision is not triggered by a feedback plan, set `--trigger` to the artifact or user request that caused the edit. Do not rely on `REVISION-CHECK.md` alone as the baseline. The snapshot is the recoverable paper state; the revision check is the quality comparison. Snapshot metadata includes hashes; validation checks those hashes when a revision check references the snapshot.
+If the revision is not triggered by a feedback plan, set `--trigger` to the artifact or user request that caused the edit. If `gpd revise` is unavailable, stop and ask before falling back to `gpd snapshot --paper <paper-dir> --reason before_substantive_revision --trigger <trigger>`. Do not edit first and snapshot later. Do not rely on `REVISION-CHECK.md` alone as the baseline. The snapshot is the recoverable paper state; the revision check is the quality comparison. Snapshot metadata includes hashes; validation checks those hashes when a revision check references the snapshot.
 
 If `.paper/REVIEW.md` contains a `Below-Target Improvement Gate` with `Immediate improvement required before export: Yes`, handle those items before export. Apply any `apply_now` or equivalent items that do not require new author decisions. If an item cannot be applied safely, record it in `.paper/FEEDBACK-PLAN.md`, `.paper/REVIEW.md`, or the draft change log with a concrete deferral reason. Do not export a serious paper while known fixable below-target issues remain only as suggestions.
 
@@ -130,6 +131,13 @@ After every substantive revision, write or update `.paper/REVISION-CHECK.md` fro
 The revision fails if any score drops unless the user explicitly accepts the tradeoff in `.paper/REVISION-CHECK.md`. Do not treat `gpd validate` or semantic validation as readiness by itself. Validators are advisory; never fix a validator warning by deleting specificity, weakening evidence, flattening persona/voice, or reducing persuasive force.
 
 If a revision degrades the paper, use `gpd restore --paper <paper-dir> --snapshot REV-...` to recover the prior tracked files. Restore creates a safety snapshot of the current state before copying files back.
+
+After any draft modification, report the exact snapshot and restore command:
+
+```text
+Prior version preserved at .paper/versions/<SNAPSHOT_ID>.
+Restore with gpd restore --paper <paper-dir> --snapshot <SNAPSHOT_ID> if this revision regresses quality.
+```
 
 Add a short revision note at the top of `.paper/REVIEW.md` or in `.paper/STATE.md` describing what changed.
 

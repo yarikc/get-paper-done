@@ -14,6 +14,11 @@ It shows the lightweight end of the workflow:
 
 The point is to demonstrate that GPD can support terse status-oriented writing without forcing the full research / fact-check path used by higher-stakes strategy papers.
 
+Current workflow note: this is a grandfathered example from before mandatory
+`PAPER-CONTEXT.md` and `DECISIONS.md`. New papers and new examples should
+include both artifacts; see `examples/software-supply-chain-evidence-pack` for
+the current shape.
+
 ## Known Limitations
 
 - Synthetic operating status only; it does not prove behavior on a real weekly update stream.

@@ -32,6 +32,10 @@ const {
   printRestore,
 } = require('./snapshot');
 const {
+  prepareRevision,
+  printRevisionPreparation,
+} = require('./revise');
+const {
   status,
   printStatus,
   nextAction,
@@ -61,6 +65,8 @@ module.exports = {
   printSnapshot,
   restoreSnapshot,
   printRestore,
+  prepareRevision,
+  printRevisionPreparation,
   status,
   printStatus,
   nextAction,
