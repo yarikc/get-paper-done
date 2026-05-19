@@ -138,6 +138,8 @@ If no external review flag is present, skip to Step 7.
 
 CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, stores each reviewer capture under `.paper/feedback-external/`, records the active combined review in `.paper/FEEDBACK-EXTERNAL.md`, and writes a pending `.paper/FEEDBACK-PLAN.md`. The generated prompt includes state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. The feedback plan deduplicates overlapping reviewer concerns and decomposes captured HIGH/MEDIUM/LOW concerns into a decision view plus numbered recommendation items with rationale. Pass `--current-runtime claude`, `--current-runtime codex`, or the matching runtime name when known; the CLI skips that provider because self-review is not independent. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
 
+Feedback-decision note: `/gpd-feedback` is the user-facing approval loop for a generated `.paper/FEEDBACK-PLAN.md`. Use `/gpd-feedback --list` to show the queue, or `/gpd-feedback --item N` to jump to a concern. When using the underlying CLI outside the paper workspace, pass `--paper <paper-dir>`. Without flags, it should show the next pending concern and present one selection list: `approve`, `modify`, `defer`, or `reject`. If the user selects `modify`, ask one follow-up question for the constraint or instruction. If the user selects `defer` or `reject`, ask for a short reason only when it is not already clear. Then record the decision with `gpd feedback-plan decide --decision <value> --note <constraint-or-reason>`. It must not edit `.paper/DRAFT.md`; `/gpd-revise` applies approved or modified concerns after snapshot protection.
+
 ## 3. Detect Available Reviewers
 
 Check which external reviewers are available:
@@ -267,33 +269,28 @@ Include:
 
 Then evaluate all feedback, including `.paper/REVIEW.md`, `.paper/FACT-CHECK.md`, and `.paper/FEEDBACK-READER.md` when present, and create `.paper/FEEDBACK-PLAN.md` using `templates/feedback-plan.md`.
 
-For each meaningful feedback item, classify:
+The plan is a concern-first approval queue. For each meaningful concern, record:
 
-- **Valid:** should probably be incorporated
-- **Partly valid:** use part of it or adapt it
-- **Not useful:** ignore
-- **Conflicts with intent:** ignore unless user changes goals
-- **Needs decision:** ask the user
+- `Type`: Concern, Review Note, Unmapped Suggestion, or Tooling Issue
+- `Severity`: HIGH, MEDIUM, LOW, or INFO
+- `Source(s)`: reviewer, reader, or artifact that raised it
+- `Recommendation`: generated default, using `approve`, `modify`, `defer`, or `reject`
+- `Why this matters`: why the concern affects paper quality, trust, decision usefulness, or audience fit
+- `What improves if addressed`: the expected quality gain
+- `Risk if handled badly`: how revision could dilute, genericize, overclaim, or distort the paper
+- `Proposed handling`: recommended approach in prose
+- `Proposed edits`: concrete implementation options under the concern
+- `Affected artifacts`: `BRIEF.md`, `RESEARCH.json` / `RESEARCH.md`, `OUTLINE.md`, `FACT-CHECK.md`, or `DRAFT.md`
+- `User Decision`: pending until the user records `approve`, `modify`, `defer`, or `reject`
+- `User Constraint`: the user's constraint when they choose `modify`
 
-Decision values:
-
-- `Incorporate`
-- `Ignore`
-- `Defer`
-- `Ask user`
-
-The plan must explain:
-
-- why feedback should be incorporated or ignored
-- exactly what would change
-- which artifact would change: `BRIEF.md`, `RESEARCH.json` / `RESEARCH.md`, `OUTLINE.md`, `FACT-CHECK.md`, or `DRAFT.md`
-- whether more research is needed before revision
+Tactical suggestions should be grouped under their parent concern when possible. If a suggestion does not map to a concern, list it as an `Unmapped Suggestion` so the user can decide it explicitly.
 
 Do not edit `.paper/DRAFT.md` during review. Review proposes action; revision applies approved action.
 
 ## 7. Approval Gate
 
-Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` summary and ask the user how to proceed. Treat the `Decision` field as the generated default. Tell the user they can approve it as-is or override selected items by editing/filling `User Override`; revision must honor any populated override.
+Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` concern queue and ask the user how to proceed. Use `gpd feedback-plan list` for a compact view and `gpd feedback-plan review --item N` for one concern at a time. Treat `Recommendation` as the generated default. Revision must honor `User Decision` and `User Constraint`.
 
 Use AskUserQuestion when available:
 
@@ -303,7 +300,7 @@ Use AskUserQuestion when available:
   - "Approve plan" -- Use the feedback handling plan during `/gpd-revise`
   - "Discuss first" -- Review decision items and unresolved trade-offs
   - "Revise plan" -- Adjust the feedback handling plan before revision
-  - "Override items" -- Change selected `User Override` fields, then revise
+  - "Decide items" -- Record `approve`, `modify`, `defer`, or `reject` decisions, then revise
   - "Ignore external" -- Keep local review only
 
 If AskUserQuestion is unavailable, ask the same question in plain text and wait.

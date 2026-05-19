@@ -239,7 +239,7 @@ function testPendingFeedbackPlanBlocksAutomaticRevise() {
     '',
   ].join('\n'));
 
-  assert.strictEqual(statusJson(paperDir).next, '/gpd-status');
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-feedback');
 }
 
 function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
@@ -257,7 +257,7 @@ function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
   touchArtifact(paperDir, 'FEEDBACK-PLAN.md', 20);
   touchArtifact(paperDir, 'BRIEF.md', 30);
 
-  assert.strictEqual(statusJson(paperDir).next, '/gpd-status');
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-feedback');
 }
 
 function testReaderFeedbackRoutesToReviewBeforeRevision() {

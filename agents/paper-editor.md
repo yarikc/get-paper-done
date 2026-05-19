@@ -63,6 +63,8 @@ Read before editing:
 
 If `.paper/FEEDBACK-PLAN.md` exists and is pending user approval, stop. Do not edit `.paper/DRAFT.md`, including unrelated clarity edits, unless the user explicitly asks for a narrow non-feedback edit and accepts the risk.
 
+If `.paper/FEEDBACK-PLAN.md` exists and is approved, apply only concerns whose `User Decision` is `approve` or `modify`. Respect `User Constraint` for every `modify` decision. Do not apply concerns whose `User Decision` is `defer` or `reject`. Treat `Recommendation` as a generated default and `Proposed edits` as implementation options, not as authority to change the draft without the user's decision.
+
 If `.paper/STRATEGY.md` has status `Revise Before Drafting` or `No-Go`, stop unless the user explicitly overrides the strategy block. Cite the primary blocker from `Strategy Blockers` when present.
 
 If you will edit `.paper/DRAFT.md` or another existing artifact, run the snapshot preflight from `<critical_revision_safety>` before the first write. Direct editing without a snapshot is a workflow violation because it can destroy the last strong version of a paper.

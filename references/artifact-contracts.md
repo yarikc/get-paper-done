@@ -141,22 +141,22 @@ Required headings:
 - `## Decision View`
 - `## Proposed Handling`
 - `## Below-Target Items`
-- `## Incorporate`
-- `## Ignore`
-- `## Defer`
+- `## Approved Or Modified`
+- `## Rejected`
+- `## Deferred`
 - `## User Decisions Needed`
 - `## Approval Gate`
 
 Required numbered sections under `## Proposed Handling`:
 
-- Each feedback item uses `### N. Feedback Item`
-- Each item includes `Feedback`, `Source(s)`, `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, `User Override`, and `Affected Artifact`
+- Each concern uses `### N. Concern: <short title>`, `### N. Review Note: <short title>`, `### N. Unmapped Suggestion: <short title>`, or `### N. Tooling Issue: <short title>`
+- Each item includes `Type`, `Severity`, `Source(s)`, `Recommendation`, `Why this matters`, `What improves if addressed`, `Risk if handled badly`, `Proposed handling`, `Proposed edits`, `Reviewer evidence`, `Affected artifacts`, `User Decision`, and `User Constraint`
 
 Required tables:
 
-- Below-Target Items: `#`, `Issue`, `Target Bar Impact`, `Action`, `Reason`
+- Below-Target Items: `#`, `Issue`, `Target Bar Impact`, `Recommendation`, `Reason`
 
-`Decision` is the default generated handling, usually with severity when known. `Why It Matters` explains the consequence of accepting or ignoring the item. `Proposed Fix` states the concrete edit strategy if approved. `Guardrail` states what not to do when applying the fix. `User Override` is the explicit override point; if populated, revision must follow the override instead of the generated decision.
+`Recommendation` is the generated default handling (`approve`, `modify`, `defer`, or `reject`). `Why this matters` explains the consequence of accepting or ignoring the concern. `What improves if addressed` states the expected benefit. `Risk if handled badly` names the failure mode to avoid. `Proposed handling` and `Proposed edits` give implementation options, not separate approval decisions. `User Decision` is the explicit approval field; `User Constraint` records any author constraint that revision must follow.
 
 ### `REVISION-CHECK.md`
 

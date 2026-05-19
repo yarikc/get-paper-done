@@ -423,7 +423,7 @@ function suggestedNext(state) {
   ) {
     return '/gpd-brief';
   }
-  if (feedbackPlanPending(state)) return '/gpd-status';
+  if (feedbackPlanPending(state)) return '/gpd-feedback';
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
     || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
@@ -597,7 +597,7 @@ function explainNext(state) {
   ) {
     return 'Paper context or decision records changed after the brief, so the formal brief must absorb the clarified intent before downstream work continues.';
   }
-  if (feedbackPlanPending(state)) return 'A feedback plan is pending approval, so revision should wait until the handling decision is explicit.';
+  if (feedbackPlanPending(state)) return 'A feedback plan is pending approval, so /gpd-feedback should walk through the concerns before revision.';
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
     || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
@@ -651,6 +651,9 @@ function userActionHint(state) {
   }
   if (next === '/gpd-export') {
     return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';
+  }
+  if (next === '/gpd-feedback') {
+    return 'Run /gpd-feedback to approve, modify, defer, or reject each feedback-plan concern before revision.';
   }
   if (next === '/gpd-review' && a['exports/FINAL.md']) {
     return 'If comments were added to .paper/exports/FINAL.md, /gpd-review should capture them into FEEDBACK-READER.md and FEEDBACK-PLAN.md before revision.';

@@ -6,56 +6,61 @@
 
 ## Summary
 
-[Short summary of the feedback and recommended path. State that recommendations are defaults and the user may override any item before revision.]
+[Short summary of the feedback and recommended path. State that recommendations are defaults and the user must record a decision before revision.]
 
 ## Decision View
 
-**Recommended decision:** [Approve / discuss / defer / ignore item groups]
+Review each concern. Use `approve`, `modify`, `defer`, or `reject`.
 
-**Why:** [Why this recommendation is the right default]
-
-**What improves:** [What quality, audience, evidence, argument, or workflow outcome improves]
-
-**How:** [How the user should approve, constrain, or override the proposed fixes before revision/export]
+| # | Concern | Type | Severity | Recommendation | User Decision |
+|---|---------|------|----------|----------------|---------------|
+| 1 | [Concern title] | Concern | HIGH / MEDIUM / LOW | approve / modify / defer / reject | pending |
 
 ## Proposed Handling
 
-### 1. Feedback Item
+### 1. Concern: [Concern title]
 
-- **Feedback:** [Feedback]
+- **Type:** Concern
+- **Severity:** [HIGH / MEDIUM / LOW / TOOLING / SUGGESTION]
 - **Source(s):** [Reviewer]
-- **Decision:** [Recommend incorporate / discuss / defer / ask user, with severity when known]
-- **Why It Matters:** [Why this affects paper quality, decision usefulness, evidence, or audience trust]
-- **Proposed Fix:** [Concrete edit strategy if approved]
-- **Guardrail:** [What not to do when applying the fix]
-- **User Override:** [Optional override or constraint before revision]
-- **Affected Artifact:** [DRAFT / BRIEF / RESEARCH / OUTLINE]
+- **Recommendation:** [approve / modify / defer / reject]
+- **Why this matters:** [Why this affects paper quality, decision usefulness, evidence, or audience trust]
+- **What improves if addressed:** [What gets better if the concern is handled]
+- **Risk if handled badly:** [What to avoid while applying the fix]
+- **Proposed handling:** [Concise edit strategy if approved]
+- **Proposed edits:**
+  1. [Concrete edit option]
+- **Reviewer evidence:**
+  - [Short quote or paraphrase from reviewer feedback]
+- **Affected artifacts:** [DRAFT / BRIEF / RESEARCH / OUTLINE]
+- **User Decision:** pending
+- **User Constraint:** none yet
 
 ## Below-Target Items
 
 Use this section when `REVIEW.md` includes a Below-Target Improvement Gate or the user challenges a rating below the target bar.
 
-| # | Issue | Target Bar Impact | Action | Reason |
-|---|-------|-------------------|--------|--------|
-| 1 | [Issue keeping paper below target] | [Why it affects quality/rating] | [Apply now / Defer / Ask user / Not applicable] | [Reason] |
+| # | Issue | Target Bar Impact | Recommendation | Reason |
+|---|-------|-------------------|----------------|--------|
+| 1 | [Issue keeping paper below target] | [Why it affects quality/rating] | [approve / modify / defer / reject / not applicable] | [Reason] |
 
-If `Action` is `Apply now`, revise before export. If `Action` is `Defer`, state why deferral is compatible with this paper's purpose, audience, risk, and mode.
+If `Recommendation` is `approve` or `modify`, revise before export after the user records a matching decision. If `Recommendation` is `defer`, state why deferral is compatible with this paper's purpose, audience, risk, and mode.
 
-## Incorporate
+## Approved Or Modified
 
-- [Feedback to incorporate and how]
+- [Concerns with `User Decision: approve` or `modify`]
 
-## Ignore
+## Rejected
 
-- [Feedback to ignore and why]
+- [Concerns with `User Decision: reject`]
 
-## Defer
+## Deferred
 
-- [Feedback to save for later]
+- [Concerns with `User Decision: defer`]
 
 ## User Decisions Needed
 
-- [Decision]
+- Record `approve`, `modify`, `defer`, or `reject` for each concern. If `modify`, fill `User Constraint`.
 
 ## Approval Gate
 
@@ -63,9 +68,9 @@ Before changing `.paper/DRAFT.md` or upstream artifacts, present this plan to th
 
 Options:
 
-- Approve generated decisions
-- Approve only incorporate items
-- Override selected items in the `User Override` field
-- Discuss decisions first
+- Approve a concern
+- Modify a concern with a constraint
+- Defer a concern
+- Reject a concern
 - Revise the handling plan
-- Ignore external feedback
+- Reject external feedback

@@ -25,7 +25,7 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 
 Read the current draft and review. If `.paper/FEEDBACK-READER.md` exists, read it as input to feedback handling, not as direct edit authority. If `.paper/FEEDBACK-PLAN.md` exists, read it before proposing or applying changes.
 
-If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to approve, revise, or ignore the plan. The `Decision` field is the generated default; the `User Override` field takes precedence for any item where the user changed it. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
+If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to decide the concern queue. The `Recommendation` field is the generated default; `User Decision` and `User Constraint` are the authority for revision. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
 
 If `.paper/STRATEGY.md` has status `Revise Before Drafting` or `No-Go`, stop unless the user explicitly overrides the strategy block. Cite the primary blocker from `Strategy Blockers` when present.
 
@@ -53,7 +53,7 @@ Before editing, identify:
 - below-target improvement gate items from `.paper/REVIEW.md`
 - approved external feedback to incorporate
 - approved reader feedback to incorporate
-- user overrides in `.paper/FEEDBACK-PLAN.md`
+- user decisions and constraints in `.paper/FEEDBACK-PLAN.md`
 - feedback explicitly ignored or deferred
 - claims needing support or removal
 - fact-check findings requiring source, softening, removal, reframe, or current verification
@@ -85,6 +85,14 @@ gpd revise --paper <paper-dir> --trigger .paper/FEEDBACK-PLAN.md
 If the revision is not triggered by a feedback plan, set `--trigger` to the artifact or user request that caused the edit. If `gpd revise` is unavailable, stop and ask before falling back to `gpd snapshot --paper <paper-dir> --reason before_substantive_revision --trigger <trigger>`. Do not edit first and snapshot later. Do not rely on `REVISION-CHECK.md` alone as the baseline. The snapshot is the recoverable paper state; the revision check is the quality comparison. Snapshot metadata includes hashes; validation checks those hashes when a revision check references the snapshot.
 
 If `.paper/REVIEW.md` contains a `Below-Target Improvement Gate` with `Immediate improvement required before export: Yes`, handle those items before export. Apply any `apply_now` or equivalent items that do not require new author decisions. If an item cannot be applied safely, record it in `.paper/FEEDBACK-PLAN.md`, `.paper/REVIEW.md`, or the draft change log with a concrete deferral reason. Do not export a serious paper while known fixable below-target issues remain only as suggestions.
+
+Feedback-plan boundary:
+
+- Apply only concerns whose `User Decision` is `approve` or `modify`.
+- Respect `User Constraint` for every `modify` decision.
+- Do not apply concerns whose `User Decision` is `defer` or `reject`.
+- Treat `Recommendation` as a generated default, not the user's decision.
+- Treat `Proposed edits` as implementation options under the concern, not mandatory line-by-line instructions.
 
 Revision boundary:
 

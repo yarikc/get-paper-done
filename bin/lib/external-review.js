@@ -663,19 +663,19 @@ function affectedArtifactForFeedback(text) {
 }
 
 function handlingForSeverity(severity) {
-  if (severity === 'HIGH') return 'Recommended default: incorporate before final approval unless the user rejects the premise.';
-  if (severity === 'MEDIUM') return 'Recommended default: discuss; incorporate if it improves the paper without expanding scope.';
-  if (severity === 'LOW') return 'Recommended default: defer unless it is quick, low-risk polish.';
-  if (severity === 'ACTION') return 'Recommended default: apply only if it maps to an approved HIGH/MEDIUM/LOW concern.';
-  return 'Recommended default: ask user whether to incorporate, ignore, defer, or convert into a specific revision task.';
+  if (severity === 'HIGH') return 'Default is approval before final release unless the user rejects the premise.';
+  if (severity === 'MEDIUM') return 'Default is modification if the concern improves the paper without expanding scope.';
+  if (severity === 'LOW') return 'Default is deferral unless the change is quick, low-risk polish.';
+  if (severity === 'ACTION') return 'Treat as a tactical edit option; apply only if it maps to an approved or modified parent concern.';
+  return 'Default is deferral until the user turns this into a specific approved or modified revision task.';
 }
 
 function recommendationForSeverity(severity) {
-  if (severity === 'HIGH') return 'Recommend incorporate';
-  if (severity === 'MEDIUM') return 'Recommend discuss';
-  if (severity === 'LOW') return 'Recommend defer';
-  if (severity === 'ACTION') return 'Recommend map to approved concern';
-  return 'Recommend ask user';
+  if (severity === 'HIGH') return 'approve';
+  if (severity === 'MEDIUM') return 'modify';
+  if (severity === 'LOW') return 'defer';
+  if (severity === 'ACTION') return 'modify';
+  return 'defer';
 }
 
 function itemNumbers(items, predicate) {
@@ -713,15 +713,14 @@ function decisionViewMarkdown(items) {
     item.severity === 'MEDIUM'
     && !sharedItemSet.has(String(index + 1))
   ));
-  const actionItems = itemNumbers(items, (item) => item.severity === 'ACTION');
   const lowItems = itemNumbers(items, (item) => item.severity === 'LOW');
   const lowText = lowItems.length > 0 ? `Defer LOW items ${formatItemNumbers(lowItems)} unless they are quick polish.` : 'No LOW items were extracted.';
 
   return `## Decision View
 
-**Recommended decision:** Approve HIGH items ${formatItemNumbers(highItems)}. Also approve shared MEDIUM items ${formatItemNumbers(sharedItems)} if they sharpen the same approved concern. Discuss the remaining MEDIUM items ${formatItemNumbers(mediumItems)}. Apply ACTION items ${formatItemNumbers(actionItems)} only when they map to an approved concern. ${lowText}
+**Recommended decision:** Approve HIGH items ${formatItemNumbers(highItems)}. Modify shared MEDIUM items ${formatItemNumbers(sharedItems)} if they sharpen the same approved concern. Discuss the remaining MEDIUM items ${formatItemNumbers(mediumItems)}. ${lowText}
 
-**Why:** HIGH items are likely to block decision usefulness, credibility, or audience trust. Shared items carry more signal because more than one reviewer converged on the concern. ACTION items are tactical suggestions; applying them without an approved parent concern can add noise.
+**Why:** HIGH items are likely to block decision usefulness, credibility, or audience trust. Shared items carry more signal because more than one reviewer converged on the concern. Tactical suggestions should stay under approved or modified concerns so revision does not add noise.
 
 **What improves:** The paper should become easier to sponsor, easier to defend, and easier to revise because the feedback is reduced from a reviewer transcript into a ranked decision set.
 
@@ -1037,7 +1036,7 @@ function extractReviewFeedbackItems(review) {
       reviewer: review.reviewer,
       severity: review.status === 'captured' ? 'UNKNOWN' : 'INFO',
       feedback: firstNonEmptyLine(review.content) || `[${review.status}] ${review.reviewer} produced no actionable review text.`,
-      recommendation: review.status === 'captured' ? 'Ask user' : 'Check provider',
+      recommendation: 'defer',
       proposedHandling: review.status === 'captured'
         ? handlingForSeverity('UNKNOWN')
         : 'Check whether this provider result should be ignored, retried, or replaced.',
@@ -1098,7 +1097,7 @@ function extractReviewFeedbackItems(review) {
     reviewer: review.reviewer,
     severity: 'UNKNOWN',
     feedback: firstNonEmptyLine(review.content) || '[No actionable feedback extracted.]',
-    recommendation: 'Ask user',
+    recommendation: 'defer',
     proposedHandling: handlingForSeverity('UNKNOWN'),
     affectedArtifact: 'DRAFT / BRIEF / RESEARCH / OUTLINE',
   }];
@@ -1117,6 +1116,160 @@ function severityRank(severity) {
     UNKNOWN: 0,
     INFO: 0,
   }[String(severity || '').toUpperCase()] || 0;
+}
+
+function planRecommendationForSeverity(severity) {
+  if (severity === 'HIGH') return 'approve';
+  if (severity === 'MEDIUM') return 'modify';
+  if (severity === 'LOW') return 'defer';
+  if (severity === 'INFO') return 'defer';
+  return 'modify';
+}
+
+function planTypeForItem(item) {
+  if (item.severity === 'INFO' || item.affectedArtifact === 'FEEDBACK-EXTERNAL') return 'Tooling Issue';
+  if (item.severity === 'LOW') return 'Review Note';
+  if (item.severity === 'SUGGESTION') return 'Unmapped Suggestion';
+  return 'Concern';
+}
+
+function concernTitleForItem(item) {
+  const title = itemTitle(item) || conciseFeedbackForPlan(item);
+  return cleanTableCell(title).replace(/^(HIGH|MEDIUM|LOW|ACTION|UNKNOWN):\s*/i, '') || 'External review concern';
+}
+
+function whatImprovesForItem(item) {
+  const affected = item.affectedArtifact || 'DRAFT';
+  if (item.severity === 'HIGH') {
+    return `The paper becomes more decision-useful and defensible for the intended audience, especially in ${affected}.`;
+  }
+  if (item.severity === 'MEDIUM') {
+    return `The paper should become clearer, sharper, or easier to trust without requiring a major scope change.`;
+  }
+  if (item.severity === 'LOW') {
+    return `The paper may gain polish or readability if the change is quick and low-risk.`;
+  }
+  if (item.severity === 'INFO') {
+    return 'The review record becomes cleaner and less likely to confuse tool behavior with paper feedback.';
+  }
+  return 'The next revision has a clearer implementation option, but the author should confirm that it supports an approved concern.';
+}
+
+function riskIfHandledBadlyForItem(item) {
+  const guardrail = guardrailForItem(item);
+  if (guardrail && !/^Do not revise automatically/.test(guardrail)) return guardrail;
+  if (item.severity === 'HIGH') return 'Over-correcting can dilute the paper, expand scope, or replace a specific argument with generic safe language.';
+  if (item.severity === 'MEDIUM') return 'A disproportionate fix can add length or distract from the main ask.';
+  if (item.severity === 'LOW') return 'Polish work can consume revision time without improving decision usefulness.';
+  return 'Acting on this without user judgment can change the wrong part of the paper.';
+}
+
+function proposedEditTextForAction(action) {
+  const fix = String(action.reviewerSuggestedFix || '').trim();
+  if (fix) return fix;
+  return conciseFeedbackForPlan(action);
+}
+
+function createPlanConcern(item) {
+  const proposedHandling = proposedFixForItem(item);
+  return {
+    type: planTypeForItem(item),
+    title: concernTitleForItem(item),
+    severity: item.severity === 'INFO' ? 'TOOLING' : (item.severity || 'UNKNOWN'),
+    sources: item.reviewer || (item.reviewers || []).join(', ') || 'external review',
+    recommendation: planRecommendationForSeverity(item.severity),
+    why: decisionRationaleForItem(item),
+    improves: whatImprovesForItem(item),
+    risk: riskIfHandledBadlyForItem(item),
+    proposedHandling,
+    proposedEdits: proposedHandling && !/^Needs human synthesis/.test(proposedHandling) ? [proposedHandling] : [],
+    reviewerEvidence: [conciseFeedbackForPlan(item)],
+    affectedArtifacts: item.affectedArtifact || 'DRAFT',
+    sourceItem: item,
+  };
+}
+
+function createSuggestionConcern(action) {
+  const edit = proposedEditTextForAction(action);
+  return {
+    type: 'Unmapped Suggestion',
+    title: concernTitleForItem(action),
+    severity: 'SUGGESTION',
+    sources: action.reviewer || 'external review',
+    recommendation: 'defer',
+    why: 'This is a tactical reviewer suggestion, but it did not map cleanly to a substantive concern. It should not drive revision by itself.',
+    improves: 'If the author maps it to an approved concern, it can become a concrete edit instead of an isolated tweak.',
+    risk: 'Applying isolated tactical suggestions can create noise, length, or inconsistency with the accepted revision strategy.',
+    proposedHandling: 'Hold until the user maps this suggestion to an approved concern or explicitly approves it as a standalone edit.',
+    proposedEdits: [edit],
+    reviewerEvidence: [cleanTableCell(action.feedback || edit)],
+    affectedArtifacts: action.affectedArtifact || 'DRAFT',
+    sourceItem: action,
+  };
+}
+
+function mapActionsToConcerns(concerns, actions) {
+  const mapped = [...concerns];
+  for (const action of actions) {
+    let bestIndex = -1;
+    let bestScore = 0;
+    for (let i = 0; i < mapped.length; i += 1) {
+      const concern = mapped[i];
+      const score = topicSimilarity(
+        action.feedback,
+        `${concern.title} ${concern.reviewerEvidence.join(' ')} ${concern.proposedHandling}`,
+      );
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+    if (bestIndex >= 0 && bestScore >= 0.18) {
+      const edit = proposedEditTextForAction(action);
+      mapped[bestIndex].proposedEdits.push(edit);
+      mapped[bestIndex].reviewerEvidence.push(cleanTableCell(action.feedback || edit));
+      mapped[bestIndex].sources = [
+        ...mapped[bestIndex].sources.split(',').map((item) => item.trim()).filter(Boolean),
+        action.reviewer,
+      ].filter(Boolean).filter((item, index, array) => array.indexOf(item) === index).join(', ');
+    } else {
+      mapped.push(createSuggestionConcern(action));
+    }
+  }
+  return mapped;
+}
+
+function feedbackPlanConcerns(feedbackItems) {
+  const items = feedbackItems || [];
+  const concerns = items
+    .filter((item) => item.severity !== 'ACTION')
+    .map(createPlanConcern);
+  const actions = items.filter((item) => item.severity === 'ACTION');
+  return mapActionsToConcerns(concerns, actions);
+}
+
+function decisionSummaryMarkdown(concerns) {
+  if (!concerns || concerns.length === 0) {
+    return `## Decision View
+
+No actionable concerns were extracted. Decide whether to rerun external review, provide review text manually, or explicitly proceed without external feedback.
+
+| # | Concern | Type | Severity | Recommendation | User Decision |
+|---|---------|------|----------|----------------|---------------|
+| - | No actionable concerns extracted | Tooling Issue | TOOLING | defer | pending |
+`;
+  }
+  const rows = concerns.map((concern, index) => (
+    `| ${index + 1} | ${cleanTableCell(concern.title)} | ${cleanTableCell(concern.type)} | ${cleanTableCell(concern.severity)} | ${cleanTableCell(concern.recommendation)} | pending |`
+  )).join('\n');
+  return `## Decision View
+
+Review the concerns below. Use \`approve\`, \`modify\`, \`defer\`, or \`reject\` for each concern. Proposed edits are implementation options under a concern; they are not separate decisions unless listed as an unmapped suggestion.
+
+| # | Concern | Type | Severity | Recommendation | User Decision |
+|---|---------|------|----------|----------------|---------------|
+${rows}
+`;
 }
 
 function severityFromRank(rank) {
@@ -1374,46 +1527,64 @@ ${combinedItems.length > 0 ? combinedItems.slice(0, 8).map((item) => `- ${item.r
 
 function feedbackPlanMarkdown({ reviews, createdAt, feedbackItems }) {
   const combinedItems = feedbackItems || dedupeFeedbackItems(feedbackItemsForReviews(reviews));
-  const sections = reviews.length === 0
+  const concerns = feedbackPlanConcerns(combinedItems);
+  const sections = concerns.length === 0
     ? [
-      '### 1. Feedback Item',
+      '### 1. Tooling Issue: No external review input was provided',
       '',
-      '- **Feedback:** No external review input was provided.',
+      '- **Type:** Tooling Issue',
+      '- **Severity:** TOOLING',
       '- **Source(s):** gpd review-external',
-      '- **Decision:** Recommend ask user (needs decision)',
-      '- **Why It Matters:** No reviewer supplied actionable feedback, so the workflow should not treat missing independent review as approval.',
-      '- **Proposed Fix:** Provide review files/stdin, run provider review, or explicitly skip external feedback for this revision.',
-      '- **Guardrail:** Do not treat missing independent review as approval.',
-      '- **User Override:** None yet - user may override.',
-      '- **Affected Artifact:** FEEDBACK-EXTERNAL',
+      '- **Recommendation:** defer',
+      '- **Why this matters:** No reviewer supplied actionable feedback, so the workflow should not treat missing independent review as approval.',
+      '- **What improves if addressed:** The author can decide whether to rerun review, provide review text manually, or explicitly proceed without external feedback.',
+      '- **Risk if handled badly:** Treating missing review as approval can hide quality risk.',
+      '- **Proposed handling:** Provide review files/stdin, run provider review, or explicitly skip external feedback for this revision.',
+      '- **Proposed edits:**',
+      '  1. No draft edit proposed.',
+      '- **Reviewer evidence:** No external review input was provided.',
+      '- **Affected artifacts:** FEEDBACK-EXTERNAL',
+      '- **User Decision:** pending',
+      '- **User Constraint:** none yet',
       '',
     ].join('\n')
-    : combinedItems.map((item, index) => {
+    : concerns.map((concern, index) => {
+      const edits = concern.proposedEdits.length > 0
+        ? concern.proposedEdits.map((edit, editIndex) => `  ${editIndex + 1}. ${cleanTableCell(edit)}`).join('\n')
+        : '  1. No concrete edit proposed; user synthesis required.';
+      const evidence = concern.reviewerEvidence
+        .slice(0, 3)
+        .map((item) => `  - ${cleanTableCell(item)}`)
+        .join('\n');
       return [
-        `### ${index + 1}. Feedback Item`,
+        `### ${index + 1}. ${concern.type}: ${cleanTableCell(concern.title)}`,
         '',
-        `- **Feedback:** ${conciseFeedbackForPlan(item)}`,
-        `- **Source(s):** ${cleanTableCell(item.reviewer)}`,
-        `- **Decision:** ${cleanTableCell(decisionLabelForItem(item))}`,
-        `- **Why It Matters:** ${cleanTableCell(decisionRationaleForItem(item))}`,
-        `- **Reviewer Suggested Fix:** ${cleanTableCell(item.reviewerSuggestedFix || 'None captured.')}`,
-        `- **Proposed Fix:** ${cleanTableCell(proposedFixForItem(item))}`,
-        `- **Why This Fix Addresses It:** ${cleanTableCell(whyProposedFixAddressesItem(item))}`,
-        `- **Fix Confidence:** ${cleanTableCell(proposedFixConfidenceForItem(item))}`,
-        `- **Guardrail:** ${cleanTableCell(guardrailForItem(item))}`,
-        '- **User Override:** None yet - user may override the decision or constrain the proposed fix before revision.',
-        `- **Affected Artifact:** ${cleanTableCell(item.affectedArtifact)}`,
+        `- **Type:** ${cleanTableCell(concern.type)}`,
+        `- **Severity:** ${cleanTableCell(concern.severity)}`,
+        `- **Source(s):** ${cleanTableCell(concern.sources)}`,
+        `- **Recommendation:** ${cleanTableCell(concern.recommendation)}`,
+        `- **Why this matters:** ${cleanTableCell(concern.why)}`,
+        `- **What improves if addressed:** ${cleanTableCell(concern.improves)}`,
+        `- **Risk if handled badly:** ${cleanTableCell(concern.risk)}`,
+        `- **Proposed handling:** ${cleanTableCell(concern.proposedHandling)}`,
+        '- **Proposed edits:**',
+        edits,
+        '- **Reviewer evidence:**',
+        evidence || '  - None captured.',
+        `- **Affected artifacts:** ${cleanTableCell(concern.affectedArtifacts)}`,
+        '- **User Decision:** pending',
+        '- **User Constraint:** none yet',
         '',
       ].join('\n');
     }).join('\n');
-  const incorporate = reviews.length > 0
-    ? '- Recommended by default for HIGH items, unless the user writes an override in the relevant numbered section or rejects the premise.'
+  const incorporate = concerns.length > 0
+    ? '- Recommended only for concerns whose `Recommendation` is `approve` and whose `User Decision` is `approve` or `modify`.'
     : '- None.';
-  const defer = reviews.length > 0
-    ? '- Recommended by default for LOW items and ACTION items that do not map to an approved concern.'
+  const defer = concerns.length > 0
+    ? '- Recommended for review notes, unmapped suggestions, or any concern whose `User Decision` is `defer`.'
     : '- None automatically.';
   const decisions = reviews.length > 0
-    ? '- Approve the generated decisions as written or edit the \`User Override\` field before revision.'
+    ? '- Review each concern and record `approve`, `modify`, `defer`, or `reject` in `User Decision` before revision.'
     : '- Decide whether to provide external review input or continue without it.';
 
   return `# Feedback Handling Plan
@@ -1424,11 +1595,11 @@ function feedbackPlanMarkdown({ reviews, createdAt, feedbackItems }) {
 
 ## Summary
 
-\`gpd review-external\` captured external review input, decomposed actionable concerns into the numbered sections below, assigned default decisions, and stopped at the approval gate. No draft or upstream artifact has been changed. The user may override any item by editing the \`User Override\` field before revision.
+\`gpd review-external\` captured external review input, grouped reviewer feedback into the concern-first decision queue below, and stopped at the approval gate. No draft or upstream artifact has been changed.
 
-\`Feedback\` summarizes the reviewer concern for fast decision-making. Full reviewer text remains in \`FEEDBACK-EXTERNAL.md\`.
+Review the concerns below in the CLI or in this file. Proposed edits are implementation options under a concern; they are not separate decisions unless listed as an unmapped suggestion. Full reviewer text remains in \`FEEDBACK-EXTERNAL.md\`.
 
-${decisionViewMarkdown(combinedItems)}
+${decisionSummaryMarkdown(concerns)}
 
 ## Proposed Handling
 
@@ -1436,19 +1607,19 @@ ${sections}
 
 ## Below-Target Items
 
-| # | Issue | Target Bar Impact | Action | Reason |
-|---|-------|-------------------|--------|--------|
-| 1 | External review may identify below-target issues. | Unknown until the user evaluates captured feedback. | Ask user | External feedback is captured as proposed handling, not automatic rewrite authority. |
+| # | Issue | Target Bar Impact | Recommendation | Reason |
+|---|-------|-------------------|----------------|--------|
+| 1 | External review may identify below-target issues. | Unknown until the user evaluates captured feedback. | modify | External feedback is captured as proposed handling, not automatic rewrite authority. |
 
-## Incorporate
+## Approved Or Modified
 
 ${incorporate}
 
-## Ignore
+## Rejected
 
 - None automatically.
 
-## Defer
+## Deferred
 
 ${defer}
 
@@ -1462,12 +1633,12 @@ Before changing \`.paper/DRAFT.md\` or upstream artifacts, present this plan to 
 
 Options:
 
-- Approve generated decisions
-- Approve only incorporate items
-- Override selected items in the \`User Override\` field
-- Discuss decisions first
+- Approve a concern
+- Modify a concern with a user constraint
+- Defer a concern
+- Reject a concern
 - Revise the handling plan
-- Ignore external feedback
+- Reject external feedback
 `;
 }
 
@@ -1480,7 +1651,7 @@ function updateFeedbackState(paperDir, dryRun) {
     current_stage: 'External Review',
     last_completed_stage: 'External Review',
     last_activity: new Date().toISOString(),
-    suggested_next_command: '/gpd-status',
+    suggested_next_command: '/gpd-feedback',
     feedback: {
       ...(state.feedback || {}),
       feedback_plan_status: 'Pending user approval',
@@ -1514,6 +1685,7 @@ async function reviewExternal(input = {}) {
   ];
   const rawFeedbackItems = feedbackItemsForReviews(reviews);
   const feedbackItems = dedupeFeedbackItems(rawFeedbackItems);
+  const feedbackConcerns = feedbackPlanConcerns(feedbackItems);
   const storedReviews = storeIndividualReviews(paperDir, reviews, createdAt, dryRun);
   const reviewRun = reviewRunProvenance({
     paperDir,
@@ -1558,11 +1730,12 @@ async function reviewExternal(input = {}) {
     rawFeedbackItems: rawFeedbackItems.length,
     providerProgress,
     storedReviews,
-    feedbackRecommendations: feedbackItems.map((item, index) => ({
+    feedbackRecommendations: feedbackConcerns.map((item, index) => ({
       index: index + 1,
-      feedback: conciseFeedbackForPlan(item),
-      reviewers: item.reviewer,
+      feedback: item.title,
+      reviewers: item.sources,
       recommendation: item.recommendation,
+      severity: item.severity,
     })),
     reviewers: reviews.map((review) => ({
       reviewer: review.reviewer,
@@ -1572,7 +1745,7 @@ async function reviewExternal(input = {}) {
     reviewRunPath,
     externalReviewsPath: path.join(paperDir, '.paper', 'FEEDBACK-EXTERNAL.md'),
     feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
-    next: '/gpd-status',
+    next: '/gpd-feedback',
   };
 }
 
@@ -1601,9 +1774,9 @@ function printExternalReviewResult(result) {
     }
   }
   if (result.feedbackRecommendations && result.feedbackRecommendations.length > 0) {
-    console.log('combined decisions:');
+    console.log('pending concerns:');
     for (const item of result.feedbackRecommendations) {
-      console.log(`- ${item.index}. ${item.recommendation} [${item.reviewers}]: ${item.feedback}`);
+      console.log(`- ${item.index}. ${item.severity || '-'} ${item.recommendation} [${item.reviewers}]: ${item.feedback}`);
     }
   }
   console.log(`review run: ${result.reviewRunPath}`);

@@ -267,9 +267,9 @@ When you or another model reviews the paper, capture that read before revising:
 ```
 
 Feedback goes into `FEEDBACK-READER.md`. Handling goes into
-`FEEDBACK-PLAN.md`. The plan includes default recommendations and a `User
-Override` field for items you want to change. Revision should happen only after
-the handling plan is approved.
+`FEEDBACK-PLAN.md`. In Claude/Codex, use `/gpd-feedback` to review one concern
+at a time and record `approve`, `modify`, `defer`, or `reject`. Revision should
+happen only after the handling plan is approved.
 
 ## Paper Types
 

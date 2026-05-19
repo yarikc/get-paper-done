@@ -61,7 +61,7 @@ Stale context risks:
 - `DRAFT.md` updated after `FACT-CHECK.md`: fact-check may need refresh.
 - `FACT-CHECK.md` has HIGH issues or claims marked verify-before-publication: do not export without user acknowledgement.
 - `FEEDBACK-READER.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
-- `FEEDBACK-PLAN.md` pending approval: do not revise until user approves handling.
+- `FEEDBACK-PLAN.md` pending approval: route to `/gpd-feedback`; do not revise until user approves, modifies, defers, or rejects each concern.
 - `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export: route to `/gpd-revise`.
 - `DRAFT.md` changed substantively after review/export and no current `REVISION-CHECK.md` exists: require `/gpd-review` or a revision-check pass before export confidence.
 - `STATE.json` `grill.status` is not `Complete`, or required `grill.resolved_decisions` are missing: recommend `/gpd-grill` before `/gpd-brief`.
@@ -123,7 +123,7 @@ Use this order:
 17. `REVIEW.md` missing → `/gpd-review --deep` for mature draft, or `/gpd-review --lite` for early draft/outline.
 18. User wants external critique and `FEEDBACK-EXTERNAL.md` missing → `/gpd-review --external`.
 19. `FEEDBACK-READER.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md` → `/gpd-review` to synthesize feedback into a plan.
-20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-status`; ask user to approve/revise/ignore feedback plan before `/gpd-revise`.
+20. `FEEDBACK-PLAN.md` exists and is pending approval → `/gpd-feedback`; ask user to approve, modify, defer, or reject feedback-plan concerns before `/gpd-revise`.
 21. `FACT-CHECK.md` recommended next action is `/gpd-research` or `/gpd-revise` → use that command.
 22. `REVIEW.md` verdict is `Revise` or `Rework` → `/gpd-revise`.
 23. `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export → `/gpd-revise`.

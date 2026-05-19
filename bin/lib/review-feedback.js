@@ -255,16 +255,23 @@ ${questions}
 
 function feedbackPlanMarkdown({ comments, createdAt }) {
   const sections = comments.map((comment, index) => [
-    `### ${index + 1}. Feedback Item`,
+    `### ${index + 1}. Concern: Reader comment ${index + 1}`,
     '',
-    `- **Feedback:** ${markdownEscape(comment.feedback)}`,
+    '- **Type:** Concern',
+    '- **Severity:** MEDIUM',
     `- **Source(s):** ${markdownEscape(comment.artifact)}:${comment.line}`,
-    '- **Decision:** Recommend discuss',
-    '- **Why It Matters:** This is direct reader friction on the exported paper, so it may reveal ambiguity the workflow missed.',
-    '- **Proposed Fix:** Discuss the comment, then incorporate it if it clarifies intent, evidence, audience fit, or ask quality without expanding scope.',
-    '- **Guardrail:** Do not apply the comment mechanically if it expands scope, weakens the paper purpose, or conflicts with approved author intent.',
-    '- **User Override:** None yet - user may override the decision or constrain the proposed fix before revision.',
-    '- **Affected Artifact:** DRAFT / BRIEF / RESEARCH / OUTLINE',
+    '- **Recommendation:** modify',
+    '- **Why this matters:** This is direct reader friction on the exported paper, so it may reveal ambiguity the workflow missed.',
+    '- **What improves if addressed:** The revised paper should better match the reader need that triggered the inline comment.',
+    '- **Risk if handled badly:** Applying the comment mechanically can expand scope, weaken the paper purpose, or conflict with approved author intent.',
+    '- **Proposed handling:** Discuss the comment, then incorporate it if it clarifies intent, evidence, audience fit, or ask quality without expanding scope.',
+    '- **Proposed edits:**',
+    `  1. Address reader comment: ${markdownEscape(comment.feedback)}`,
+    '- **Reviewer evidence:**',
+    `  - ${markdownEscape(comment.feedback)}`,
+    '- **Affected artifacts:** DRAFT / BRIEF / RESEARCH / OUTLINE',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
     '',
   ].join('\n')).join('\n');
   const itemList = comments.map((_, index) => String(index + 1)).join(', ') || 'none';
@@ -277,17 +284,17 @@ function feedbackPlanMarkdown({ comments, createdAt }) {
 
 ## Summary
 
-\`gpd feedback\` captured inline review comments, assigned default decisions, and stopped at the approval gate. No draft or upstream artifact has been changed. The user may override any item by editing the \`User Override\` field before revision.
+\`gpd feedback\` captured inline review comments, grouped them into the concern-first decision queue below, and stopped at the approval gate. No draft or upstream artifact has been changed.
 
 ## Decision View
 
-**Recommended decision:** Discuss items ${itemList}; incorporate the comments that clarify intent, evidence, audience fit, or ask quality without expanding scope.
+Review concerns ${itemList}. Use \`approve\`, \`modify\`, \`defer\`, or \`reject\` for each concern.
 
-**Why:** These comments came from the reading copy, so they represent actual reader friction rather than speculative reviewer advice.
+| # | Concern | Type | Severity | Recommendation | User Decision |
+|---|---------|------|----------|----------------|---------------|
+${comments.map((_, index) => `| ${index + 1} | Reader comment ${index + 1} | Concern | MEDIUM | modify | pending |`).join('\n')}
 
-**What improves:** The next draft should be easier to understand and more aligned with the reader's decision needs.
-
-**How:** Approve or override each numbered item, revise the affected source artifacts, regenerate \`.paper/exports/FINAL.md\`, and validate that no unresolved comments remain in the export.
+These comments came from the reading copy, so they represent actual reader friction rather than speculative reviewer advice. The next draft should be easier to understand and more aligned with the reader's decision needs.
 
 ## Proposed Handling
 
@@ -295,21 +302,21 @@ ${sections}
 
 ## Below-Target Items
 
-| # | Issue | Target Bar Impact | Action | Reason |
-|---|-------|-------------------|--------|--------|
-| 1 | Inline comments may identify below-target issues. | Unknown until the user evaluates captured feedback. | Ask user | Inline comments are captured as proposed handling, not automatic rewrite authority. |
+| # | Issue | Target Bar Impact | Recommendation | Reason |
+|---|-------|-------------------|----------------|--------|
+| 1 | Inline comments may identify below-target issues. | Unknown until the user evaluates captured feedback. | modify | Inline comments are captured as proposed handling, not automatic rewrite authority. |
 
-## Incorporate
+## Approved Or Modified
 
-- Recommended only after user approval or explicit override.
+- Only concerns with \`User Decision: approve\` or \`modify\`.
 
-## Ignore
+## Rejected
 
 - None automatically.
 
-## Defer
+## Deferred
 
-- Use the \`User Override\` field for comments that should not affect this revision.
+- Use \`User Decision: defer\` for comments that should not affect this revision.
 
 ## User Decisions Needed
 
@@ -321,12 +328,12 @@ Before changing \`.paper/DRAFT.md\` or upstream artifacts, present this plan to 
 
 Options:
 
-- Approve generated decisions
-- Approve only incorporate items
-- Override selected items in the \`User Override\` field
-- Discuss decisions first
+- Approve a concern
+- Modify a concern with a constraint
+- Defer a concern
+- Reject a concern
 - Revise the handling plan
-- Ignore captured feedback
+- Reject captured feedback
 `;
 }
 
@@ -340,7 +347,7 @@ function updateFeedbackState(paperDir, dryRun) {
     current_stage: 'Reader Feedback',
     last_completed_stage: 'Reader Feedback Capture',
     last_activity: new Date().toISOString(),
-    suggested_next_command: '/gpd-status',
+      suggested_next_command: '/gpd-feedback',
     feedback: {
       ...(state.feedback || {}),
       feedback_plan_status: 'Pending user approval',
@@ -395,7 +402,7 @@ function captureFeedback(input = {}) {
     commentsCaptured: comments.length,
     readerFeedbackPath,
     feedbackPlanPath,
-    next: '/gpd-status',
+    next: '/gpd-feedback',
   };
 }
 

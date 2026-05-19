@@ -145,14 +145,14 @@ const markdownContracts = {
       '## Decision View',
       '## Proposed Handling',
       '## Below-Target Items',
-      '## Incorporate',
-      '## Ignore',
-      '## Defer',
+      '## Approved Or Modified',
+      '## Rejected',
+      '## Deferred',
       '## User Decisions Needed',
       '## Approval Gate',
     ],
     tables: [
-      ['#', 'Issue', 'Target Bar Impact', 'Action', 'Reason'],
+      ['#', 'Issue', 'Target Bar Impact', 'Recommendation', 'Reason'],
     ],
   },
   'FEEDBACK-EXTERNAL.md': {
@@ -519,14 +519,19 @@ function validateFeedbackPlanSections(markdown) {
   }
 
   const requiredFields = [
-    'Feedback',
+    'Type',
+    'Severity',
     'Source(s)',
-    'Decision',
-    'Why It Matters',
-    'Proposed Fix',
-    'Guardrail',
-    'User Override',
-    'Affected Artifact',
+    'Recommendation',
+    'Why this matters',
+    'What improves if addressed',
+    'Risk if handled badly',
+    'Proposed handling',
+    'Proposed edits',
+    'Reviewer evidence',
+    'Affected artifacts',
+    'User Decision',
+    'User Constraint',
   ];
   for (const field of requiredFields) {
     const pattern = new RegExp(`\\*\\*${field.replace(/[()]/g, '\\$&')}:\\*\\*`);

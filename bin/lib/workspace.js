@@ -36,6 +36,14 @@ const {
   printRevisionPreparation,
 } = require('./revise');
 const {
+  decideFeedbackPlan,
+  listFeedbackPlan,
+  printFeedbackPlanDecision,
+  printFeedbackPlanList,
+  printFeedbackPlanReview,
+  reviewFeedbackPlan,
+} = require('./feedback-plan');
+const {
   status,
   printStatus,
   nextAction,
@@ -67,6 +75,12 @@ module.exports = {
   printRestore,
   prepareRevision,
   printRevisionPreparation,
+  decideFeedbackPlan,
+  listFeedbackPlan,
+  printFeedbackPlanDecision,
+  printFeedbackPlanList,
+  printFeedbackPlanReview,
+  reviewFeedbackPlan,
   status,
   printStatus,
   nextAction,

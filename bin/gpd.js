@@ -27,6 +27,12 @@ const {
   printReviewPack,
   captureFeedback,
   printFeedbackCapture,
+  decideFeedbackPlan,
+  listFeedbackPlan,
+  printFeedbackPlanDecision,
+  printFeedbackPlanList,
+  printFeedbackPlanReview,
+  reviewFeedbackPlan,
   createSnapshot,
   printSnapshot,
   restoreSnapshot,
@@ -47,6 +53,7 @@ Commands:
   export                       Export reviewed draft to .paper/exports/FINAL.md
   review-pack                  Show the one file to review and how to comment
   feedback                     Capture reader comments; /gpd-review evaluates paper quality
+  feedback-plan                List/review/decide feedback-plan concerns
   revise                       Prepare revision by snapshotting current paper state
   snapshot                     Preserve current paper artifacts before risky work
   restore                      Restore paper artifacts from a snapshot
@@ -76,6 +83,9 @@ Options:
   --snapshot REV               Snapshot ID or .paper/versions path to restore
   --trigger ARTIFACT           Artifact or event that triggered a snapshot
   --notes TEXT                 Human note for snapshot metadata
+  --item N                     Feedback-plan item number
+  --decision VALUE             Feedback-plan decision: approve|modify|defer|reject
+  --note TEXT                  Feedback-plan decision constraint/note
   --stdin                      Read one external review from stdin
   --paper DIR                  Existing paper directory for next/status/validate
   --path FILE                  Artifact path for validate-artifact
@@ -94,6 +104,9 @@ Examples:
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-pack --paper ~/papers/metadata-strategy
   gpd feedback --paper ~/papers/metadata-strategy
+  gpd feedback-plan list --paper ~/papers/metadata-strategy
+  gpd feedback-plan review --paper ~/papers/metadata-strategy --item 1
+  gpd feedback-plan decide --paper ~/papers/metadata-strategy --item 1 --decision approve
   gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md
   gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
   gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
@@ -192,6 +205,18 @@ function parseWorkspaceOptions(argv) {
     } else if (arg === '--notes') {
       args.notes = argv[i + 1];
       i += 1;
+    } else if (arg === '--note') {
+      args.note = argv[i + 1];
+      i += 1;
+    } else if (arg === '--item') {
+      args.item = Number(argv[i + 1]);
+      if (!Number.isInteger(args.item) || args.item < 1) {
+        throw new Error('--item must be a positive integer');
+      }
+      i += 1;
+    } else if (arg === '--decision') {
+      args.decision = argv[i + 1];
+      i += 1;
     } else if (arg === '--paper') {
       args.paper = argv[i + 1];
       i += 1;
@@ -277,6 +302,30 @@ async function main(argv) {
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printFeedbackCapture(result);
     return;
+  }
+
+  if (command === 'feedback-plan') {
+    const subcommand = rest[0] || 'list';
+    const args = parseWorkspaceOptions(rest.slice(1));
+    if (subcommand === 'list') {
+      const result = listFeedbackPlan(args);
+      if (args.json) console.log(JSON.stringify(result, null, 2));
+      else printFeedbackPlanList(result);
+      return;
+    }
+    if (subcommand === 'review') {
+      const result = reviewFeedbackPlan(args);
+      if (args.json) console.log(JSON.stringify(result, null, 2));
+      else printFeedbackPlanReview(result);
+      return;
+    }
+    if (subcommand === 'decide') {
+      const result = decideFeedbackPlan(args);
+      if (args.json) console.log(JSON.stringify(result, null, 2));
+      else printFeedbackPlanDecision(result);
+      return;
+    }
+    throw new Error(`Unknown feedback-plan subcommand: ${subcommand}`);
   }
 
   if (command === 'revise') {

@@ -234,19 +234,20 @@ Then continue in Claude/Codex:
 
 GPD captures comments into `FEEDBACK-READER.md`, creates a pending
 `FEEDBACK-PLAN.md` with default recommendations, and waits for approval before
-revision. You can approve the recommendations or override selected items in the
-`User Override` field. Approved changes are applied to `.paper/DRAFT.md`;
-export regenerates `FINAL.md` and snapshots the prior export first. You review
-the final paper; GPD keeps the draft as the editable source of truth.
+revision. In Claude/Codex, use `/gpd-feedback` to walk through one concern at a
+time and record `approve`, `modify`, `defer`, or `reject` decisions. Approved
+changes are applied to `.paper/DRAFT.md`; export regenerates `FINAL.md` and
+snapshots the prior export first. You review the final paper; GPD keeps the
+draft as the editable source of truth.
 
 For external model review, `gpd review-external` sends the reviewer the paper
 state, classification, grill context, decisions, brief, research, outline,
 draft, fact-check, review, prior feedback, and export when present. It writes
 each raw reviewer capture to `.paper/feedback-external/`, writes the active
 combined review to `FEEDBACK-EXTERNAL.md`, and breaks deduplicated
-HIGH/MEDIUM/LOW concerns into recommended `FEEDBACK-PLAN.md` items for approval
-or override. When you ask for multiple reviewers in one command, GPD prints the
-combined recommendation list when the command finishes.
+HIGH/MEDIUM/LOW concerns into a concern-first `FEEDBACK-PLAN.md` decision queue.
+When you ask for multiple reviewers in one command, GPD prints the pending
+concern list when the command finishes.
 
 Each run also writes `.paper/EXTERNAL-REVIEW-RUN.json`. That file records the
 review target, context artifacts sent, requested providers, current-runtime

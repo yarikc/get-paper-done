@@ -131,7 +131,7 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `FEEDBACK-EXTERNAL.md` | Raw and summarized external model feedback |
 | `EXTERNAL-REVIEW-RUN.json` | Machine-readable external-review provenance: review target, context artifacts, requested providers, timeout, provider command/argument shape, exact-model policy, statuses, and raw feedback paths |
 | `FEEDBACK-READER.md` | Structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals |
-| `FEEDBACK-PLAN.md` | Recommended incorporate/discuss/defer/ask handling, plus user overrides, before revision |
+| `FEEDBACK-PLAN.md` | Concern-first approval queue for local, external, and reader feedback; records generated recommendations, proposed edits, user decisions, and user constraints before revision |
 | `REVISION-CHECK.md` | Before/after regression gate for substantive revisions, including persona and voice preservation |
 | `REVISION-LOG.md` | Snapshot ledger recording paper-local versions created before substantive revision, restore, or export overwrite |
 | `versions/` | Paper-local snapshots of paper artifacts, source notes, external-review captures, imported originals, and hash metadata for rollback, comparison, and auditability |
@@ -156,7 +156,8 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-review` | Review locally |
 | `/gpd-fact-check` | Check material claims for source support, staleness, exaggeration, contradiction, and citation risk |
 | `/gpd-review --external` | Run external model review and feedback planning |
-| `/gpd-revise` | Apply approved feedback |
+| `/gpd-feedback` | Walk through pending feedback-plan concerns one at a time and record author decisions |
+| `/gpd-revise` | Apply approved or modified feedback with snapshot protection |
 | `/gpd-export` | Prepare final handoff |
 | `gpd review-pack` | Show the current review target, editable source, and comment syntax |
 | `gpd feedback` | Capture inline comments from the review target into reader feedback and feedback-plan artifacts |
@@ -184,7 +185,7 @@ run the recommended command
 repeat
 ```
 
-After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a decision view and concise numbered items with `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, and `User Override`; any populated override wins over the generated decision. Before substantive revision, `gpd revise --trigger <artifact>` preserves the current paper artifacts under `.paper/versions/` with file hashes, records the active revision snapshot in state, and prints the restore command. `/gpd-revise` then applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
+After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a concern-first decision view with numbered concerns, proposed edits grouped under each concern, `User Decision`, and `User Constraint`. `/gpd-feedback` is the user-facing approval loop: it shows one concern, asks for `approve`, `modify`, `defer`, or `reject`, and records the decision. The lower-level CLI exposes the same queue through `gpd feedback-plan list`, `gpd feedback-plan review`, and `gpd feedback-plan decide` for agents, tests, and scripts. Before substantive revision, `gpd revise --trigger <artifact>` preserves the current paper artifacts under `.paper/versions/` with file hashes, records the active revision snapshot in state, and prints the restore command. `/gpd-revise` then applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
 
 ### Stage Semantics
 
@@ -339,14 +340,9 @@ External review writes:
 - `FEEDBACK-EXTERNAL.md`
 - `FEEDBACK-PLAN.md`
 
-Feedback items must be classified:
+Feedback plans must group tactical suggestions under named concerns when possible. Each concern carries a generated `Recommendation`, proposed edits, `User Decision`, and `User Constraint`.
 
-- Incorporate
-- Ignore
-- Defer
-- Ask user
-
-Revision applies only approved feedback.
+Revision applies only concerns with `User Decision: approve` or `modify`; deferred and rejected concerns stay out of the draft.
 
 ## Agent Contracts
 
@@ -456,7 +452,7 @@ gpd list-profiles
 
 `gpd init` creates `.paper/` setup artifacts and leaves grill incomplete until `/gpd-grill` resolves author intent. `gpd import` copies source material to `original/`, writes `.paper/IMPORT.md`, creates minimal setup artifacts, previews classification counts and warnings during dry-run, ranks draft candidates deterministically, extracts plain text from selected `.docx` canonical drafts, records unverified source-reference candidates for later triage, indexes copied files by likely role and downstream stage, routes to `/gpd-grill`, and preserves downstream research/outline/fact-check/review as separate stages.
 
-`gpd review-external` sends external providers the paper workspace context needed for a real paper review: state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. It stores each reviewer capture under `.paper/feedback-external/`, writes `EXTERNAL-REVIEW-RUN.json` so the run records review target, context artifacts, requested providers, timeout, isolated working-directory policy, safe provider command/argument shape, provider status, and whether exact model/settings were controlled by GPD or inherited from provider CLI defaults, writes the active combined review to `FEEDBACK-EXTERNAL.md`, deduplicates overlapping reviewer concerns, and decomposes captured HIGH/MEDIUM/LOW concerns and suggested changes into a decision view plus concise numbered `FEEDBACK-PLAN.md` items with decision, why it matters, proposed fix, guardrail, and user override point. Claude provider review defaults to `claude -p --model opus --effort high`; Gemini provider review defaults to `gemini -p "" -m gemini-2.5-pro --output-format text --approval-mode plan --skip-trust`; other providers currently use their calibrated CLI argument shape and provider defaults. Provider CLIs run from an isolated temporary directory and are instructed to return the full review on stdout so accidental reviewer-created files do not land in the paper or repo.
+`gpd review-external` sends external providers the paper workspace context needed for a real paper review: state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. It stores each reviewer capture under `.paper/feedback-external/`, writes `EXTERNAL-REVIEW-RUN.json` so the run records review target, context artifacts, requested providers, timeout, isolated working-directory policy, safe provider command/argument shape, provider status, and whether exact model/settings were controlled by GPD or inherited from provider CLI defaults, writes the active combined review to `FEEDBACK-EXTERNAL.md`, deduplicates overlapping reviewer concerns, and decomposes captured HIGH/MEDIUM/LOW concerns and suggested changes into a concern-first `FEEDBACK-PLAN.md` queue with proposed edits grouped under their parent concern. Claude provider review defaults to `claude -p --model opus --effort high`; Gemini provider review defaults to `gemini -p "" -m gemini-2.5-pro --output-format text --approval-mode plan --skip-trust`; other providers currently use their calibrated CLI argument shape and provider defaults. Provider CLIs run from an isolated temporary directory and are instructed to return the full review on stdout so accidental reviewer-created files do not land in the paper or repo.
 
 Provider invocation is bounded by `--timeout-ms`. A timed-out provider is recorded as `timed_out`, counted as a review issue, and GPD requests cleanup for the provider process tree before continuing with any completed reviewer results. If the command is interrupted, GPD attempts to clean up active provider processes before exiting.
 
