@@ -8,6 +8,7 @@ Prepare the final draft for publication or handoff.
 - .paper/DRAFT.md
 - .paper/REVIEW.md
 - .paper/FACT-CHECK.md if present
+- .paper/REVISION-CHECK.md if `.paper/DRAFT.md` changed substantively since the last review or export
 </required_reading>
 
 <process>
@@ -15,6 +16,10 @@ Prepare the final draft for publication or handoff.
 Read project, brief, draft, review, and fact-check if present.
 
 If `REVIEW.md` verdict is not Ready, warn the user and ask whether to export anyway.
+
+If `.paper/DRAFT.md` changed substantively since the last reviewed/exported version, require both a paper-local snapshot in `.paper/versions/` and `.paper/REVISION-CHECK.md` before treating the export as ready. Do not rely on structural or semantic validation alone. The revision check must compare against the saved snapshot and show no quality regression in thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation unless the user explicitly accepted the tradeoff.
+
+When using the CLI, `gpd export` refuses to overwrite an existing `.paper/exports/FINAL.md` with a newer `DRAFT.md` unless `REVISION-CHECK.md` is current and valid. It then automatically snapshots the existing export before overwriting it and records the snapshot in `.paper/REVISION-LOG.md`. This protects the reviewed reading copy. Do not manually overwrite `FINAL.md` without preserving the prior file.
 
 If `FACT-CHECK.md` is missing and the draft contains factual, current, technical, market, regulatory, numerical, or publication-sensitive claims, warn the user and recommend `/gpd-fact-check --publication` before export. Ask whether to export anyway.
 

@@ -185,6 +185,60 @@ function completeGrill(state) {
   state.grill.resolved_decisions = requiredGrillDecisionKeys;
 }
 
+function validRevisionCheckMarkdown(snapshotId) {
+  return [
+    '# Revision Check',
+    '',
+    '## Revision Classification',
+    '',
+    '- **Revision timestamp:** 2026-05-19T10:00:00Z',
+    '- **Revision source:** test',
+    `- **Baseline compared:** .paper/versions/${snapshotId}`,
+    `- **Baseline metadata:** .paper/versions/${snapshotId}/VERSION-METADATA.json`,
+    '- **Current draft:** `.paper/DRAFT.md`',
+    '- **Substantive revision:** Yes',
+    '- **Reason:** test',
+    '',
+    '## Substantive Revision Definition',
+    '',
+    'Substantive revision changed draft body after review.',
+    '',
+    '## Before / After Quality Gate',
+    '',
+    '| Dimension | Baseline Score | Revised Score | Regression? | Evidence / Notes |',
+    '|-----------|----------------|---------------|-------------|------------------|',
+    '| Thesis clarity | 5 | 5 | No | preserved |',
+    '| Argument flow | 5 | 5 | No | preserved |',
+    '| Evidence support | 5 | 5 | No | preserved |',
+    '| Audience fit | 5 | 5 | No | preserved |',
+    '| Persona and voice | 5 | 5 | No | preserved |',
+    '| Ask clarity | 5 | 5 | No | preserved |',
+    '| Substance preservation | 5 | 5 | No | preserved |',
+    '',
+    '## Change Impact',
+    '',
+    '| Change | Intended Improvement | Regression Risk | Result |',
+    '|--------|----------------------|-----------------|--------|',
+    '| body | update | low | preserved |',
+    '',
+    '## Validator Interpretation',
+    '',
+    '- **Structural validation result:** ok',
+    '- **Semantic validation result:** ok',
+    '- **Snapshot hash validation:** ok',
+    '- **Validator-driven edits made:** None',
+    '- **Meaning-preservation check:** preserved',
+    '',
+    '## Decision',
+    '',
+    '- **Revision verdict:** Accept',
+    '- **Reason:** no regression',
+    '- **User approval required before export:** No',
+    '- **Next action:** /gpd-export',
+    '',
+  ].join('\n');
+}
+
 function testStateJsonIsStatusSourceOfTruth() {
   const dir = tempDir('gpd-state-json-test');
   run(['init', '--location', dir, '--slug', 'state-source']);
@@ -609,6 +663,8 @@ function testExportCommandWritesFinalAndState() {
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   assert.strictEqual(updatedState.status, 'Exported');
   assert.strictEqual(updatedState.suggested_next_command, '/gpd-status');
+  assert(updatedState.versioning.last_exported_draft_sha256);
+  assert(updatedState.versioning.last_exported_final_sha256);
   const stateMarkdown = fs.readFileSync(path.join(meta, 'STATE.md'), 'utf8');
   assert(stateMarkdown.includes('**Status:** Exported'));
   assert(stateMarkdown.includes('**Suggested next command:** `/gpd-status`'));
@@ -617,6 +673,283 @@ function testExportCommandWritesFinalAndState() {
   assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
   assert.strictEqual(status.next, '/gpd-status');
   assert(status.userAction.includes('Read .paper/exports/FINAL.md'));
+}
+
+function testNextUsesDraftHashForExportFreshness() {
+  const dir = tempDir('gpd-export-hash-freshness-test');
+  run(['init', '--location', dir, '--slug', 'export-hash-freshness', '--title', 'Export Hash Freshness']);
+  const paperDir = path.join(dir, 'export-hash-freshness');
+  const meta = path.join(paperDir, '.paper');
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  const draftPath = path.join(meta, 'DRAFT.md');
+  fs.writeFileSync(draftPath, '# Draft\n\n## Draft Body\n\nStable body.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+  run(['export', '--paper', paperDir]);
+
+  const finalPath = path.join(meta, 'exports', 'FINAL.md');
+  const future = new Date('2026-05-19T12:00:00Z');
+  fs.utimesSync(draftPath, future, future);
+  let status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(status.next, '/gpd-status');
+
+  fs.writeFileSync(draftPath, '# Draft\n\n## Draft Body\n\nChanged body with old mtime.\n');
+  const past = new Date('2026-05-19T09:00:00Z');
+  const later = new Date('2026-05-19T10:00:00Z');
+  fs.utimesSync(draftPath, past, past);
+  fs.utimesSync(path.join(meta, 'REVIEW.md'), later, later);
+  fs.utimesSync(finalPath, later, later);
+  status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(status.next, '/gpd-export');
+  assert(status.userAction.includes('Run /gpd-export'));
+}
+
+function testSnapshotCommandCreatesVersionAndRevisionLog() {
+  const dir = tempDir('gpd-snapshot-test');
+  run(['init', '--location', dir, '--slug', 'snapshot-paper', '--title', 'Snapshot Paper']);
+  const paperDir = path.join(dir, 'snapshot-paper');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nImportant draft body.\n');
+  fs.mkdirSync(path.join(meta, 'exports'), { recursive: true });
+  fs.writeFileSync(path.join(meta, 'exports', 'FINAL.md'), '# Snapshot Paper\n\nReviewed export.\n');
+  fs.mkdirSync(path.join(meta, 'sources'), { recursive: true });
+  fs.writeFileSync(path.join(meta, 'sources', 'source-note.md'), '# Source\n\nEvidence note.\n');
+  fs.mkdirSync(path.join(paperDir, 'original'), { recursive: true });
+  fs.writeFileSync(path.join(paperDir, 'original', 'source-draft.md'), '# Original\n\nImported draft.\n');
+
+  const output = run([
+    'snapshot',
+    '--paper',
+    paperDir,
+    '--reason',
+    'before_substantive_revision',
+    '--trigger',
+    '.paper/FEEDBACK-PLAN.md',
+    '--notes',
+    'test snapshot',
+  ]);
+  assert(output.includes('snapshot: .paper/versions/REV-'));
+  assert(output.includes('copied: DRAFT.md, exports/FINAL.md'));
+
+  const versionsDir = path.join(meta, 'versions');
+  const versions = fs.readdirSync(versionsDir);
+  assert.strictEqual(versions.length, 1);
+  const snapshotDir = path.join(versionsDir, versions[0]);
+  assert.strictEqual(fs.readFileSync(path.join(snapshotDir, 'DRAFT.md'), 'utf8'), '# Draft\n\nImportant draft body.\n');
+  assert.strictEqual(fs.readFileSync(path.join(snapshotDir, 'exports', 'FINAL.md'), 'utf8'), '# Snapshot Paper\n\nReviewed export.\n');
+  const metadata = JSON.parse(fs.readFileSync(path.join(snapshotDir, 'VERSION-METADATA.json'), 'utf8'));
+  assert.strictEqual(metadata.snapshot_reason, 'before-substantive-revision');
+  assert.strictEqual(metadata.trigger_artifact, '.paper/FEEDBACK-PLAN.md');
+  assert(metadata.source_artifacts.includes('DRAFT.md'));
+  assert(metadata.source_artifacts.includes('exports/FINAL.md'));
+  assert(metadata.source_artifacts.includes('.paper/sources/source-note.md'));
+  assert(metadata.source_artifacts.includes('original/source-draft.md'));
+  assert(Array.isArray(metadata.file_hashes));
+  assert(metadata.file_hashes.some((file) => file.source_path === '.paper/DRAFT.md' && file.sha256));
+  assert.strictEqual(
+    fs.readFileSync(path.join(snapshotDir, 'sources', 'source-note.md'), 'utf8'),
+    '# Source\n\nEvidence note.\n',
+  );
+  assert.strictEqual(
+    fs.readFileSync(path.join(snapshotDir, 'original', 'source-draft.md'), 'utf8'),
+    '# Original\n\nImported draft.\n',
+  );
+  const revisionLog = fs.readFileSync(path.join(meta, 'REVISION-LOG.md'), 'utf8');
+  assert(revisionLog.includes(`# Revision Log`));
+  assert(revisionLog.includes(metadata.version_id));
+}
+
+function testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot() {
+  const dir = tempDir('gpd-restore-test');
+  run(['init', '--location', dir, '--slug', 'restore-paper', '--title', 'Restore Paper']);
+  const paperDir = path.join(dir, 'restore-paper');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nVersion one.\n');
+  fs.mkdirSync(path.join(meta, 'sources'), { recursive: true });
+  fs.writeFileSync(path.join(meta, 'sources', 'source-note.md'), 'source v1\n');
+
+  run(['snapshot', '--paper', paperDir, '--reason', 'before_substantive_revision']);
+  const firstSnapshot = fs.readdirSync(path.join(meta, 'versions'))[0];
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nVersion two.\n');
+  fs.writeFileSync(path.join(meta, 'sources', 'source-note.md'), 'source v2\n');
+
+  const output = run(['restore', '--paper', paperDir, '--snapshot', firstSnapshot]);
+  assert(output.includes(`restored: ${firstSnapshot}`));
+  assert(output.includes('safety snapshot: .paper/versions/REV-'));
+  assert.strictEqual(fs.readFileSync(path.join(meta, 'DRAFT.md'), 'utf8'), '# Draft\n\nVersion one.\n');
+  assert.strictEqual(fs.readFileSync(path.join(meta, 'sources', 'source-note.md'), 'utf8'), 'source v1\n');
+
+  const versions = fs.readdirSync(path.join(meta, 'versions'));
+  assert.strictEqual(versions.length, 2);
+  const restoredState = JSON.parse(fs.readFileSync(path.join(meta, 'STATE.json'), 'utf8'));
+  assert.strictEqual(restoredState.versioning.last_restore_snapshot_id, firstSnapshot);
+  assert(fs.readFileSync(path.join(meta, 'REVISION-LOG.md'), 'utf8').includes(`Restored ${firstSnapshot}`));
+}
+
+function testRestoreCommandRejectsTamperedSnapshot() {
+  const dir = tempDir('gpd-restore-tamper-test');
+  run(['init', '--location', dir, '--slug', 'restore-tamper', '--title', 'Restore Tamper']);
+  const paperDir = path.join(dir, 'restore-tamper');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nVersion one.\n');
+
+  run(['snapshot', '--paper', paperDir, '--reason', 'before_substantive_revision']);
+  const snapshotId = fs.readdirSync(path.join(meta, 'versions'))[0];
+  fs.writeFileSync(path.join(meta, 'versions', snapshotId, 'DRAFT.md'), '# Draft\n\nTampered snapshot.\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nCurrent version must survive.\n');
+
+  const result = runFail(['restore', '--paper', paperDir, '--snapshot', snapshotId]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stderr.includes('Snapshot integrity check failed'));
+  assert(result.stderr.includes('hash mismatch: DRAFT.md'));
+  assert.strictEqual(fs.readFileSync(path.join(meta, 'DRAFT.md'), 'utf8'), '# Draft\n\nCurrent version must survive.\n');
+  assert.strictEqual(fs.readdirSync(path.join(meta, 'versions')).length, 1);
+}
+
+function testExportCommandSnapshotsExistingFinalBeforeOverwrite() {
+  const dir = tempDir('gpd-export-snapshot-test');
+  run(['init', '--location', dir, '--slug', 'export-snapshot', '--title', 'Export Snapshot']);
+  const paperDir = path.join(dir, 'export-snapshot');
+  const meta = path.join(paperDir, '.paper');
+
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), [
+    '# Draft',
+    '',
+    '## Draft Body',
+    '',
+    'First export body.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+  run(['export', '--paper', paperDir]);
+  const firstFinal = fs.readFileSync(path.join(meta, 'exports', 'FINAL.md'), 'utf8');
+  assert(firstFinal.includes('First export body.'));
+
+  run(['snapshot', '--paper', paperDir, '--reason', 'before_substantive_revision']);
+  const baselineSnapshot = fs.readdirSync(path.join(meta, 'versions'))[0];
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), [
+    '# Draft',
+    '',
+    '## Draft Body',
+    '',
+    'Second export body.',
+    '',
+  ].join('\n'));
+  fs.writeFileSync(path.join(meta, 'REVISION-CHECK.md'), validRevisionCheckMarkdown(baselineSnapshot));
+  const output = run(['export', '--paper', paperDir, '--force']);
+  assert(output.includes('snapshot before overwrite: .paper/versions/REV-'));
+
+  const versions = fs.readdirSync(path.join(meta, 'versions'));
+  assert.strictEqual(versions.length, 2);
+  const exportSnapshot = versions.find((version) => version.includes('before-export-overwrite'));
+  const snapshotFinal = fs.readFileSync(path.join(meta, 'versions', exportSnapshot, 'exports', 'FINAL.md'), 'utf8');
+  assert(snapshotFinal.includes('First export body.'));
+  const currentFinal = fs.readFileSync(path.join(meta, 'exports', 'FINAL.md'), 'utf8');
+  assert(currentFinal.includes('Second export body.'));
+  const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  assert.strictEqual(updatedState.versioning.last_export_snapshot_id, exportSnapshot);
+  assert(fs.readFileSync(path.join(meta, 'REVISION-LOG.md'), 'utf8').includes('before-export-overwrite'));
+}
+
+function testExportCommandRequiresCurrentRevisionCheckBeforeOverwritingFinal() {
+  const dir = tempDir('gpd-export-revision-check-test');
+  run(['init', '--location', dir, '--slug', 'export-revision-check', '--title', 'Export Revision Check']);
+  const paperDir = path.join(dir, 'export-revision-check');
+  const meta = path.join(paperDir, '.paper');
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nFirst body.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+  run(['export', '--paper', paperDir]);
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nChanged body.\n');
+
+  const result = runFail(['export', '--paper', paperDir, '--force']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stderr.includes('Create a snapshot and REVISION-CHECK.md before overwriting a reviewed export'));
+}
+
+function testExportCommandRejectsStaleRevisionCheckBeforeOverwritingFinal() {
+  const dir = tempDir('gpd-export-stale-revision-check-test');
+  run(['init', '--location', dir, '--slug', 'export-stale-revision-check', '--title', 'Export Stale Revision Check']);
+  const paperDir = path.join(dir, 'export-stale-revision-check');
+  const meta = path.join(paperDir, '.paper');
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  const draftPath = path.join(meta, 'DRAFT.md');
+  const revisionCheckPath = path.join(meta, 'REVISION-CHECK.md');
+  fs.writeFileSync(draftPath, '# Draft\n\n## Draft Body\n\nFirst body.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+  run(['export', '--paper', paperDir]);
+
+  run(['snapshot', '--paper', paperDir, '--reason', 'before_substantive_revision']);
+  const snapshotId = fs.readdirSync(path.join(meta, 'versions'))[0];
+  fs.writeFileSync(revisionCheckPath, validRevisionCheckMarkdown(snapshotId));
+  fs.writeFileSync(draftPath, '# Draft\n\n## Draft Body\n\nChanged after revision check.\n');
+
+  const oldTime = new Date('2026-05-19T10:00:00Z');
+  const newTime = new Date('2026-05-19T10:01:00Z');
+  fs.utimesSync(revisionCheckPath, oldTime, oldTime);
+  fs.utimesSync(draftPath, newTime, newTime);
+
+  const result = runFail(['export', '--paper', paperDir, '--force']);
+  assert.strictEqual(result.status, 1);
+  assert(result.stderr.includes('REVISION-CHECK.md is older than DRAFT.md'));
+  assert(fs.readFileSync(path.join(meta, 'exports', 'FINAL.md'), 'utf8').includes('First body.'));
 }
 
 function testReviewPackAndFeedbackCaptureFinalComments() {
@@ -1495,6 +1828,13 @@ testImportVersionSourceIndexGroupsMaterial();
 testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
+testNextUsesDraftHashForExportFreshness();
+testSnapshotCommandCreatesVersionAndRevisionLog();
+testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot();
+testRestoreCommandRejectsTamperedSnapshot();
+testExportCommandSnapshotsExistingFinalBeforeOverwrite();
+testExportCommandRequiresCurrentRevisionCheckBeforeOverwritingFinal();
+testExportCommandRejectsStaleRevisionCheckBeforeOverwritingFinal();
 testReviewPackAndFeedbackCaptureFinalComments();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();

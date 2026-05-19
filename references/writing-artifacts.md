@@ -307,8 +307,12 @@ The review stage has four possible outputs:
 - `.paper/FEEDBACK-EXTERNAL.md`: raw and summarized external model feedback
 - `.paper/FEEDBACK-READER.md`: structured capture of human/model reader feedback when feedback arrives outside the local review
 - `.paper/FEEDBACK-PLAN.md`: evaluated handling plan
+- `.paper/REVISION-CHECK.md`: before/after regression gate for substantive revisions
+- `.paper/REVISION-LOG.md`: snapshot ledger for paper-local rollback, restore, and comparison
 
 `FEEDBACK-READER.md` uses five signals: voice, register, audience fit, evidence, and ask clarity. The feedback plan must start with a decision view, classify each item as recommend incorporate, recommend discuss, recommend defer, or recommend ask user, and keep each numbered item concise: decision, why it matters, proposed fix, guardrail, user override, and affected artifacts. The `User Override` field in each numbered feedback item is the explicit place for the author to override a generated decision or constrain the proposed fix before revision. `FEEDBACK-PLAN.md` must also carry below-target items when review says a paper is below its quality bar. No draft or upstream artifact should be changed until the user approves the proposed handling.
+
+`REVISION-CHECK.md` is required for substantive revisions. It compares the revised draft against the snapshot captured before revision and prevents validator-driven or feedback-driven edits from degrading thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, or substance preservation. The recoverable baseline lives under `.paper/versions/`; `REVISION-CHECK.md` is the quality judgment, not the backup. Snapshots include hash metadata, paper-local source notes, external-review captures, and imported originals when present. Use `gpd restore --snapshot REV-...` to restore tracked files from a snapshot; restore first creates a safety snapshot of the current state.
 
 ## Fast Intake
 

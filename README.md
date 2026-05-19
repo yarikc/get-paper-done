@@ -188,9 +188,16 @@ export; human or model feedback is captured before revision work starts.
 ```
 
 Revise applies approved fixes from review, fact-check, or feedback planning. It
-is not an open-ended rewrite step.
+is not an open-ended rewrite step. If the revision changes the argument,
+evidence, structure, ask, audience handling, persona, or voice, GPD requires a
+snapshot plus `REVISION-CHECK.md` before export so fixes do not quietly make
+the paper worse. Snapshots include the paper artifacts, source notes, external
+review captures, imported originals, and hash metadata for integrity checks.
 
-Export produces the final Markdown handoff in `.paper/exports/FINAL.md`.
+Export produces the final Markdown handoff in `.paper/exports/FINAL.md`. If
+that file already exists, `gpd export` requires a current `REVISION-CHECK.md`
+when the draft is newer than the export, then preserves the old copy under
+`.paper/versions/` before overwriting it.
 
 ### Reviewing The Final Paper
 
@@ -222,8 +229,8 @@ GPD captures comments into `FEEDBACK-READER.md`, creates a pending
 `FEEDBACK-PLAN.md` with default recommendations, and waits for approval before
 revision. You can approve the recommendations or override selected items in the
 `User Override` field. Approved changes are applied to `.paper/DRAFT.md`;
-export regenerates `FINAL.md`. You review the final paper; GPD keeps the draft
-as the editable source of truth.
+export regenerates `FINAL.md` and snapshots the prior export first. You review
+the final paper; GPD keeps the draft as the editable source of truth.
 
 For external model review, `gpd review-external` sends the reviewer the paper
 state, classification, grill context, decisions, brief, research, outline,
@@ -298,6 +305,8 @@ gpd status
 gpd validate
 gpd validate --semantic
 gpd export
+gpd snapshot --reason before_substantive_revision
+gpd restore --snapshot REV-20260519T143205123-before-substantive-revision
 gpd review-pack
 gpd feedback
 gpd review-external --models claude,codex,gemini --current-runtime codex

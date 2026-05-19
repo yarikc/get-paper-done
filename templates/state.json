@@ -26,5 +26,12 @@
     "feedback_plan_status": "Not created",
     "approved_handling": ""
   },
+  "versioning": {
+    "last_snapshot_id": "",
+    "last_export_snapshot_id": "",
+    "last_restore_snapshot_id": "",
+    "last_exported_draft_sha256": "",
+    "last_exported_final_sha256": ""
+  },
   "post_import_choices": []
 }

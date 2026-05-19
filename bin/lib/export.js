@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {
+  fileSha256IfExists,
   writeFile,
 } = require('./common');
 const {
@@ -11,6 +12,12 @@ const {
   status,
   writeStateJson,
 } = require('./state');
+const {
+  createSnapshot,
+} = require('./snapshot');
+const {
+  validateArtifact,
+} = require('./validate');
 
 function readIfExists(filePath) {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : null;
@@ -113,6 +120,41 @@ function draftTitleAndBody(draftMarkdown, fallbackTitle) {
   };
 }
 
+function mtimeMs(filePath) {
+  return fs.existsSync(filePath) ? fs.statSync(filePath).mtimeMs : 0;
+}
+
+function draftChangedSinceExport(draftPath, finalPath, stateResult) {
+  if (!fs.existsSync(finalPath)) return false;
+  const versioning = stateResult.machineState && stateResult.machineState.versioning
+    ? stateResult.machineState.versioning
+    : {};
+  if (versioning.last_exported_draft_sha256) {
+    return fileSha256IfExists(draftPath) !== versioning.last_exported_draft_sha256;
+  }
+  return mtimeMs(draftPath) > mtimeMs(finalPath);
+}
+
+function ensureRevisionSafetyForOverwrite(meta, draftPath, finalPath, stateResult) {
+  if (!fs.existsSync(finalPath)) return;
+  if (!draftChangedSinceExport(draftPath, finalPath, stateResult)) return;
+
+  const revisionCheckPath = path.join(meta, 'REVISION-CHECK.md');
+  if (!fs.existsSync(revisionCheckPath)) {
+    throw new Error(
+      'DRAFT.md is newer than exports/FINAL.md. Create a snapshot and REVISION-CHECK.md before overwriting a reviewed export.',
+    );
+  }
+  if (mtimeMs(revisionCheckPath) < mtimeMs(draftPath)) {
+    throw new Error('REVISION-CHECK.md is older than DRAFT.md. Refresh the revision check before export.');
+  }
+
+  const issues = validateArtifact(revisionCheckPath).filter((item) => item.severity === 'HIGH');
+  if (issues.length > 0) {
+    throw new Error(`REVISION-CHECK.md has blocking issues:\n- ${issues.map((item) => item.issue).join('\n- ')}`);
+  }
+}
+
 function exportPaper(input = {}) {
   const paperDir = findPaperDir(input.paper || process.cwd());
   if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
@@ -144,9 +186,24 @@ function exportPaper(input = {}) {
   if (!body) throw new Error('DRAFT.md does not contain exportable body content.');
 
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
+  ensureRevisionSafetyForOverwrite(meta, draftPath, finalPath, stateResult);
+  const overwriteSnapshot = fs.existsSync(finalPath)
+    ? createSnapshot({
+      paper: paperDir,
+      reason: 'before_export_overwrite',
+      trigger: '.paper/exports/FINAL.md',
+      paperStage: stateResult.machineState ? stateResult.machineState.current_stage : '',
+      notes: 'Automatic snapshot before regenerating exports/FINAL.md.',
+      dryRun: input.dryRun,
+    })
+    : null;
   writeFile(finalPath, `# ${title}\n\n${body}\n`, input.dryRun);
 
   if (stateResult.machineState) {
+    const draftHash = fileSha256IfExists(draftPath);
+    const finalHash = input.dryRun
+      ? ''
+      : fileSha256IfExists(finalPath);
     const nextState = {
       ...stateResult.machineState,
       status: 'Exported',
@@ -154,6 +211,17 @@ function exportPaper(input = {}) {
       last_completed_stage: 'Internal export',
       last_activity: new Date().toISOString(),
       suggested_next_command: '/gpd-status',
+      versioning: {
+        ...(stateResult.machineState.versioning || {}),
+        last_snapshot_id: overwriteSnapshot ? overwriteSnapshot.versionId : (
+          stateResult.machineState.versioning ? stateResult.machineState.versioning.last_snapshot_id : ''
+        ),
+        last_export_snapshot_id: overwriteSnapshot ? overwriteSnapshot.versionId : (
+          stateResult.machineState.versioning ? stateResult.machineState.versioning.last_export_snapshot_id : ''
+        ),
+        last_exported_draft_sha256: draftHash,
+        last_exported_final_sha256: finalHash,
+      },
     };
     writeStateJson(paperDir, nextState, input.dryRun);
   }
@@ -183,12 +251,14 @@ function exportPaper(input = {}) {
     paperDir,
     finalPath,
     forced: Boolean(input.force),
+    snapshot: overwriteSnapshot,
   };
 }
 
 function printExport(result) {
   console.log(`paper: ${result.paperDir}`);
   console.log(`export: ${result.finalPath}`);
+  if (result.snapshot) console.log(`snapshot before overwrite: ${result.snapshot.relativeSnapshotPath}`);
   if (result.forced) console.log('warning: exported with --force');
   console.log('review: read .paper/exports/FINAL.md');
   console.log('if you add comments: run gpd feedback, then /gpd-review');

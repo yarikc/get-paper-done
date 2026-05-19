@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { root, expandHome } = require('./common');
+const { root, expandHome, fileSha256 } = require('./common');
 const {
   allowedStrategyStatuses,
   allowedStrategyBlockers,
@@ -26,6 +26,8 @@ const artifactNameAliases = {
   'feedback-external.md': 'FEEDBACK-EXTERNAL.md',
   'feedback-reader.md': 'FEEDBACK-READER.md',
   'feedback-plan.md': 'FEEDBACK-PLAN.md',
+  'revision-check.md': 'REVISION-CHECK.md',
+  'revision-log.md': 'REVISION-LOG.md',
   'paper-context.md': 'PAPER-CONTEXT.md',
   'decisions.md': 'DECISIONS.md',
 };
@@ -186,6 +188,27 @@ const markdownContracts = {
       'Evidence',
       'Ask clarity',
     ],
+  },
+  'REVISION-CHECK.md': {
+    headings: [
+      '# Revision Check',
+      '## Revision Classification',
+      '## Substantive Revision Definition',
+      '## Before / After Quality Gate',
+      '## Change Impact',
+      '## Validator Interpretation',
+      '## Decision',
+    ],
+    tables: [
+      ['Dimension', 'Baseline Score', 'Revised Score', 'Regression?', 'Evidence / Notes'],
+      ['Change', 'Intended Improvement', 'Regression Risk', 'Result'],
+    ],
+  },
+  'REVISION-LOG.md': {
+    headings: [
+      '# Revision Log',
+    ],
+    tables: [],
   },
   'PAPER-CONTEXT.md': {
     headings: [
@@ -515,6 +538,118 @@ function validateFeedbackPlanSections(markdown) {
   return issues;
 }
 
+function validateRevisionCheckContent(markdown, filePath) {
+  if (isTemplateFile(filePath)) return [];
+
+  const issues = [];
+  const expectedDimensions = [
+    'Thesis clarity',
+    'Argument flow',
+    'Evidence support',
+    'Audience fit',
+    'Persona and voice',
+    'Ask clarity',
+    'Substance preservation',
+  ];
+
+  const baseline = extractMarkdownField(markdown, 'Baseline compared');
+  const substantive = extractMarkdownField(markdown, 'Substantive revision');
+  if (!baseline || isPlaceholderValue(baseline)) {
+    issues.push(issue('HIGH', 'REVISION-CHECK.md', 'Baseline compared must name the prior draft/export or snapshot'));
+  }
+  if (!substantive || !['Yes', 'No'].includes(substantive)) {
+    issues.push(issue('HIGH', 'REVISION-CHECK.md', 'Substantive revision must be Yes or No'));
+  }
+
+  const meta = path.dirname(filePath);
+  if (baseline && /\.paper\/versions\//.test(baseline)) {
+    const matches = baseline.match(/\.paper\/versions\/[A-Za-z0-9_.-]+/g) || [];
+    for (const relative of matches) {
+      const snapshotPath = path.join(meta, relative.replace(/^\.paper\//, ''));
+      if (!fs.existsSync(snapshotPath)) {
+        issues.push(issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot does not exist: ${relative}`));
+      } else {
+        issues.push(...validateSnapshotMetadata(snapshotPath, relative));
+      }
+    }
+  }
+
+  const qualitySection = sectionBetween(markdown, '## Before / After Quality Gate', /\n##\s+/);
+  const rows = parseFirstTableRows(qualitySection);
+  const rowByDimension = new Map(rows.map((row) => [row[0], row]));
+  for (const dimension of expectedDimensions) {
+    if (!rowByDimension.has(dimension)) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `Before / After Quality Gate missing dimension "${dimension}"`));
+    }
+  }
+
+  const decision = sectionBetween(markdown, '## Decision', /\n##\s+/).toLowerCase();
+  for (const [dimension, row] of rowByDimension.entries()) {
+    if (!expectedDimensions.includes(dimension)) continue;
+    const baselineScore = Number(row[1]);
+    const revisedScore = Number(row[2]);
+    const regression = String(row[3] || '').trim();
+    if (!Number.isInteger(baselineScore) || baselineScore < 1 || baselineScore > 5) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `${dimension} baseline score must be an integer from 1 to 5`));
+    }
+    if (!Number.isInteger(revisedScore) || revisedScore < 1 || revisedScore > 5) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `${dimension} revised score must be an integer from 1 to 5`));
+    }
+    if (!['Yes', 'No'].includes(regression)) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `${dimension} Regression? must be Yes or No`));
+    }
+    if (Number.isInteger(baselineScore) && Number.isInteger(revisedScore) && revisedScore < baselineScore && regression !== 'Yes') {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `${dimension} score dropped but Regression? is not Yes`));
+    }
+    if ((regression === 'Yes' || revisedScore < baselineScore) && !/user.*accept|accepted.*tradeoff|approval.*yes/.test(decision)) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `${dimension} regression requires explicit user-accepted tradeoff in Decision`));
+    }
+  }
+
+  return issues;
+}
+
+function sha256File(filePath) {
+  return fileSha256(filePath);
+}
+
+function validateSnapshotMetadata(snapshotPath, relativeSnapshotPath) {
+  const issues = [];
+  const metadataPath = path.join(snapshotPath, 'VERSION-METADATA.json');
+  if (!fs.existsSync(metadataPath)) {
+    return [issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot missing VERSION-METADATA.json: ${relativeSnapshotPath}`)];
+  }
+
+  const parsed = readJson(metadataPath);
+  if (parsed.error) {
+    return [issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot metadata is malformed JSON: ${relativeSnapshotPath}`)];
+  }
+
+  const files = Array.isArray(parsed.data.file_hashes) ? parsed.data.file_hashes : [];
+  if (files.length === 0) {
+    issues.push(issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot has no file_hashes metadata: ${relativeSnapshotPath}`));
+    return issues;
+  }
+
+  for (const file of files) {
+    if (!file.snapshot_path || !file.sha256) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot has incomplete hash entry: ${relativeSnapshotPath}`));
+      continue;
+    }
+    const snapshottedFile = path.join(snapshotPath, file.snapshot_path);
+    if (!fs.existsSync(snapshottedFile)) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot file missing: ${file.snapshot_path}`));
+      continue;
+    }
+    const actual = sha256File(snapshottedFile);
+    if (actual !== file.sha256) {
+      issues.push(issue('HIGH', 'REVISION-CHECK.md', `Baseline snapshot hash mismatch: ${file.snapshot_path}`));
+    }
+  }
+
+  return issues;
+}
+
 function extractMarkdownField(markdown, label) {
   const target = `**${label.toLowerCase()}:**`;
   for (const line of markdown.split(/\r?\n/)) {
@@ -682,6 +817,9 @@ function validateMarkdownArtifact(filePath) {
   }
   if (artifact === 'FEEDBACK-PLAN.md') {
     issues.push(...validateFeedbackPlanSections(markdown));
+  }
+  if (artifact === 'REVISION-CHECK.md') {
+    issues.push(...validateRevisionCheckContent(markdown, filePath));
   }
   if (artifact === 'STRATEGY.md') {
     issues.push(...validateStrategyValues(markdown, filePath));

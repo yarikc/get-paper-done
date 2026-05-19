@@ -148,6 +148,16 @@ Review stages write findings and feedback plans. They do not edit drafts directl
 
 Draft changes happen only through revision/editing workflows after the user approves how to handle feedback.
 
+Before substantive revision, the current paper state must be preserved with a paper-local snapshot under:
+
+```text
+.paper/versions/
+```
+
+`REVISION-CHECK.md` records the quality comparison, but the snapshot is the recoverable baseline. Export requires a current valid revision check before overwriting an existing `FINAL.md` with a newer draft, then preserves the prior export before overwrite.
+
+Snapshots include tracked paper artifacts, paper-local sources, external-review captures, imported originals, and hash metadata. `REVISION-CHECK.md` validation verifies referenced snapshot metadata and hashes. `gpd restore` restores tracked files from a snapshot only after first creating a safety snapshot of the current state.
+
 ## Decision 10: GSD Is An Inspiration, Not The Domain Model
 
 GPD borrows durable context and staged workflow discipline from GSD, but the domain model is writing:

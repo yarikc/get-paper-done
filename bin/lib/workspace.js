@@ -26,6 +26,12 @@ const {
   printReviewPack,
 } = require('./review-feedback');
 const {
+  createSnapshot,
+  printSnapshot,
+  restoreSnapshot,
+  printRestore,
+} = require('./snapshot');
+const {
   status,
   printStatus,
   nextAction,
@@ -51,6 +57,10 @@ module.exports = {
   printFeedbackCapture,
   reviewPack,
   printReviewPack,
+  createSnapshot,
+  printSnapshot,
+  restoreSnapshot,
+  printRestore,
   status,
   printStatus,
   nextAction,

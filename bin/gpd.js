@@ -27,6 +27,10 @@ const {
   printReviewPack,
   captureFeedback,
   printFeedbackCapture,
+  createSnapshot,
+  printSnapshot,
+  restoreSnapshot,
+  printRestore,
 } = require('./lib/workspace');
 
 function printHelp() {
@@ -41,6 +45,8 @@ Commands:
   export                       Export reviewed draft to .paper/exports/FINAL.md
   review-pack                  Show the one file to review and how to comment
   feedback                     Capture inline review comments into feedback artifacts
+  snapshot                     Preserve current paper artifacts before risky work
+  restore                      Restore paper artifacts from a snapshot
   review-external              Collect external review text into review artifacts
   status                       Show current paper workspace state
   next                         Show only the next recommended action and why
@@ -63,6 +69,10 @@ Options:
   --current-runtime NAME       Exclude current runtime from external provider review
   --timeout-ms MS              External reviewer timeout in milliseconds
   --reviewer NAME              Reviewer name for stdin review input
+  --reason REASON              Snapshot reason, e.g. before_substantive_revision
+  --snapshot REV               Snapshot ID or .paper/versions path to restore
+  --trigger ARTIFACT           Artifact or event that triggered a snapshot
+  --notes TEXT                 Human note for snapshot metadata
   --stdin                      Read one external review from stdin
   --paper DIR                  Existing paper directory for next/status/validate
   --path FILE                  Artifact path for validate-artifact
@@ -81,6 +91,8 @@ Examples:
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-pack --paper ~/papers/metadata-strategy
   gpd feedback --paper ~/papers/metadata-strategy
+  gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
+  gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
   gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini --current-runtime codex
   gpd export --paper ~/papers/metadata-strategy
@@ -160,6 +172,18 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--reviewer') {
       args.reviewer = argv[i + 1];
+      i += 1;
+    } else if (arg === '--reason') {
+      args.reason = argv[i + 1];
+      i += 1;
+    } else if (arg === '--snapshot') {
+      args.snapshot = argv[i + 1];
+      i += 1;
+    } else if (arg === '--trigger') {
+      args.trigger = argv[i + 1];
+      i += 1;
+    } else if (arg === '--notes') {
+      args.notes = argv[i + 1];
       i += 1;
     } else if (arg === '--paper') {
       args.paper = argv[i + 1];
@@ -245,6 +269,22 @@ async function main(argv) {
     const result = captureFeedback(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printFeedbackCapture(result);
+    return;
+  }
+
+  if (command === 'snapshot') {
+    const args = parseWorkspaceOptions(rest);
+    const result = createSnapshot(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printSnapshot(result);
+    return;
+  }
+
+  if (command === 'restore') {
+    const args = parseWorkspaceOptions(rest);
+    const result = restoreSnapshot(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printRestore(result);
     return;
   }
 

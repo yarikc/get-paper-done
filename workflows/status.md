@@ -32,6 +32,8 @@ Check which artifacts exist:
 - FEEDBACK-EXTERNAL.md
 - FEEDBACK-READER.md
 - FEEDBACK-PLAN.md
+- REVISION-CHECK.md
+- REVISION-LOG.md
 - PAPER-CONTEXT.md
 - DECISIONS.md
 - IMPORT.md
@@ -61,6 +63,7 @@ Stale context risks:
 - `FEEDBACK-READER.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
 - `FEEDBACK-PLAN.md` pending approval: do not revise until user approves handling.
 - `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export: route to `/gpd-revise`.
+- `DRAFT.md` changed substantively after review/export and no current `REVISION-CHECK.md` exists: require `/gpd-review` or a revision-check pass before export confidence.
 - `STATE.json` `grill.status` is not `Complete`, or required `grill.resolved_decisions` are missing: recommend `/gpd-grill` before `/gpd-brief`.
 - `PAPER-CONTEXT.md` or `DECISIONS.md` newer than `BRIEF.md`: recommend `/gpd-brief` so the formal brief absorbs the clarified context.
 - An agent detects unresolved thesis, audience, term, scope, proof-standard, or non-goal ambiguity after downstream work exists: recommend `/gpd-grill` first, then `/gpd-brief` after resolution.

@@ -95,6 +95,7 @@ Each paper lives in its own directory:
     config.json
     sources/
     exports/
+    versions/
     RESEARCH.json
     RESEARCH.md
     OUTLINE.md
@@ -104,6 +105,8 @@ Each paper lives in its own directory:
     FEEDBACK-EXTERNAL.md
     FEEDBACK-READER.md
     FEEDBACK-PLAN.md
+    REVISION-CHECK.md
+    REVISION-LOG.md
 ```
 
 Setup creates only the artifacts required to start. Later stages create their artifacts on demand.
@@ -128,6 +131,9 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `FEEDBACK-EXTERNAL.md` | Raw and summarized external model feedback |
 | `FEEDBACK-READER.md` | Structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals |
 | `FEEDBACK-PLAN.md` | Recommended incorporate/discuss/defer/ask handling, plus user overrides, before revision |
+| `REVISION-CHECK.md` | Before/after regression gate for substantive revisions, including persona and voice preservation |
+| `REVISION-LOG.md` | Snapshot ledger recording paper-local versions created before substantive revision, restore, or export overwrite |
+| `versions/` | Paper-local snapshots of paper artifacts, source notes, external-review captures, imported originals, and hash metadata for rollback, comparison, and auditability |
 | `STATE.md` | Human-readable current stage, blockers, approvals, suggested next command |
 | `STATE.json` | Machine-readable state companion used by CLI status and validation |
 | `IMPORT.md` | Import manifest and classification |
@@ -153,6 +159,8 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-export` | Prepare final handoff |
 | `gpd review-pack` | Show the current review target, editable source, and comment syntax |
 | `gpd feedback` | Capture inline comments from the review target into reader feedback and feedback-plan artifacts |
+| `gpd snapshot` | Preserve current tracked paper state before substantive revision or other risky work |
+| `gpd restore` | Restore tracked paper files from a snapshot after first creating a safety snapshot |
 
 ### Maintenance Commands
 
@@ -174,7 +182,7 @@ run the recommended command
 repeat
 ```
 
-After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a decision view and concise numbered items with `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, and `User Override`; any populated override wins over the generated decision. `/gpd-revise` applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
+After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a decision view and concise numbered items with `Decision`, `Why It Matters`, `Proposed Fix`, `Guardrail`, and `User Override`; any populated override wins over the generated decision. Before substantive revision, `gpd snapshot --reason before_substantive_revision` preserves the current paper artifacts under `.paper/versions/` with file hashes. `/gpd-revise` applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
 
 ### Stage Semantics
 
@@ -191,8 +199,8 @@ After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` show
 | Draft | `/gpd-draft` | Draft body exists | Required | `DRAFT.md` | Prefer `--next-section` until the paper body is complete; full draft only for short or explicit cases. |
 | Fact-check | `/gpd-fact-check` | Material claim safety | Required for standard/flagship; conditional for lite | `FACT-CHECK.md` | Keep, soften, remove, verify, or route claims back to research/revise. |
 | Review | `/gpd-review` | Review verdict and below-target gate | Required before export | `REVIEW.md`, optionally `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md` | Ready routes to export only when the below-target gate does not require immediate improvement. Revise/rework, or Ready with immediate below-target fixes, routes to revision. |
-| Revise | `/gpd-revise` | Approved fix application | Conditional | `DRAFT.md` and state updates | Apply only approved feedback/fact-check/review fixes, then refresh stale downstream stages. |
-| Export | `/gpd-export`, `gpd export` | Final handoff current | Required for final output | `exports/FINAL.md` | Allowed when draft/review state is ready and export is not stale. |
+| Revise | `/gpd-revise` | Approved fix application plus snapshot and regression check for substantive edits | Conditional | `versions/`, `DRAFT.md`, `REVISION-CHECK.md`, `REVISION-LOG.md`, and state updates | Apply only approved feedback/fact-check/review fixes. Any substantive revision must first preserve a snapshot, then compare before/after quality for thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation before export. |
+| Export | `/gpd-export`, `gpd export` | Final handoff current | Required for final output | `exports/FINAL.md`, and `versions/`/`REVISION-LOG.md` when overwriting a prior export | Allowed when draft/review state is ready and export is not stale. If `DRAFT.md` is newer than an existing `FINAL.md`, export requires a current valid `REVISION-CHECK.md`; existing `FINAL.md` is snapshotted before overwrite. |
 
 `/gpd-grill` can also be invoked later. If an author or agent finds unresolved ambiguity after brief, research, outline, draft, review, or feedback, the workflow updates `PAPER-CONTEXT.md` and `DECISIONS.md` without rewriting downstream artifacts directly. When those artifacts are newer than `BRIEF.md`, status routing sends the paper back to `/gpd-brief` so the formal paper contract catches up before downstream work resumes.
 

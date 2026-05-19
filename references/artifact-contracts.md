@@ -158,6 +158,50 @@ Required tables:
 
 `Decision` is the default generated handling, usually with severity when known. `Why It Matters` explains the consequence of accepting or ignoring the item. `Proposed Fix` states the concrete edit strategy if approved. `Guardrail` states what not to do when applying the fix. `User Override` is the explicit override point; if populated, revision must follow the override instead of the generated decision.
 
+### `REVISION-CHECK.md`
+
+Required when a substantive revision changes the draft before export or renewed review. The check must compare against a saved baseline, preferably a `.paper/versions/...` snapshot created before the revision.
+
+Required headings:
+
+- `# Revision Check`
+- `## Revision Classification`
+- `## Substantive Revision Definition`
+- `## Before / After Quality Gate`
+- `## Change Impact`
+- `## Validator Interpretation`
+- `## Decision`
+
+Required tables:
+
+- Before / After Quality Gate: `Dimension`, `Baseline Score`, `Revised Score`, `Regression?`, `Evidence / Notes`
+- Change Impact: `Change`, `Intended Improvement`, `Regression Risk`, `Result`
+
+A revision is substantive when it changes, removes, adds, compresses, reorders, or reframes thesis, paper job, decision ask, reader promise, scope, argument flow, evidence use, source interpretation, mechanisms, examples, definitions, governance/control language, operating model, audience handling, objection handling, persona, voice, register, author posture, or any claim-carrying paragraph beyond local copyediting.
+
+The quality gate must score thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation. A substantive revision fails if any dimension drops versus the baseline unless the user explicitly accepts the tradeoff. Validators are advisory and must not be fixed by deleting specificity, weakening evidence, flattening persona/voice, or reducing persuasive force.
+
+Validation checks the required dimensions, numeric score ranges, score-drop/regression consistency, existence of any referenced `.paper/versions/...` baseline, and baseline snapshot hash metadata.
+
+### `REVISION-LOG.md`
+
+Records paper-local snapshots created before substantive revision, restore, or export overwrite.
+
+Required headings:
+
+- `# Revision Log`
+
+Each entry should include:
+
+- version id
+- timestamp
+- reason
+- trigger artifact or event
+- snapshot path
+- source artifacts copied
+- hash metadata stored in `VERSION-METADATA.json`
+- notes
+
 ### `FEEDBACK-EXTERNAL.md`
 
 Required headings:

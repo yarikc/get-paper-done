@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const { root } = require('./installer');
 
@@ -81,6 +82,14 @@ function copyFile(src, dest, dryRun) {
   fs.copyFileSync(src, dest);
 }
 
+function fileSha256(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function fileSha256IfExists(filePath) {
+  return fs.existsSync(filePath) ? fileSha256(filePath) : '';
+}
+
 function templateWithBasics(name, replacements) {
   let content = readTemplate(name);
   for (const [key, value] of Object.entries(replacements)) {
@@ -118,6 +127,8 @@ module.exports = {
   readTemplate,
   writeFile,
   copyFile,
+  fileSha256,
+  fileSha256IfExists,
   templateWithBasics,
   listMarkdownItems,
 };

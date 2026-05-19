@@ -13,6 +13,7 @@ Review the draft for argument quality, evidence, audience fit, persona consisten
 - .paper/exports/FINAL.md if present, especially when the user reviewed the exported paper
 - .paper/FACT-CHECK.md if present
 - .paper/FEEDBACK-READER.md if present
+- .paper/REVISION-CHECK.md if present
 - references/review-rubrics.md
 - references/audience-review-rubric.md
 - templates/review.md
@@ -92,6 +93,8 @@ Write `.paper/REVIEW.md` with:
 - revision plan
 
 If `.paper/REVIEW.md` already exists, the new review must clearly supersede the prior verdict and evaluate the current draft, not preserve stale findings from an earlier revision. If the draft has changed since the prior review, explicitly account for whether prior required fixes were resolved.
+
+If `.paper/REVISION-CHECK.md` exists, use it as required input. Confirm whether the revision preserved thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance. If the revision check reports any regression that the user did not explicitly accept, the verdict cannot be `Ready`.
 
 Use review stance first. Do not praise before identifying the highest-impact issues.
 

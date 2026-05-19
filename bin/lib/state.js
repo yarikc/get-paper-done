@@ -5,6 +5,7 @@ const path = require('path');
 
 const {
   expandHome,
+  fileSha256IfExists,
   writeFile,
 } = require('./common');
 const {
@@ -50,6 +51,13 @@ function defaultMachineState(input = {}) {
     feedback: {
       feedback_plan_status: 'Not created',
       approved_handling: '',
+    },
+    versioning: {
+      last_snapshot_id: '',
+      last_export_snapshot_id: '',
+      last_restore_snapshot_id: '',
+      last_exported_draft_sha256: '',
+      last_exported_final_sha256: '',
     },
     post_import_choices: input.postImportChoices || [],
   };
@@ -148,6 +156,10 @@ function readJsonIfExists(filePath) {
 
 function artifactPath(paperDir, artifactName) {
   return path.join(paperDir, '.paper', artifactName);
+}
+
+function artifactSha256(paperDir, artifactName) {
+  return fileSha256IfExists(artifactPath(paperDir, artifactName));
 }
 
 function artifactMtimeMs(paperDir, artifactName) {
@@ -295,6 +307,35 @@ function reviewBelowTargetRequiresRevision(state) {
   return /^yes\b/i.test(immediate || '');
 }
 
+function versioningState(state) {
+  return state.machineState && state.machineState.versioning
+    ? state.machineState.versioning
+    : {};
+}
+
+function draftChangedSinceExport(state) {
+  const versioning = versioningState(state);
+  if (!state.artifacts['DRAFT.md'] || !state.artifacts['exports/FINAL.md']) return false;
+  if (versioning.last_exported_draft_sha256) {
+    return artifactSha256(state.paperDir, 'DRAFT.md') !== versioning.last_exported_draft_sha256;
+  }
+  return artifactNewerThan(state.paperDir, 'DRAFT.md', 'exports/FINAL.md');
+}
+
+function draftMatchesLastExportedHash(state) {
+  const versioning = versioningState(state);
+  return Boolean(
+    state.artifacts['DRAFT.md']
+    && versioning.last_exported_draft_sha256
+    && artifactSha256(state.paperDir, 'DRAFT.md') === versioning.last_exported_draft_sha256,
+  );
+}
+
+function draftNewerThanWithContentChange(state, downstream) {
+  if (!artifactNewerThan(state.paperDir, 'DRAFT.md', downstream)) return false;
+  return !draftMatchesLastExportedHash(state);
+}
+
 function artifactState(paperDir) {
   const meta = path.join(paperDir, '.paper');
   const artifactNames = [
@@ -314,6 +355,8 @@ function artifactState(paperDir) {
     'FEEDBACK-READER.md',
     'FEEDBACK-EXTERNAL.md',
     'FEEDBACK-PLAN.md',
+    'REVISION-CHECK.md',
+    'REVISION-LOG.md',
     'STATE.md',
     'STATE.json',
     'config.json',
@@ -373,14 +416,14 @@ function suggestedNext(state) {
   }
   if (artifactNewerThan(state.paperDir, 'RESEARCH.json', 'OUTLINE.md')) return '/gpd-outline --deep';
   if (artifactNewerThan(state.paperDir, 'OUTLINE.md', 'DRAFT.md')) return '/gpd-draft';
-  if (artifactNewerThan(state.paperDir, 'DRAFT.md', 'FACT-CHECK.md')) return '/gpd-fact-check --full';
+  if (draftNewerThanWithContentChange(state, 'FACT-CHECK.md')) return '/gpd-fact-check --full';
 
   const factCheckAction = factCheckRecommendedAction(state);
   if (factCheckAction === '/gpd-research') return '/gpd-research';
   if (factCheckAction === '/gpd-revise') return '/gpd-revise';
 
   if (
-    artifactNewerThan(state.paperDir, 'DRAFT.md', 'REVIEW.md')
+    draftNewerThanWithContentChange(state, 'REVIEW.md')
     || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
   ) {
     return '/gpd-review --deep';
@@ -397,7 +440,7 @@ function suggestedNext(state) {
   if (reviewBelowTargetRequiresRevision(state)) return '/gpd-revise';
   if (a['exports/FINAL.md']) {
     if (
-      artifactNewerThan(state.paperDir, 'DRAFT.md', 'exports/FINAL.md')
+      draftChangedSinceExport(state)
       || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'exports/FINAL.md')
       || artifactNewerThan(state.paperDir, 'REVIEW.md', 'exports/FINAL.md')
     ) {
@@ -560,7 +603,12 @@ function explainNext(state) {
   if ((verdict === 'Revise' || verdict === 'Rework') && next === '/gpd-revise') return `REVIEW.md verdict is ${verdict}, so revision is the next controlled step.`;
   if (reviewBelowTargetRequiresRevision(state) && next === '/gpd-revise') return 'REVIEW.md says below-target items require immediate improvement before export.';
   if (a['exports/FINAL.md'] && next === '/gpd-status') return 'The export is current, so there is no required next writing stage.';
-  if (a['exports/FINAL.md'] && next === '/gpd-export') return 'The draft, fact-check, or review changed after export, so FINAL.md needs regeneration.';
+  if (a['exports/FINAL.md'] && next === '/gpd-export') {
+    if (draftChangedSinceExport(state)) {
+      return 'The draft content hash no longer matches the last exported draft, so FINAL.md needs regeneration.';
+    }
+    return 'The fact-check or review changed after export, so FINAL.md needs regeneration.';
+  }
   if (!a['RESEARCH.json'] && next === '/gpd-research') return 'Structured research is missing, so research is the next required artifact.';
   if (!a['OUTLINE.md'] && next.startsWith('/gpd-outline')) return 'The outline is missing, so structure should be created before drafting.';
   if (!a['DRAFT.md'] && next === '/gpd-draft') return 'The draft is missing, so drafting is the next stage.';

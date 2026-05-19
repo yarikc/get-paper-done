@@ -164,7 +164,12 @@ before export instead of treating them as optional notes.
 /gpd-export
 ```
 
-Revise applies approved fixes. Export creates `.paper/exports/FINAL.md`.
+Revise applies approved fixes. If the revision changes the argument, evidence,
+structure, ask, audience handling, persona, or voice, GPD requires a snapshot
+plus `REVISION-CHECK.md` before export. Export creates
+`.paper/exports/FINAL.md`; if that file already exists and the draft changed,
+`gpd export` requires a current `REVISION-CHECK.md`, then snapshots the old
+copy first.
 
 ## Reviewing The Export
 
@@ -190,6 +195,20 @@ Use `gpd review-pack --paper ~/papers/my-paper` whenever you are unsure which
 file to review. GPD captures comments, plans the handling, revises
 `.paper/DRAFT.md` only after approval, and regenerates `FINAL.md`. You review
 the final reading copy; GPD keeps `DRAFT.md` as the source of truth.
+
+For risky manual work, create a snapshot first:
+
+```bash
+gpd snapshot --paper ~/papers/my-paper --reason before_substantive_revision
+```
+
+To recover a prior paper state:
+
+```bash
+gpd restore --paper ~/papers/my-paper --snapshot REV-20260519T143205123-before-substantive-revision
+```
+
+Restore creates its own safety snapshot before it overwrites tracked files.
 
 ## Moving Backward Is Normal
 

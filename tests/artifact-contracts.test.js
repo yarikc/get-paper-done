@@ -50,6 +50,8 @@ function testTemplateArtifactsPassContracts() {
     'templates/feedback-external.md',
     'templates/feedback-reader.md',
     'templates/feedback-plan.md',
+    'templates/revision-check.md',
+    'templates/revision-log.md',
     'templates/paper-context.md',
     'templates/decisions.md',
   ]) {
@@ -475,6 +477,130 @@ function testConfigClassificationEnumFailureIsActionable() {
   assert(errors.includes('$.classification.audience_shape must be one of single, prioritized_multi, hybrid'));
 }
 
+function testRevisionCheckRequiresBaselineAndDimensions() {
+  const dir = tempDir('gpd-revision-check-contract-test');
+  const meta = path.join(dir, '.paper');
+  fs.mkdirSync(meta, { recursive: true });
+  const revisionCheck = path.join(meta, 'REVISION-CHECK.md');
+  fs.writeFileSync(revisionCheck, [
+    '# Revision Check',
+    '',
+    '## Revision Classification',
+    '',
+    '- **Revision timestamp:** 2026-05-19T10:00:00Z',
+    '- **Revision source:** test',
+    '- **Baseline compared:** .paper/versions/REV-missing',
+    '- **Current draft:** `.paper/DRAFT.md`',
+    '- **Substantive revision:** Yes',
+    '- **Reason:** test',
+    '',
+    '## Substantive Revision Definition',
+    '',
+    'Definition.',
+    '',
+    '## Before / After Quality Gate',
+    '',
+    '| Dimension | Baseline Score | Revised Score | Regression? | Evidence / Notes |',
+    '|-----------|----------------|---------------|-------------|------------------|',
+    '| Thesis clarity | 5 | 4 | No | dropped but not marked |',
+    '',
+    '## Change Impact',
+    '',
+    '| Change | Intended Improvement | Regression Risk | Result |',
+    '|--------|----------------------|-----------------|--------|',
+    '| edit | better | risk | regressed |',
+    '',
+    '## Validator Interpretation',
+    '',
+    '- **Structural validation result:** ok',
+    '',
+    '## Decision',
+    '',
+    '- **Revision verdict:** Accept',
+    '- **Reason:** test',
+    '',
+  ].join('\n'));
+
+  const result = runFail(['validate-artifact', '--path', revisionCheck]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('Baseline snapshot does not exist: .paper/versions/REV-missing'));
+  assert(result.stdout.includes('Before / After Quality Gate missing dimension "Argument flow"'));
+  assert(result.stdout.includes('Thesis clarity score dropped but Regression? is not Yes'));
+}
+
+function testRevisionCheckValidatesSnapshotHashes() {
+  const dir = tempDir('gpd-revision-check-hash-test');
+  const meta = path.join(dir, '.paper');
+  const snapshotDir = path.join(meta, 'versions', 'REV-20260519T100000000-before-substantive-revision');
+  fs.mkdirSync(snapshotDir, { recursive: true });
+  fs.writeFileSync(path.join(snapshotDir, 'DRAFT.md'), '# Draft\n\nTampered.\n');
+  fs.writeFileSync(path.join(snapshotDir, 'VERSION-METADATA.json'), JSON.stringify({
+    version_id: 'REV-20260519T100000000-before-substantive-revision',
+    created_at: '2026-05-19T10:00:00.000Z',
+    snapshot_reason: 'before-substantive-revision',
+    snapshot_path: '.paper/versions/REV-20260519T100000000-before-substantive-revision',
+    source_artifacts: ['DRAFT.md'],
+    file_hashes: [
+      {
+        source_path: '.paper/DRAFT.md',
+        snapshot_path: 'DRAFT.md',
+        bytes: 18,
+        sha256: '0000000000000000000000000000000000000000000000000000000000000000',
+      },
+    ],
+  }, null, 2));
+
+  const revisionCheck = path.join(meta, 'REVISION-CHECK.md');
+  fs.writeFileSync(revisionCheck, [
+    '# Revision Check',
+    '',
+    '## Revision Classification',
+    '',
+    '- **Revision timestamp:** 2026-05-19T10:00:00Z',
+    '- **Revision source:** test',
+    '- **Baseline compared:** .paper/versions/REV-20260519T100000000-before-substantive-revision',
+    '- **Current draft:** `.paper/DRAFT.md`',
+    '- **Substantive revision:** Yes',
+    '- **Reason:** test',
+    '',
+    '## Substantive Revision Definition',
+    '',
+    'Substantive revision changed draft body after review.',
+    '',
+    '## Before / After Quality Gate',
+    '',
+    '| Dimension | Baseline Score | Revised Score | Regression? | Evidence / Notes |',
+    '|-----------|----------------|---------------|-------------|------------------|',
+    '| Thesis clarity | 5 | 5 | No | preserved |',
+    '| Argument flow | 5 | 5 | No | preserved |',
+    '| Evidence support | 5 | 5 | No | preserved |',
+    '| Audience fit | 5 | 5 | No | preserved |',
+    '| Persona and voice | 5 | 5 | No | preserved |',
+    '| Ask clarity | 5 | 5 | No | preserved |',
+    '| Substance preservation | 5 | 5 | No | preserved |',
+    '',
+    '## Change Impact',
+    '',
+    '| Change | Intended Improvement | Regression Risk | Result |',
+    '|--------|----------------------|-----------------|--------|',
+    '| edit | better | low | preserved |',
+    '',
+    '## Validator Interpretation',
+    '',
+    '- **Structural validation result:** ok',
+    '',
+    '## Decision',
+    '',
+    '- **Revision verdict:** Accept',
+    '- **Reason:** no regression',
+    '',
+  ].join('\n'));
+
+  const result = runFail(['validate-artifact', '--path', revisionCheck]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('Baseline snapshot hash mismatch: DRAFT.md'));
+}
+
 testTemplateArtifactsPassContracts();
 testJsonSchemaFailureIsActionable();
 testStateEnumFailureIsActionable();
@@ -486,6 +612,8 @@ testMarkdownContractFailureIsActionable();
 testMarkdownContractRejectsUnexpectedAudienceDimension();
 testMarkdownContractRejectsMalformedHeading();
 testReaderFeedbackContractRejectsMissingSignal();
+testRevisionCheckRequiresBaselineAndDimensions();
+testRevisionCheckValidatesSnapshotHashes();
 testExternalReviewsContractRequiresConsensusSections();
 testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
