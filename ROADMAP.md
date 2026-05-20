@@ -41,7 +41,7 @@ Current issue alignment:
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
 - `#5`: RFC event and hook runtime feature request; deferred until real-paper trial clarifies which transitions need deterministic events.
 - `#14`: RFC-001 remaining review orchestration and evaluation hardening; Phase 1 artifact contracts are implemented, and later slices should wait for observed calibration failures.
-- `#15`: RFC-002.1 progressive classification and policy-driven checks; current enum foundation exists, but classification-driven policy/routing remains deferred.
+- `#15`: RFC-012 progressive classification and policy-driven checks; current enum foundation exists, but classification-driven policy/routing remains deferred.
 - `#12`: RFC-003 illustrations and diagram artifacts; gated feature request, not core workflow until a real calibration paper proves the need for paper-native visual lifecycle management.
 - `#13`: RFC-004 data charts and Vega-Lite artifacts; gated feature request, not core workflow until a real quantitative/public-source paper proves charting is materially useful.
 - `#16`: RFC-005 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
@@ -77,12 +77,12 @@ Deferred until after the main-line calibration unless explicitly reprioritized:
 
 - RFC-005 / `#16` work beyond the bounded README/product-story and `docs/START-HERE.md` cleanup.
 - RFC-003 / `#12` and RFC-004 / `#13` visual/chart work.
-- RFC-001 / `#14` later phases and RFC-002.1 / `#15` intake or policy-routing changes.
+- RFC-001 / `#14` later phases and RFC-012 / `#15` intake or policy-routing changes.
 - Issue #5 RFC event and hook runtime.
 - RFC-006 mobile review packs / `#17` beyond manual validation.
 - Broad import conversion work beyond bugs exposed by the calibration.
 - Semantic validation as a routing source. `gpd validate --semantic` detects quality failures, but `gpd next` does not yet use semantic issue IDs as blockers.
-- Deterministic classification-driven policy checks beyond schema/template/workflow guidance. RFC-002.1 / issue #15 owns the broader feature direction.
+- Deterministic classification-driven policy checks beyond schema/template/workflow guidance. RFC-012 / issue #15 owns the broader feature direction.
 - Context-pack discovery CLI. `contexts/` is installed and documented, but users inspect the directory directly for now.
 - RFC-007 through RFC-011 implementation beyond issue creation and RFC capture. Resolve purpose-taxonomy drift first: current first-class `classification.purpose` values remain `decision_memo`, `strategy_paper`, `explainer`, and `update`; labels such as `position_paper` and `white_paper` should map onto the existing taxonomy unless the taxonomy is explicitly reopened.
 - LLM-as-judge behavior inside deterministic semantic validation. Future RFC slices should keep `semantic.js` deterministic where possible and put model-judged assessment in advisory review/evaluation until calibrated.

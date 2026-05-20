@@ -1,5 +1,6 @@
 node_modules/
 .DS_Store
+/.scratch/
 /.paper/
 agents/.claude/
 docs/feedback*.md

@@ -1,4 +1,4 @@
-# RFC-001 Phase 1: Artifact Contracts And Static Validation
+# Implementation Note: RFC-001 Phase 1 Artifact Contracts And Static Validation
 
 - **Status:** Implemented
 - **Parent RFC:** [RFC-001: Research-Driven Improvement Plan](rfc-001-research-driven-improvement-plan.md)

@@ -1,4 +1,4 @@
-# RFC-002.1: Progressive Classification And Policy-Driven Checks
+# RFC-012: Progressive Classification And Policy-Driven Checks
 
 - **Status:** Draft
 - **Author:** Codex, based on review of RFC-002
@@ -12,7 +12,7 @@
 
 RFC-002 is directionally correct: GPD needs to replace the free-form `paper_type` string with a policy layer that can explain how much workflow rigor a paper deserves. But RFC-002 is too stage/agent-centric and too eager to route workflow behavior from classification.
 
-RFC-002.1 keeps the core classification model but changes three important things:
+RFC-012 keeps the core classification model but changes three important things:
 
 1. Classification is **progressive**, not a five-field intake tax.
 2. Mode is split into **recommended** and **selected**, with a rule trace.
@@ -227,7 +227,7 @@ The rule trace must be stored so the user can see why a mode was recommended.
 
 RFC-002 listed required stages such as `audience_reviewer`, `opposition_reviewer`, and `fact_checker`. That binds policy to implementation.
 
-RFC-002.1 stores required checks instead:
+RFC-012 stores required checks instead:
 
 ```json
 {
@@ -474,6 +474,6 @@ Only after the model survives real use:
 
 ## 13. Recommendation
 
-Adopt RFC-002.1 over RFC-002.
+Adopt RFC-012 over RFC-002.
 
 Do not start by changing the writing workflow. Start with a pure, tested classification and mode recommendation layer. Then expose it in CLI status. Only after real papers show that the recommendations are useful should GPD route stages or enforce checks from the policy layer.
