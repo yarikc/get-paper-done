@@ -678,7 +678,7 @@ function testExportCommandWritesFinalAndState() {
   const output = run(['export', '--paper', paperDir]);
   assert(output.includes('exports/FINAL.md'));
   assert(output.includes('review: read .paper/exports/FINAL.md'));
-  assert(output.includes('if you add comments: run gpd feedback, then /gpd-feedback'));
+  assert(output.includes('if you add comments: run gpd feedback collect, then /gpd-feedback'));
 
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
   assert(fs.existsSync(finalPath));
@@ -1081,51 +1081,125 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
 
   run(['export', '--paper', paperDir]);
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
-  fs.appendFileSync(finalPath, '\n//USER The ask is still unclear for the target reader.\n');
+  fs.appendFileSync(finalPath, [
+    '',
+    '//todo!: The ask is still unclear for the target reader.',
+    'This sentence has a source URL https://example.com/path and should not become feedback.',
+    'This sentence includes a protected phrase //keep: preserve the operating-layer ownership language // that must remain readable.',
+    'This sentence asks a question. //qq?: Is this supported by the research?',
+    'This sentence uses scoped syntax. //review todo: The mechanism is unsupported and weak. //',
+    'This sentence uses untyped scoped syntax //review this should not be captured // and should stay untouched.',
+    'Architecture must support //todo: see https://example.com for details // and ship.',
+    '//keep: this NIST framing from https://nist.gov/x -- do not dilute //',
+    '```js',
+    '//todo: this is code and should not be captured',
+    '```',
+    '~~~js',
+    '//todo: this is tilde-fenced code and should not be captured',
+    '~~~',
+    '',
+  ].join('\n'));
 
   const packOutput = run(['review-pack', '--paper', paperDir]);
   assert(packOutput.includes(`review target: ${finalPath}`));
   assert(packOutput.includes('editable source: .paper/DRAFT.md'));
-  assert(packOutput.includes('capture: gpd feedback'));
+  assert(packOutput.includes('capture: gpd feedback collect'));
 
-  const captureOutput = run(['feedback', '--paper', paperDir]);
-  assert(captureOutput.includes('comments captured: 1'));
+  const captureOutput = run(['feedback', 'collect', '--paper', paperDir]);
+  assert(captureOutput.includes('comments captured: 6'));
   assert(captureOutput.includes('next: /gpd-feedback'));
+  assert(captureOutput.includes('commented review preserved:'));
+  assert(captureOutput.includes('comments: left in review target'));
+  assert(fs.readFileSync(finalPath, 'utf8').includes('//todo!: The ask is still unclear'));
+
+  const reviewsDir = path.join(meta, 'reviews');
+  const reviewArtifacts = fs.readdirSync(reviewsDir).filter((name) => name.startsWith('inline-feedback-'));
+  assert.strictEqual(reviewArtifacts.length, 1);
+  assert(fs.readFileSync(path.join(reviewsDir, reviewArtifacts[0]), 'utf8').includes('//keep: preserve the operating-layer ownership language'));
+  const snapshotDirs = fs.readdirSync(path.join(meta, 'versions')).filter((name) => name.includes('inline-feedback-collect'));
+  assert(snapshotDirs.length >= 1);
+  const snapshotReviewPath = path.join(meta, 'versions', snapshotDirs[0], 'reviews', reviewArtifacts[0]);
+  assert(fs.existsSync(snapshotReviewPath), 'snapshot should include preserved review artifacts');
 
   const readerFeedback = fs.readFileSync(path.join(meta, 'FEEDBACK-READER.md'), 'utf8');
   assert(readerFeedback.includes('**Source:** inline user comments'));
   assert(readerFeedback.includes('The ask is still unclear for the target reader.'));
+  assert(readerFeedback.includes('preserve the operating-layer ownership language'));
+  assert(readerFeedback.includes('Is this supported by the research?'));
+  assert(readerFeedback.includes('The mechanism is unsupported and weak.'));
+  assert(readerFeedback.includes('see https://example.com for details'));
+  assert(readerFeedback.includes('this NIST framing from https://nist.gov/x -- do not dilute'));
+  assert(!readerFeedback.includes('https://example.com/path'));
+  assert(!readerFeedback.includes('this should not be captured'));
+  assert(!readerFeedback.includes('this is code and should not be captured'));
+  assert(!readerFeedback.includes('this is tilde-fenced code and should not be captured'));
   assert(readerFeedback.includes('| Ask clarity |'));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(feedbackPlan.includes('**Status:** Pending user approval'));
   assert(feedbackPlan.includes('No draft or upstream artifact has been changed.'));
-  assert(feedbackPlan.includes('### 1. Concern: Reader comment 1'));
+  assert(feedbackPlan.includes('### 1. Action: Reader comment 1'));
+  assert(feedbackPlan.includes('### 2. Preservation: Reader comment 2'));
+  assert(feedbackPlan.includes('### 3. Question: Reader comment 3'));
+  assert(feedbackPlan.includes('### 4. Action: Reader comment 4'));
+  assert(feedbackPlan.includes('### 5. Action: Reader comment 5'));
+  assert(feedbackPlan.includes('### 6. Preservation: Reader comment 6'));
+  assert(feedbackPlan.includes('**Severity:** HIGH'));
+  assert(feedbackPlan.includes('**Severity:** LOW'));
   assert(feedbackPlan.includes('**User Decision:** pending'));
-  assert(feedbackPlan.includes('**User Constraint:** none yet'));
+  assert(feedbackPlan.includes('**User Constraint:** preserve the operating-layer ownership language'));
   assert(feedbackPlan.includes('The ask is still unclear for the target reader.'));
 
   const listOutput = run(['feedback-plan', 'list', '--paper', paperDir]);
-  assert(listOutput.includes('1. MEDIUM modify [pending] Reader comment 1'));
+  assert(listOutput.includes('1. HIGH modify [pending] Reader comment 1'));
+  assert(listOutput.includes('2. MEDIUM preserve [pending] Reader comment 2'));
+  assert(listOutput.includes('3. LOW answer [pending] Reader comment 3'));
+  assert(listOutput.includes('4. HIGH modify [pending] Reader comment 4'));
+  assert(listOutput.includes('5. MEDIUM modify [pending] Reader comment 5'));
+  assert(listOutput.includes('6. MEDIUM preserve [pending] Reader comment 6'));
   const reviewOutput = run(['feedback-plan', 'review', '--paper', paperDir, '--item', '1']);
-  assert(reviewOutput.includes('Concern 1 of 1'));
+  assert(reviewOutput.includes('Concern 1 of 6'));
   assert(reviewOutput.includes('Why this matters:'));
   assert(reviewOutput.includes('Proposed edits:'));
   assert(reviewOutput.includes('Reviewer evidence:'));
   assert(reviewOutput.includes('The ask is still unclear for the target reader.'));
   assert(reviewOutput.includes('Decision options:'));
   assert(reviewOutput.includes('- modify: accept the concern with an added constraint or instruction'));
+  assert(reviewOutput.includes('- answered_no_action: answer a question and record that no revision is needed'));
   const decideOutput = run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '1', '--decision', 'modify', '--note', 'Keep the ask concise.']);
   assert(decideOutput.includes('decision: modify'));
   assert(decideOutput.includes('constraint: Keep the ask concise.'));
+  run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '2', '--decision', 'approve', '--note', 'Preserve the ownership language.']);
+  run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '3', '--decision', 'answered_no_action', '--note', 'Research already supports it.']);
+  run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '4', '--decision', 'approve', '--note', 'Clarify the mechanism.']);
+  run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '5', '--decision', 'approve', '--note', 'Use the cited URL.']);
+  run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '6', '--decision', 'approve', '--note', 'Preserve the NIST framing.']);
   const decidedPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(decidedPlan.includes('**Status:** Approved by user'));
   assert(decidedPlan.includes('**User Decision:** modify'));
+  assert(decidedPlan.includes('**User Decision:** answered_no_action'));
   assert(decidedPlan.includes('**User Constraint:** Keep the ask concise.'));
 
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   assert.strictEqual(updatedState.status, 'Feedback Pending');
   assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Approved by user');
+
+  const cleanOutput = run(['feedback', 'clean', '--paper', paperDir]);
+  assert(cleanOutput.includes('comments removed: 6'));
+  const cleanedFinal = fs.readFileSync(finalPath, 'utf8');
+  assert(!cleanedFinal.includes('//todo!:'));
+  assert(!cleanedFinal.includes('//keep:'));
+  assert(!cleanedFinal.includes('//qq?:'));
+  assert(!cleanedFinal.includes('//review todo:'));
+  assert(cleanedFinal.includes('https://example.com/path'));
+  assert(cleanedFinal.includes('//review this should not be captured //'));
+  assert(cleanedFinal.includes('//todo: this is code and should not be captured'));
+  assert(cleanedFinal.includes('//todo: this is tilde-fenced code and should not be captured'));
+  assert(cleanedFinal.includes('This sentence includes a protected phrase that must remain readable.'));
+  assert(cleanedFinal.includes('This sentence uses scoped syntax.'));
+  assert(cleanedFinal.includes('Architecture must support and ship.'));
+  assert(!cleanedFinal.includes('see https://example.com for details'));
+  assert(!cleanedFinal.includes('this NIST framing from https://nist.gov/x'));
 }
 
 function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {

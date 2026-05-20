@@ -530,7 +530,7 @@ function testSoftwareSupplyChainEvidencePackKeepsCalibrationShape() {
   assert(final.includes('unreviewed retrieval, prompt, or tool-permission change'));
   assert(final.includes('sampled validation failure'));
   assert(final.includes('decision owner accepts residual risk'));
-  assert(!final.includes('//YC'));
+  assert(!final.includes('//todo:'));
   assert(!final.includes('[NEEDS EVIDENCE:'));
   assert(!final.includes('[AUTHOR DECISION:'));
 }

@@ -37,6 +37,15 @@ Use 1-5 scores. A substantive revision fails if any dimension drops versus the b
 | Ask clarity | [1-5] | [1-5] | [Yes / No] | [note] |
 | Substance preservation | [1-5] | [1-5] | [Yes / No] | [note] |
 
+## Preservation Constraints
+
+Use this section when `.paper/FEEDBACK-PLAN.md` includes approved or modified `//keep:` constraints.
+
+- **Preservation constraints present:** [Yes / No]
+- **Preservation constraints honored:** [Yes / No / Not applicable]
+- **Evidence:** [cite the preserved wording, argument, voice, specificity, or idea]
+- **User override:** [None / describe explicit override]
+
 ## Change Impact
 
 | Change | Intended Improvement | Regression Risk | Result |

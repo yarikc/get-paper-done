@@ -23,9 +23,9 @@
 
 ## Feedback Items
 
-| # | Feedback | Signal | Severity | Recommended Handling | Affected Artifact |
-|---|----------|--------|----------|----------------------|-------------------|
-| 1 | [specific feedback] | [Voice / Register / Audience fit / Evidence / Ask clarity] | [HIGH / MEDIUM / LOW] | [Incorporate / Ignore / Defer / Ask user] | [BRIEF.md / RESEARCH.json / OUTLINE.md / DRAFT.md / FACT-CHECK.md / REVIEW.md / exports/FINAL.md] |
+| # | Type | Feedback | Signal | Severity | Recommended Handling | Affected Artifact |
+|---|------|----------|--------|----------|----------------------|-------------------|
+| 1 | [Action / Preservation / Question / Rejection] | [specific feedback] | [Voice / Register / Audience fit / Evidence / Ask clarity] | [HIGH / MEDIUM / LOW] | [Incorporate / Preserve / Answer / Ignore / Defer / Ask user] | [BRIEF.md / RESEARCH.json / OUTLINE.md / DRAFT.md / FACT-CHECK.md / REVIEW.md / exports/FINAL.md] |
 
 ## Questions
 

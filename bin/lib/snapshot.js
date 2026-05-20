@@ -46,6 +46,10 @@ const directoryArtifacts = [
     snapshotRoot: 'feedback-external',
   },
   {
+    sourceRoot: '.paper/reviews',
+    snapshotRoot: 'reviews',
+  },
+  {
     sourceRoot: 'original',
     snapshotRoot: 'original',
   },

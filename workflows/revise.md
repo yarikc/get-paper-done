@@ -134,7 +134,7 @@ Include a short change log for any draft modification:
 
 If a needed change is substantive and not already approved, stop and ask before applying it.
 
-After every substantive revision, write or update `.paper/REVISION-CHECK.md` from `templates/revision-check.md` before export. The check must compare the revised draft to the snapshot created before the revision and score thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation.
+After every substantive revision, write or update `.paper/REVISION-CHECK.md` from `templates/revision-check.md` before export. The check must compare the revised draft to the snapshot created before the revision and score thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation. If `.paper/FEEDBACK-PLAN.md` includes approved or modified `//keep:` preservation constraints, the revision check must explicitly say whether those constraints were honored and cite evidence.
 
 The revision fails if any score drops unless the user explicitly accepts the tradeoff in `.paper/REVISION-CHECK.md`. Do not treat `gpd validate` or semantic validation as readiness by itself. Validators are advisory; never fix a validator warning by deleting specificity, weakening evidence, flattening persona/voice, or reducing persuasive force.
 

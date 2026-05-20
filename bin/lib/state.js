@@ -647,7 +647,7 @@ function userActionHint(state) {
   const a = state.artifacts;
   const next = state.next;
   if (a['exports/FINAL.md'] && next === '/gpd-status') {
-    return 'Read .paper/exports/FINAL.md. If you add comments there, run gpd feedback, then /gpd-feedback; GPD will capture the comments, revise DRAFT.md after approval, and regenerate FINAL.md.';
+    return 'Read .paper/exports/FINAL.md. If you add inline comments there, run gpd feedback collect, then /gpd-feedback; GPD will capture the comments, revise DRAFT.md after approval, and regenerate FINAL.md.';
   }
   if (next === '/gpd-export') {
     return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';
@@ -656,7 +656,7 @@ function userActionHint(state) {
     return 'Run /gpd-feedback to approve, modify, defer, or reject each feedback-plan concern before revision.';
   }
   if (next === '/gpd-review' && a['exports/FINAL.md']) {
-    return 'If comments were added to .paper/exports/FINAL.md, run gpd feedback first; /gpd-feedback approves the captured concerns before revision.';
+    return 'If inline comments were added to .paper/exports/FINAL.md, run gpd feedback collect first; /gpd-feedback approves the captured concerns before revision.';
   }
   if (next === '/gpd-revise') {
     const restore = snapshotRestoreCommand(state);

@@ -114,11 +114,20 @@ Capture the feedback as evidence for review planning, not as permission to rewri
 
 ```text
 user reviews .paper/exports/FINAL.md
-  -> gpd feedback captures comments into FEEDBACK-READER.md and FEEDBACK-PLAN.md
+  -> gpd feedback collect captures comments into FEEDBACK-READER.md and FEEDBACK-PLAN.md
   -> /gpd-feedback approves, modifies, defers, or rejects captured concerns
   -> /gpd-revise edits .paper/DRAFT.md
   -> /gpd-export regenerates .paper/exports/FINAL.md
 ```
+
+Inline comment markers are visible and code-comment-like:
+
+- `//todo:` requested action or fix
+- `//keep:` preserve this wording, argument, voice, or specificity
+- `//qq:` question or uncertainty
+- `//no:` reject or disagree with this claim/framing
+
+Severity suffixes are allowed: `//todo!:` for high severity and `//todo?:` for low severity. Colon is required. The parser ignores fenced code blocks and URLs. `gpd feedback collect` is non-destructive by default: it preserves the commented paper and leaves comments in place. Use `gpd feedback clean` only after the user confirms extraction was complete.
 
 ## 2. External Review Flag Detection
 
@@ -138,7 +147,7 @@ If no external review flag is present, skip to Step 7.
 
 CLI note: `gpd review-external` can collect existing review text from files/stdin and can invoke selected installed provider CLIs with `--models`. Provider invocation prints provider-level progress while it runs, sends the generated review prompt to those CLIs, stores each reviewer capture under `.paper/feedback-external/`, records the active combined review in `.paper/FEEDBACK-EXTERNAL.md`, and writes a pending `.paper/FEEDBACK-PLAN.md`. The generated prompt includes state, config/classification, grill context, decision records, persona, audience, brief, strategy gate, research summary, research JSON, outline, draft, exported reading copy, fact-check, local review, reader feedback, and prior feedback plan when present. The feedback plan deduplicates overlapping reviewer concerns and decomposes captured HIGH/MEDIUM/LOW concerns into a decision view plus numbered recommendation items with rationale. Pass `--current-runtime claude`, `--current-runtime codex`, or the matching runtime name when known; the CLI skips that provider because self-review is not independent. Continue using the slash workflow below for local HTTP servers or provider-specific behavior not yet covered by the CLI. Do not use Opencode for paper review.
 
-Feedback-decision note: `/gpd-feedback` is the user-facing approval loop for a generated `.paper/FEEDBACK-PLAN.md`. Use `/gpd-feedback --list` to show the queue, or `/gpd-feedback --item N` to jump to a concern. When using the underlying CLI outside the paper workspace, pass `--paper <paper-dir>`. Without flags, it should show the next pending concern and present one selection list: `approve`, `modify`, `defer`, or `reject`. If the user selects `modify`, ask one follow-up question for the constraint or instruction. If the user selects `defer` or `reject`, ask for a short reason only when it is not already clear. Then record the decision with `gpd feedback-plan decide --decision <value> --note <constraint-or-reason>`. It must not edit `.paper/DRAFT.md`; `/gpd-revise` applies approved or modified concerns after snapshot protection.
+Feedback-decision note: `/gpd-feedback` is the user-facing approval loop for a generated `.paper/FEEDBACK-PLAN.md`. Use `/gpd-feedback --list` to show the queue, or `/gpd-feedback --item N` to jump to a concern. When using the underlying CLI outside the paper workspace, pass `--paper <paper-dir>`. Without flags, it should show the next pending concern and present one selection list: `approve`, `modify`, `defer`, `reject`, or `answered_no_action`. If the user selects `modify`, ask one follow-up question for the constraint or instruction. If the user selects `defer` or `reject`, ask for a short reason only when it is not already clear. Use `answered_no_action` when a question has been answered and no revision is needed. Then record the decision with `gpd feedback-plan decide --decision <value> --note <constraint-or-reason>`. It must not edit `.paper/DRAFT.md`; `/gpd-revise` applies approved or modified concerns after snapshot protection.
 
 ## 3. Detect Available Reviewers
 

@@ -12,7 +12,7 @@ const {
   writeStateMarkdown,
 } = require('./state');
 
-const VALID_DECISIONS = new Set(['approve', 'modify', 'defer', 'reject']);
+const VALID_DECISIONS = new Set(['approve', 'modify', 'defer', 'reject', 'answered_no_action']);
 
 function feedbackPlanPath(paperDir) {
   return path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md');
@@ -157,7 +157,7 @@ function updatePlanStatus(markdown) {
 function decideFeedbackPlan(input = {}) {
   const decision = String(input.decision || '').toLowerCase();
   if (!VALID_DECISIONS.has(decision)) {
-    throw new Error('--decision must be one of approve, modify, defer, reject');
+    throw new Error('--decision must be one of approve, modify, defer, reject, answered_no_action');
   }
   if (!Number.isInteger(input.item) || input.item < 1) {
     throw new Error('--item must be a positive integer');
@@ -274,8 +274,9 @@ function printFeedbackPlanReview(result) {
   console.log('- modify: accept the concern with an added constraint or instruction');
   console.log('- defer: keep the concern for later and do not apply it in this revision');
   console.log('- reject: do not apply this concern');
+  console.log('- answered_no_action: answer a question and record that no revision is needed');
   console.log('');
-  console.log(`Record with: gpd feedback-plan decide --paper ${result.paperDir} --item ${concern.index} --decision <approve|modify|defer|reject> --note "constraint or reason"`);
+  console.log(`Record with: gpd feedback-plan decide --paper ${result.paperDir} --item ${concern.index} --decision <approve|modify|defer|reject|answered_no_action> --note "constraint or reason"`);
 }
 
 function printFeedbackPlanDecision(result) {

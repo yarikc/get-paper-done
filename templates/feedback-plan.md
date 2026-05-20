@@ -10,11 +10,11 @@
 
 ## Decision View
 
-Review each concern. Use `approve`, `modify`, `defer`, or `reject`.
+Review each concern. Use `approve`, `modify`, `defer`, `reject`, or `answered_no_action`.
 
 | # | Concern | Type | Severity | Recommendation | User Decision |
 |---|---------|------|----------|----------------|---------------|
-| 1 | [Concern title] | Concern | HIGH / MEDIUM / LOW | approve / modify / defer / reject | pending |
+| 1 | [Concern title] | Concern | HIGH / MEDIUM / LOW | approve / modify / defer / reject / answer / preserve | pending |
 
 ## Proposed Handling
 
@@ -23,7 +23,7 @@ Review each concern. Use `approve`, `modify`, `defer`, or `reject`.
 - **Type:** Concern
 - **Severity:** [HIGH / MEDIUM / LOW / TOOLING / SUGGESTION]
 - **Source(s):** [Reviewer]
-- **Recommendation:** [approve / modify / defer / reject]
+- **Recommendation:** [approve / modify / defer / reject / answer / preserve]
 - **Why this matters:** [Why this affects paper quality, decision usefulness, evidence, or audience trust]
 - **What improves if addressed:** [What gets better if the concern is handled]
 - **Risk if handled badly:** [What to avoid while applying the fix]
@@ -42,7 +42,7 @@ Use this section when `REVIEW.md` includes a Below-Target Improvement Gate or th
 
 | # | Issue | Target Bar Impact | Recommendation | Reason |
 |---|-------|-------------------|----------------|--------|
-| 1 | [Issue keeping paper below target] | [Why it affects quality/rating] | [approve / modify / defer / reject / not applicable] | [Reason] |
+| 1 | [Issue keeping paper below target] | [Why it affects quality/rating] | [approve / modify / defer / reject / answer / preserve / not applicable] | [Reason] |
 
 If `Recommendation` is `approve` or `modify`, revise before export after the user records a matching decision. If `Recommendation` is `defer`, state why deferral is compatible with this paper's purpose, audience, risk, and mode.
 
@@ -60,7 +60,7 @@ If `Recommendation` is `approve` or `modify`, revise before export after the use
 
 ## User Decisions Needed
 
-- Record `approve`, `modify`, `defer`, or `reject` for each concern. If `modify`, fill `User Constraint`.
+- Record `approve`, `modify`, `defer`, `reject`, or `answered_no_action` for each concern. If `modify`, fill `User Constraint`.
 
 ## Approval Gate
 

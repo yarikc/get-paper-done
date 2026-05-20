@@ -223,7 +223,7 @@ gpd review-pack --paper ~/papers/metadata-strategy
 If you add inline comments there, capture them with:
 
 ```bash
-gpd feedback --paper ~/papers/metadata-strategy
+gpd feedback collect --paper ~/papers/metadata-strategy
 ```
 
 Then approve the feedback handling in Claude/Codex:
@@ -235,10 +235,25 @@ Then approve the feedback handling in Claude/Codex:
 GPD captures comments into `FEEDBACK-READER.md`, creates a pending
 `FEEDBACK-PLAN.md` with default recommendations, and waits for approval before
 revision. In Claude/Codex, use `/gpd-feedback` to walk through one concern at a
-time and record `approve`, `modify`, `defer`, or `reject` decisions. Approved
+time and record `approve`, `modify`, `defer`, `reject`, or
+`answered_no_action` decisions. Approved
 changes are applied to `.paper/DRAFT.md`; export regenerates `FINAL.md` and
 snapshots the prior export first. You review the final paper; GPD keeps the
 draft as the editable source of truth.
+
+Use visible comment markers while reading:
+
+```md
+//todo: requested action
+//keep: preserve this wording, argument, voice, or specificity
+//qq: question or uncertainty
+//no: reject or disagree with this claim/framing
+```
+
+Severity suffixes are supported: `//todo!:` for high severity and `//todo?:`
+for low severity. `gpd feedback collect` leaves comments in place by default;
+run `gpd feedback clean` only after confirming the extracted feedback is
+complete.
 
 For external model review, `gpd review-external` sends the reviewer the paper
 state, classification, grill context, decisions, brief, research, outline,
@@ -332,14 +347,15 @@ gpd revise --trigger .paper/FEEDBACK-PLAN.md
 gpd snapshot --reason before_substantive_revision
 gpd restore --snapshot REV-20260519T143205123-before-substantive-revision
 gpd review-pack
-gpd feedback
+gpd feedback collect
+gpd feedback clean
 gpd review-external --models claude,codex,gemini --current-runtime codex
 gpd update claude
 gpd update codex
 ```
 
-`/gpd-review` evaluates the paper. `gpd feedback` captures reader comments into
-feedback artifacts for planning and revision.
+`/gpd-review` evaluates the paper. `gpd feedback collect` captures reader
+comments into feedback artifacts for planning and revision.
 
 Use `gpd next` for the compact answer. Use `gpd status` when you want full
 artifact presence. Use `gpd validate --semantic` before treating a paper as

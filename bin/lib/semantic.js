@@ -558,29 +558,29 @@ function validateStateDrift(paperDir) {
 }
 
 function hasInlineReviewComment(line) {
-  const trimmed = line.trim();
-  if (trimmed.startsWith('//')) return true;
-  if (/<!--\s*(?:(YC|GPD|feedback)\b\s*:?)?.+-->/i.test(trimmed)) return true;
-  const slashIndex = line.indexOf('//');
-  if (slashIndex <= 0) return false;
-  if (line.includes('://')) return false;
-  const before = line[slashIndex - 1];
-  return !before || /\s/.test(before);
+  return /\/\/\s*(?:(review)\s+)?(todo|keep|qq|no|question|preserve|reject)[!?]?:\s*/i.test(line);
 }
 
 function validateUnresolvedExportComments(paperDir) {
   const final = readIfExists(metaPath(paperDir, 'exports/FINAL.md'));
   if (!final) return [];
-  const comments = final
-    .split(/\r?\n/)
-    .map((line, index) => ({ line, index: index + 1 }))
-    .filter(({ line }) => hasInlineReviewComment(line));
+  const comments = [];
+  let inFence = false;
+  final.split(/\r?\n/).forEach((line, index) => {
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence;
+      return;
+    }
+    if (!inFence && hasInlineReviewComment(line)) {
+      comments.push({ line, index: index + 1 });
+    }
+  });
   if (comments.length === 0) return [];
   return [issue(
     'semantic.export_unresolved_review_comments',
     'HIGH',
     'exports/FINAL.md',
-    `contains ${comments.length} unresolved inline review comment(s); run gpd feedback before treating the export as final`,
+    `contains ${comments.length} unresolved inline review comment(s); run gpd feedback collect, then gpd feedback clean before treating the export as final`,
   )];
 }
 

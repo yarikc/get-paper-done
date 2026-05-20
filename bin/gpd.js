@@ -26,7 +26,9 @@ const {
   reviewPack,
   printReviewPack,
   captureFeedback,
+  cleanFeedbackComments,
   printFeedbackCapture,
+  printFeedbackClean,
   decideFeedbackPlan,
   listFeedbackPlan,
   printFeedbackPlanDecision,
@@ -52,7 +54,7 @@ Commands:
   import                       Import an existing paper folder/file into a workspace
   export                       Export reviewed draft to .paper/exports/FINAL.md
   review-pack                  Show the one file to review and how to comment
-  feedback                     Capture reader comments; /gpd-review evaluates paper quality
+  feedback [collect|clean]     Capture or clean inline reader comments; /gpd-review evaluates paper quality
   feedback-plan                List/review/decide feedback-plan concerns
   revise                       Prepare revision by snapshotting current paper state
   snapshot                     Preserve current paper artifacts before risky work
@@ -79,12 +81,13 @@ Options:
   --current-runtime NAME       Exclude current runtime from external provider review
   --timeout-ms MS              External reviewer timeout in milliseconds
   --reviewer NAME              Reviewer name for stdin review input
+  --from FILE                  Markdown artifact to collect/clean inline feedback from
   --reason REASON              Snapshot reason, e.g. before_substantive_revision
   --snapshot REV               Snapshot ID or .paper/versions path to restore
   --trigger ARTIFACT           Artifact or event that triggered a snapshot
   --notes TEXT                 Human note for snapshot metadata
   --item N                     Feedback-plan item number
-  --decision VALUE             Feedback-plan decision: approve|modify|defer|reject
+  --decision VALUE             Feedback-plan decision: approve|modify|defer|reject|answered_no_action
   --note TEXT                  Feedback-plan decision constraint/note
   --stdin                      Read one external review from stdin
   --paper DIR                  Existing paper directory for next/status/validate
@@ -103,7 +106,8 @@ Examples:
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-pack --paper ~/papers/metadata-strategy
-  gpd feedback --paper ~/papers/metadata-strategy
+  gpd feedback collect --paper ~/papers/metadata-strategy
+  gpd feedback clean --paper ~/papers/metadata-strategy
   gpd feedback-plan list --paper ~/papers/metadata-strategy
   gpd feedback-plan review --paper ~/papers/metadata-strategy --item 1
   gpd feedback-plan decide --paper ~/papers/metadata-strategy --item 1 --decision approve
@@ -121,7 +125,7 @@ Examples:
   gpd list-audiences
 
 Review distinction:
-  /gpd-review evaluates the paper. gpd feedback captures reader comments.
+  /gpd-review evaluates the paper. gpd feedback collect captures reader comments.
 `);
 }
 
@@ -192,6 +196,9 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--reviewer') {
       args.reviewer = argv[i + 1];
+      i += 1;
+    } else if (arg === '--from') {
+      args.from = argv[i + 1];
       i += 1;
     } else if (arg === '--reason') {
       args.reason = argv[i + 1];
@@ -297,7 +304,17 @@ async function main(argv) {
   }
 
   if (command === 'feedback') {
-    const args = parseWorkspaceOptions(rest);
+    const maybeSubcommand = rest[0] && !rest[0].startsWith('-') ? rest[0] : 'collect';
+    const subcommands = new Set(['collect', 'clean']);
+    const subcommand = subcommands.has(maybeSubcommand) ? maybeSubcommand : null;
+    if (!subcommand) throw new Error(`Unknown feedback subcommand: ${maybeSubcommand}`);
+    const args = parseWorkspaceOptions(rest[0] && !rest[0].startsWith('-') ? rest.slice(1) : rest);
+    if (subcommand === 'clean') {
+      const result = cleanFeedbackComments(args);
+      if (args.json) console.log(JSON.stringify(result, null, 2));
+      else printFeedbackClean(result);
+      return;
+    }
     const result = captureFeedback(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printFeedbackCapture(result);

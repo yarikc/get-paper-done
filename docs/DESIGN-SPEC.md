@@ -160,7 +160,8 @@ Setup creates only the artifacts required to start. Later stages create their ar
 | `/gpd-revise` | Apply approved or modified feedback with snapshot protection |
 | `/gpd-export` | Prepare final handoff |
 | `gpd review-pack` | Show the current review target, editable source, and comment syntax |
-| `gpd feedback` | Capture inline comments from the review target into reader feedback and feedback-plan artifacts |
+| `gpd feedback collect` | Capture inline comments from the review target into reader feedback and feedback-plan artifacts |
+| `gpd feedback clean` | Remove captured inline comments from the review target after the user confirms extraction |
 | `gpd revise` | Prepare a controlled revision by snapshotting current paper state and surfacing the restore command |
 | `gpd snapshot` | Preserve current tracked paper state before substantive revision or other risky work |
 | `gpd restore` | Restore tracked paper files from a snapshot after first creating a safety snapshot |
@@ -185,7 +186,7 @@ run the recommended command
 repeat
 ```
 
-After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback` captures inline comments from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, then stops at the approval gate. `FEEDBACK-PLAN.md` carries a concern-first decision view with numbered concerns, proposed edits grouped under each concern, `User Decision`, and `User Constraint`. `/gpd-feedback` is the user-facing approval loop: it shows one concern, asks for `approve`, `modify`, `defer`, or `reject`, and records the decision. The lower-level CLI exposes the same queue through `gpd feedback-plan list`, `gpd feedback-plan review`, and `gpd feedback-plan decide` for agents, tests, and scripts. Before substantive revision, `gpd revise --trigger <artifact>` preserves the current paper artifacts under `.paper/versions/` with file hashes, records the active revision snapshot in state, and prints the restore command. `/gpd-revise` then applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
+After export, the user reviews `.paper/exports/FINAL.md`. `gpd review-pack` shows the exact review target and comment syntax. `gpd feedback collect` captures visible inline comments (`//todo:`, `//keep:`, `//qq:`, `//no:`) from the review target into `FEEDBACK-READER.md` and `FEEDBACK-PLAN.md`, preserves the commented paper, leaves comments in place by default, and stops at the approval gate. `gpd feedback clean` removes those inline comments only after the user confirms extraction. `FEEDBACK-PLAN.md` carries a concern-first decision view with numbered concerns, proposed edits grouped under each concern, `User Decision`, and `User Constraint`; `//keep:` becomes a preservation constraint. `/gpd-feedback` is the user-facing approval loop: it shows one concern, asks for `approve`, `modify`, `defer`, `reject`, or `answered_no_action`, and records the decision. The lower-level CLI exposes the same queue through `gpd feedback-plan list`, `gpd feedback-plan review`, and `gpd feedback-plan decide` for agents, tests, and scripts. Before substantive revision, `gpd revise --trigger <artifact>` preserves the current paper artifacts under `.paper/versions/` with file hashes, records the active revision snapshot in state, and prints the restore command. `/gpd-revise` then applies approved changes to `.paper/DRAFT.md`, and `/gpd-export` regenerates `FINAL.md`. If `FINAL.md` already exists and `DRAFT.md` changed after it, `gpd export` requires a current valid `REVISION-CHECK.md`, then snapshots the old export before overwriting it. `gpd next` compares the current `DRAFT.md` hash to the last exported draft hash, so a touched-but-unchanged draft does not force export while a content change with misleading mtimes still does. `gpd restore --snapshot REV-...` restores tracked files from a snapshot after creating a safety snapshot of the current state. `FINAL.md` is the reading copy; `DRAFT.md` remains the editable source of truth.
 
 ### Stage Semantics
 
@@ -443,7 +444,8 @@ gpd next
 gpd status
 gpd validate
 gpd review-pack
-gpd feedback
+gpd feedback collect
+gpd feedback clean
 gpd review-external --review-file reviewer=<path>
 gpd review-external --models claude,codex,gemini --current-runtime codex
 gpd list-audiences

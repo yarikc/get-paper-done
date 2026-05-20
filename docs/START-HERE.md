@@ -186,10 +186,21 @@ When GPD exports the paper, review this file:
 If you add comments to it, run:
 
 ```bash
-gpd feedback --paper ~/papers/my-paper
+gpd feedback collect --paper ~/papers/my-paper
 ```
 
-`gpd feedback` captures reader comments into feedback artifacts. `/gpd-review`
+Use visible comment markers while reading:
+
+```md
+//todo: requested action
+//keep: preserve this wording, argument, voice, or specificity
+//qq: question or uncertainty
+//no: reject or disagree with this claim/framing
+```
+
+`gpd feedback collect` captures reader comments into feedback artifacts and
+leaves the comments in place. After confirming the extraction is complete, use
+`gpd feedback clean` to remove them from the reviewed Markdown. `/gpd-review`
 evaluates the paper's quality, audience fit, evidence, and ask clarity. They
 are related, but they are not the same command.
 

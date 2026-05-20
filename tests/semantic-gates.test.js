@@ -1131,13 +1131,13 @@ function testExportMetadataLeakFails() {
 
 function testUnresolvedExportCommentsFail() {
   const paperDir = makePaper('semantic-export-comments');
-  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n\nThis claim needs work. //YC unclear ask\n');
+  writeArtifact(paperDir, 'exports/FINAL.md', '# Final\n\nThis claim needs work. //todo: unclear ask\n');
 
   const result = runFail(['validate', '--paper', paperDir, '--semantic']);
   assert.strictEqual(result.status, 1);
   assert(result.stdout.includes('exports/FINAL.md'));
   assert(result.stdout.includes('unresolved inline review comment'));
-  assert(result.stdout.includes('gpd feedback'));
+  assert(result.stdout.includes('gpd feedback collect'));
 }
 
 function testStateMarkdownJsonDriftFails() {

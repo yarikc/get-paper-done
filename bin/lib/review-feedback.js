@@ -7,6 +7,9 @@ const {
   writeFile,
 } = require('./common');
 const {
+  createSnapshot,
+} = require('./snapshot');
+const {
   findPaperDir,
   status,
   writeStateJson,
@@ -46,10 +49,29 @@ function reviewTarget(paperDir) {
   };
 }
 
+function reviewTargetFromInput(paperDir, input = {}) {
+  if (!input.from) return reviewTarget(paperDir);
+  const raw = String(input.from);
+  const candidate = path.isAbsolute(raw)
+    ? raw
+    : path.join(paperDir, raw.startsWith('.paper/') ? raw : path.join('.paper', raw));
+  const meta = path.join(paperDir, '.paper');
+  const relative = path.relative(meta, candidate);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('--from must point to a file inside .paper/');
+  }
+  return {
+    artifact: relative.split(path.sep).join('/'),
+    path: candidate,
+    editableSource: '.paper/DRAFT.md',
+    reason: 'Explicit review source selected with --from.',
+  };
+}
+
 function reviewPack(input = {}) {
   const paperDir = findPaperDir(input.paper || process.cwd());
   if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
-  const target = reviewTarget(paperDir);
+  const target = reviewTargetFromInput(paperDir, input);
   if (!fs.existsSync(target.path)) throw new Error(`Review target is missing: .paper/${target.artifact}`);
 
   return {
@@ -59,13 +81,15 @@ function reviewPack(input = {}) {
     editableSource: target.editableSource,
     reason: target.reason,
     commentSyntax: [
-      '// comment text',
-      '//USER comment text',
-      '<!-- comment text -->',
-      `${target.path}.feedback`,
+      '//todo: requested action',
+      '//keep: preserve this wording, argument, voice, or specificity',
+      '//qq: question or uncertainty',
+      '//no: reject or disagree with this claim/framing',
+      '//todo!: high-severity action, //todo?: low-severity action',
+      '//review todo: optional scoped form, closed with // when useful',
     ],
-    captureCommand: `gpd feedback --paper ${paperDir}`,
-    next: 'Review the target file, add comments, then run gpd feedback.',
+    captureCommand: `gpd feedback collect --paper ${paperDir}`,
+    next: 'Review the target file, add comments, then run gpd feedback collect.',
   };
 }
 
@@ -87,54 +111,117 @@ function nearestContext(lines, lineIndex) {
   return { heading, previousText };
 }
 
-function stripCommentPrefix(value) {
-  return value
-    .replace(/^\/\//, '')
-    .replace(/^\s*(USER|GPD|feedback)\b\s*:?\s*/i, '')
-    .replace(/^<!--\s*/, '')
-    .replace(/\s*-->$/, '')
-    .trim();
+const markerAliases = {
+  question: 'qq',
+  preserve: 'keep',
+  reject: 'no',
+};
+
+function normalizeKind(kind) {
+  return markerAliases[kind] || kind;
+}
+
+function kindLabel(kind) {
+  if (kind === 'todo') return 'Action';
+  if (kind === 'keep') return 'Preservation';
+  if (kind === 'qq') return 'Question';
+  if (kind === 'no') return 'Rejection';
+  return 'Concern';
+}
+
+function severityFromSuffix(suffix, feedback) {
+  if (suffix === '!') return 'HIGH';
+  if (suffix === '?') return 'LOW';
+  return inferSeverity(feedback);
+}
+
+function markerRegex() {
+  return /\/\/\s*(?:(review)\s+)?(todo|keep|qq|no|question|preserve|reject)([!?]?):\s*/i;
+}
+
+function isFenceLine(line) {
+  return /^\s*(```|~~~)/.test(line);
+}
+
+function closingMarkerIndex(line, afterMarkerStart) {
+  const remaining = line.slice(afterMarkerStart);
+  const closeMatch = remaining.match(/(?<=\s)\/\//);
+  return closeMatch ? afterMarkerStart + closeMatch.index : -1;
 }
 
 function inlineCommentFromLine(line) {
-  const trimmed = line.trim();
-  if (trimmed.startsWith('//')) {
-    const comment = stripCommentPrefix(trimmed);
-    return comment ? { comment, anchor: '' } : null;
-  }
+  const match = markerRegex().exec(line);
+  if (!match) return null;
+  const markerStart = match.index;
+  const before = line.slice(0, markerStart);
+  const afterMarkerStart = markerStart + match[0].length;
+  const closeIndex = closingMarkerIndex(line, afterMarkerStart);
+  const commentEnd = closeIndex >= 0 ? closeIndex : line.length;
+  const rawComment = line.slice(afterMarkerStart, commentEnd).trim();
+  if (!rawComment) return null;
+  const after = closeIndex >= 0 ? line.slice(closeIndex + 2) : '';
+  const cleanLine = `${before}${after}`.replace(/[ \t]{2,}/g, ' ').trimEnd();
+  return {
+    comment: rawComment,
+    anchor: before.trim() || cleanLine.trim(),
+    kind: normalizeKind(match[2].toLowerCase()),
+    suffix: match[3] || '',
+    scoped: Boolean(match[1]),
+    marker: match[0].trim(),
+    markerStart,
+    markerEnd: commentEnd,
+    hasClosingMarker: closeIndex >= 0,
+    cleanLine,
+  };
+}
 
-  const htmlStart = line.indexOf('<!--');
-  const htmlEnd = line.indexOf('-->', htmlStart + 4);
-  if (htmlStart >= 0 && htmlEnd > htmlStart) {
-    const raw = line.slice(htmlStart, htmlEnd + 3);
-    const comment = stripCommentPrefix(raw);
-    const anchor = line.slice(0, htmlStart).trim();
-    return comment ? { comment, anchor } : null;
-  }
-
-  const slashIndex = line.indexOf('//');
-  if (slashIndex <= 0) return null;
-  if (line.includes('://')) return null;
-  const before = line[slashIndex - 1];
-  if (before && !/\s/.test(before)) return null;
-  const comment = stripCommentPrefix(line.slice(slashIndex));
-  const anchor = line.slice(0, slashIndex).trim();
-  return comment ? { comment, anchor } : null;
+function cleanInlineCommentsFromMarkdown(content) {
+  const lines = content.split(/\r?\n/);
+  let inFence = false;
+  let removed = 0;
+  const cleaned = lines.map((line) => {
+    if (isFenceLine(line)) {
+      inFence = !inFence;
+      return line;
+    }
+    if (inFence) return line;
+    const parsed = inlineCommentFromLine(line);
+    if (!parsed) return line;
+    removed += 1;
+    return parsed.cleanLine.trim() ? parsed.cleanLine : null;
+  }).filter((line) => line !== null);
+  return {
+    content: cleaned.join('\n'),
+    removed,
+  };
 }
 
 function commentsFromMarkdown(content, artifact) {
   const lines = content.split(/\r?\n/);
   const comments = [];
+  let inFence = false;
   lines.forEach((line, index) => {
+    if (isFenceLine(line)) {
+      inFence = !inFence;
+      return;
+    }
+    if (inFence) return;
     const parsed = inlineCommentFromLine(line);
     if (!parsed) return;
     const context = nearestContext(lines, index);
+    const severity = severityFromSuffix(parsed.suffix, parsed.comment);
     comments.push({
       artifact,
       line: index + 1,
       feedback: parsed.comment,
       context: parsed.anchor || context.previousText || context.heading || artifact,
       heading: context.heading,
+      kind: parsed.kind,
+      type: kindLabel(parsed.kind),
+      severity,
+      explicitSeverity: Boolean(parsed.suffix),
+      marker: parsed.marker,
+      hasClosingMarker: parsed.hasClosingMarker,
     });
   });
   return comments;
@@ -151,12 +238,22 @@ function commentsFromFeedbackFile(content, artifact) {
       feedback: stripCommentPrefix(line.trim()),
       context: artifact,
       heading: 'Companion feedback file',
+      kind: 'todo',
+      type: 'Action',
+      severity: inferSeverity(stripCommentPrefix(line.trim())),
     }))
     .filter((item) => item.feedback);
 }
 
-function collectInlineFeedback(paperDir) {
-  const target = reviewTarget(paperDir);
+function stripCommentPrefix(value) {
+  return value
+    .replace(/^\/\//, '')
+    .replace(/^\s*(review|feedback)\b\s*:?\s*/i, '')
+    .trim();
+}
+
+function collectInlineFeedback(paperDir, input = {}) {
+  const target = reviewTargetFromInput(paperDir, input);
   const sources = [];
   if (fs.existsSync(target.path)) {
     sources.push({
@@ -210,7 +307,7 @@ function markdownEscape(value) {
 
 function readerFeedbackMarkdown({ comments, createdAt, targetArtifact }) {
   const rows = comments.map((comment, index) => (
-    `| ${index + 1} | ${markdownEscape(comment.feedback)} | ${inferSignal(comment.feedback)} | ${inferSeverity(comment.feedback)} | Ask user | ${markdownEscape(comment.artifact)}:${comment.line} |`
+    `| ${index + 1} | ${comment.type || 'Concern'} | ${markdownEscape(comment.feedback)} | ${inferSignal(comment.feedback)} | ${comment.severity || inferSeverity(comment.feedback)} | Ask user | ${markdownEscape(comment.artifact)}:${comment.line} |`
   )).join('\n');
   const questions = comments.map((comment, index) => (
     `- Item ${index + 1}: confirm whether to incorporate the feedback from ${comment.artifact}:${comment.line}.`
@@ -226,7 +323,7 @@ function readerFeedbackMarkdown({ comments, createdAt, targetArtifact }) {
 ## Source
 
 - **Reviewer:** User
-- **Context:** Comments captured from the current review target by \`gpd feedback\`.
+- **Context:** Comments captured from the current review target by \`gpd feedback collect\`.
 - **Scope:** whole paper or commented sections
 
 ## Five-Signal Scorecard
@@ -241,8 +338,8 @@ function readerFeedbackMarkdown({ comments, createdAt, targetArtifact }) {
 
 ## Feedback Items
 
-| # | Feedback | Signal | Severity | Recommended Handling | Affected Artifact |
-|---|----------|--------|----------|----------------------|-------------------|
+| # | Type | Feedback | Signal | Severity | Recommended Handling | Affected Artifact |
+|---|------|----------|--------|----------|----------------------|-------------------|
 ${rows}
 
 ## Questions
@@ -262,25 +359,58 @@ ${questions}
 `;
 }
 
+function recommendationForComment(comment) {
+  if (comment.kind === 'keep') return 'preserve';
+  if (comment.kind === 'qq') return 'answer';
+  if (comment.kind === 'no') return 'modify';
+  return 'modify';
+}
+
+function whyForComment(comment) {
+  if (comment.kind === 'keep') return 'The reader explicitly marked this as something the revision must preserve. Losing it risks repeating the prior regression where a strong paper became generic.';
+  if (comment.kind === 'qq') return 'The reader raised a question or uncertainty. It must be answered before deciding whether revision, research, fact-checking, or no action is appropriate.';
+  if (comment.kind === 'no') return 'The reader explicitly rejected this framing or claim. Leaving it unresolved may preserve a known disagreement in the paper.';
+  return 'This is direct reader friction on the exported paper, so it may reveal ambiguity the workflow missed.';
+}
+
+function handlingForComment(comment) {
+  if (comment.kind === 'keep') return 'Treat this as a preservation constraint during revision. Do not rewrite away the marked wording, argument, voice, or specificity unless the user explicitly overrides it.';
+  if (comment.kind === 'qq') return 'Answer the question first. Then decide whether the result requires revision, research, fact-checking, deferral, or no action.';
+  if (comment.kind === 'no') return 'Resolve the rejected claim or framing before revision approval. If the rejection is accepted, rewrite or remove the problematic framing without diluting adjacent strong material.';
+  return 'Discuss the comment, then incorporate it if it clarifies intent, evidence, audience fit, or ask quality without expanding scope.';
+}
+
+function proposedEditForComment(comment) {
+  if (comment.kind === 'keep') return `Preserve reader-marked material: ${markdownEscape(comment.feedback)}`;
+  if (comment.kind === 'qq') return `Answer reader question before deciding revision action: ${markdownEscape(comment.feedback)}`;
+  if (comment.kind === 'no') return `Address rejected framing or claim: ${markdownEscape(comment.feedback)}`;
+  return `Address reader comment: ${markdownEscape(comment.feedback)}`;
+}
+
+function userConstraintForComment(comment) {
+  if (comment.kind === 'keep') return markdownEscape(comment.feedback) || 'preserve marked material';
+  return 'none yet';
+}
+
 function feedbackPlanMarkdown({ comments, createdAt }) {
   const sections = comments.map((comment, index) => [
-    `### ${index + 1}. Concern: Reader comment ${index + 1}`,
+    `### ${index + 1}. ${comment.type || 'Concern'}: Reader comment ${index + 1}`,
     '',
-    '- **Type:** Concern',
-    '- **Severity:** MEDIUM',
+    `- **Type:** ${comment.type || 'Concern'}`,
+    `- **Severity:** ${comment.severity || inferSeverity(comment.feedback)}`,
     `- **Source(s):** ${markdownEscape(comment.artifact)}:${comment.line}`,
-    '- **Recommendation:** modify',
-    '- **Why this matters:** This is direct reader friction on the exported paper, so it may reveal ambiguity the workflow missed.',
+    `- **Recommendation:** ${recommendationForComment(comment)}`,
+    `- **Why this matters:** ${whyForComment(comment)}`,
     '- **What improves if addressed:** The revised paper should better match the reader need that triggered the inline comment.',
     '- **Risk if handled badly:** Applying the comment mechanically can expand scope, weaken the paper purpose, or conflict with approved author intent.',
-    '- **Proposed handling:** Discuss the comment, then incorporate it if it clarifies intent, evidence, audience fit, or ask quality without expanding scope.',
+    `- **Proposed handling:** ${handlingForComment(comment)}`,
     '- **Proposed edits:**',
-    `  1. Address reader comment: ${markdownEscape(comment.feedback)}`,
+    `  1. ${proposedEditForComment(comment)}`,
     '- **Reviewer evidence:**',
     `  - ${markdownEscape(comment.feedback)}`,
     '- **Affected artifacts:** DRAFT / BRIEF / RESEARCH / OUTLINE',
     '- **User Decision:** pending',
-    '- **User Constraint:** none yet',
+    `- **User Constraint:** ${userConstraintForComment(comment)}`,
     '',
   ].join('\n')).join('\n');
   const itemList = comments.map((_, index) => String(index + 1)).join(', ') || 'none';
@@ -293,7 +423,7 @@ function feedbackPlanMarkdown({ comments, createdAt }) {
 
 ## Summary
 
-\`gpd feedback\` captured inline review comments, grouped them into the concern-first decision queue below, and stopped at the approval gate. No draft or upstream artifact has been changed.
+\`gpd feedback collect\` captured inline review comments, grouped them into the concern-first decision queue below, and stopped at the approval gate. No draft or upstream artifact has been changed.
 
 ## Decision View
 
@@ -301,7 +431,7 @@ Review concerns ${itemList}. Use \`approve\`, \`modify\`, \`defer\`, or \`reject
 
 | # | Concern | Type | Severity | Recommendation | User Decision |
 |---|---------|------|----------|----------------|---------------|
-${comments.map((_, index) => `| ${index + 1} | Reader comment ${index + 1} | Concern | MEDIUM | modify | pending |`).join('\n')}
+${comments.map((comment, index) => `| ${index + 1} | Reader comment ${index + 1} | ${comment.type || 'Concern'} | ${comment.severity || inferSeverity(comment.feedback)} | ${recommendationForComment(comment)} | pending |`).join('\n')}
 
 These comments came from the reading copy, so they represent actual reader friction rather than speculative reviewer advice. The next draft should be easier to understand and more aligned with the reader's decision needs.
 
@@ -356,7 +486,7 @@ function updateFeedbackState(paperDir, dryRun) {
     current_stage: 'Reader Feedback',
     last_completed_stage: 'Reader Feedback Capture',
     last_activity: new Date().toISOString(),
-      suggested_next_command: '/gpd-feedback',
+    suggested_next_command: '/gpd-feedback',
     feedback: {
       ...(state.feedback || {}),
       feedback_plan_status: 'Pending user approval',
@@ -368,13 +498,25 @@ function updateFeedbackState(paperDir, dryRun) {
   return nextState;
 }
 
+function timestampForFile(date = new Date()) {
+  return date.toISOString().replace(/[^0-9]/g, '').slice(0, 14);
+}
+
+function preserveCommentedReview(meta, target, content, createdAt, dryRun) {
+  const reviewsDir = path.join(meta, 'reviews');
+  const baseName = target.artifact.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'review';
+  const reviewPath = path.join(reviewsDir, `inline-feedback-${timestampForFile(new Date(createdAt))}-${baseName}.md`);
+  writeFile(reviewPath, content, dryRun);
+  return reviewPath;
+}
+
 function captureFeedback(input = {}) {
   const paperDir = findPaperDir(input.paper || process.cwd());
   if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
-  const target = reviewTarget(paperDir);
+  const target = reviewTargetFromInput(paperDir, input);
   if (!fs.existsSync(target.path)) throw new Error(`Review target is missing: .paper/${target.artifact}`);
 
-  const comments = collectInlineFeedback(paperDir);
+  const comments = collectInlineFeedback(paperDir, input);
   if (comments.length === 0) {
     return {
       paperDir,
@@ -382,7 +524,7 @@ function captureFeedback(input = {}) {
       commentsCaptured: 0,
       readerFeedbackPath: path.join(paperDir, '.paper', 'FEEDBACK-READER.md'),
       feedbackPlanPath: path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
-      next: 'Add inline comments to the review target, then run gpd feedback again.',
+      next: 'Add inline comments to the review target, then run gpd feedback collect again.',
     };
   }
 
@@ -390,6 +532,20 @@ function captureFeedback(input = {}) {
   const meta = path.join(paperDir, '.paper');
   const readerFeedbackPath = path.join(meta, 'FEEDBACK-READER.md');
   const feedbackPlanPath = path.join(meta, 'FEEDBACK-PLAN.md');
+  const commentedReviewPath = preserveCommentedReview(
+    meta,
+    target,
+    fs.readFileSync(target.path, 'utf8'),
+    createdAt,
+    input.dryRun,
+  );
+  const snapshot = createSnapshot({
+    paper: paperDir,
+    reason: 'inline_feedback_collect',
+    trigger: `.paper/${target.artifact}`,
+    notes: `Preserved commented review artifact at ${path.relative(paperDir, commentedReviewPath).split(path.sep).join('/')}`,
+    dryRun: input.dryRun,
+  });
   const previousReaderFeedback = readIfExists(readerFeedbackPath);
   const previousFeedbackPlan = readIfExists(feedbackPlanPath);
   const readerFeedback = [
@@ -411,6 +567,41 @@ function captureFeedback(input = {}) {
     commentsCaptured: comments.length,
     readerFeedbackPath,
     feedbackPlanPath,
+    commentedReviewPath,
+    snapshotId: snapshot.versionId,
+    commentsLeftInPlace: true,
+    next: '/gpd-feedback',
+  };
+}
+
+function cleanFeedbackComments(input = {}) {
+  const paperDir = findPaperDir(input.paper || process.cwd());
+  if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
+  const target = reviewTargetFromInput(paperDir, input);
+  if (!fs.existsSync(target.path)) throw new Error(`Review target is missing: .paper/${target.artifact}`);
+  const original = fs.readFileSync(target.path, 'utf8');
+  const cleaned = cleanInlineCommentsFromMarkdown(original);
+  if (cleaned.removed === 0) {
+    return {
+      paperDir,
+      reviewTarget: target.path,
+      commentsRemoved: 0,
+      next: 'No inline feedback comments found to clean.',
+    };
+  }
+  const snapshot = createSnapshot({
+    paper: paperDir,
+    reason: 'inline_feedback_clean',
+    trigger: `.paper/${target.artifact}`,
+    notes: `Before cleaning ${cleaned.removed} inline feedback comments from .paper/${target.artifact}`,
+    dryRun: input.dryRun,
+  });
+  writeFile(target.path, cleaned.content, input.dryRun);
+  return {
+    paperDir,
+    reviewTarget: target.path,
+    commentsRemoved: cleaned.removed,
+    snapshotId: snapshot.versionId,
     next: '/gpd-feedback',
   };
 }
@@ -433,13 +624,28 @@ function printFeedbackCapture(result) {
   console.log(`comments captured: ${result.commentsCaptured}`);
   console.log(`reader feedback: ${result.readerFeedbackPath}`);
   console.log(`feedback plan: ${result.feedbackPlanPath}`);
+  if (result.commentedReviewPath) console.log(`commented review preserved: ${result.commentedReviewPath}`);
+  if (result.snapshotId) console.log(`snapshot: ${result.snapshotId}`);
+  if (result.commentsLeftInPlace) console.log('comments: left in review target; run gpd feedback clean after confirming extraction');
+  console.log(`next: ${result.next}`);
+}
+
+function printFeedbackClean(result) {
+  console.log(`paper: ${result.paperDir}`);
+  console.log(`review target: ${result.reviewTarget}`);
+  console.log(`comments removed: ${result.commentsRemoved}`);
+  if (result.snapshotId) console.log(`snapshot: ${result.snapshotId}`);
   console.log(`next: ${result.next}`);
 }
 
 module.exports = {
   captureFeedback,
+  cleanFeedbackComments,
   printFeedbackCapture,
+  printFeedbackClean,
   reviewPack,
   printReviewPack,
   collectInlineFeedback,
+  cleanInlineCommentsFromMarkdown,
+  inlineCommentFromLine,
 };

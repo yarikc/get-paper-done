@@ -1,7 +1,7 @@
 ---
 name: gpd:feedback
 description: Walk through feedback-plan concerns one at a time and record user decisions
-argument-hint: "[--list] [--item N]"
+argument-hint: "[collect|clean|--list] [--item N]"
 allowed-tools:
   - Read
   - Bash
@@ -12,9 +12,11 @@ allowed-tools:
 **Flags:**
 - `--list` - Show the current feedback-plan concern queue without deciding anything.
 - `--item N` - Review a specific concern instead of the next pending concern.
+- `collect` - Extract inline human comments into feedback artifacts.
+- `clean` - Remove extracted inline comments from the reviewed Markdown after confirming capture.
 
 This command is the user-facing approval loop for `.paper/FEEDBACK-PLAN.md`.
-Use it after `/gpd-review`, `gpd feedback`, or `gpd review-external` creates a feedback plan.
+Use it after `/gpd-review`, `gpd feedback collect`, or `gpd review-external` creates a feedback plan.
 </context>
 
 <execution_context>
@@ -22,6 +24,31 @@ Use it after `/gpd-review`, `gpd feedback`, or `gpd review-external` creates a f
 </execution_context>
 
 <process>
+If `collect` is present, run:
+
+```bash
+gpd feedback collect --paper <paper-dir>
+```
+
+Use this when the user has added inline comments such as:
+
+```md
+//todo: requested action
+//keep: preserve this wording, argument, voice, or specificity
+//qq: question or uncertainty
+//no: reject or disagree with this claim/framing
+```
+
+The CLI preserves the commented paper, writes `.paper/FEEDBACK-READER.md` and `.paper/FEEDBACK-PLAN.md`, and leaves comments in place by default.
+
+If `clean` is present, run:
+
+```bash
+gpd feedback clean --paper <paper-dir>
+```
+
+Only clean comments after the user confirms extraction captured the comments correctly.
+
 If `--list` is present, run:
 
 ```bash
@@ -54,15 +81,18 @@ Ask the user for one decision using a single selection list:
 - `modify`
 - `defer`
 - `reject`
+- `answered_no_action`
 
 If the user selects `modify`, ask one short follow-up question for the required
 constraint or instruction. If the user selects `defer` or `reject`, ask for a
 short reason only when the reason is not already clear from the conversation.
+Use `answered_no_action` when a `//qq:` question has been answered and no
+revision is needed.
 
 After the user answers, record the decision with:
 
 ```bash
-gpd feedback-plan decide --paper <paper-dir> --item <N> --decision <approve|modify|defer|reject> --note "<constraint or reason>"
+gpd feedback-plan decide --paper <paper-dir> --item <N> --decision <approve|modify|defer|reject|answered_no_action> --note "<constraint or reason>"
 ```
 
 Then show the next pending concern if one remains. Do not revise `.paper/DRAFT.md`; `/gpd-feedback` only records decisions. `/gpd-revise` applies approved or modified concerns after snapshot protection.

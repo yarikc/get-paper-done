@@ -21,7 +21,9 @@ const {
 } = require('./external-review');
 const {
   captureFeedback,
+  cleanFeedbackComments,
   printFeedbackCapture,
+  printFeedbackClean,
   reviewPack,
   printReviewPack,
 } = require('./review-feedback');
@@ -66,7 +68,9 @@ module.exports = {
   printExternalReviewResult,
   formatExternalReviewProgress,
   captureFeedback,
+  cleanFeedbackComments,
   printFeedbackCapture,
+  printFeedbackClean,
   reviewPack,
   printReviewPack,
   createSnapshot,

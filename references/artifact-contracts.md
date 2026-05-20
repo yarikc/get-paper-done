@@ -156,7 +156,7 @@ Required tables:
 
 - Below-Target Items: `#`, `Issue`, `Target Bar Impact`, `Recommendation`, `Reason`
 
-`Recommendation` is the generated default handling (`approve`, `modify`, `defer`, or `reject`). `Why this matters` explains the consequence of accepting or ignoring the concern. `What improves if addressed` states the expected benefit. `Risk if handled badly` names the failure mode to avoid. `Proposed handling` and `Proposed edits` give implementation options, not separate approval decisions. `User Decision` is the explicit approval field; `User Constraint` records any author constraint that revision must follow.
+`Recommendation` is the generated default handling (`approve`, `modify`, `defer`, `reject`, `answer`, or `preserve`). `Why this matters` explains the consequence of accepting or ignoring the concern. `What improves if addressed` states the expected benefit. `Risk if handled badly` names the failure mode to avoid. `Proposed handling` and `Proposed edits` give implementation options, not separate approval decisions. `User Decision` is the explicit approval field (`approve`, `modify`, `defer`, `reject`, or `answered_no_action`); `User Constraint` records any author constraint that revision must follow. Inline `//keep:` feedback must become a preservation constraint, and revision checks must verify that accepted preservation constraints were honored.
 
 ### `REVISION-CHECK.md`
 
