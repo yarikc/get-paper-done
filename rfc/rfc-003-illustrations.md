@@ -1,12 +1,12 @@
-# RFC-3: Illustrations in the Paper Pipeline (Excalidraw)
+# RFC-003: Illustrations in the Paper Pipeline (Excalidraw)
 
 - **Status:** Proposed
 - **Author:** Project maintainer
 - **Date:** 2026-05-11
 - **Scope:** GPD pipeline extension — diagram authoring, rendering, and validation as a first-class lifecycle artifact
 - **Tracking Issue:** [#12](https://github.com/yarikc/get-paper-done/issues/12)
-- **Complements:** [RFC-4](./RFC-4-charts.md) (data charts via Vega-Lite); shares the same agent, pipeline slot, render command, and validator pattern
-- **Supersedes:** an earlier exploratory draft (`RFC-3-charting.md`) that recommended Mermaid
+- **Complements:** [RFC-004](./rfc-004-charts.md) (data charts via Vega-Lite); shares the same agent, pipeline slot, render command, and validator pattern
+- **Supersedes:** an earlier exploratory charting draft that recommended Mermaid
 
 ## Summary
 
@@ -14,7 +14,7 @@ GPD today produces text-only papers. Executive strategy and architecture papers 
 
 This RFC adds illustrations as a first-class GPD artifact:
 
-- A new `paper-illustrator` agent (one agent, two skills: this RFC covers the `diagram` skill; RFC-4 covers the `chart` skill) that runs after DRAFT and before FACT-CHECK
+- A new `paper-illustrator` agent (one agent, two skills: this RFC covers the `diagram` skill; RFC-004 covers the `chart` skill) that runs after DRAFT and before FACT-CHECK
 - Excalidraw JSON as the source-of-truth format
 - SVG as the rendered output, committed alongside source
 - Lifecycle-throughout rendering — diagrams visible in every viewer the paper is read in, not only at PDF export
@@ -63,16 +63,16 @@ The hand-drawn aesthetic is acceptable today. Anthropic, Stripe, Vercel, and mos
 
 ---
 
-## 3. The two-tool split (this RFC and RFC-4)
+## 3. The two-tool split (this RFC and RFC-004)
 
 Two artifact categories with different mental models:
 
 - **Illustrations** (this RFC) — *positioning carries the meaning.* Architecture, lifecycle, flow, layered diagrams. Excalidraw.
-- **Charts** (RFC-4) — *data carries the meaning.* Bar, line, scatter, area, time series. Vega-Lite.
+- **Charts** (RFC-004) — *data carries the meaning.* Bar, line, scatter, area, time series. Vega-Lite.
 
 One tool cannot do both well. Excalidraw has no data binding; Vega-Lite has no concept of "labeled box with an arrow to another labeled box." Both formats are needed.
 
-RFC-3 and RFC-4 share: the `paper-illustrator` agent, the pipeline slot, the render command, the validator pattern, and the hand-edit pattern. Only the rendering engine, the artifact directory, and the format-specific validators differ.
+RFC-003 and RFC-004 share: the `paper-illustrator` agent, the pipeline slot, the render command, the validator pattern, and the hand-edit pattern. Only the rendering engine, the artifact directory, and the format-specific validators differ.
 
 ---
 
@@ -83,7 +83,7 @@ RFC-3 and RFC-4 share: the `paper-illustrator` agent, the pipeline slot, the ren
 One agent, two skills:
 
 - `diagram` — produces Excalidraw JSON (this RFC)
-- `chart` — produces Vega-Lite JSON (RFC-4)
+- `chart` — produces Vega-Lite JSON (RFC-004)
 
 The agent reads DRAFT.md and decides per-illustration which skill applies. The decision is mechanical: if the content is *positioning-as-meaning* (architecture, flow, state), use `diagram`. If *data-as-meaning* (counts, rates, distributions, trends), use `chart`. Mixed cases prefer two separate artifacts over one hybrid.
 
@@ -200,7 +200,7 @@ Implementation: `validateIllustrationsArtifact`.
 
 ### 5.3 Out of scope for v1
 
-- LLM-judge consistency between prose claims and illustration content. Named as future work; aligns with the deferred LLM-judge tier in `docs/feedback.md`.
+- LLM-judge consistency between prose claims and illustration content. Named as future work; aligns with the deferred LLM-judge boundary tracked in the roadmap and follow-up issues.
 
 ---
 
@@ -211,7 +211,7 @@ Implementation: `validateIllustrationsArtifact`.
 | `gpd illustrate` | Invoke the illustrator agent (proposes plan, optionally generates artifacts) |
 | `gpd illustrate --plan-only` | Generate `PLAN.md` without generating JSON yet |
 | `gpd illustrate --request "lifecycle state diagram"` | Generate a specific illustration without proposing a plan |
-| `gpd render` | Re-render all sources in `.paper/illustrations/` and (post-RFC-4) `.paper/charts/` |
+| `gpd render` | Re-render all sources in `.paper/illustrations/` and (post-RFC-004) `.paper/charts/` |
 | `gpd render --illustrations` | Render only illustrations |
 | `gpd validate --semantic` | Existing command; adds illustration validation if `.paper/illustrations/` is present |
 
@@ -236,7 +236,7 @@ Exit criteria: a paper can complete the pipeline end-to-end with one illustratio
 - Illustrator runs automatically after DRAFT, before FACT-CHECK, gated by config
 - Fact-checker reads illustrations and flags prose-vs-illustration inconsistencies (deterministic rules first, LLM-judge deferred)
 - BRIEF.md `illustration_requests` and DRAFT.md inline markers honored
-- RFC-4 phase-1 (charts) lands in this phase
+- RFC-004 phase-1 (charts) lands in this phase
 
 Exit criteria: end-to-end run of a strategy paper produces both illustrations and at least one chart without manual invocation.
 
@@ -267,7 +267,7 @@ Phases are independently shippable.
 - Excalidraw JSON schema — https://docs.excalidraw.com/docs/codebase/json-schema
 - Mermaid flowchart layout — https://mermaid.js.org/syntax/flowchart.html
 - D2 (terrastruct) — https://d2lang.com/ (MPL 2.0)
-- Anthropic agent patterns (orchestrator-workers, evaluator-optimizer) — referenced in `rfc/RFC-1.md`
+- Anthropic agent patterns (orchestrator-workers, evaluator-optimizer) — referenced in `rfc/rfc-001-research-driven-improvement-plan.md`
 - Existing GPD validator shape — `bin/lib/semantic.js`
 - Existing agent contract pattern — `agents/paper-drafter.md`, `agents/paper-fact-checker.md`
-- Companion: `rfc/RFC-4-charts.md`
+- Companion: `rfc/rfc-004-charts.md`

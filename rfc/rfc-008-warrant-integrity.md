@@ -178,7 +178,7 @@ These map directly to warrant statements and defeaters.
 
 1. Authored or LLM-proposed-then-confirmed? Recommend LLM-proposed with author confirmation, since authors are systematically blind to their own warrants.
 1. Block export on missing warrants, or warn? Block for `strategy_paper` and `position_paper`; warn for memos and explainers.
-1. How to handle warrants that change between paper versions (extending a position paper into a strategy paper)? Covered by RFC-005 on grill source intake.
+1. How to handle warrants that change between paper versions (extending a position paper into a strategy paper)? Covered by RFC-011 on grill source intake.
 
 ## References
 

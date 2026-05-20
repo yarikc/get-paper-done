@@ -23,4 +23,4 @@ The paper itself is also not publication advice or a complete public white paper
 
 ## Calibration Notes
 
-The example is intentionally included in automated validation so future changes do not regress a completed workflow. The feedback files that drove its calibration are kept as local review inputs under `docs/feedback*.md` when present; they are not part of the installable framework.
+The example is intentionally included in automated validation so future changes do not regress a completed workflow. The raw feedback that drove its calibration is not part of the installable framework; actionable findings were converted into tests, docs, and issue-backed changes.

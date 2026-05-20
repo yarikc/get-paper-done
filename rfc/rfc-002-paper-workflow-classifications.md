@@ -1,4 +1,4 @@
-# RFC-2: Paper Workflow Classifications, Modes, and Expectations
+# RFC-002: Paper Workflow Classifications, Modes, and Expectations
 
 - **Status:** Proposed
 - **Author:** Project maintainer
@@ -6,7 +6,7 @@
 - **Scope:** GPD policy layer — paper classification, workflow mode selection, machine-readable expectations
 - **Tracking Issue:** [#15](https://github.com/yarikc/get-paper-done/issues/15)
 - **Supersedes:** the implicit free-form `paper type` string in `PROJECT.md`
-- **Complements:** [RFC-1](./RFC-1.md) — RFC-1 improves how agents *run*; this RFC improves how the system *decides which workflow to run*
+- **Complements:** [RFC-001](./rfc-001-research-driven-improvement-plan.md) — RFC-001 improves how agents *run*; this RFC improves how the system *decides which workflow to run*
 
 ## Summary
 
@@ -216,7 +216,7 @@ Each stage in `required_stages` maps to a command, agent, and output artifact in
 | `outline_deep` | `/gpd-outline --deep` | `paper-outliner` (Deep) | `.paper/OUTLINE.md` |
 | `draft` | `/gpd-draft` | `paper-drafter` | `.paper/DRAFT.md` |
 | `audience_reviewer` | `/gpd-review` | `audience-reviewer` | `.paper/REVIEW.md` |
-| `opposition_reviewer` | `/gpd-review` (suite) | `opposition-reviewer` | `.paper/OPPOSITION.md` (proposed in RFC-1) |
+| `opposition_reviewer` | `/gpd-review` (suite) | `opposition-reviewer` | `.paper/OPPOSITION.md` (proposed in RFC-001) |
 | `fact_checker` | `/gpd-fact-check` | `paper-fact-checker` | `.paper/FACT-CHECK.md` |
 | `editor` | `/gpd-revise` | `paper-editor` | `.paper/DRAFT.md` (revised) + change log |
 | `publication_readiness_check` | (runs in `editor` flagship mode) | `paper-editor` | `.paper/REVIEW.md:publication_readiness` |
@@ -385,7 +385,7 @@ New commands implied by this RFC:
 | `gpd mode <paper>` | Print derived mode and rule trace ("`flagship` because `risk_level=high+channel=external` triggered minimum_mode=flagship") |
 | `gpd mode <paper> --set <mode> [--reason "..."] [--force]` | Manual mode override |
 | `gpd validate <paper>` | (extends existing) Evaluate `required_gates` against `STATE.json:gates_satisfied`; report missing or unsatisfied gates |
-| `gpd validate-artifact <path>` | (proposed in RFC-1) Validate an artifact against its JSON schema |
+| `gpd validate-artifact <path>` | (proposed in RFC-001) Validate an artifact against its JSON schema |
 
 `gpd status` is extended to print mode and unsatisfied required gates.
 
@@ -485,22 +485,22 @@ Required gates: all six. Worth noting: even though the topic is "just a blog pos
 
 ---
 
-## 15. Forward references to RFC-1
+## 15. Forward references to RFC-001
 
-This RFC composes with [RFC-1](./RFC-1.md):
+This RFC composes with [RFC-001](./rfc-001-research-driven-improvement-plan.md):
 
-- **RFC-1 #3 (schema validation).** This RFC's `quality_gates` predicates depend on schemas being enforceable. The schemas to author: `classification.schema.json`, `state.schema.json` (extended for `gates_satisfied` and `classification.history`), `outline.schema.json`, `fact-check.schema.json`, `research.schema.json`.
-- **RFC-1 #1 (parallelized review suite).** Mode = `flagship` with all three reviewers (`audience_reviewer + opposition_reviewer + fact_checker`) is the canonical fan-out target. Implementing `/gpd-review-suite` simplifies flagship execution.
-- **RFC-1 #4 (bias mitigation).** The `audience_shape = hybrid` rule and the `audience_conflicts_resolved` gate naturally invoke the cross-model judge rule and binary scoring proposed in RFC-1.
-- **RFC-1 #8 (instrumentation).** Mode and classification are exactly the labels you'd want for retrospective analysis. The `STATE.json:classification.history` log feeds directly into `gpd history`.
+- **RFC-001 #3 (schema validation).** This RFC's `quality_gates` predicates depend on schemas being enforceable. The schemas to author: `classification.schema.json`, `state.schema.json` (extended for `gates_satisfied` and `classification.history`), `outline.schema.json`, `fact-check.schema.json`, `research.schema.json`.
+- **RFC-001 #1 (parallelized review suite).** Mode = `flagship` with all three reviewers (`audience_reviewer + opposition_reviewer + fact_checker`) is the canonical fan-out target. Implementing `/gpd-review-suite` simplifies flagship execution.
+- **RFC-001 #4 (bias mitigation).** The `audience_shape = hybrid` rule and the `audience_conflicts_resolved` gate naturally invoke the cross-model judge rule and binary scoring proposed in RFC-001.
+- **RFC-001 #8 (instrumentation).** Mode and classification are exactly the labels you'd want for retrospective analysis. The `STATE.json:classification.history` log feeds directly into `gpd history`.
 
-Adopt both RFCs together. RFC-1 makes agents produce better artifacts; this RFC makes the system pick the right intensity.
+Adopt both RFCs together. RFC-001 makes agents produce better artifacts; this RFC makes the system pick the right intensity.
 
 ---
 
 ## 16. Implementation order
 
-1. **Author the JSON schema for classification + extended STATE.json.** Reusable by RFC-1's schema validator. Small effort, large payoff.
+1. **Author the JSON schema for classification + extended STATE.json.** Reusable by RFC-001's schema validator. Small effort, large payoff.
 2. **Implement `gpd classify` / `gpd reclassify`.** Interactive 5-question flow. Writes classification + derives mode + appends history.
 3. **Implement mode-derivation engine.** ~50 lines in `bin/lib/mode.js`. Pure function: `(classification) → { mode, rule_trace }`.
 4. **Extend `gpd validate`** to evaluate `required_gates` against `STATE.json:gates_satisfied`. Define the gate predicates (Section 7) as named functions in `bin/lib/gates.js`.
@@ -526,7 +526,7 @@ Items 1–3 are the load-bearing core. Items 4–6 land the policy in the workfl
 
 ## Sources
 
-- [RFC-1 — Research-Driven Improvement Plan](./RFC-1.md) — companion RFC. Sources for AI workflow patterns, schema enforcement, bias mitigation, and prompt-eval frameworks live there.
+- [RFC-001 — Research-Driven Improvement Plan](./rfc-001-research-driven-improvement-plan.md) — companion RFC. Sources for AI workflow patterns, schema enforcement, bias mitigation, and prompt-eval frameworks live there.
 - The classification axes were derived by decomposing the existing `PROJECT.md:document_type` field's actual usage observed in the GPD codebase (`commands/gpd/*.md`, `workflows/*.md`) and in the curated audience personas (`audiences/*.md`).
 - The mode-derivation algorithm follows standard policy-engine design (default + minimum-floor rules with deterministic resolution). The rule shape is similar to IETF BCP "MUST / SHOULD / MAY" semantics applied to workflow stages.
 - The split between policy (`config.json`) and state (`STATE.json`) follows the convention used elsewhere in GPD's own tooling (e.g., `INSTALL-MANIFEST.json` records what was installed; install command declares what to install).

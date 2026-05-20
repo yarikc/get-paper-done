@@ -1,4 +1,4 @@
-# RFC-6: Mobile Review Pack
+# RFC-006: Mobile Review Pack
 
 - **Status:** Proposed backlog
 - **Author:** AI-assisted, reviewed by project owner

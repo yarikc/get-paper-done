@@ -1,18 +1,18 @@
-# RFC-2.1: Progressive Classification And Policy-Driven Checks
+# RFC-002.1: Progressive Classification And Policy-Driven Checks
 
 - **Status:** Draft
-- **Author:** Codex, based on review of RFC-2
+- **Author:** Codex, based on review of RFC-002
 - **Date:** 2026-05-10
 - **Scope:** GPD policy layer — paper classification, workflow mode recommendation, and required quality checks
 - **Tracking Issue:** [#15](https://github.com/yarikc/get-paper-done/issues/15)
-- **Supersedes:** [RFC-2](RFC-2.md) if accepted
-- **Ignores dependency status:** This RFC is written as the desired policy design, regardless of whether RFC-1 Phase 1 has landed.
+- **Supersedes:** [RFC-002](rfc-002-paper-workflow-classifications.md) if accepted
+- **Ignores dependency status:** This RFC is written as the desired policy design, regardless of whether RFC-001 Phase 1 has landed.
 
 ## Summary
 
-RFC-2 is directionally correct: GPD needs to replace the free-form `paper_type` string with a policy layer that can explain how much workflow rigor a paper deserves. But RFC-2 is too stage/agent-centric and too eager to route workflow behavior from classification.
+RFC-002 is directionally correct: GPD needs to replace the free-form `paper_type` string with a policy layer that can explain how much workflow rigor a paper deserves. But RFC-002 is too stage/agent-centric and too eager to route workflow behavior from classification.
 
-RFC-2.1 keeps the core classification model but changes three important things:
+RFC-002.1 keeps the core classification model but changes three important things:
 
 1. Classification is **progressive**, not a five-field intake tax.
 2. Mode is split into **recommended** and **selected**, with a rule trace.
@@ -106,7 +106,7 @@ Allowed values:
 - `high`
 - `regulated`
 
-This differs from RFC-2, which used only `low | high | regulated`.
+This differs from RFC-002, which used only `low | high | regulated`.
 
 `medium` is needed because many papers are not low-stakes, but calling them high-risk would over-route them into heavyweight process. `medium` maps naturally to standard rigor.
 
@@ -151,7 +151,7 @@ Allowed selected/recommended values:
 - `standard`
 - `rigorous`
 
-RFC-2 used `lite | standard | flagship`. This RFC renames them:
+RFC-002 used `lite | standard | flagship`. This RFC renames them:
 
 - `light` is plain and user-facing.
 - `standard` remains unchanged.
@@ -225,9 +225,9 @@ The rule trace must be stored so the user can see why a mode was recommended.
 
 ## 6. Required Checks, Not Required Agents
 
-RFC-2 listed required stages such as `audience_reviewer`, `opposition_reviewer`, and `fact_checker`. That binds policy to implementation.
+RFC-002 listed required stages such as `audience_reviewer`, `opposition_reviewer`, and `fact_checker`. That binds policy to implementation.
 
-RFC-2.1 stores required checks instead:
+RFC-002.1 stores required checks instead:
 
 ```json
 {
@@ -337,7 +337,7 @@ If a required check is `waived`, a reason is required.
 
 ## 9. CLI Surface
 
-This RFC implies a smaller CLI surface than RFC-2.
+This RFC implies a smaller CLI surface than RFC-002.
 
 ### 9.1 `gpd classify`
 
@@ -464,7 +464,7 @@ Only after the model survives real use:
 
 ## 12. Open Questions
 
-1. Should mode labels be `light | standard | rigorous` or preserve RFC-2's `lite | standard | flagship`?
+1. Should mode labels be `light | standard | rigorous` or preserve RFC-002's `lite | standard | flagship`?
 2. Should `medium` risk be accepted, or should the system intentionally force low/high decisions?
 3. Should `update` be constrained by schema so it cannot be `complexity=deep` without explicit override?
 4. Which required checks can be satisfied manually?
@@ -474,6 +474,6 @@ Only after the model survives real use:
 
 ## 13. Recommendation
 
-Adopt RFC-2.1 over RFC-2.
+Adopt RFC-002.1 over RFC-002.
 
 Do not start by changing the writing workflow. Start with a pure, tested classification and mode recommendation layer. Then expose it in CLI status. Only after real papers show that the recommendations are useful should GPD route stages or enforce checks from the policy layer.

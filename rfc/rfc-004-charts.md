@@ -1,20 +1,20 @@
-# RFC-4: Data Charts in the Paper Pipeline (Vega-Lite)
+# RFC-004: Data Charts in the Paper Pipeline (Vega-Lite)
 
 - **Status:** Proposed
 - **Author:** Project maintainer
 - **Date:** 2026-05-11
 - **Scope:** GPD pipeline extension — quantitative chart authoring, rendering, and validation as a first-class lifecycle artifact
 - **Tracking Issue:** [#13](https://github.com/yarikc/get-paper-done/issues/13)
-- **Complements:** [RFC-3](./RFC-3-illustrations.md) (illustrations via Excalidraw); shares the same agent, pipeline slot, render command, hand-edit pattern, and validator shape
+- **Complements:** [RFC-003](./rfc-003-illustrations.md) (illustrations via Excalidraw); shares the same agent, pipeline slot, render command, hand-edit pattern, and validator shape
 - **Supersedes:** none
 
 ## Summary
 
-GPD papers routinely make quantitative claims — cost categories, effort distributions, incident counts over time, before/after comparisons. Today these claims live as prose tables or are absent entirely. This RFC adds data charts as a first-class GPD artifact via Vega-Lite, paired with RFC-3's illustration support to cover both halves of paper graphics.
+GPD papers routinely make quantitative claims — cost categories, effort distributions, incident counts over time, before/after comparisons. Today these claims live as prose tables or are absent entirely. This RFC adds data charts as a first-class GPD artifact via Vega-Lite, paired with RFC-003's illustration support to cover both halves of paper graphics.
 
-The chart skill lives in the same `paper-illustrator` agent introduced in RFC-3. Vega-Lite was chosen because it is a data-bound declarative tool: the AI describes data + mark + encoding, the tool computes the layout. The author does not do chart geometry. This is the opposite of Excalidraw's explicit-coordinate model — and the right model for charts, where data structure should drive the visual.
+The chart skill lives in the same `paper-illustrator` agent introduced in RFC-003. Vega-Lite was chosen because it is a data-bound declarative tool: the AI describes data + mark + encoding, the tool computes the layout. The author does not do chart geometry. This is the opposite of Excalidraw's explicit-coordinate model — and the right model for charts, where data structure should drive the visual.
 
-Most of the design is shared with RFC-3. This RFC covers only the chart-specific deltas: the skill, the artifact directory, data handling, and chart-specific validation.
+Most of the design is shared with RFC-003. This RFC covers only the chart-specific deltas: the skill, the artifact directory, data handling, and chart-specific validation.
 
 ---
 
@@ -43,7 +43,7 @@ Vega-Lite reverses the model. The author writes data + mark + encoding; the tool
 | Schema-validatable | Yes (official JSON Schema) | Limited | Limited | N/A |
 | License | BSD-3 | MIT | MIT | PSF |
 | Statistical primitives | Strong | Limited | Strong | Strong |
-| Integration with GPD pipeline | Mirrors RFC-3 exactly | More JS surface | More JS surface | Adds Python dependency |
+| Integration with GPD pipeline | Mirrors RFC-003 exactly | More JS surface | More JS surface | Adds Python dependency |
 
 Vega-Lite is the right choice on text-source, AI-generation quality, schema validation, and pipeline shape: JSON source committed, SVG render committed, validators in `bin/lib/semantic.js`. It is free and BSD-3 licensed.
 
@@ -51,22 +51,22 @@ Worth flagging: **Observable Plot** has a similar declarative model and slightly
 
 ---
 
-## 3. What is shared with RFC-3
+## 3. What is shared with RFC-003
 
 Everything except the rendering engine, the artifact directory, and a few format-specific validators. Specifically:
 
 | Concern | Shared mechanism | Reference |
 |---|---|---|
-| Agent | `paper-illustrator` (one agent, two skills) | RFC-3 §4.1 |
-| Pipeline slot | After DRAFT, before FACT-CHECK | RFC-3 §4.2 |
-| Triggering | Agent-proposed via `PLAN.md`; user-requested via BRIEF.md or DRAFT.md markers | RFC-3 §4.3 |
-| Render command | `gpd render` | RFC-3 §4.5 |
-| Render output format | SVG | RFC-3 §4.6 |
-| Hand-edit roundtrip | Copy/paste with provided commands; instructions in README.md | RFC-3 §4.7 |
-| Validator pattern | JSON-schema + semantic; `bin/lib/semantic.js` | RFC-3 §5 |
-| CLI shape | `gpd illustrate`, `gpd render` | RFC-3 §6 |
+| Agent | `paper-illustrator` (one agent, two skills) | RFC-003 §4.1 |
+| Pipeline slot | After DRAFT, before FACT-CHECK | RFC-003 §4.2 |
+| Triggering | Agent-proposed via `PLAN.md`; user-requested via BRIEF.md or DRAFT.md markers | RFC-003 §4.3 |
+| Render command | `gpd render` | RFC-003 §4.5 |
+| Render output format | SVG | RFC-003 §4.6 |
+| Hand-edit roundtrip | Copy/paste with provided commands; instructions in README.md | RFC-003 §4.7 |
+| Validator pattern | JSON-schema + semantic; `bin/lib/semantic.js` | RFC-003 §5 |
+| CLI shape | `gpd illustrate`, `gpd render` | RFC-003 §6 |
 
-Phases (RFC-3 §7) are also shared: charts land in **phase 2**, after illustrations are stable in phase 1. This RFC is the design for phase 2's chart additions.
+Phases (RFC-003 §7) are also shared: charts land in **phase 2**, after illustrations are stable in phase 1. This RFC is the design for phase 2's chart additions.
 
 ---
 
@@ -74,7 +74,7 @@ Phases (RFC-3 §7) are also shared: charts land in **phase 2**, after illustrati
 
 ### 4.1 Chart skill in `paper-illustrator`
 
-The same agent contract as the illustration skill (RFC-3 §4.1). The skill is invoked when the agent decides the content is *data-as-meaning*: counts, rates, distributions, trends, before/after comparisons, multi-series time data.
+The same agent contract as the illustration skill (RFC-003 §4.1). The skill is invoked when the agent decides the content is *data-as-meaning*: counts, rates, distributions, trends, before/after comparisons, multi-series time data.
 
 Decision heuristics for the agent:
 
@@ -97,7 +97,7 @@ Decision heuristics for the agent:
 
 Source spec and rendered SVG are both committed, same as illustrations. Charts reference data either inline (in the JSON spec's `data.values`) or via a sibling file under `.paper/charts/data/`.
 
-The illustration `PLAN.md` (RFC-3 §4.4) covers both illustrations and charts (see Open Questions §7.1 for the placement decision).
+The illustration `PLAN.md` (RFC-003 §4.4) covers both illustrations and charts (see Open Questions §7.1 for the placement decision).
 
 ### 4.3 Data handling
 
@@ -111,7 +111,7 @@ Default: inline. Switch to external only when (a) the same data backs more than 
 
 ### 4.4 Render flow
 
-`gpd render` (defined in RFC-3 §4.5) walks `.paper/charts/*.vega.json` and renders each to SVG using `vega-cli` (`vl2svg`). Free, BSD-3, npm-installable. No Python, no headless browser.
+`gpd render` (defined in RFC-003 §4.5) walks `.paper/charts/*.vega.json` and renders each to SVG using `vega-cli` (`vl2svg`). Free, BSD-3, npm-installable. No Python, no headless browser.
 
 Renderer choice notes:
 
@@ -135,7 +135,7 @@ For each rendered chart, GPD writes copy-paste instructions to `.paper/charts/RE
     7. gpd render  (or commit; pre-commit hook re-renders)
 ```
 
-Linux and Windows clipboard equivalents identical to RFC-3 §4.7.
+Linux and Windows clipboard equivalents identical to RFC-003 §4.7.
 
 ---
 
@@ -178,13 +178,13 @@ Implementation: `validateChartsArtifact`.
 | `gpd render --charts` | Render only charts |
 | `gpd validate --semantic` | Adds chart validation if `.paper/charts/` is present |
 
-All other commands inherit RFC-3 behavior.
+All other commands inherit RFC-003 behavior.
 
 ---
 
 ## 7. Open questions
 
-1. **PLAN.md placement.** RFC-3 puts `PLAN.md` under `.paper/illustrations/`. Should charts share that file (one combined plan), or maintain a separate `.paper/charts/PLAN.md`? Recommendation: one combined plan at `.paper/PLAN.md` covering both, since the illustrator agent reasons across the whole paper. Decide alongside RFC-3 phase 1.
+1. **PLAN.md placement.** RFC-003 puts `PLAN.md` under `.paper/illustrations/`. Should charts share that file (one combined plan), or maintain a separate `.paper/charts/PLAN.md`? Recommendation: one combined plan at `.paper/PLAN.md` covering both, since the illustrator agent reasons across the whole paper. Decide alongside RFC-003 phase 1.
 2. **Data column naming.** When data lives external to the spec, should column names follow a convention (snake_case, lower-case)? Default: accept whatever the agent produces; revisit if AI output drifts.
 3. **Chart density limits.** Vega-Lite renders charts with thousands of points. For executive papers, charts above ~50 visual elements lose clarity. Should there be a validator that warns above a threshold? Defer to phase 3.
 4. **Shared data across charts.** If two charts reference the same external file, the validator should accept it and not warn. The current §5.2 sketch handles this; verify in phase 2.
@@ -201,4 +201,4 @@ All other commands inherit RFC-3 behavior.
 - Observable Plot (considered, not chosen) — https://observablehq.com/plot/
 - Existing GPD validator shape — `bin/lib/semantic.js`
 - Existing agent contract pattern — `agents/paper-drafter.md`, `agents/paper-fact-checker.md`
-- Companion: `rfc/RFC-3-illustrations.md`
+- Companion: `rfc/rfc-003-illustrations.md`

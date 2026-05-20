@@ -1,4 +1,4 @@
-# RFC-1: Research-Driven Improvement Plan
+# RFC-001: Research-Driven Improvement Plan
 
 - **Status:** Draft
 - **Author:** Project maintainer

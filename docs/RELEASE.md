@@ -91,8 +91,8 @@ Manual release checks:
 - `docs/PROJECT-REVIEW.md` has current ratings and residual risks.
 - `ROADMAP.md` records any plan change.
 - `git status --short` is clean before tagging.
-- Ignored feedback files, workflow-simulation scratch files, and `*.feedback` files are not staged.
-- There is no tracked `docs/feedback-archive/`; raw review feedback stays ignored unless it is anonymized and deliberately converted into a durable issue, example, fixture, or documentation change.
+- Ignored raw feedback files and workflow-simulation scratch files are not staged.
+- There is no tracked raw-feedback archive; raw review feedback stays ignored unless it is anonymized and deliberately converted into a durable issue, example, fixture, or documentation change.
 - Feedback harvesting must leave an auditable trail: either a GitHub issue, a test/example change, a roadmap entry, or a documentation update. Do not commit the raw feedback file itself.
 - Packaged paper examples are anonymized and contain no person names, company names, employer names, local paths, or private source material.
 
@@ -109,9 +109,8 @@ The package must exclude:
 - `tests/`
 - `.github/`
 - `rfc/`
-- `docs/feedback*.md`
-- `docs/WORKFLOW-SIMULATION.md`
-- `*.feedback`
+- ignored raw feedback files
+- workflow-simulation scratch files
 - local runtime settings such as `agents/.claude/`
 - private paper source drafts or local scratch files
 

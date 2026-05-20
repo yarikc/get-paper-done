@@ -106,7 +106,7 @@ Claims that should be softened, bounded, or rejected:
 4. **Audience imbalance.** The memo may satisfy engineering readers but fail to make the decision ask clear to the primary reader.
 5. **Weak operational model.** The draft may recommend evidence without naming who owns it, when it is required, and how exceptions work.
 6. **Source mapping drift.** Fact-check may cite a source as direct support when it is only topically related.
-7. **Visual temptation.** The memo may expose whether RFC-3/RFC-4 should remain deferred: if a simple evidence-pack flow or table is enough, no visual artifact is needed.
+7. **Visual temptation.** The memo may expose whether RFC-003/RFC-004 should remain deferred: if a simple evidence-pack flow or table is enough, no visual artifact is needed.
 
 ## What Counts As Useful Result
 
@@ -156,6 +156,6 @@ Record observations during or immediately after the run:
 
 ## Commit Boundary
 
-Do not commit private material, person names, company names, titles, local paths, ignored `docs/feedback*.md` files, or unpublished draft source material.
+Do not commit private material, person names, company names, titles, local paths, ignored raw feedback files, or unpublished draft source material.
 
 If this becomes a committed example, it must contain only public-source material and anonymized/generated paper artifacts.

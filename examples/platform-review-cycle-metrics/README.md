@@ -21,7 +21,7 @@ the current shape.
 
 - Source records and metrics are synthetic; this fixture validates workflow shape, not real-world citation fidelity.
 - It exercises numerical support, baseline handling, and overclaim prevention, but it does not test live source verification.
-- It does not include charts. RFC-4 should remain deferred until a real paper proves charting is necessary.
+- It does not include charts. RFC-004 should remain deferred until a real paper proves charting is necessary.
 
 ## Privacy Boundary
 

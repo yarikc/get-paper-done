@@ -115,7 +115,7 @@ Capture the feedback as evidence for review planning, not as permission to rewri
 ```text
 user reviews .paper/exports/FINAL.md
   -> gpd feedback captures comments into FEEDBACK-READER.md and FEEDBACK-PLAN.md
-  -> /gpd-review reviews the captured feedback and plan
+  -> /gpd-feedback approves, modifies, defers, or rejects captured concerns
   -> /gpd-revise edits .paper/DRAFT.md
   -> /gpd-export regenerates .paper/exports/FINAL.md
 ```

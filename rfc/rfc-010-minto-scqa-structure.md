@@ -216,7 +216,7 @@ ambiguity ✓), Q implicit (acceptable), A present in paragraph 2
 
 1. Should answer position be strictly “first paragraph” or allow “by end of opening section”? Recommend first or second paragraph as the rule.
 1. Should the validator support multi-page papers where the answer is in an executive summary and the body uses different structure? Likely yes — declare the executive summary as the SCQA layer and the body as elaboration.
-1. How to handle papers that extend prior papers (covered by RFC-005)? The grill source-intake mechanism may produce a prior-paper-aware Situation that references where the reader was left off.
+1. How to handle papers that extend prior papers (covered by RFC-011)? The grill source-intake mechanism may produce a prior-paper-aware Situation that references where the reader was left off.
 
 ## References
 

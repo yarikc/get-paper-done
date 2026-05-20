@@ -40,12 +40,12 @@ Current issue alignment:
 - `#9`: second-paper trial; produced the anonymized imported-paper example and an exporter bug fix. Pre-registration was not captured as a formal artifact, so the run is useful but weaker as calibration evidence.
 - `#10`: closed anonymized control-paper import fixture; captured the founding failure pattern without real names, employer names, titles, or local paths and produced regression coverage for three missed semantic failures.
 - `#5`: RFC event and hook runtime feature request; deferred until real-paper trial clarifies which transitions need deterministic events.
-- `#14`: RFC-1 remaining review orchestration and evaluation hardening; Phase 1 artifact contracts are implemented, and later slices should wait for observed calibration failures.
-- `#15`: RFC-2.1 progressive classification and policy-driven checks; current enum foundation exists, but classification-driven policy/routing remains deferred.
-- `#12`: RFC-3 illustrations and diagram artifacts; gated feature request, not core workflow until a real calibration paper proves the need for paper-native visual lifecycle management.
-- `#13`: RFC-4 data charts and Vega-Lite artifacts; gated feature request, not core workflow until a real quantitative/public-source paper proves charting is materially useful.
-- `#16`: RFC-5 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
-- `#17`: RFC-6 mobile review packs for away-from-desktop review; useful capability backlog item, but should start as manual validation and review-pack export/import rather than a mobile app or vendor integration.
+- `#14`: RFC-001 remaining review orchestration and evaluation hardening; Phase 1 artifact contracts are implemented, and later slices should wait for observed calibration failures.
+- `#15`: RFC-002.1 progressive classification and policy-driven checks; current enum foundation exists, but classification-driven policy/routing remains deferred.
+- `#12`: RFC-003 illustrations and diagram artifacts; gated feature request, not core workflow until a real calibration paper proves the need for paper-native visual lifecycle management.
+- `#13`: RFC-004 data charts and Vega-Lite artifacts; gated feature request, not core workflow until a real quantitative/public-source paper proves charting is materially useful.
+- `#16`: RFC-005 new-user onboarding follow-through; bounded README and START-HERE cleanup shipped, and any further onboarding work should be driven by concrete newcomer feedback.
+- `#17`: RFC-006 mobile review packs for away-from-desktop review; useful capability backlog item, but should start as manual validation and review-pack export/import rather than a mobile app or vendor integration.
 - `#18`: closed mandatory grill gate and reusable paper context records; follow-up cleanup now clarifies grandfathered examples, indexes examples/fixtures, and tightens validation for grill companion artifacts.
 - `#20`: review/comment UX simplification; first CLI slice implemented with `gpd review-pack`, `gpd feedback`, unresolved-export-comment validation, external-review provider progress, current-runtime self-review skipping, full-workspace external-review prompt context, reviewer-specific external-review storage, combined-review deduplication, feedback-plan decomposition of external review concerns, generated recommendations, and explicit user decisions. Remaining future improvements should be driven by the next paper trial, not speculative UI surface.
 - `#31`: concern-first feedback-plan UX; implements a clearer `FEEDBACK-PLAN.md` schema and `gpd feedback-plan list/review/decide` so users can make one decision at a time in the CLI/TUI before revision.
@@ -56,16 +56,16 @@ Current issue alignment:
 - `#36`: RFC-011 grill source intake and source graph; highest-leverage RFC-007..011 starting point because it addresses the observed missed-source failure in a real paper trial.
 - `#37`: state schema and workflow-simulation hardening follow-ups; tracks lower-risk state-label/versioning/status-nudge work harvested from the local workflow simulation after the high-risk safety findings were fixed.
 
-## Main Line Preserved During RFC-5 Detour
+## Main Line Preserved During RFC-005 Detour
 
-RFC-5 identifies a real onboarding and product-story gap, and a bounded documentation detour is allowed because the pre-existing main line is now explicitly recorded. After that detour, the plan of record remains:
+RFC-005 identifies a real onboarding and product-story gap, and a bounded documentation detour is allowed because the pre-existing main line is now explicitly recorded. After that detour, the plan of record remains:
 
 1. Run one more realistic paper calibration using public sources only.
 2. Pre-register the calibration before the run: paper purpose, channel, risk, complexity, audience shape, source set, expected failure modes, and what would count as a useful result.
 3. Run the workflow end to end: brief, strategy gate, research, outline, draft, fact-check, review, revise, and export.
 4. Validate the resulting workspace with `gpd validate --semantic` and package/example checks where applicable.
 5. Convert only observed failures into targeted changes: prompt guidance, artifact contracts, semantic validators, examples, or tests.
-6. Keep all paper material anonymized and public-source-only; do not commit private drafts, person names, company names, titles, local paths, or ignored `docs/feedback*.md` files.
+6. Keep all paper material anonymized and public-source-only; do not commit private drafts, person names, company names, titles, local paths, or ignored raw feedback files.
 
 Owning issues:
 
@@ -75,25 +75,25 @@ Owning issues:
 
 Deferred until after the main-line calibration unless explicitly reprioritized:
 
-- RFC-5 / `#16` work beyond the bounded README/product-story and `docs/START-HERE.md` cleanup.
-- RFC-3 / `#12` and RFC-4 / `#13` visual/chart work.
-- RFC-1 / `#14` later phases and RFC-2.1 / `#15` intake or policy-routing changes.
+- RFC-005 / `#16` work beyond the bounded README/product-story and `docs/START-HERE.md` cleanup.
+- RFC-003 / `#12` and RFC-004 / `#13` visual/chart work.
+- RFC-001 / `#14` later phases and RFC-002.1 / `#15` intake or policy-routing changes.
 - Issue #5 RFC event and hook runtime.
-- RFC-6 mobile review packs / `#17` beyond manual validation.
+- RFC-006 mobile review packs / `#17` beyond manual validation.
 - Broad import conversion work beyond bugs exposed by the calibration.
 - Semantic validation as a routing source. `gpd validate --semantic` detects quality failures, but `gpd next` does not yet use semantic issue IDs as blockers.
-- Deterministic classification-driven policy checks beyond schema/template/workflow guidance. RFC-2.1 / issue #15 owns the broader feature direction.
+- Deterministic classification-driven policy checks beyond schema/template/workflow guidance. RFC-002.1 / issue #15 owns the broader feature direction.
 - Context-pack discovery CLI. `contexts/` is installed and documented, but users inspect the directory directly for now.
 - RFC-007 through RFC-011 implementation beyond issue creation and RFC capture. Resolve purpose-taxonomy drift first: current first-class `classification.purpose` values remain `decision_memo`, `strategy_paper`, `explainer`, and `update`; labels such as `position_paper` and `white_paper` should map onto the existing taxonomy unless the taxonomy is explicitly reopened.
 - LLM-as-judge behavior inside deterministic semantic validation. Future RFC slices should keep `semantic.js` deterministic where possible and put model-judged assessment in advisory review/evaluation until calibrated.
 
-## RFC-3 / RFC-4 Placement
+## RFC-003 / RFC-004 Placement
 
-RFC-3 (`#12`) and RFC-4 (`#13`) are useful design proposals, but they should not become core GPD workflow yet.
+RFC-003 (`#12`) and RFC-004 (`#13`) are useful design proposals, but they should not become core GPD workflow yet.
 
 Current decision:
 
-1. Treat RFC-3/RFC-4 as a gated visual-artifacts track, not active main-line work.
+1. Treat RFC-003/RFC-004 as a gated visual-artifacts track, not active main-line work.
 2. Use the next public-source calibration paper to observe whether a serious paper naturally needs a diagram, chart, both, or neither.
 3. If a visual artifact is needed, prototype it first as an optional authoring skill or manual artifact convention before adding core CLI commands such as `gpd illustrate` or `gpd render`.
 4. Promote to GPD core only after a real paper proves that visuals need lifecycle state, validation, rendering, and export behavior inside `.paper/`.
@@ -101,8 +101,8 @@ Current decision:
 Rationale:
 
 - The project still needs broader real-paper calibration more than it needs a new artifact family.
-- RFC-3's proposed Excalidraw pipeline adds meaningful dependency and rendering complexity. It should be justified by a real diagram need, not by architecture completeness.
-- RFC-4's Vega-Lite proposal is more naturally justified by a quantitative paper with real public data. The short quantitative example did not prove charting was necessary.
+- RFC-003's proposed Excalidraw pipeline adds meaningful dependency and rendering complexity. It should be justified by a real diagram need, not by architecture completeness.
+- RFC-004's Vega-Lite proposal is more naturally justified by a quantitative paper with real public data. The short quantitative example did not prove charting was necessary.
 - Existing Codex skills already cover adjacent work: image generation is useful for raster assets but is not a deterministic diagram/chart source of truth; spreadsheet tooling can create charts in workbooks but does not solve paper-native markdown/SVG lifecycle management. These capabilities are helpers, not a replacement for a GPD visual artifact model.
 
 Recommended phase order if the calibration proves the need:
@@ -130,7 +130,7 @@ Plan-change rule:
 - If scope changes, update this section with the new scope and reason.
 - If task order changes, update this section with the new order and reason.
 - If a task moves to a different issue, comment on both the old and new issue.
-- Do not use ignored `docs/feedback*.md` files as execution tracking. They are inputs, not the plan of record.
+- Do not use ignored raw feedback files as execution tracking. They are inputs, not the plan of record.
 
 ### Owning Issues
 
@@ -168,11 +168,11 @@ Plan-change rule:
 
 ### Explicit Non-Goals For This Cycle
 
-- Do not implement RFC-3 or RFC-4.
+- Do not implement RFC-003 or RFC-004.
 - Do not add new semantic quality heuristics unless the active plan changes first.
 - Do not add a web dashboard, app UI, or any UX surface outside the `gpd` CLI, Claude/Codex slash commands, and `.paper/` artifacts.
 - Do not commit ignored feedback files.
-- Do not add a tracked feedback archive. Harvest actionable feedback into anonymized issues, tests, examples, docs, or roadmap entries; leave raw `docs/feedback*.md` and `*.feedback` ignored.
+- Do not add a tracked feedback archive. Harvest actionable feedback into anonymized issues, tests, examples, docs, or roadmap entries; leave raw feedback files ignored.
 
 ### Deferred After This Cycle
 
@@ -191,7 +191,7 @@ Next work should validate behavior under real use before adding more RFC surface
 5. Completed: added example validation tests for semantic validation, export cleanliness, and completed-workflow routing on a normalized checkout copy.
 6. Completed: converted the next feedback pass into prompt rules, semantic gates, and example repairs for reasoning spine, audience conflict specificity, fact-check/source alignment, and concrete recommendations.
 7. Completed: added example-wide semantic gate script, compact broken semantic fixture, recommendation-specificity warnings, list-heavy prose warnings, and cleaned the completed example opening prose.
-8. Completed: feedback-4 prep expanded the example README, tightened artifact-level prose-density warnings, repaired the completed example, and tracked the second-paper trial in GitHub.
+8. Completed: the fourth feedback pass expanded the example README, tightened artifact-level prose-density warnings, repaired the completed example, and tracked the second-paper trial in GitHub.
 9. Completed: ran a second paper with a different failure profile before adding more same-example validators. Gap: hypotheses were discussed but not captured as a formal pre-registration artifact.
 10. Completed: built the anonymized control-paper fixture from the non-GPD lifecycle-paper sequence, preserving the failure pattern while removing identifying names, titles, companies, and local paths.
 11. Completed: added an anonymized imported-paper example at `examples/technology-lifecycle-management`.

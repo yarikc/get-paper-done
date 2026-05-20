@@ -1,15 +1,15 @@
-# RFC-1 Phase 1: Artifact Contracts And Static Validation
+# RFC-001 Phase 1: Artifact Contracts And Static Validation
 
 - **Status:** Implemented
-- **Parent RFC:** [RFC-1: Research-Driven Improvement Plan](RFC-1.md)
+- **Parent RFC:** [RFC-001: Research-Driven Improvement Plan](rfc-001-research-driven-improvement-plan.md)
 - **Scope:** Get Paper Done artifact reliability, validation, and static consistency tests
-- **Related Tracking Issue:** [#14](https://github.com/yarikc/get-paper-done/issues/14) for remaining RFC-1 work
+- **Related Tracking Issue:** [#14](https://github.com/yarikc/get-paper-done/issues/14) for remaining RFC-001 work
 - **Decision:** Implement this phase before external review orchestration, parallel review suites, or judge-bias mechanics.
 - **Implemented in:** `9bc4ba1`, `e7ae451`, `bef683c`, `519b9ad`, `845736b`
 
 ## Summary
 
-Phase 1 narrows RFC-1 to the lowest-regret foundation: make GPD artifacts structurally reliable.
+Phase 1 narrows RFC-001 to the lowest-regret foundation: make GPD artifacts structurally reliable.
 
 GPD is a prompt-first, file-backed writing workflow. Its main reliability risk is not that the CLI cannot run; it is that an AI stage can produce an artifact that looks plausible but is missing the structure downstream stages expect. This phase adds artifact contracts, JSON schema validation, markdown structural checks, and static workflow consistency tests.
 
@@ -31,7 +31,7 @@ Remaining work from the parent RFC is now outside Phase 1 and should be tracked 
 
 ## Why This Phase First
 
-Artifact contracts are the foundation for every later RFC-1 improvement:
+Artifact contracts are the foundation for every later RFC-001 improvement:
 
 - External review runner output needs stable `EXTERNAL-REVIEWS.md` and `FEEDBACK-PLAN.md` shapes.
 - Parallel review synthesis needs stable reviewer artifacts to merge.
@@ -161,7 +161,7 @@ These tests should run in `npm test`.
 3. Should `validate-artifact` be a separate command, or should agents rely only on `gpd validate --paper`?
 4. Should artifact contracts live under `references/` because agents read them, or under `docs/` because they are developer-facing?
 
-## Deferred From RFC-1
+## Deferred From RFC-001
 
 These remain valuable but are intentionally deferred:
 

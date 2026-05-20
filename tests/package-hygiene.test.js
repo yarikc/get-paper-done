@@ -50,10 +50,10 @@ for (const requiredPath of [
 
 for (const forbiddenPath of [
   'paper_spec_template_yarik.md',
-  'rfc/RFC-1.md',
-  'rfc/RFC-2.md',
-  'rfc/RFC-3-illustrations.md',
-  'rfc/RFC-4-charts.md',
+  'rfc/rfc-001-research-driven-improvement-plan.md',
+  'rfc/rfc-002-paper-workflow-classifications.md',
+  'rfc/rfc-003-illustrations.md',
+  'rfc/rfc-004-charts.md',
   'commands/gpd/new-paper.md',
   'commands/gpd/import-paper.md',
   'commands/gpd/progress.md',
