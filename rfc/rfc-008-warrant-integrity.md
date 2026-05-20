@@ -3,6 +3,7 @@
 **Type:** Enhancement
 **Area:** Argument quality, grill, fact-check
 **Status:** Proposed (revised)
+**GitHub issue:** #33
 **Revision note:** This RFC was revised after re-evaluating the grill mechanism. Earlier draft placed warrants in `RESEARCH.json` as a parallel mechanism. Revised draft places warrant articulation inside grill (with `PAPER-CONTEXT.md` as the home for paper-level warrants) and uses `RESEARCH.json` only for evidence-level warrant references.
 
 ## Problem

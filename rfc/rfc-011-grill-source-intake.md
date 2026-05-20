@@ -3,6 +3,7 @@
 **Type:** Enhancement
 **Area:** Grill, research, paper continuity
 **Status:** Proposed
+**GitHub issue:** #36
 
 ## Problem
 

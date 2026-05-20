@@ -3,6 +3,7 @@
 **Type:** Enhancement
 **Area:** Quality measurement, framework calibration
 **Status:** Proposed
+**GitHub issue:** #32
 
 ## Problem
 
@@ -87,7 +88,7 @@ evaluations/
   "paper_path": "examples/foo/.paper/exports/FINAL.md",
   "paper_classification": "strategy_paper",
   "evaluated_at": "2026-05-19T...",
-  "judges": ["claude", "human:yarikc"],
+  "judges": ["claude", "human:author"],
   "scores": {
     "diagnosis": { "score": 3, "rationale": "...", "evidence_quotes": ["..."] },
     "warrant_integrity": { "score": 2, "rationale": "...", "evidence_quotes": ["..."] }

@@ -63,6 +63,19 @@ function supportedProviders() {
   return Object.keys(providerCommands);
 }
 
+function readIfExists(filePath) {
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+}
+
+function preservedPriorMarkdown(title, markdown) {
+  if (!markdown) return '';
+  const quoted = markdown
+    .split(/\r?\n/)
+    .map((line) => `> ${line}`)
+    .join('\n');
+  return ['---', '', `## ${title}`, '', quoted].join('\n');
+}
+
 function emitProgress(input, event) {
   if (typeof input.onProgress === 'function') input.onProgress(event);
 }
@@ -1649,7 +1662,7 @@ function updateFeedbackState(paperDir, dryRun) {
     ...state,
     status: 'Feedback Pending',
     current_stage: 'External Review',
-    last_completed_stage: 'External Review',
+    last_completed_stage: 'External Review Capture',
     last_activity: new Date().toISOString(),
     suggested_next_command: '/gpd-feedback',
     feedback: {
@@ -1714,11 +1727,13 @@ async function reviewExternal(input = {}) {
     }),
     dryRun,
   );
-  writeFile(
-    path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md'),
+  const feedbackPlanPath = path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md');
+  const previousFeedbackPlan = readIfExists(feedbackPlanPath);
+  const feedbackPlan = [
     feedbackPlanMarkdown({ reviews, createdAt, feedbackItems }),
-    dryRun,
-  );
+    preservedPriorMarkdown('Prior Feedback Plan', previousFeedbackPlan),
+  ].filter(Boolean).join('\n\n');
+  writeFile(feedbackPlanPath, feedbackPlan, dryRun);
   updateFeedbackState(paperDir, dryRun);
 
   return {

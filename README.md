@@ -226,10 +226,10 @@ If you add inline comments there, capture them with:
 gpd feedback --paper ~/papers/metadata-strategy
 ```
 
-Then continue in Claude/Codex:
+Then approve the feedback handling in Claude/Codex:
 
 ```text
-/gpd-review
+/gpd-feedback
 ```
 
 GPD captures comments into `FEEDBACK-READER.md`, creates a pending

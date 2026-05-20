@@ -260,6 +260,38 @@ function testPendingFeedbackPlanBlocksStaleMtimeRefresh() {
   assert.strictEqual(statusJson(paperDir).next, '/gpd-feedback');
 }
 
+function testFeedbackPlanStatusUsesExactPendingValue() {
+  const paperDir = completePaper('feedback-status-exact');
+  const state = readState(paperDir);
+  state.feedback.feedback_plan_status = 'Approved';
+  state.suggested_next_command = '/gpd-status';
+  writeState(paperDir, state);
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
+    '# Feedback Handling Plan',
+    '',
+    '**Status:** Approved with pending follow-ups',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-status');
+}
+
+function testMarkdownOnlyPendingFeedbackPlanRoutesToFeedback() {
+  const paperDir = completePaper('feedback-markdown-only-pending');
+  const state = readState(paperDir);
+  state.feedback.feedback_plan_status = 'Not created';
+  state.suggested_next_command = '/gpd-status';
+  writeState(paperDir, state);
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
+    '# Feedback Handling Plan',
+    '',
+    '**Status:** Pending user approval',
+    '',
+  ].join('\n'));
+
+  assert.strictEqual(statusJson(paperDir).next, '/gpd-feedback');
+}
+
 function testReaderFeedbackRoutesToReviewBeforeRevision() {
   const paperDir = completePaper('reader-feedback');
   writeArtifact(paperDir, 'FEEDBACK-READER.md', fs.readFileSync(path.join(repoRoot, 'templates', 'feedback-reader.md'), 'utf8'));
@@ -303,6 +335,8 @@ testReviewVerdictRoutesToRevise();
 testBelowTargetGateRoutesToRevise();
 testPendingFeedbackPlanBlocksAutomaticRevise();
 testPendingFeedbackPlanBlocksStaleMtimeRefresh();
+testFeedbackPlanStatusUsesExactPendingValue();
+testMarkdownOnlyPendingFeedbackPlanRoutesToFeedback();
 testReaderFeedbackRoutesToReviewBeforeRevision();
 testHandledReaderFeedbackDoesNotStaleExport();
 

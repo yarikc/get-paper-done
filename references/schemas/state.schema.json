@@ -135,7 +135,18 @@
       "additionalProperties": false,
       "required": ["feedback_plan_status", "approved_handling"],
       "properties": {
-        "feedback_plan_status": { "type": "string" },
+        "feedback_plan_status": {
+          "type": "string",
+          "enum": [
+            "Not created",
+            "Pending user approval",
+            "Approved",
+            "Approved by user",
+            "Applied",
+            "Needs revision",
+            "Ignored"
+          ]
+        },
         "approved_handling": { "type": "string" }
       }
     },

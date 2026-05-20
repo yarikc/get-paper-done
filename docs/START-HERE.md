@@ -193,10 +193,10 @@ gpd feedback --paper ~/papers/my-paper
 evaluates the paper's quality, audience fit, evidence, and ask clarity. They
 are related, but they are not the same command.
 
-Then run:
+Then approve the feedback handling:
 
 ```text
-/gpd-review
+/gpd-feedback
 ```
 
 Use `gpd review-pack --paper ~/papers/my-paper` whenever you are unsure which

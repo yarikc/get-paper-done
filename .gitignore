@@ -3,5 +3,6 @@ node_modules/
 /.paper/
 agents/.claude/
 docs/feedback*.md
+docs/WORKFLOW-SIMULATION.md
 *.feedback
 .codex-handoff.md

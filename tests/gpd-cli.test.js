@@ -678,7 +678,7 @@ function testExportCommandWritesFinalAndState() {
   const output = run(['export', '--paper', paperDir]);
   assert(output.includes('exports/FINAL.md'));
   assert(output.includes('review: read .paper/exports/FINAL.md'));
-  assert(output.includes('if you add comments: run gpd feedback, then /gpd-review'));
+  assert(output.includes('if you add comments: run gpd feedback, then /gpd-feedback'));
 
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
   assert(fs.existsSync(finalPath));
@@ -1305,6 +1305,17 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   fs.writeFileSync(path.join(meta, 'RESEARCH.json'), '{"research_plan":{},"source_registry":[],"evidence_matrix":[]}\n');
   fs.writeFileSync(path.join(meta, 'OUTLINE.md'), '# Outline\n');
   fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+  fs.writeFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), [
+    '# Feedback Handling Plan',
+    '',
+    '**Status:** Approved by user',
+    '',
+    '### 1. Concern: Prior approved concern',
+    '',
+    '- **User Decision:** modify',
+    '- **User Constraint:** Preserve the executive ask.',
+    '',
+  ].join('\n'));
 
   const reviewDir = tempDir('gpd-external-review-source');
   const reviewPath = path.join(reviewDir, 'claude-review.md');
@@ -1376,10 +1387,13 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   assert(feedbackPlan.includes('**Risk if handled badly:**'));
   assert(feedbackPlan.includes('**User Constraint:** none yet'));
   assert(feedbackPlan.includes('No draft or upstream artifact has been changed.'));
+  assert(feedbackPlan.includes('## Prior Feedback Plan'));
+  assert(feedbackPlan.includes('> - **User Constraint:** Preserve the executive ask.'));
 
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   assert.strictEqual(updatedState.status, 'Feedback Pending');
   assert.strictEqual(updatedState.current_stage, 'External Review');
+  assert.strictEqual(updatedState.last_completed_stage, 'External Review Capture');
   assert.strictEqual(updatedState.suggested_next_command, '/gpd-feedback');
   assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Pending user approval');
 

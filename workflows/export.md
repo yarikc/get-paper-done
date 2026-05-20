@@ -45,7 +45,7 @@ Update `.paper/STATE.md` and `.paper/STATE.json` to mark the paper exported.
 After export, tell the user:
 
 - Review `.paper/exports/FINAL.md`.
-- If they add comments directly to `FINAL.md` or a `.feedback` file, run `/gpd-review`.
-- GPD will capture comments, revise `.paper/DRAFT.md`, and regenerate `FINAL.md`; users do not need to remember the full stage sequence.
+- If they add comments directly to `FINAL.md` or a `.feedback` file, run `gpd feedback`, then `/gpd-feedback`.
+- GPD will capture comments, ask for approval, revise `.paper/DRAFT.md`, and regenerate `FINAL.md`; users do not need to remember the full stage sequence.
 
 </process>

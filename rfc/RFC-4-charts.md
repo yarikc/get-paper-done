@@ -1,7 +1,7 @@
 # RFC-4: Data Charts in the Paper Pipeline (Vega-Lite)
 
 - **Status:** Proposed
-- **Author:** Yarik Chinskiy
+- **Author:** Project maintainer
 - **Date:** 2026-05-11
 - **Scope:** GPD pipeline extension — quantitative chart authoring, rendering, and validation as a first-class lifecycle artifact
 - **Tracking Issue:** [#13](https://github.com/yarikc/get-paper-done/issues/13)

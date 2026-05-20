@@ -28,7 +28,7 @@
 
 ## Feedback Handling
 
-- **Feedback plan status:** [Not created | Pending user approval | Approved | Needs revision | Ignored]
+- **Feedback plan status:** [Not created | Pending user approval | Approved | Approved by user | Applied | Needs revision | Ignored]
 - **Approved handling:** [Summary]
 
 ## Post-Import Choices

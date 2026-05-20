@@ -41,6 +41,13 @@ If no section is specified and `section_draft` applies, identify the next undraf
 
 Write `.paper/DRAFT.md`. In `section_draft` mode, append or replace only the target section and preserve existing sections unless the user explicitly asks to revise them.
 
+Revision safety: if `.paper/DRAFT.md` already exists and drafting will replace,
+regenerate, redraft, or materially edit existing draft text, run
+`gpd revise --paper <paper-dir> --trigger <triggering-artifact>` before writing
+and preserve the reported snapshot ID. Appending a new, previously undrafted
+section in `--next-section` mode can proceed without a snapshot; replacing or
+revising existing sections cannot.
+
 Drafting rules:
 
 - obey persona directives

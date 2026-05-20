@@ -3,6 +3,7 @@
 **Type:** Enhancement
 **Area:** Semantic validation, strategy gate
 **Status:** Proposed
+**GitHub issue:** #34
 
 ## Problem
 

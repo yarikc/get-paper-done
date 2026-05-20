@@ -102,6 +102,7 @@ function testStateEnumFailureIsActionable() {
   state.grill.resolved_decisions = ['paper_job', 'reader_vibes'];
   state.strategy.primary_blocker = 'thesis_typo';
   state.strategy.required_unblock_action = 'rewrite_the_thing';
+  state.feedback.feedback_plan_status = 'Pendng user approval';
   fs.writeFileSync(badState, JSON.stringify(state, null, 2));
 
   const result = runFail(['validate-artifact', '--path', badState]);
@@ -110,6 +111,20 @@ function testStateEnumFailureIsActionable() {
   assert(result.stdout.includes('STATE.json: $.grill.resolved_decisions[1] must be one of paper_job, primary_reader'));
   assert(result.stdout.includes('STATE.json: $.strategy.primary_blocker must be one of none, scope_too_broad, thesis_weak, audience_unclear'));
   assert(result.stdout.includes('STATE.json: $.strategy.required_unblock_action must be one of none, brief_revision, audience_revision'));
+  assert(result.stdout.includes('STATE.json: $.feedback.feedback_plan_status must be one of Not created, Pending user approval, Approved'));
+}
+
+function testFeedbackPlanStatusFailureIsActionable() {
+  const dir = tempDir('gpd-feedback-plan-status-test');
+  const badFeedbackPlan = path.join(dir, 'FEEDBACK-PLAN.md');
+  const feedbackPlan = fs
+    .readFileSync(path.join(repoRoot, 'templates', 'feedback-plan.md'), 'utf8')
+    .replace('**Status:** Pending user approval', '**Status:** Pendng user approval');
+  fs.writeFileSync(badFeedbackPlan, feedbackPlan);
+
+  const result = runFail(['validate-artifact', '--path', badFeedbackPlan]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('FEEDBACK-PLAN.md: Status must be one of Pending user approval, Approved, Approved by user'));
 }
 
 function testResearchEnumFailureIsActionable() {
@@ -640,6 +655,7 @@ function testRevisionCheckValidatesSnapshotHashes() {
 testTemplateArtifactsPassContracts();
 testJsonSchemaFailureIsActionable();
 testStateEnumFailureIsActionable();
+testFeedbackPlanStatusFailureIsActionable();
 testResearchEnumFailureIsActionable();
 testResearchPlanSourceTypeFailureIsActionable();
 testResearchSourceRegistryFailureIsActionable();

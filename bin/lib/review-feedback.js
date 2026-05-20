@@ -17,6 +17,15 @@ function readIfExists(filePath) {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : null;
 }
 
+function preservedPriorMarkdown(title, markdown) {
+  if (!markdown) return '';
+  const quoted = markdown
+    .split(/\r?\n/)
+    .map((line) => `> ${line}`)
+    .join('\n');
+  return ['---', '', `## ${title}`, '', quoted].join('\n');
+}
+
 function reviewTarget(paperDir) {
   const finalPath = path.join(paperDir, '.paper', 'exports', 'FINAL.md');
   if (fs.existsSync(finalPath)) {
@@ -385,11 +394,11 @@ function captureFeedback(input = {}) {
   const previousFeedbackPlan = readIfExists(feedbackPlanPath);
   const readerFeedback = [
     readerFeedbackMarkdown({ comments, createdAt, targetArtifact: `.paper/${target.artifact}` }),
-    previousReaderFeedback ? ['---', '', '## Prior Reader Feedback', '', previousReaderFeedback].join('\n') : '',
+    preservedPriorMarkdown('Prior Reader Feedback', previousReaderFeedback),
   ].filter(Boolean).join('\n\n');
   const feedbackPlan = [
     feedbackPlanMarkdown({ comments, createdAt }),
-    previousFeedbackPlan ? ['---', '', '## Prior Feedback Plan', '', previousFeedbackPlan].join('\n') : '',
+    preservedPriorMarkdown('Prior Feedback Plan', previousFeedbackPlan),
   ].filter(Boolean).join('\n\n');
 
   writeFile(readerFeedbackPath, readerFeedback, input.dryRun);

@@ -32,6 +32,15 @@ const artifactNameAliases = {
   'decisions.md': 'DECISIONS.md',
 };
 
+const allowedFeedbackPlanStatuses = [
+  'Pending user approval',
+  'Approved',
+  'Approved by user',
+  'Applied',
+  'Needs revision',
+  'Ignored',
+];
+
 const markdownContracts = {
   'STRATEGY.md': {
     headings: [
@@ -233,6 +242,27 @@ const markdownContracts = {
 
 function issue(severity, artifact, message) {
   return { severity, issue: `${artifact}: ${message}` };
+}
+
+function stripMarkdownValue(value) {
+  return value
+    .trim()
+    .replace(/`/g, '')
+    .replace(/\.$/, '')
+    .trim();
+}
+
+function parseMarkdownField(markdown, label) {
+  if (!markdown) return null;
+  const target = `**${label.toLowerCase()}:**`;
+  for (const line of markdown.split(/\r?\n/)) {
+    const trimmed = line.trim().replace(/^-+\s*/, '');
+    const normalized = trimmed.toLowerCase();
+    if (normalized.startsWith(target)) {
+      return stripMarkdownValue(trimmed.slice(target.length));
+    }
+  }
+  return null;
 }
 
 function readJson(filePath) {
@@ -513,6 +543,13 @@ function validateReaderFeedbackScorecard(markdown) {
 function validateFeedbackPlanSections(markdown) {
   const section = sectionBetween(markdown, '## Proposed Handling', /\n##\s+/);
   const issues = [];
+  const status = parseMarkdownField(markdown, 'Status');
+  if (!status) {
+    issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', 'Status field is required'));
+  } else if (!allowedFeedbackPlanStatuses.includes(status)) {
+    issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', `Status must be one of ${allowedFeedbackPlanStatuses.join(', ')}`));
+  }
+
   if (!/###\s+\d+\.\s+/.test(section)) {
     issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', 'Proposed Handling must use numbered feedback item sections'));
     return issues;

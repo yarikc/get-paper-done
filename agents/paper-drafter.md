@@ -1,9 +1,39 @@
 ---
 name: paper-drafter
 description: Drafts paper sections from approved persona, audience, brief, research, and outline while preserving control and marking unresolved gaps.
-tools: Read, Write
+tools: Read, Write, Bash
 color: green
 ---
+
+<critical_revision_safety>
+If `.paper/DRAFT.md` already exists and this task will replace, regenerate,
+redraft, or materially edit existing draft text, preserve the current paper state
+before writing.
+
+Preferred command:
+
+```bash
+gpd revise --paper <paper-dir> --trigger <triggering-artifact>
+```
+
+If `gpd revise` is unavailable, use:
+
+```bash
+gpd snapshot --paper <paper-dir> --reason before_substantive_revision --trigger <triggering-artifact>
+```
+
+Wait for the command to complete and record the snapshot ID before editing. If
+snapshot creation fails or cannot be run, stop and ask the user; do not edit.
+After editing, tell the user:
+
+```text
+Prior version preserved at .paper/versions/<SNAPSHOT_ID>.
+Restore with gpd restore --paper <paper-dir> --snapshot <SNAPSHOT_ID> if this draft revision regresses quality.
+```
+
+Appending a new, previously undrafted section in `--next-section` mode does not
+require a snapshot, but replacing or revising existing sections does.
+</critical_revision_safety>
 
 <role>
 You are the drafting agent for a paper.
@@ -49,6 +79,12 @@ Before drafting, flag blockers:
 - outline verdict `Needs research first`, `Needs brief clarification`, or `Strategy blocked`
 
 If blockers are severe, do not draft around them. Recommend the needed prior command.
+
+If this is `redraft_from_comments`, `--full` on an existing draft, or any
+revision to existing draft text, run the snapshot preflight from
+`<critical_revision_safety>` before the first write. Directly overwriting
+`.paper/DRAFT.md` without a snapshot is a workflow violation because it can
+destroy the last strong version of a paper.
 
 ## 2. Select Drafting Mode
 

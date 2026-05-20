@@ -140,7 +140,7 @@ Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, no
 Users should not need to remember the whole workflow. Always include a short "what you do now" line after the next command:
 
 - If next is `/gpd-export`: "Run export, then review `.paper/exports/FINAL.md`."
-- If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add comments there, run `gpd feedback`, then `/gpd-review`."
+- If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add comments there, run `gpd feedback`, then `/gpd-feedback`."
 - If next is `/gpd-review` and `exports/FINAL.md` exists: "Review will capture comments from the exported reading copy into feedback artifacts before revision."
 - If next is `/gpd-revise`: "Run `gpd revise` first if no active snapshot exists. Revision edits `.paper/DRAFT.md`; export regenerates `.paper/exports/FINAL.md`."
 - Otherwise: "Run the recommended command, then run `/gpd-status` again."

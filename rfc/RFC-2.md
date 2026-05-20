@@ -1,7 +1,7 @@
 # RFC-2: Paper Workflow Classifications, Modes, and Expectations
 
 - **Status:** Proposed
-- **Author:** Yarik Chinskiy
+- **Author:** Project maintainer
 - **Date:** 2026-05-09
 - **Scope:** GPD policy layer — paper classification, workflow mode selection, machine-readable expectations
 - **Tracking Issue:** [#15](https://github.com/yarikc/get-paper-done/issues/15)
@@ -410,7 +410,7 @@ Common labels are not first-class classification values. They map into combinati
 
 ## 14. Worked examples
 
-### 14.1 Yarik's data platform white paper
+### 14.1 Data platform white paper
 
 ```json
 {

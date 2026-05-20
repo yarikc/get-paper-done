@@ -3,6 +3,7 @@
 **Type:** Enhancement
 **Area:** Outline and draft validation, structure quality
 **Status:** Proposed (revised)
+**GitHub issue:** #35
 **Revision note:** Revised after re-evaluating the grill mechanism. The SCQA opening pattern shares territory with `PAPER-CONTEXT.md`’s example dialogues and flagged ambiguities. Revised draft makes the integration explicit: SCQA components can be sourced from grill outputs rather than constructed independently.
 
 ## Problem

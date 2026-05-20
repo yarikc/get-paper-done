@@ -240,7 +240,7 @@ function exportPaper(input = {}) {
       '',
       '- Internal export created at `.paper/exports/FINAL.md`.',
       '- Review `.paper/exports/FINAL.md` as the reading copy.',
-      '- If you add comments to `FINAL.md`, run `gpd feedback`, then `/gpd-review`; approved changes will be applied to `.paper/DRAFT.md` and exported again.',
+      '- If you add comments to `FINAL.md`, run `gpd feedback`, then `/gpd-feedback`; approved changes will be applied to `.paper/DRAFT.md` and exported again.',
       '- Run `/gpd-status` whenever you are unsure what to do next.',
       '',
     ].join('\n'),
@@ -261,7 +261,7 @@ function printExport(result) {
   if (result.snapshot) console.log(`snapshot before overwrite: ${result.snapshot.relativeSnapshotPath}`);
   if (result.forced) console.log('warning: exported with --force');
   console.log('review: read .paper/exports/FINAL.md');
-  console.log('if you add comments: run gpd feedback, then /gpd-review');
+  console.log('if you add comments: run gpd feedback, then /gpd-feedback');
 }
 
 module.exports = {

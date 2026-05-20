@@ -2,14 +2,14 @@
 
 Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
 
-Last reviewed: 2026-05-15
+Last reviewed: 2026-05-19
 
 This file is the forward plan. The current ratings, risk snapshot, and review findings live in [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). When the review changes, update that snapshot first and adjust this roadmap only when the plan itself changes.
 
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.45/10 as a writing framework and 9.15/10 as an installable private-repo tool as of 2026-05-15
+- Current rating: 9.25/10 as a writing framework and 9.1/10 as an installable private-repo tool as of 2026-05-19
 - Target: 9/10 as a writing framework and 9/10 as an installable tool
 
 The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, hash-aware export freshness, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/Gemini provider invocation, external-review provider progress output, reviewer-specific external-review storage, combined-review deduplication, current-runtime self-review skipping, full-workspace external-review prompt context, external-review provenance, concern-first feedback plans, CLI feedback-plan review/decision commands, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, local HTTP provider support, and one-by-one agent calibration against real papers.
@@ -49,6 +49,12 @@ Current issue alignment:
 - `#18`: closed mandatory grill gate and reusable paper context records; follow-up cleanup now clarifies grandfathered examples, indexes examples/fixtures, and tightens validation for grill companion artifacts.
 - `#20`: review/comment UX simplification; first CLI slice implemented with `gpd review-pack`, `gpd feedback`, unresolved-export-comment validation, external-review provider progress, current-runtime self-review skipping, full-workspace external-review prompt context, reviewer-specific external-review storage, combined-review deduplication, feedback-plan decomposition of external review concerns, generated recommendations, and explicit user decisions. Remaining future improvements should be driven by the next paper trial, not speculative UI surface.
 - `#31`: concern-first feedback-plan UX; implements a clearer `FEEDBACK-PLAN.md` schema and `gpd feedback-plan list/review/decide` so users can make one decision at a time in the CLI/TUI before revision.
+- `#32`: RFC-007 evaluation harness; backlog item for independent `FINAL.md` quality measurement. Start with manual rubric calibration before CLI automation.
+- `#33`: RFC-008 warrant-integrity checks; backlog item for making load-bearing warrants explicit in grill/PAPER-CONTEXT. Keep deterministic checks separate from LLM advisory assessment.
+- `#34`: RFC-009 bad-strategy tells; backlog item that should fold first into the Brief Acceptance Gate and strategy gate rather than adding a heavy standalone artifact immediately.
+- `#35`: RFC-010 Minto/SCQA structure checks; backlog item for explicit structure declaration, answer-first checks, and genre opt-out.
+- `#36`: RFC-011 grill source intake and source graph; highest-leverage RFC-007..011 starting point because it addresses the observed missed-source failure in a real paper trial.
+- `#37`: state schema and workflow-simulation hardening follow-ups; tracks lower-risk state-label/versioning/status-nudge work harvested from the local workflow simulation after the high-risk safety findings were fixed.
 
 ## Main Line Preserved During RFC-5 Detour
 
@@ -78,6 +84,8 @@ Deferred until after the main-line calibration unless explicitly reprioritized:
 - Semantic validation as a routing source. `gpd validate --semantic` detects quality failures, but `gpd next` does not yet use semantic issue IDs as blockers.
 - Deterministic classification-driven policy checks beyond schema/template/workflow guidance. RFC-2.1 / issue #15 owns the broader feature direction.
 - Context-pack discovery CLI. `contexts/` is installed and documented, but users inspect the directory directly for now.
+- RFC-007 through RFC-011 implementation beyond issue creation and RFC capture. Resolve purpose-taxonomy drift first: current first-class `classification.purpose` values remain `decision_memo`, `strategy_paper`, `explainer`, and `update`; labels such as `position_paper` and `white_paper` should map onto the existing taxonomy unless the taxonomy is explicitly reopened.
+- LLM-as-judge behavior inside deterministic semantic validation. Future RFC slices should keep `semantic.js` deterministic where possible and put model-judged assessment in advisory review/evaluation until calibrated.
 
 ## RFC-3 / RFC-4 Placement
 
@@ -147,7 +155,7 @@ Plan-change rule:
 14. Completed: added `gpd review-external` as a safe collector from files or stdin. It writes `.paper/FEEDBACK-EXTERNAL.md` and `.paper/FEEDBACK-PLAN.md`, updates state to the pending approval gate, adds an `FEEDBACK-EXTERNAL.md` artifact contract, and deliberately does not invoke external providers yet.
 15. Completed: added a first provider-invocation slice for `gpd review-external --models`, limited to installed CLI providers with known stdin command patterns, temp prompt generation, timeout/error capture, and no local HTTP server support yet.
 16. Completed: calibrated the real Claude CLI path on a synthetic public paper, fixed the command from `claude -p -` to `claude -p`, and added a regression assertion for the argument shape.
-17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-status` before stale mtime refresh rules can send the paper backward.
+17. Completed: fixed status routing so pending `FEEDBACK-PLAN.md` approval gates route to `/gpd-feedback` before stale mtime refresh rules can send the paper backward.
 18. Completed: calibrated the real Codex CLI path on a synthetic public paper, confirmed `codex exec --skip-git-repo-check -`, and added a regression assertion for the argument shape.
 19. Completed: added first-pass `.docx` canonical-draft text extraction for `gpd import`, preserving the original file under `original/`, writing extracted paragraph text to `.paper/DRAFT.md`, recording extraction provenance in `.paper/IMPORT.md`, and covering the behavior with a synthetic DOCX regression test.
 20. Completed: added import-time detection of unverified source-reference candidates from Markdown, text, and `.docx` material, recording URLs, DOIs, named standards/source families, and source/reference lines in `.paper/IMPORT.md` without creating `RESEARCH.json`.
@@ -225,7 +233,7 @@ Next work should validate behavior under real use before adding more RFC surface
 - Renamed project to Get Paper Done.
 - Simplified import so it preserves originals and creates only minimal artifacts.
 - Added paper location prompt and per-paper directory creation.
-- Added `/gpd-status` and `/gpd-status` as read-only continuity commands.
+- Added `/gpd-status` as the read-only slash-command continuity dashboard.
 - Added CLI-only `gpd next` for compact next-action guidance while preserving explicit slash-command stage execution.
 - Added hard research compression rule.
 - Added curated reusable audiences.
