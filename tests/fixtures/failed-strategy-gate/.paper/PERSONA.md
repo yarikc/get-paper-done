@@ -1,5 +1,9 @@
 # Persona
 
+## Profile Boundary
+
+This profile describes finished-paper voice, author perspective, and durable content preferences. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Writer
 
 The writer is an internal architecture leader preparing a short direction memo for a senior technical review group.

@@ -49,6 +49,8 @@ Use one mode:
 
 If no mode is specified, use `full_claim_check` when `.paper/DRAFT.md` exists and the paper is serious, technical, executive-facing, public, or publication-bound. Use `risk_scan` for rough or early drafts.
 
+If the thesis, framing, scope, or audience posture is materially broken, do not spend effort on a full claim audit. Record the highest-risk factual claims visible from a risk scan, then route the paper upstream to `/gpd-brief`, `/gpd-research`, `/gpd-outline`, or `/gpd-review` as appropriate. Claim verification should not polish a paper whose core argument is not yet sound.
+
 ## 2. Extract Claim Inventory
 
 Extract claims from `.paper/DRAFT.md` and classify:

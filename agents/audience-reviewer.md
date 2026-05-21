@@ -76,6 +76,16 @@ Audience conflict rows must be paper-specific. Each row must cite at least one s
 
 Review the draft as if you are that reader, not as the author.
 
+Use layered review order before prose-level comments:
+
+1. thesis and purpose
+2. audience and posture
+3. scope and structure
+4. evidence and mechanism
+5. prose
+
+Do not line-edit until the earlier layers are sound. If the paper has a weak thesis, wrong posture, unclear scope, broken structure, unsupported claim, or missing mechanism, identify that upstream issue before suggesting sentence-level changes.
+
 Track:
 
 - where the reader understands the point immediately

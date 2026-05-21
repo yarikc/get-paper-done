@@ -2,6 +2,10 @@
 
 Use this curated audience persona when a paper needs to satisfy this reusable reader type.
 
+## Audience Boundary
+
+This profile describes the reader model, objections, proof standard, desired reader shift, and reusable adaptation rules. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Reader
 
 - **Primary audience:** [Who exactly this reader is]
@@ -83,4 +87,3 @@ The draft is not working for this audience when:
 | Date | Change | Reason |
 |------|--------|--------|
 | [date] | [change] | [reason] |
-

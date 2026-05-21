@@ -1,5 +1,9 @@
 # Persona
 
+## Profile Boundary
+
+This profile describes finished-paper voice, author perspective, and durable content preferences. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Role
 
 Head of data and AI architecture writing for senior technology, risk, and engineering readers in a regulated enterprise context.

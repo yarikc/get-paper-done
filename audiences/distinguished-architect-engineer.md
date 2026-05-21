@@ -2,6 +2,10 @@
 
 Use this curated audience persona for senior technical leaders, principal engineers, distinguished engineers, and architecture review audiences.
 
+## Audience Boundary
+
+This profile describes the reader model, objections, proof standard, desired reader shift, and reusable adaptation rules. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Reader
 
 - **Primary audience:** Distinguished architect, principal engineer, senior platform engineer, architecture fellow, or deeply technical leader.
@@ -57,4 +61,3 @@ After reading, they should:
 - Boundary clarity
 - Alternative evaluation
 - Jargon appropriateness
-

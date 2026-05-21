@@ -60,6 +60,8 @@ Clarify:
 
 Write or update `.paper/AUDIENCE.md`.
 
+Keep the audience boundary explicit: `AUDIENCE.md` describes the reader model, objections, proof standard, desired reader shift, and paper-specific adaptation rules. It must not define TUI interaction style, snapshot policy, feedback approval mechanics, or workflow gates.
+
 If `.paper/STATE.md` or `.paper/STATE.json` exists, note that the audience profile was updated and flag downstream artifacts that may need revision.
 
 </process>

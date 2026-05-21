@@ -37,6 +37,8 @@ For `--new`, ask:
 
 Create `audiences/[slug].md` using `templates/curated-audience.md`.
 
+Keep the audience boundary explicit: curated audience personas describe reusable reader models, objections, proof standards, desired reader shifts, and adaptation rules. They must not define TUI interaction style, snapshot policy, feedback approval mechanics, or workflow gates.
+
 Before writing:
 
 - show the proposed persona

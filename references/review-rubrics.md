@@ -2,6 +2,18 @@
 
 Use these rubrics when reviewing a draft.
 
+## Layered Review Order
+
+Review in this order:
+
+1. thesis and purpose
+2. audience and posture
+3. scope and structure
+4. evidence and mechanism
+5. prose
+
+Do not line-edit until the earlier layers are sound. A polished sentence does not fix a weak thesis, unclear audience, wrong posture, unsupported claim, or broken argument structure.
+
 ## Thesis Clarity
 
 5: The central claim is unmistakable and appears early enough.
@@ -25,6 +37,12 @@ Checks:
 5: Voice, posture, vocabulary, and tone match `PERSONA.md`.
 3: Mostly consistent with occasional generic or off-tone sections.
 1: The persona is not visible.
+
+Checks:
+
+- Are persona and tone consistent across `BRIEF.md`, `OUTLINE.md`, `DRAFT.md`, `FINAL.md`, and review artifacts?
+- Does any artifact silently shift posture, level of certainty, or author voice?
+- Do review recommendations preserve the intended persona instead of flattening the paper into generic prose?
 
 ## Evidence Quality
 

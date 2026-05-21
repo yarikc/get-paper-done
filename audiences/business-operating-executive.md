@@ -2,6 +2,10 @@
 
 Use this curated audience persona for business leaders and operating executives who need practical implications.
 
+## Audience Boundary
+
+This profile describes the reader model, objections, proof standard, desired reader shift, and reusable adaptation rules. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Reader
 
 - **Primary audience:** Business executive, operating executive, transformation leader, or functional leader accountable for outcomes.
@@ -57,4 +61,3 @@ After reading, they should:
 - Organizational implications
 - Timing and sequencing
 - Decision usefulness
-

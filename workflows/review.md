@@ -30,6 +30,18 @@ Read all context and the current draft.
 
 If `.paper/exports/FINAL.md` exists, treat it as the user's reading copy. Scan it for inline comments, `.feedback` companion files, or user-marked review notes. The export is not the editing source of truth; comments on `FINAL.md` must be captured into `.paper/FEEDBACK-READER.md` and `.paper/FEEDBACK-PLAN.md`, then applied later to `.paper/DRAFT.md` through `/gpd-revise`.
 
+Use the layered review order from `references/review-rubrics.md` before judging prose:
+
+1. thesis and purpose
+2. audience and posture
+3. scope and structure
+4. evidence and mechanism
+5. prose
+
+Do not line-edit until the earlier layers are sound. If thesis, audience, posture, scope, structure, evidence, or mechanism are weak, route the paper to the right upstream stage or revision plan instead of polishing sentences.
+
+Check persona and tone consistency across `.paper/BRIEF.md`, `.paper/OUTLINE.md`, `.paper/DRAFT.md`, `.paper/exports/FINAL.md`, and review artifacts. Do not allow the paper to silently shift posture, level of certainty, or author voice between artifacts.
+
 Use `.paper/config.json` classification as the review contract:
 
 - `decision_memo`: judge ask clarity, decision usefulness, support for the ask, operating mechanism, accountability, caveats, and concise memo discipline.

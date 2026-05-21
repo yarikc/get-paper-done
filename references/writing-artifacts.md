@@ -146,6 +146,12 @@ Persona and audience profiles are paper-scoped by default. A reusable global pro
 
 Reusable profiles may live in `profiles/*.md`. Importing a reusable profile should adapt it into `.paper/PERSONA.md`; workflows should not treat the reusable profile as more authoritative than the local paper profile.
 
+Every `.paper/PERSONA.md` must include a `Profile Boundary` section. The boundary keeps persona focused on finished-paper voice, author perspective, and durable content preferences. It must not define TUI interaction style, snapshot policy, feedback approval mechanics, or workflow gates; those belong in workflows, CLI behavior, and artifact contracts.
+
+Every `.paper/AUDIENCE.md` must include an `Audience Boundary` section. The boundary keeps audience focused on reader model, objections, proof standard, desired reader shift, and adaptation rules. It must not define TUI interaction style, snapshot policy, feedback approval mechanics, or workflow gates.
+
+As a separation-of-concerns rule, persona and audience artifacts must not absorb project mechanics over time. If guidance mentions GPD commands, `STATE.json`, snapshots/restores, feedback approval, routing, TUI behavior, or workflow gates, move it to workflows, commands, CLI code, or artifact contracts instead.
+
 ## Audience Scope
 
 Reusable audience personas live in `audiences/*.md`.

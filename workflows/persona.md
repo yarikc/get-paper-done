@@ -30,6 +30,8 @@ Ask only for missing or weak areas:
 
 Write or update `.paper/PERSONA.md`.
 
+Keep the profile boundary explicit: `PERSONA.md` describes finished-paper voice, author perspective, and durable content preferences. It must not define TUI interaction style, snapshot policy, feedback approval mechanics, or workflow gates.
+
 If `.paper/STATE.md` or `.paper/STATE.json` exists, note that the persona was updated and flag downstream artifacts that may need revision.
 
 </process>

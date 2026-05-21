@@ -19,6 +19,8 @@ const jsonArtifactSchemas = {
 };
 
 const artifactNameAliases = {
+  'persona.md': 'PERSONA.md',
+  'audience.md': 'AUDIENCE.md',
   'strategy.md': 'STRATEGY.md',
   'outline.md': 'OUTLINE.md',
   'fact-check.md': 'FACT-CHECK.md',
@@ -32,6 +34,14 @@ const artifactNameAliases = {
   'decisions.md': 'DECISIONS.md',
 };
 
+function artifactNameForFile(filePath) {
+  const basename = path.basename(filePath);
+  const normalized = path.resolve(filePath).split(path.sep);
+  if (normalized.includes('profiles') && basename.endsWith('.md')) return 'PERSONA.md';
+  if (normalized.includes('audiences') && basename.endsWith('.md')) return 'AUDIENCE.md';
+  return artifactNameAliases[basename] || basename;
+}
+
 const allowedFeedbackPlanStatuses = [
   'Pending user approval',
   'Approved',
@@ -42,6 +52,18 @@ const allowedFeedbackPlanStatuses = [
 ];
 
 const markdownContracts = {
+  'PERSONA.md': {
+    headings: [
+      '## Profile Boundary',
+    ],
+    tables: [],
+  },
+  'AUDIENCE.md': {
+    headings: [
+      '## Audience Boundary',
+    ],
+    tables: [],
+  },
   'STRATEGY.md': {
     headings: [
       '# Strategy Review',
@@ -811,6 +833,88 @@ function validateDecisionRecordsContent(markdown, filePath) {
   return issues;
 }
 
+function validatePersonaContent(markdown) {
+  const boundary = sectionBetween(markdown, '## Profile Boundary', /\n##\s+/).toLowerCase();
+  const requiredPhrases = [
+    'finished-paper voice',
+    'author perspective',
+    'durable content preferences',
+    'does not define',
+    'tui',
+    'snapshot policy',
+    'feedback approval',
+    'workflow gates',
+  ];
+  const missing = requiredPhrases.filter((phrase) => !boundary.includes(phrase));
+  const issues = [];
+  if (missing.length > 0) {
+    issues.push(issue('HIGH', 'PERSONA.md', 'Profile Boundary must separate finished-paper voice from TUI behavior, snapshot policy, feedback approval, and workflow gates'));
+  }
+  issues.push(...validateSeparationOfConcerns(markdown, 'PERSONA.md', ['## Profile Boundary']));
+  return issues;
+}
+
+function validateAudienceContent(markdown) {
+  const boundary = sectionBetween(markdown, '## Audience Boundary', /\n##\s+/).toLowerCase();
+  const requiredPhrases = [
+    'reader model',
+    'objections',
+    'proof standard',
+    'desired reader shift',
+    'does not define',
+    'tui',
+    'snapshot policy',
+    'feedback approval',
+    'workflow gates',
+  ];
+  const issues = [];
+  const missing = requiredPhrases.filter((phrase) => !boundary.includes(phrase));
+  if (missing.length > 0) {
+    issues.push(issue('HIGH', 'AUDIENCE.md', 'Audience Boundary must separate reader model from TUI behavior, snapshot policy, feedback approval, and workflow gates'));
+  }
+  issues.push(...validateSeparationOfConcerns(markdown, 'AUDIENCE.md', ['## Audience Boundary']));
+  return issues;
+}
+
+function removeMarkdownSections(markdown, headings) {
+  let result = markdown;
+  for (const heading of headings) {
+    const pattern = new RegExp(`\\n?${heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[\\s\\S]*?(?=\\n##\\s+|$)`, 'g');
+    result = result.replace(pattern, '\n');
+  }
+  return result;
+}
+
+function validateSeparationOfConcerns(markdown, artifact, allowedBoundaryHeadings = []) {
+  const scoped = removeMarkdownSections(markdown, allowedBoundaryHeadings);
+  const checks = [
+    {
+      label: 'interactive TUI behavior',
+      pattern: /\b(?:interactive\s+)?(?:codex\s+|claude\s+)?tui\s+behavior\b/i,
+    },
+    {
+      label: 'snapshot or restore policy',
+      pattern: /\b(?:snapshot policy|gpd snapshot|gpd restore|last_snapshot_id|restore snapshot)\b/i,
+    },
+    {
+      label: 'feedback approval mechanics',
+      pattern: /\b(?:feedback approval|feedback approval gate|FEEDBACK-PLAN approval|approved_handling)\b/i,
+    },
+    {
+      label: 'workflow gates or CLI routing',
+      pattern: /(?:\b(?:workflow gates?|gate override|suggested_next_command|gpd next)\b|\/gpd-[a-z-]+\b)/i,
+    },
+    {
+      label: 'machine state mechanics',
+      pattern: /\b(?:STATE\.json|STATE\.md|config\.json)\b/i,
+    },
+  ];
+
+  return checks
+    .filter((check) => check.pattern.test(scoped))
+    .map((check) => issue('HIGH', artifact, `Separation of concerns violation: ${check.label} belongs in workflows, commands, CLI, or artifact contracts, not ${artifact}`));
+}
+
 function validatePaperContextTermsUsedInDraft(meta) {
   const contextPath = path.join(meta, 'PAPER-CONTEXT.md');
   const draftPath = path.join(meta, 'DRAFT.md');
@@ -834,7 +938,7 @@ function validatePaperContextTermsUsedInDraft(meta) {
 
 function validateMarkdownArtifact(filePath) {
   const basename = path.basename(filePath);
-  const artifact = artifactNameAliases[basename] || basename;
+  const artifact = artifactNameForFile(filePath);
   const contract = markdownContracts[artifact];
   if (!contract) return [];
   if (!fs.existsSync(filePath)) return [issue('HIGH', artifact, 'file does not exist')];
@@ -856,6 +960,12 @@ function validateMarkdownArtifact(filePath) {
 
   if (artifact === 'REVIEW.md') {
     issues.push(...validateAudienceScorecard(markdown));
+  }
+  if (artifact === 'PERSONA.md') {
+    issues.push(...validatePersonaContent(markdown));
+  }
+  if (artifact === 'AUDIENCE.md') {
+    issues.push(...validateAudienceContent(markdown));
   }
   if (artifact === 'FEEDBACK-READER.md') {
     issues.push(...validateReaderFeedbackScorecard(markdown));
@@ -882,7 +992,7 @@ function validateMarkdownArtifact(filePath) {
 function validateArtifact(inputPath) {
   const filePath = path.resolve(expandHome(inputPath));
   const basename = path.basename(filePath);
-  const artifact = artifactNameAliases[basename] || basename;
+  const artifact = artifactNameForFile(filePath);
   if (jsonArtifactSchemas[basename]) return validateJsonArtifact(filePath);
   if (markdownContracts[artifact]) return validateMarkdownArtifact(filePath);
   return [issue('MEDIUM', basename, 'No artifact contract found')];

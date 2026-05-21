@@ -2,6 +2,10 @@
 
 Use this curated audience persona for chief-level executives and enterprise decision makers.
 
+## Audience Boundary
+
+This profile describes the reader model, objections, proof standard, desired reader shift, and reusable adaptation rules. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Reader
 
 - **Primary audience:** CEO, CIO, CTO, CDAO, CDO, or other CxO-level decision maker.
@@ -57,4 +61,3 @@ After reading, they should:
 - Investment logic
 - Execution risk
 - Structural flow
-

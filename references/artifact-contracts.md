@@ -30,6 +30,24 @@ Schemas using unsupported keywords fail validation so authors do not assume sema
 
 Markdown artifacts must contain the headings and table columns listed below when the artifact exists as a completed stage output.
 
+### `PERSONA.md`
+
+Required headings:
+
+- `## Profile Boundary`
+
+Completed `.paper/PERSONA.md` artifacts must keep the profile boundary explicit: persona controls finished-paper voice, author perspective, and durable content preferences. It must not define TUI behavior, snapshot policy, feedback approval mechanics, or workflow gates.
+
+Persona and audience artifacts are also checked for separation of concerns. Outside their explicit boundary sections, they must not define project/workflow mechanics such as GPD command routing, state files, snapshot/restore policy, feedback approval gates, or TUI behavior. Those rules belong in workflows, commands, CLI code, or artifact contracts.
+
+### `AUDIENCE.md`
+
+Required headings:
+
+- `## Audience Boundary`
+
+Completed `.paper/AUDIENCE.md` artifacts must keep the audience boundary explicit: audience controls reader model, objections, proof standard, desired reader shift, and adaptation rules. It must not define TUI behavior, snapshot policy, feedback approval mechanics, or workflow gates.
+
 ### `STRATEGY.md`
 
 Required headings:

@@ -1,5 +1,9 @@
 # Audience
 
+## Audience Boundary
+
+This profile describes the reader model, objections, proof standard, desired reader shift, and paper-specific adaptation rules. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Primary Audience
 
 Senior decision sponsor who needs to decide whether to validate the direction, sponsor a phased rollout, and convene the right collaborators.
@@ -11,4 +15,3 @@ Peer architecture collaborators who need enough operating detail to challenge, r
 ## Audience Tension
 
 The senior decision sponsor needs a concise decision frame. Peer collaborators need enough mechanism detail to test whether the operating model is real. A draft that tries to satisfy both without declaring priority risks becoming too abstract for the sponsor and too shallow for collaborators.
-

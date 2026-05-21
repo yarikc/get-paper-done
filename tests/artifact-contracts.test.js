@@ -9,6 +9,7 @@ const { execFileSync, spawnSync } = require('child_process');
 const repoRoot = path.resolve(__dirname, '..');
 const gpd = path.join(repoRoot, 'bin', 'gpd.js');
 const {
+  validateArtifact,
   validateJsonSchemaValue,
   validateSchemaDefinition,
   validatePaperArtifacts,
@@ -43,6 +44,8 @@ function testTemplateArtifactsPassContracts() {
     'templates/state.json',
     'templates/config.json',
     'templates/research.json',
+    'templates/persona.md',
+    'templates/audience.md',
     'templates/strategy.md',
     'templates/outline.md',
     'templates/fact-check.md',
@@ -307,6 +310,74 @@ function testStrategyValueFailureIsActionable() {
   assert(result.stdout.includes('STRATEGY.md: $.Status must be one of Go, Revise Before Drafting, No-Go'));
   assert(result.stdout.includes('STRATEGY.md: $.Primary blocker must be one of none, scope_too_broad, thesis_weak'));
   assert(result.stdout.includes('STRATEGY.md: $.Required unblock action must be one of none, brief_revision, audience_revision'));
+}
+
+function testPersonaBoundaryFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-persona-boundary-test');
+  const badPersona = path.join(dir, 'PERSONA.md');
+  const persona = fs.readFileSync(path.join(repoRoot, 'templates', 'persona.md'), 'utf8')
+    .replace(/## Profile Boundary[\s\S]*?(?=## Identity)/, '');
+  fs.writeFileSync(badPersona, persona);
+
+  const result = runFail(['validate-artifact', '--path', badPersona]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('PERSONA.md: Missing heading "## Profile Boundary"'));
+  assert(result.stdout.includes('PERSONA.md: Profile Boundary must separate finished-paper voice from TUI behavior, snapshot policy, feedback approval, and workflow gates'));
+}
+
+function testPersonaRejectsWorkflowMechanicsOutsideBoundary() {
+  const dir = tempDir('gpd-artifact-persona-concern-test');
+  const badPersona = path.join(dir, 'PERSONA.md');
+  const persona = `${fs.readFileSync(path.join(repoRoot, 'templates', 'persona.md'), 'utf8')}\n\n## Process\n\nRun /gpd-feedback before any revision.`;
+  fs.writeFileSync(badPersona, persona);
+
+  const result = runFail(['validate-artifact', '--path', badPersona]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('PERSONA.md: Separation of concerns violation: workflow gates or CLI routing belongs in workflows, commands, CLI, or artifact contracts, not PERSONA.md'));
+}
+
+function testAudienceBoundaryFailureIsActionable() {
+  const dir = tempDir('gpd-artifact-audience-boundary-test');
+  const badAudience = path.join(dir, 'AUDIENCE.md');
+  const audience = fs.readFileSync(path.join(repoRoot, 'templates', 'audience.md'), 'utf8')
+    .replace(/## Audience Boundary[\s\S]*?(?=## Audience Source)/, '');
+  fs.writeFileSync(badAudience, audience);
+
+  const result = runFail(['validate-artifact', '--path', badAudience]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('AUDIENCE.md: Missing heading "## Audience Boundary"'));
+  assert(result.stdout.includes('AUDIENCE.md: Audience Boundary must separate reader model from TUI behavior, snapshot policy, feedback approval, and workflow gates'));
+}
+
+function testAudienceRejectsWorkflowMechanicsOutsideBoundary() {
+  const dir = tempDir('gpd-artifact-audience-concern-test');
+  const badAudience = path.join(dir, 'AUDIENCE.md');
+  const audience = `${fs.readFileSync(path.join(repoRoot, 'templates', 'audience.md'), 'utf8')}\n\n## Process Preference\n\nStore next routing in STATE.json.`;
+  fs.writeFileSync(badAudience, audience);
+
+  const result = runFail(['validate-artifact', '--path', badAudience]);
+  assert.strictEqual(result.status, 1);
+  assert(result.stdout.includes('AUDIENCE.md: Separation of concerns violation: machine state mechanics belongs in workflows, commands, CLI, or artifact contracts, not AUDIENCE.md'));
+}
+
+function testReusableProfilesAndAudiencesDeclareBoundaries() {
+  for (const file of fs.readdirSync(path.join(repoRoot, 'profiles')).filter((name) => name.endsWith('.md'))) {
+    const fullPath = path.join(repoRoot, 'profiles', file);
+    const markdown = fs.readFileSync(fullPath, 'utf8');
+    assert(markdown.includes('## Profile Boundary'), `${file} must declare Profile Boundary`);
+
+    const issues = validateArtifact(fullPath);
+    assert.deepStrictEqual(issues, [], `${file} must satisfy PERSONA.md boundary contract`);
+  }
+
+  for (const file of fs.readdirSync(path.join(repoRoot, 'audiences')).filter((name) => name.endsWith('.md'))) {
+    const fullPath = path.join(repoRoot, 'audiences', file);
+    const markdown = fs.readFileSync(fullPath, 'utf8');
+    assert(markdown.includes('## Audience Boundary'), `${file} must declare Audience Boundary`);
+
+    const issues = validateArtifact(fullPath);
+    assert.deepStrictEqual(issues, [], `${file} must satisfy AUDIENCE.md boundary contract`);
+  }
 }
 
 function testPaperContextRejectsPlaceholderContent() {
@@ -685,6 +756,11 @@ testRevisionCheckValidatesSnapshotHashes();
 testExternalReviewsContractRequiresConsensusSections();
 testFactCheckContractRequiresSafeClaimSections();
 testStrategyValueFailureIsActionable();
+testPersonaBoundaryFailureIsActionable();
+testPersonaRejectsWorkflowMechanicsOutsideBoundary();
+testAudienceBoundaryFailureIsActionable();
+testAudienceRejectsWorkflowMechanicsOutsideBoundary();
+testReusableProfilesAndAudiencesDeclareBoundaries();
 testPaperContextRejectsPlaceholderContent();
 testDecisionsRejectPlaceholderContent();
 testPaperContextTermsMustAppearInDraftAfterReviewExists();

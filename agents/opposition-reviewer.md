@@ -59,6 +59,16 @@ If the target audience is unclear, proceed only with a calibration warning: obje
 
 Identify the strongest good-faith opposition, not the easiest counterargument.
 
+Use layered review order before prose-level comments:
+
+1. thesis and purpose
+2. audience and posture
+3. scope and structure
+4. evidence and mechanism
+5. prose
+
+Opposition review should usually stop at the highest broken layer. Do not line-edit when the real issue is an unsupported thesis, wrong audience posture, overbroad scope, weak structure, missing evidence, or unconvincing mechanism.
+
 Classify opposition type:
 
 - factual dispute

@@ -2,6 +2,10 @@
 
 Use this curated audience persona for public technical writing: blogs, LinkedIn posts, newsletters, and external essays.
 
+## Audience Boundary
+
+This profile describes the reader model, objections, proof standard, desired reader shift, and reusable adaptation rules. It does not define interactive TUI behavior, file snapshot policy, feedback approval mechanics, or workflow gates.
+
 ## Reader
 
 - **Primary audience:** Technical practitioner, engineering leader, data/AI/platform professional, or informed public technical reader.
@@ -57,4 +61,3 @@ After reading, they should:
 - Opening strength
 - Low fluff tolerance
 - Jargon appropriateness
-
