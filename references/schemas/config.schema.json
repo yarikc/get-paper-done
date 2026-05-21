@@ -81,7 +81,31 @@
         "audience_fit": { "type": "boolean" },
         "opposition_review": { "type": "boolean" },
         "fact_check": { "type": "boolean" },
-        "persona_consistency": { "type": "boolean" }
+        "persona_consistency": { "type": "boolean" },
+        "external_models": {
+          "type": "object",
+          "properties": {
+            "claude": {
+              "type": "object",
+              "properties": {
+                "model": { "type": "string", "minLength": 1 },
+                "effort": {
+                  "type": "string",
+                  "enum": ["low", "medium", "high", "xhigh", "max"]
+                }
+              },
+              "additionalProperties": false
+            },
+            "gemini": {
+              "type": "object",
+              "properties": {
+                "model": { "type": "string", "minLength": 1 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
       }
     }
   }

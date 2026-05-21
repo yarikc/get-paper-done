@@ -247,8 +247,8 @@ Invoke selected reviewers sequentially to avoid rate limits.
 Recommended command patterns:
 
 ```bash
-cat /tmp/gpd-review-prompt.md | gemini -p "" > /tmp/gpd-review-gemini.md 2>/tmp/gpd-review-gemini.err
-cat /tmp/gpd-review-prompt.md | claude -p > /tmp/gpd-review-claude.md 2>/tmp/gpd-review-claude.err
+cat /tmp/gpd-review-prompt.md | gemini -p "" -m pro --output-format json --approval-mode plan --skip-trust > /tmp/gpd-review-gemini.json 2>/tmp/gpd-review-gemini.err
+cat /tmp/gpd-review-prompt.md | claude -p --model opus --effort xhigh > /tmp/gpd-review-claude.md 2>/tmp/gpd-review-claude.err
 cat /tmp/gpd-review-prompt.md | codex exec --skip-git-repo-check - > /tmp/gpd-review-codex.md 2>/tmp/gpd-review-codex.err
 cat /tmp/gpd-review-prompt.md | qwen - > /tmp/gpd-review-qwen.md 2>/tmp/gpd-review-qwen.err
 cat /tmp/gpd-review-prompt.md | cursor agent -p --mode ask --trust > /tmp/gpd-review-cursor.md 2>/tmp/gpd-review-cursor.err

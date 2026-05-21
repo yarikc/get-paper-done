@@ -26,6 +26,7 @@
     "audience_fit": true,
     "opposition_review": true,
     "fact_check": true,
-    "persona_consistency": true
+    "persona_consistency": true,
+    "external_models": {}
   }
 }

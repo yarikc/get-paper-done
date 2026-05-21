@@ -528,6 +528,22 @@ function testConfigClassificationEnumFailureIsActionable() {
   assert(errors.includes('$.classification.audience_shape must be one of single, prioritized_multi, hybrid'));
 }
 
+function testConfigExternalModelOverrideFailureIsActionable() {
+  const config = JSON.parse(fs.readFileSync(path.join(repoRoot, 'templates', 'config.json'), 'utf8'));
+  config.review.external_models = {
+    clude: {
+      model: 'opus',
+    },
+    gemini: {
+      effort: 'high',
+    },
+  };
+
+  const errors = validateJsonSchemaValue(config, loadSchema('config.schema.json'));
+  assert(errors.includes('$.review.external_models.clude is not allowed'));
+  assert(errors.includes('$.review.external_models.gemini.effort is not allowed'));
+}
+
 function testRevisionCheckRequiresBaselineAndDimensions() {
   const dir = tempDir('gpd-revision-check-contract-test');
   const meta = path.join(dir, '.paper');
@@ -678,5 +694,6 @@ testUnsupportedSchemaKeywordFailsSchemaDefinition();
 testUnknownArtifactFailsCli();
 testPaperValidationIncludesArtifactContracts();
 testConfigClassificationEnumFailureIsActionable();
+testConfigExternalModelOverrideFailureIsActionable();
 
 console.log('artifact contract tests passed');

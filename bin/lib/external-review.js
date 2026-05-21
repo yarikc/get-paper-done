@@ -19,15 +19,20 @@ const {
 const providerCommands = {
   gemini: {
     command: 'gemini',
-    args: ['-p', '', '-m', 'gemini-2.5-pro', '--output-format', 'text', '--approval-mode', 'plan', '--skip-trust'],
-    exactModel: 'gemini-2.5-pro',
-    effort: 'default-thinking',
+    args: ['-p', '', '-m', 'pro', '--output-format', 'json', '--approval-mode', 'plan', '--skip-trust'],
+    modelArg: '-m',
+    requestedModel: 'pro',
+    requestedModelType: 'provider_alias',
+    outputFormat: 'json',
   },
   claude: {
     command: 'claude',
-    args: ['-p', '--model', 'opus', '--effort', 'high'],
-    exactModel: 'opus',
-    effort: 'high',
+    args: ['-p', '--model', 'opus', '--effort', 'xhigh'],
+    modelArg: '--model',
+    effortArg: '--effort',
+    requestedModel: 'opus',
+    requestedModelType: 'provider_alias',
+    requestedEffort: 'xhigh',
   },
   codex: { command: 'codex', args: ['exec', '--skip-git-repo-check', '-'] },
   qwen: { command: 'qwen', args: ['-'] },
@@ -65,6 +70,15 @@ function supportedProviders() {
 
 function readIfExists(filePath) {
   return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+}
+
+function readJsonIfExists(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
 }
 
 function preservedPriorMarkdown(title, markdown) {
@@ -119,6 +133,80 @@ function detectCurrentRuntime(input = {}) {
   if (env.CODEX_HOME || env.CODEX_SANDBOX || env.CODEX_CLI) return 'codex';
   if (env.CURSOR_TRACE_ID || env.CURSOR_AGENT) return 'cursor';
   return '';
+}
+
+function paperReviewModelOverrides(paperDir) {
+  const config = readJsonIfExists(path.join(paperDir || '', '.paper', 'config.json'));
+  return config?.review?.external_models || {};
+}
+
+function modelSelectionType(provider, model) {
+  if (!model) return 'provider_default';
+  // Keep this alias list intentionally small. Unknown values are explicit pins
+  // unless the provider's CLI documents a durable capability alias.
+  const aliases = {
+    claude: new Set(['default', 'opus', 'sonnet', 'haiku', 'opusplan']),
+    gemini: new Set(['auto', 'pro', 'flash', 'flash-lite']),
+  };
+  return aliases[provider]?.has(String(model).toLowerCase()) ? 'provider_alias' : 'explicit_pin';
+}
+
+function withArgValue(args, flag, value) {
+  const index = args.indexOf(flag);
+  if (index < 0 || index === args.length - 1) return args;
+  const next = [...args];
+  next[index + 1] = value;
+  return next;
+}
+
+function providerOverrideFor(model, paperDir) {
+  const override = paperReviewModelOverrides(paperDir)[model];
+  if (!override) return {};
+  if (typeof override === 'string') return { model: override };
+  return typeof override === 'object' ? override : {};
+}
+
+function resolvedProviderConfig(model, input = {}) {
+  const base = providerCommands[model];
+  if (!base) return null;
+  const override = providerOverrideFor(model, input.paperDir);
+  let args = [...base.args];
+  let requestedModel = base.requestedModel || null;
+  let requestedEffort = base.requestedEffort || null;
+  const ignoredOverrides = [];
+
+  if (override.model) {
+    if (base.modelArg) {
+      requestedModel = String(override.model);
+      args = withArgValue(args, base.modelArg, requestedModel);
+    } else {
+      ignoredOverrides.push({
+        field: 'model',
+        reason: 'provider has no GPD-controlled model flag',
+      });
+    }
+  }
+  if (override.effort) {
+    if (base.effortArg) {
+      requestedEffort = String(override.effort);
+      args = withArgValue(args, base.effortArg, requestedEffort);
+    } else {
+      ignoredOverrides.push({
+        field: 'effort',
+        reason: 'provider has no GPD-controlled effort flag',
+      });
+    }
+  }
+
+  return {
+    ...base,
+    args,
+    requestedModel,
+    requestedModelType: modelSelectionType(model, requestedModel),
+    requestedEffort,
+    overrideApplied: Object.keys(override).length > ignoredOverrides.length,
+    ignoredOverrides,
+  };
 }
 
 function parseReviewFileSpec(spec) {
@@ -262,6 +350,41 @@ function providerFailureReview(reviewer, source, content, status = 'failed') {
   };
 }
 
+function parseProviderStdout(model, config, stdout) {
+  const raw = (stdout || '').trim();
+  if (model !== 'gemini' || config?.outputFormat !== 'json' || !raw) {
+    return {
+      content: raw,
+      resolvedModels: [],
+      resolutionStatus: config ? 'not_reported_by_provider_cli' : 'unknown',
+      resolutionSource: null,
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    const resolvedModels = parsed?.stats?.models && typeof parsed.stats.models === 'object'
+      ? Object.keys(parsed.stats.models)
+      : [];
+    return {
+      content: String(parsed.response || '').trim(),
+      resolvedModels,
+      resolutionStatus: resolvedModels.length > 0
+        ? 'resolved_from_provider_stats'
+        : 'not_reported_by_provider_cli',
+      resolutionSource: resolvedModels.length > 0 ? 'stdout_json.stats.models' : null,
+    };
+  } catch (error) {
+    return {
+      content: raw,
+      resolvedModels: [],
+      resolutionStatus: 'resolution_parse_failed',
+      resolutionSource: 'stdout_json',
+      resolutionError: error.message,
+    };
+  }
+}
+
 function reviewRunId(createdAt) {
   return `EXT-${String(createdAt).replace(/[-:.]/g, '').replace(/\D/g, '').slice(0, 17)}`;
 }
@@ -289,8 +412,11 @@ function reviewSourceType(review) {
   return 'file';
 }
 
-function providerReviewConfig(model, input = {}) {
-  const config = providerCommands[model];
+function providerReviewConfig(model, input = {}, review = null) {
+  const config = resolvedProviderConfig(model, input);
+  const resolvedModels = review?.resolvedModels || [];
+  const resolutionStatus = review?.resolutionStatus
+    || (config ? 'not_reported_by_provider_cli' : 'unsupported');
   return {
     provider: model,
     source: `provider:${model}`,
@@ -298,15 +424,21 @@ function providerReviewConfig(model, input = {}) {
     command: config ? config.command : null,
     args: config ? [...config.args] : [],
     timeout_ms: input.timeoutMs || 120000,
-    exact_model: config?.exactModel || 'provider_cli_default_or_unknown',
+    requested_model: config?.requestedModel || null,
+    requested_model_type: config?.requestedModelType || 'unknown',
+    requested_effort: config?.requestedEffort || null,
+    resolved_model: resolvedModels.length === 1 ? resolvedModels[0] : null,
+    resolved_models: resolvedModels,
+    resolution_status: resolutionStatus,
+    resolution_source: review?.resolutionSource || null,
+    resolution_error: review?.resolutionError || null,
+    ignored_overrides: config?.ignoredOverrides || [],
     temperature: null,
     max_output_tokens: null,
-    reasoning_budget: config?.effort || null,
+    reasoning_budget: config?.requestedEffort || null,
     working_directory_policy: config ? 'isolated_temp_directory' : null,
     configuration_control: config
-      ? (config.exactModel
-        ? 'GPD controls provider CLI command, argument shape, prompt, timeout, and configured model/effort for this provider. Temperature and max output tokens remain provider CLI defaults unless later configured.'
-        : 'GPD controls provider CLI command, argument shape, prompt, and timeout; exact model/settings are inherited from the local provider CLI unless configured outside GPD.')
+      ? 'GPD controls provider CLI command, argument shape, prompt, timeout, requested model alias/pin when configured, and requested effort where supported. Exact resolved model is recorded only when the provider reports it.'
       : 'Unsupported provider; no model or CLI configuration was invoked.',
   };
 }
@@ -323,7 +455,7 @@ function reviewRunProvenance({
   const providerConfigs = requestedProviders.map((model) => {
     const review = reviews.find((item) => item.source === `provider:${model}`) || null;
     return {
-      ...providerReviewConfig(model, input),
+      ...providerReviewConfig(model, { ...input, paperDir }, review),
       current_runtime_match: Boolean(currentRuntime && model === currentRuntime),
       status: review ? review.status : 'not_run',
       raw_feedback_path: storedReviews.find((item) => item.reviewer === model)?.relativePath || null,
@@ -346,7 +478,7 @@ function reviewRunProvenance({
     requested_providers: requestedProviders,
     current_runtime: requestedProviders.length > 0 ? (currentRuntime || null) : null,
     timeout_ms: input.timeoutMs || 120000,
-    exact_model_policy: 'GPD records provider CLI command/args and timeout. Exact model, temperature, output tokens, and reasoning budget are provider CLI defaults unless later configured with provider-specific flags.',
+    model_policy: 'GPD defaults to provider capability aliases for best current review, allows supported per-paper pins through config.json, and records resolved models only when provider output reports them.',
     provider_configs: providerConfigs,
     reviewer_inputs: reviewerInputs,
     context_artifacts: contextArtifactProvenance(paperDir),
@@ -485,7 +617,7 @@ function runProviderCommand(commandPath, args, prompt, timeoutMs, options = {}) 
 }
 
 async function invokeProvider(model, prompt, input = {}) {
-  const config = providerCommands[model];
+  const config = resolvedProviderConfig(model, input);
   if (!config) {
     emitProgress(input, {
       reviewer: model,
@@ -573,7 +705,8 @@ async function invokeProvider(model, prompt, input = {}) {
     );
   }
 
-  const stdout = (result.stdout || '').trim();
+  const providerOutput = parseProviderStdout(model, config, result.stdout || '');
+  const stdout = providerOutput.content;
   const stderr = (result.stderr || '').trim();
   if (result.status !== 0) {
     emitProgress(input, {
@@ -605,6 +738,10 @@ async function invokeProvider(model, prompt, input = {}) {
     source: `provider:${model}`,
     content: stdout,
     status: stdout ? 'captured' : 'empty',
+    resolvedModels: providerOutput.resolvedModels,
+    resolutionStatus: providerOutput.resolutionStatus,
+    resolutionSource: providerOutput.resolutionSource,
+    resolutionError: providerOutput.resolutionError,
   };
 }
 
@@ -627,6 +764,7 @@ async function invokeProviderReviews(input = {}, paperDir) {
       } else {
         reviews.push(await invokeProvider(model, prompt, {
           ...input,
+          paperDir,
           providerCwd: providerTempDir,
         }));
       }
@@ -1508,7 +1646,7 @@ function externalReviewsMarkdown({
 
 ## Review Prompt Summary
 
-External review text was collected by \`gpd review-external\` from ${modeText}. Provider invocation, when used, sends the generated review prompt to selected installed CLIs and captures their stdout/stderr. The review-run provenance file records the requested providers, current-runtime skip setting, timeout, safe provider command/argument shape, context artifacts, raw feedback paths, and whether exact model/settings were controlled by GPD or inherited from provider CLI defaults. This command records captured feedback and creates a pending feedback plan; it does not revise the draft.
+External review text was collected by \`gpd review-external\` from ${modeText}. Provider invocation, when used, sends the generated review prompt to selected installed CLIs and captures their stdout/stderr. The review-run provenance file records the requested providers, current-runtime skip setting, timeout, safe provider command/argument shape, context artifacts, raw feedback paths, requested model aliases or pins, requested effort where supported, and resolved model evidence when the provider reports it. This command records captured feedback and creates a pending feedback plan; it does not revise the draft.
 
 ## Stored Reviewer Files
 

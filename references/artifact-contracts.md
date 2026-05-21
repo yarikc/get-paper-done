@@ -226,7 +226,8 @@ Required intent:
 - record review target and editable source
 - record context artifacts included in the review prompt
 - record requested provider names, current-runtime skip setting, timeout, isolated working-directory policy, safe provider command/argument shape, provider status, and raw feedback paths
-- explicitly state when exact model, temperature, output tokens, or reasoning budget are provider CLI defaults or unknown rather than controlled by GPD
+- record requested model alias/pin, requested effort where supported, ignored unsupported overrides, resolved model evidence when the provider reports it, and honest unknown/not-reported status otherwise
+- explicitly avoid treating provider aliases as exact model IDs
 - avoid local temp prompt paths or absolute provider binary paths
 
 ### `FEEDBACK-READER.md`

@@ -1426,7 +1426,7 @@ function testReviewExternalCollectsReviewAndStopsAtApprovalGate() {
   assert(externalReviews.includes('### HIGH — Ask is unclear'));
   assert(!externalReviews.includes(reviewDir));
   assert(externalReviews.includes('does not revise the draft'));
-  assert(externalReviews.includes('whether exact model/settings were controlled by GPD or inherited from provider CLI defaults'));
+  assert(externalReviews.includes('requested model aliases or pins'));
 
   const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
   assert.strictEqual(reviewRun.gpd_command, 'gpd review-external');
@@ -1761,7 +1761,7 @@ function testReviewExternalInvokesProviderModel() {
   assert(!externalReviews.includes('gpd-review-'));
   assert.strictEqual(
     fs.readFileSync(argsPath, 'utf8'),
-    '-p\n--model\nopus\n--effort\nhigh\n',
+    '-p\n--model\nopus\n--effort\nxhigh\n',
   );
   const providerCwd = fs.readFileSync(cwdPath, 'utf8').trim();
   assert(providerCwd.includes('gpd-provider-review-'));
@@ -1777,13 +1777,18 @@ function testReviewExternalInvokesProviderModel() {
   assert.strictEqual(reviewRun.provider_configs[0].command, 'claude');
   assert.deepStrictEqual(
     reviewRun.provider_configs[0].args,
-    ['-p', '--model', 'opus', '--effort', 'high'],
+    ['-p', '--model', 'opus', '--effort', 'xhigh'],
   );
   assert.strictEqual(reviewRun.provider_configs[0].status, 'captured');
-  assert.strictEqual(reviewRun.provider_configs[0].exact_model, 'opus');
-  assert.strictEqual(reviewRun.provider_configs[0].reasoning_budget, 'high');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model, 'opus');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model_type, 'provider_alias');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_effort, 'xhigh');
+  assert.strictEqual(reviewRun.provider_configs[0].resolved_model, null);
+  assert.deepStrictEqual(reviewRun.provider_configs[0].resolved_models, []);
+  assert.strictEqual(reviewRun.provider_configs[0].resolution_status, 'not_reported_by_provider_cli');
+  assert.strictEqual(reviewRun.provider_configs[0].reasoning_budget, 'xhigh');
   assert.strictEqual(reviewRun.provider_configs[0].working_directory_policy, 'isolated_temp_directory');
-  assert(reviewRun.provider_configs[0].configuration_control.includes('configured model/effort'));
+  assert(reviewRun.provider_configs[0].configuration_control.includes('requested model alias/pin'));
   assert(reviewRun.context_artifacts.some((item) => item.artifact === '.paper/exports/FINAL.md' && item.included));
   assert(!JSON.stringify(reviewRun).includes(providerDir));
 
@@ -1823,6 +1828,51 @@ function testReviewExternalUsesCodexProviderArgs() {
   assert(externalReviews.includes('HIGH: Codex provider saw draft context.'));
 }
 
+function testReviewExternalDoesNotInventUnsupportedProviderModelOverride() {
+  const dir = tempDir('gpd-review-external-unsupported-override-test');
+  run(['init', '--location', dir, '--slug', 'unsupported-override-review', '--title', 'Unsupported Override Review']);
+  const paperDir = path.join(dir, 'unsupported-override-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+  const configPath = path.join(meta, 'config.json');
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  config.review.external_models = {
+    codex: {
+      model: 'gpt-5',
+    },
+  };
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+  const providerDir = tempDir('gpd-codex-unsupported-override-bin');
+  const providerPath = path.join(providerDir, 'codex');
+  const argsPath = path.join(providerDir, 'codex-unsupported-override-args.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
+    'cat >/dev/null',
+    'echo "HIGH: Codex provider saw draft context."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'codex', '--current-runtime', 'none', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert.strictEqual(fs.readFileSync(argsPath, 'utf8'), 'exec\n--skip-git-repo-check\n-\n');
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model, null);
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model_type, 'provider_default');
+  assert.deepStrictEqual(reviewRun.provider_configs[0].ignored_overrides, [
+    {
+      field: 'model',
+      reason: 'provider has no GPD-controlled model flag',
+    },
+  ]);
+}
+
 function testReviewExternalUsesGeminiProviderArgs() {
   const dir = tempDir('gpd-review-external-gemini-provider-test');
   run(['init', '--location', dir, '--slug', 'gemini-provider-review', '--title', 'Gemini Provider Review']);
@@ -1840,7 +1890,7 @@ function testReviewExternalUsesGeminiProviderArgs() {
     `pwd > "${cwdPath}"`,
     'printf "provider side effect\\n" > REVIEW.md',
     'cat >/dev/null',
-    'echo "HIGH: Gemini provider saw draft context."',
+    'printf \'%s\\n\' \'{"response":"HIGH: Gemini provider saw draft context.","stats":{"models":{"gemini-3-pro-preview":{"tokens":{"total":42}}}}}\'',
     '',
   ].join('\n'));
   fs.chmodSync(providerPath, 0o755);
@@ -1853,7 +1903,7 @@ function testReviewExternalUsesGeminiProviderArgs() {
   assert(output.includes('- gemini: captured (provider:gemini)'));
   assert.strictEqual(
     fs.readFileSync(argsPath, 'utf8'),
-    '-p\n\n-m\ngemini-2.5-pro\n--output-format\ntext\n--approval-mode\nplan\n--skip-trust\n',
+    '-p\n\n-m\npro\n--output-format\njson\n--approval-mode\nplan\n--skip-trust\n',
   );
   const providerCwd = fs.readFileSync(cwdPath, 'utf8').trim();
   assert(providerCwd.includes('gpd-provider-review-'));
@@ -1864,13 +1914,143 @@ function testReviewExternalUsesGeminiProviderArgs() {
   assert(externalReviews.includes('HIGH: Gemini provider saw draft context.'));
 
   const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
-  assert.strictEqual(reviewRun.provider_configs[0].exact_model, 'gemini-2.5-pro');
-  assert.strictEqual(reviewRun.provider_configs[0].reasoning_budget, 'default-thinking');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model, 'pro');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model_type, 'provider_alias');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_effort, null);
+  assert.strictEqual(reviewRun.provider_configs[0].resolved_model, 'gemini-3-pro-preview');
+  assert.deepStrictEqual(reviewRun.provider_configs[0].resolved_models, ['gemini-3-pro-preview']);
+  assert.strictEqual(reviewRun.provider_configs[0].resolution_status, 'resolved_from_provider_stats');
+  assert.strictEqual(reviewRun.provider_configs[0].resolution_source, 'stdout_json.stats.models');
+  assert.strictEqual(reviewRun.provider_configs[0].reasoning_budget, null);
   assert.strictEqual(reviewRun.provider_configs[0].working_directory_policy, 'isolated_temp_directory');
   assert.deepStrictEqual(
     reviewRun.provider_configs[0].args,
-    ['-p', '', '-m', 'gemini-2.5-pro', '--output-format', 'text', '--approval-mode', 'plan', '--skip-trust'],
+    ['-p', '', '-m', 'pro', '--output-format', 'json', '--approval-mode', 'plan', '--skip-trust'],
   );
+}
+
+function testReviewExternalUsesPerPaperProviderModelOverride() {
+  const dir = tempDir('gpd-review-external-model-override-test');
+  run(['init', '--location', dir, '--slug', 'model-override-review', '--title', 'Model Override Review']);
+  const paperDir = path.join(dir, 'model-override-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+  const configPath = path.join(meta, 'config.json');
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  config.review.external_models = {
+    gemini: {
+      model: 'gemini-3-pro-preview',
+    },
+  };
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+  const providerDir = tempDir('gpd-gemini-override-provider-bin');
+  const providerPath = path.join(providerDir, 'gemini');
+  const argsPath = path.join(providerDir, 'gemini-override-args.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
+    'cat >/dev/null',
+    'printf \'%s\\n\' \'{"response":"HIGH: Gemini override reviewer ran.","stats":{"models":{"gemini-3-pro-preview":{"tokens":{"total":12}}}}}\'',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'gemini', '--current-runtime', 'none', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert.strictEqual(
+    fs.readFileSync(argsPath, 'utf8'),
+    '-p\n\n-m\ngemini-3-pro-preview\n--output-format\njson\n--approval-mode\nplan\n--skip-trust\n',
+  );
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model, 'gemini-3-pro-preview');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model_type, 'explicit_pin');
+  assert.strictEqual(reviewRun.provider_configs[0].resolved_model, 'gemini-3-pro-preview');
+  assert.strictEqual(reviewRun.provider_configs[0].resolution_status, 'resolved_from_provider_stats');
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'FEEDBACK-EXTERNAL.md'), 'utf8');
+  assert(externalReviews.includes('HIGH: Gemini override reviewer ran.'));
+}
+
+function testReviewExternalUsesClaudeEffortOverride() {
+  const dir = tempDir('gpd-review-external-claude-effort-override-test');
+  run(['init', '--location', dir, '--slug', 'claude-effort-override-review', '--title', 'Claude Effort Override Review']);
+  const paperDir = path.join(dir, 'claude-effort-override-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+  const configPath = path.join(meta, 'config.json');
+  const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  config.review.external_models = {
+    claude: {
+      model: 'sonnet',
+      effort: 'max',
+    },
+  };
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+
+  const providerDir = tempDir('gpd-claude-effort-override-provider-bin');
+  const providerPath = path.join(providerDir, 'claude');
+  const argsPath = path.join(providerDir, 'claude-effort-override-args.txt');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > "${argsPath}"`,
+    'cat >/dev/null',
+    'echo "HIGH: Claude override reviewer ran."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'claude', '--current-runtime', 'none', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+  assert.strictEqual(
+    fs.readFileSync(argsPath, 'utf8'),
+    '-p\n--model\nsonnet\n--effort\nmax\n',
+  );
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model, 'sonnet');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_model_type, 'provider_alias');
+  assert.strictEqual(reviewRun.provider_configs[0].requested_effort, 'max');
+  assert.deepStrictEqual(reviewRun.provider_configs[0].ignored_overrides, []);
+}
+
+function testReviewExternalRecordsMalformedGeminiJsonResolution() {
+  const dir = tempDir('gpd-review-external-malformed-gemini-json-test');
+  run(['init', '--location', dir, '--slug', 'malformed-gemini-review', '--title', 'Malformed Gemini Review']);
+  const paperDir = path.join(dir, 'malformed-gemini-review');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe ask is unclear.\n');
+
+  const providerDir = tempDir('gpd-malformed-gemini-provider-bin');
+  const providerPath = path.join(providerDir, 'gemini');
+  fs.writeFileSync(providerPath, [
+    '#!/bin/sh',
+    'cat >/dev/null',
+    'echo "HIGH: Gemini returned non-json text."',
+    '',
+  ].join('\n'));
+  fs.chmodSync(providerPath, 0o755);
+
+  const output = run(
+    ['review-external', '--paper', paperDir, '--models', 'gemini', '--current-runtime', 'none', '--timeout-ms', '5000'],
+    { env: { ...process.env, PATH: `${providerDir}${path.delimiter}${process.env.PATH}` } },
+  );
+  assert(output.includes('reviews captured: 1'));
+
+  const reviewRun = JSON.parse(fs.readFileSync(path.join(meta, 'EXTERNAL-REVIEW-RUN.json'), 'utf8'));
+  assert.strictEqual(reviewRun.provider_configs[0].resolution_status, 'resolution_parse_failed');
+  assert.strictEqual(reviewRun.provider_configs[0].resolution_source, 'stdout_json');
+  assert(reviewRun.provider_configs[0].resolution_error);
+
+  const externalReviews = fs.readFileSync(path.join(meta, 'FEEDBACK-EXTERNAL.md'), 'utf8');
+  assert(externalReviews.includes('HIGH: Gemini returned non-json text.'));
 }
 
 function testReviewExternalProviderTimeoutCleansUpProcessTree() {
@@ -2120,7 +2300,11 @@ testReviewExternalCombinesAndStoresMultipleReviewers();
 testReviewExternalKeepsProposedFixesMappedToConcerns();
 testReviewExternalInvokesProviderModel();
 testReviewExternalUsesCodexProviderArgs();
+testReviewExternalDoesNotInventUnsupportedProviderModelOverride();
 testReviewExternalUsesGeminiProviderArgs();
+testReviewExternalUsesPerPaperProviderModelOverride();
+testReviewExternalUsesClaudeEffortOverride();
+testReviewExternalRecordsMalformedGeminiJsonResolution();
 testReviewExternalProviderTimeoutCleansUpProcessTree();
 testReviewExternalSkipsCurrentRuntimeProvider();
 testReviewExternalDoesNotUseOpencodeForPapers();
