@@ -51,6 +51,27 @@ const requiredGrillDecisionKeys = [
   'non_goals',
 ];
 
+const boundaryOutOfScopePhrases = [
+  'does not define',
+  'tui',
+  'snapshot policy',
+  'feedback approval',
+  'workflow gates',
+];
+
+const personaBoundaryInScopePhrases = [
+  'finished-paper voice',
+  'author perspective',
+  'durable content preferences',
+];
+
+const audienceBoundaryInScopePhrases = [
+  'reader model',
+  'objections',
+  'proof standard',
+  'desired reader shift',
+];
+
 module.exports = {
   CURRENT_STATE_VERSION,
   allowedStrategyStatuses,
@@ -58,4 +79,7 @@ module.exports = {
   allowedUnblockActions,
   allowedGrillStatuses,
   requiredGrillDecisionKeys,
+  boundaryOutOfScopePhrases,
+  personaBoundaryInScopePhrases,
+  audienceBoundaryInScopePhrases,
 };

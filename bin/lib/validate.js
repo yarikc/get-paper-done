@@ -8,6 +8,9 @@ const {
   allowedStrategyStatuses,
   allowedStrategyBlockers,
   allowedUnblockActions,
+  boundaryOutOfScopePhrases,
+  personaBoundaryInScopePhrases,
+  audienceBoundaryInScopePhrases,
 } = require('./contracts');
 
 const jsonArtifactSchemas = {
@@ -272,6 +275,10 @@ function stripMarkdownValue(value) {
     .replace(/`/g, '')
     .replace(/\.$/, '')
     .trim();
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function parseMarkdownField(markdown, label) {
@@ -836,14 +843,8 @@ function validateDecisionRecordsContent(markdown, filePath) {
 function validatePersonaContent(markdown) {
   const boundary = sectionBetween(markdown, '## Profile Boundary', /\n##\s+/).toLowerCase();
   const requiredPhrases = [
-    'finished-paper voice',
-    'author perspective',
-    'durable content preferences',
-    'does not define',
-    'tui',
-    'snapshot policy',
-    'feedback approval',
-    'workflow gates',
+    ...personaBoundaryInScopePhrases,
+    ...boundaryOutOfScopePhrases,
   ];
   const missing = requiredPhrases.filter((phrase) => !boundary.includes(phrase));
   const issues = [];
@@ -857,15 +858,8 @@ function validatePersonaContent(markdown) {
 function validateAudienceContent(markdown) {
   const boundary = sectionBetween(markdown, '## Audience Boundary', /\n##\s+/).toLowerCase();
   const requiredPhrases = [
-    'reader model',
-    'objections',
-    'proof standard',
-    'desired reader shift',
-    'does not define',
-    'tui',
-    'snapshot policy',
-    'feedback approval',
-    'workflow gates',
+    ...audienceBoundaryInScopePhrases,
+    ...boundaryOutOfScopePhrases,
   ];
   const issues = [];
   const missing = requiredPhrases.filter((phrase) => !boundary.includes(phrase));
@@ -887,22 +881,25 @@ function removeMarkdownSections(markdown, headings) {
 
 function validateSeparationOfConcerns(markdown, artifact, allowedBoundaryHeadings = []) {
   const scoped = removeMarkdownSections(markdown, allowedBoundaryHeadings);
+  const outOfScopeChecks = boundaryOutOfScopePhrases
+    .filter((phrase) => phrase !== 'does not define')
+    .map((phrase) => ({
+      label: phrase === 'tui' ? 'interactive TUI behavior' : phrase,
+      pattern: new RegExp(`\\b${escapeRegex(phrase)}\\b`, 'i'),
+    }));
   const checks = [
+    ...outOfScopeChecks,
     {
-      label: 'interactive TUI behavior',
-      pattern: /\b(?:interactive\s+)?(?:codex\s+|claude\s+)?tui\s+behavior\b/i,
-    },
-    {
-      label: 'snapshot or restore policy',
-      pattern: /\b(?:snapshot policy|gpd snapshot|gpd restore|last_snapshot_id|restore snapshot)\b/i,
+      label: 'snapshot or restore mechanics',
+      pattern: /\b(?:gpd snapshot|gpd restore|last_snapshot_id|restore snapshot)\b/i,
     },
     {
       label: 'feedback approval mechanics',
-      pattern: /\b(?:feedback approval|feedback approval gate|FEEDBACK-PLAN approval|approved_handling)\b/i,
+      pattern: /\b(?:feedback approval gate|FEEDBACK-PLAN approval|approved_handling)\b/i,
     },
     {
       label: 'workflow gates or CLI routing',
-      pattern: /(?:\b(?:workflow gates?|gate override|suggested_next_command|gpd next)\b|\/gpd-[a-z-]+\b)/i,
+      pattern: /(?:\b(?:gate override|suggested_next_command|gpd next)\b|\/gpd-[a-z-]+\b)/i,
     },
     {
       label: 'machine state mechanics',

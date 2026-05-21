@@ -14,6 +14,7 @@ const {
   validateSchemaDefinition,
   validatePaperArtifacts,
 } = require('../bin/lib/validate');
+const { boundaryOutOfScopePhrases } = require('../bin/lib/contracts');
 
 function run(args, options = {}) {
   return execFileSync(process.execPath, [gpd, ...args], {
@@ -358,6 +359,25 @@ function testAudienceRejectsWorkflowMechanicsOutsideBoundary() {
   const result = runFail(['validate-artifact', '--path', badAudience]);
   assert.strictEqual(result.status, 1);
   assert(result.stdout.includes('AUDIENCE.md: Separation of concerns violation: machine state mechanics belongs in workflows, commands, CLI, or artifact contracts, not AUDIENCE.md'));
+}
+
+function testBoundaryPhraseConstantsDrivePersonaAndAudienceValidation() {
+  const dir = tempDir('gpd-boundary-constant-test');
+  const personaPath = path.join(dir, 'PERSONA.md');
+  const audiencePath = path.join(dir, 'AUDIENCE.md');
+  fs.writeFileSync(personaPath, fs.readFileSync(path.join(repoRoot, 'templates', 'persona.md'), 'utf8'));
+  fs.writeFileSync(audiencePath, fs.readFileSync(path.join(repoRoot, 'templates', 'audience.md'), 'utf8'));
+
+  boundaryOutOfScopePhrases.push('mcp policy');
+  try {
+    const personaIssues = validateArtifact(personaPath);
+    const audienceIssues = validateArtifact(audiencePath);
+
+    assert(personaIssues.some((item) => item.issue.includes('PERSONA.md: Profile Boundary must separate')));
+    assert(audienceIssues.some((item) => item.issue.includes('AUDIENCE.md: Audience Boundary must separate')));
+  } finally {
+    boundaryOutOfScopePhrases.pop();
+  }
 }
 
 function testReusableProfilesAndAudiencesDeclareBoundaries() {
@@ -760,6 +780,7 @@ testPersonaBoundaryFailureIsActionable();
 testPersonaRejectsWorkflowMechanicsOutsideBoundary();
 testAudienceBoundaryFailureIsActionable();
 testAudienceRejectsWorkflowMechanicsOutsideBoundary();
+testBoundaryPhraseConstantsDrivePersonaAndAudienceValidation();
 testReusableProfilesAndAudiencesDeclareBoundaries();
 testPaperContextRejectsPlaceholderContent();
 testDecisionsRejectPlaceholderContent();
