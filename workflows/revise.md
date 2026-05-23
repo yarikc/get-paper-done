@@ -25,7 +25,7 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 
 Read the current draft and review. If `.paper/FEEDBACK-READER.md` exists, read it as input to feedback handling, not as direct edit authority. If `.paper/FEEDBACK-PLAN.md` exists, read it before proposing or applying changes.
 
-If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to decide the concern queue. The `Recommendation` field is the generated default; `User Decision` and `User Constraint` are the authority for revision. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
+If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to decide the concern queue. The `Suggested handling` field is the generated default; `User Decision` and `User Constraint` are the authority for revision. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
 
 If `.paper/STRATEGY.md` has status `Revise Before Drafting` or `No-Go`, stop unless the user explicitly overrides the strategy block. Cite the primary blocker from `Strategy Blockers` when present.
 
@@ -91,7 +91,7 @@ Feedback-plan boundary:
 - Apply only concerns whose `User Decision` is `approve` or `modify`.
 - Respect `User Constraint` for every `modify` decision.
 - Do not apply concerns whose `User Decision` is `defer` or `reject`.
-- Treat `Recommendation` as a generated default, not the user's decision.
+- Treat `Suggested handling` as a generated default, not the user's decision.
 - Treat `Proposed edits` as implementation options under the concern, not mandatory line-by-line instructions.
 
 Revision boundary:
@@ -123,6 +123,12 @@ Edit in layers when running an editorial mode:
 Revise `.paper/DRAFT.md` in place only when feedback is approved or the user explicitly requested an edit mode. Preserve any strong material unless it conflicts with the approved review, brief, strategy, evidence, or audience profile.
 
 Do not edit `.paper/exports/FINAL.md` as the durable source. If the user commented on `FINAL.md`, use those comments as feedback, apply approved changes to `.paper/DRAFT.md`, then route to `/gpd-export` so `FINAL.md` is regenerated.
+
+After a substantive revision, recommend user review of the regenerated
+`.paper/exports/FINAL.md` before external review. The user's read confirms that
+the paper still has the intended thesis, voice, posture, and calibration.
+External review should test the accepted version, not steer an unapproved
+revision.
 
 Include a short change log for any draft modification:
 

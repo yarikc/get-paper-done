@@ -186,7 +186,13 @@ When GPD exports the paper, review this file:
 If you add comments to it, run:
 
 ```bash
-gpd feedback collect --paper ~/papers/my-paper
+gpd feedback
+```
+
+Run that from the paper directory. If you are somewhere else, pass the paper:
+
+```bash
+gpd feedback --paper ~/papers/my-paper
 ```
 
 Use visible comment markers while reading:
@@ -198,11 +204,16 @@ Use visible comment markers while reading:
 //no: reject or disagree with this claim/framing
 ```
 
-`gpd feedback collect` captures reader comments into feedback artifacts and
-leaves the comments in place. After confirming the extraction is complete, use
-`gpd feedback clean` to remove them from the reviewed Markdown. `/gpd-review`
-evaluates the paper's quality, audience fit, evidence, and ask clarity. They
-are related, but they are not the same command.
+`gpd feedback` captures reader comments into feedback artifacts, adds a
+first-pass interpretation, and leaves the comments in place. With 8 or fewer
+comments, the plan stays itemized. With more than 8 comments, GPD groups the
+comments into theme-level decisions by default so review stays manageable.
+After confirming the extraction is complete, use `gpd feedback clean` to remove
+them from the reviewed Markdown. `/gpd-feedback` is the interactive decision
+loop: it shows the pending concern or theme, explains whether the agent agrees,
+disagrees, or needs clarification, and asks what to do. `/gpd-review` evaluates
+the paper's quality, audience fit, evidence, and ask clarity. They are related,
+but they are not the same command.
 
 Then approve the feedback handling:
 
@@ -301,6 +312,7 @@ From the paper directory:
 ```bash
 gpd next
 gpd status
+gpd status --full
 gpd validate
 gpd validate --semantic
 ```
@@ -311,6 +323,12 @@ Inside Claude or Codex:
 /gpd-status
 ```
 
-Use `gpd next` for the compact answer. Use `gpd status` when you want the full
-artifact list. Use `gpd validate --semantic` before treating a paper as
-example-quality, publication-ready, or ready for handoff.
+Use `gpd next` for only the next action. Use `gpd status` for a short narrative:
+current state, review rating, export path, recent revision summary, recommended
+review path, restore command, and what to do next. Use `gpd status --full` only
+when you need the full artifact list. When `REVIEW.md` includes an estimated
+quality rating, both commands surface it as `review rating` so you can see the
+latest quality signal without opening the review file. Status and export output
+also say whether the next review should be your own read or external review, and
+why. Use `gpd validate --semantic` before treating a paper as example-quality,
+publication-ready, or ready for handoff.

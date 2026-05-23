@@ -350,6 +350,8 @@ function printSnapshot(result) {
   console.log(`reason: ${result.reason}`);
   console.log(`copied: ${result.copied.length > 0 ? result.copied.join(', ') : 'none'}`);
   console.log(`revision log: ${result.revisionLogPath}`);
+  console.log(`restore: gpd restore --paper ${result.paperDir} --snapshot ${result.versionId}`);
+  console.log('next: continue the planned work; run gpd status if you are unsure what should happen next.');
 }
 
 function printRestore(result) {
@@ -357,6 +359,7 @@ function printRestore(result) {
   console.log(`restored: ${result.restoredSnapshotId}`);
   console.log(`safety snapshot: ${result.safetySnapshot.relativeSnapshotPath}`);
   console.log(`files restored: ${result.restored.length > 0 ? result.restored.join(', ') : 'none'}`);
+  console.log('next: run gpd status to confirm the restored paper state before making more changes.');
 }
 
 module.exports = {

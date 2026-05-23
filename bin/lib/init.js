@@ -13,6 +13,7 @@ const {
 } = require('./common');
 const {
   defaultMachineState,
+  status,
   writeStateMarkdown,
   writeStateJson,
 } = require('./state');
@@ -71,7 +72,13 @@ function initPaper(input = {}) {
     dryRun,
   );
 
+  const current = dryRun ? null : status({ paper: paperDir });
   console.log(`${dryRun ? 'Dry run complete' : 'Initialized paper'}: ${paperDir}`);
+  console.log('created: .paper workspace with PROJECT, PERSONA, AUDIENCE, BRIEF, STRATEGY, STATE, and config');
+  console.log('next: /gpd-grill');
+  console.log('why: new papers must resolve thesis, reader, terms, proof standard, scope, and non-goals before briefing or drafting.');
+  console.log(`from terminal: gpd status --paper ${paperDir}`);
+  if (current) console.log(`user action: ${current.userAction}`);
   return { paperDir };
 }
 

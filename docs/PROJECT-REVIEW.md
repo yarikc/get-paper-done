@@ -1,7 +1,7 @@
 # Project Review
 
-Review date: 2026-05-19
-Last reviewed: 2026-05-19
+Review date: 2026-05-23
+Last reviewed: 2026-05-23
 
 This file is the current project-health snapshot. The forward plan lives in [../ROADMAP.md](../ROADMAP.md).
 
@@ -28,7 +28,7 @@ The installable tool is now at the 9/10 private-repo threshold, but still not fi
 - The project boundary is clear: framework package, installed runtime, and paper workspace are separate.
 - `.paper/` gives the workflow durable memory without relying on chat history.
 - `STATE.json` as the machine-readable source of truth is the right direction, and it now includes mandatory grill completion state.
-- `gpd next`, `gpd status`, `gpd validate`, and `gpd validate-artifact` give useful visibility into the next action, workspace health, and artifact health.
+- `gpd next`, `gpd status`, `gpd validate`, and `gpd validate-artifact` give useful visibility into the next action, workspace health, artifact health, review rating, latest snapshot restore path, and whether the next review should be user review or external review.
 - Artifact contracts now protect key JSON and Markdown outputs, including the fixed seven-dimension audience scorecard, non-empty grill companion artifacts, dated paper decision records, and canonical-term consistency between `PAPER-CONTEXT.md` and `DRAFT.md` once a paper has reached review/export.
 - `FEEDBACK-READER.md` now captures human/model reader feedback in a fixed five-signal structure before it becomes revision work.
 - `gpd revise` now creates the pre-revision snapshot, records the active revision snapshot in state, and prints the restore command before controlled draft changes.
@@ -50,7 +50,7 @@ The installable tool is now at the 9/10 private-repo threshold, but still not fi
 - `gpd status` now recognizes `.paper/exports/FINAL.md`, detects stale exports, and routes completed exports to `/gpd-status`.
 - `gpd export` provides a deterministic CLI path for internal Markdown export after a `Ready` review verdict.
 - `gpd review-external` provides a deterministic CLI path for capturing external review text from files/stdin or selected installed provider CLIs, stores reviewer-specific captures under `.paper/feedback-external/`, sends reviewers full workspace context, writes `EXTERNAL-REVIEW-RUN.json`, writes a combined deduplicated `FEEDBACK-EXTERNAL.md` and concern-first `FEEDBACK-PLAN.md`, skips the current runtime's own provider when identified, then routes to the pending approval gate.
-- `/gpd-feedback` is now the user-facing approval loop for feedback plans: it shows one concern at a time, asks for `approve`, `modify`, `defer`, or `reject`, and records the decision. `gpd feedback-plan list/review/decide` remains available as the lower-level CLI surface for agents, tests, and scripts.
+- `/gpd-feedback` is now the user-facing approval loop for feedback plans: it shows one pending concern or aggregate theme, asks for `approve`, `modify`, `defer`, `reject`, or `answered_no_action`, and records the decision. `gpd feedback-plan list/review/decide` remains available as the lower-level CLI surface for agents, tests, and scripts.
 - Claude, Codex, and Gemini provider paths are calibrated on synthetic and live private-paper trials. Opencode is intentionally unsupported for paper review.
 - `gpd validate-artifact` now recognizes `FEEDBACK-EXTERNAL.md`, so the new review collector has a matching structural contract.
 - `gpd status` now treats pending feedback-plan approval as a user gate before stale mtime refresh rules, as long as setup exists and strategy is not blocked; feedback-plan status is enum-backed and matched exactly to avoid typo bypasses or substring false positives.
@@ -84,6 +84,7 @@ The installable tool is now at the 9/10 private-repo threshold, but still not fi
 - `gpd import` now detects unverified source-reference candidates from Markdown, text, and `.docx` material, records them in `.paper/IMPORT.md`, and explicitly leaves verification to `/gpd-research` or `/gpd-fact-check`.
 - `gpd import` now writes a `Version / Source Index` so copied files are grouped by likely role, ranking signal, modified time, downstream stage, and rationale without generating downstream artifacts.
 - The README now acts as a product front door with a short product story and workflow loop, while `docs/START-HERE.md` gives a first-paper path through examples, install, setup, `gpd next`, `/gpd-status`, workflow commands, feedback, and import.
+- The CLI output is now more usable inside Claude/Codex TUI sessions: `gpd init`, `gpd import`, `gpd status`, `gpd next`, `gpd export`, `gpd revise`, `gpd feedback`, `gpd review-external`, `gpd snapshot`, and `gpd restore` all explain what happened, what is next, and when the next review should be user review versus external review.
 
 ## Main Risks
 

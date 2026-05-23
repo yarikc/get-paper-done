@@ -580,7 +580,7 @@ function validateUnresolvedExportComments(paperDir) {
     'semantic.export_unresolved_review_comments',
     'HIGH',
     'exports/FINAL.md',
-    `contains ${comments.length} unresolved inline review comment(s); run gpd feedback collect, then gpd feedback clean before treating the export as final`,
+    `contains ${comments.length} unresolved inline review comment(s); run gpd feedback, then gpd feedback clean before treating the export as final`,
   )];
 }
 

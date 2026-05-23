@@ -6,13 +6,13 @@
 
 ## Summary
 
-[Short summary of the feedback and recommended path. State that recommendations are defaults and the user must record a decision before revision.]
+[Short summary of the feedback and suggested path. State that suggested handling values are defaults and the user must record a decision before revision.]
 
 ## Decision View
 
 Review each concern. Use `approve`, `modify`, `defer`, `reject`, or `answered_no_action`.
 
-| # | Concern | Type | Severity | Recommendation | User Decision |
+| # | Concern | Type | Severity | Suggested handling | User Decision |
 |---|---------|------|----------|----------------|---------------|
 | 1 | [Concern title] | Concern | HIGH / MEDIUM / LOW | approve / modify / defer / reject / answer / preserve | pending |
 
@@ -23,7 +23,7 @@ Review each concern. Use `approve`, `modify`, `defer`, `reject`, or `answered_no
 - **Type:** Concern
 - **Severity:** [HIGH / MEDIUM / LOW / TOOLING / SUGGESTION]
 - **Source(s):** [Reviewer]
-- **Recommendation:** [approve / modify / defer / reject / answer / preserve]
+- **Suggested handling:** [approve / modify / defer / reject / answer / preserve]
 - **Why this matters:** [Why this affects paper quality, decision usefulness, evidence, or audience trust]
 - **What improves if addressed:** [What gets better if the concern is handled]
 - **Risk if handled badly:** [What to avoid while applying the fix]
@@ -40,11 +40,11 @@ Review each concern. Use `approve`, `modify`, `defer`, `reject`, or `answered_no
 
 Use this section when `REVIEW.md` includes a Below-Target Improvement Gate or the user challenges a rating below the target bar.
 
-| # | Issue | Target Bar Impact | Recommendation | Reason |
+| # | Issue | Target Bar Impact | Suggested handling | Reason |
 |---|-------|-------------------|----------------|--------|
 | 1 | [Issue keeping paper below target] | [Why it affects quality/rating] | [approve / modify / defer / reject / answer / preserve / not applicable] | [Reason] |
 
-If `Recommendation` is `approve` or `modify`, revise before export after the user records a matching decision. If `Recommendation` is `defer`, state why deferral is compatible with this paper's purpose, audience, risk, and mode.
+If `Suggested handling` is `approve` or `modify`, revise before export after the user records a matching decision. If `Suggested handling` is `defer`, state why deferral is compatible with this paper's purpose, audience, risk, and mode.
 
 ## Approved Or Modified
 

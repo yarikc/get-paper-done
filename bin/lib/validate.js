@@ -588,7 +588,6 @@ function validateFeedbackPlanSections(markdown) {
     'Type',
     'Severity',
     'Source(s)',
-    'Recommendation',
     'Why this matters',
     'What improves if addressed',
     'Risk if handled badly',
@@ -604,6 +603,9 @@ function validateFeedbackPlanSections(markdown) {
     if (!pattern.test(section)) {
       issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', `Proposed Handling missing field "${field}"`));
     }
+  }
+  if (!/\*\*(?:Suggested handling|Recommendation):\*\*/.test(section)) {
+    issues.push(issue('HIGH', 'FEEDBACK-PLAN.md', 'Proposed Handling missing field "Suggested handling"'));
   }
 
   return issues;
@@ -951,6 +953,15 @@ function validateMarkdownArtifact(filePath) {
   const tables = parseTables(markdown);
   for (const columns of contract.tables) {
     if (!hasTableWithColumns(tables, columns)) {
+      if (
+        artifact === 'FEEDBACK-PLAN.md'
+        && columns.includes('Recommendation')
+        && hasTableWithColumns(tables, columns.map((column) => (
+          column === 'Recommendation' ? 'Suggested handling' : column
+        )))
+      ) {
+        continue;
+      }
       issues.push(issue('HIGH', artifact, `Missing table with columns: ${columns.join(', ')}`));
     }
   }

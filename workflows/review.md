@@ -126,8 +126,8 @@ Capture the feedback as evidence for review planning, not as permission to rewri
 
 ```text
 user reviews .paper/exports/FINAL.md
-  -> gpd feedback collect captures comments into FEEDBACK-READER.md and FEEDBACK-PLAN.md
-  -> /gpd-feedback approves, modifies, defers, or rejects captured concerns
+  -> gpd feedback captures comments into FEEDBACK-READER.md and FEEDBACK-PLAN.md
+  -> /gpd-feedback interprets each concern or theme, then approves, modifies, defers, or rejects it
   -> /gpd-revise edits .paper/DRAFT.md
   -> /gpd-export regenerates .paper/exports/FINAL.md
 ```
@@ -139,7 +139,7 @@ Inline comment markers are visible and code-comment-like:
 - `//qq:` question or uncertainty
 - `//no:` reject or disagree with this claim/framing
 
-Severity suffixes are allowed: `//todo!:` for high severity and `//todo?:` for low severity. Colon is required. The parser ignores fenced code blocks and URLs. `gpd feedback collect` is non-destructive by default: it preserves the commented paper and leaves comments in place. Use `gpd feedback clean` only after the user confirms extraction was complete.
+Severity suffixes are allowed: `//todo!:` for high severity and `//todo?:` for low severity. Colon is required. The parser ignores fenced code blocks and URLs. `gpd feedback` is non-destructive by default: it preserves the commented paper and leaves comments in place. With 8 or fewer comments, the feedback plan stays itemized. With more than 8 comments, the feedback plan aggregates raw comments into theme-level decisions by default so the user does not have to approve every raw comment. Use `gpd feedback --itemized` to force one item per comment or `gpd feedback --aggregate` to force theme grouping. Use `gpd feedback clean` only after the user confirms extraction was complete.
 
 ## 2. External Review Flag Detection
 
@@ -295,7 +295,7 @@ The plan is a concern-first approval queue. For each meaningful concern, record:
 - `Type`: Concern, Review Note, Unmapped Suggestion, or Tooling Issue
 - `Severity`: HIGH, MEDIUM, LOW, or INFO
 - `Source(s)`: reviewer, reader, or artifact that raised it
-- `Recommendation`: generated default, using `approve`, `modify`, `defer`, or `reject`
+- `Suggested handling`: generated default, using `approve`, `modify`, `defer`, or `reject`
 - `Why this matters`: why the concern affects paper quality, trust, decision usefulness, or audience fit
 - `What improves if addressed`: the expected quality gain
 - `Risk if handled badly`: how revision could dilute, genericize, overclaim, or distort the paper
@@ -311,7 +311,7 @@ Do not edit `.paper/DRAFT.md` during review. Review proposes action; revision ap
 
 ## 7. Approval Gate
 
-Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` concern queue and ask the user how to proceed. Use `gpd feedback-plan list` for a compact view and `gpd feedback-plan review --item N` for one concern at a time. Treat `Recommendation` as the generated default. Revision must honor `User Decision` and `User Constraint`.
+Before acting on feedback, present the `.paper/FEEDBACK-PLAN.md` concern queue and ask the user how to proceed. Use `gpd feedback-plan list` for a compact view and `gpd feedback-plan review --item N` for one concern at a time. Treat `Suggested handling` as the generated default, not the user's decision. Revision must honor `User Decision` and `User Constraint`.
 
 Use AskUserQuestion when available:
 

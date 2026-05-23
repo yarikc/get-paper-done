@@ -24,6 +24,14 @@ function fieldValue(block, field) {
   return match ? match[1].trim() : '';
 }
 
+function fieldValueAny(block, fields) {
+  for (const field of fields) {
+    const value = fieldValue(block, field);
+    if (value) return value;
+  }
+  return '';
+}
+
 function fieldList(block, field) {
   const escaped = field.replace(/[()]/g, '\\$&');
   const pattern = new RegExp(`^- \\*\\*${escaped}:\\*\\*\\s*$`, 'im');
@@ -62,7 +70,9 @@ function parseFeedbackPlanMarkdown(markdown) {
       title: match[3].trim(),
       severity: fieldValue(block, 'Severity'),
       sources: fieldValue(block, 'Source(s)'),
-      recommendation: fieldValue(block, 'Recommendation'),
+      recommendation: fieldValueAny(block, ['Suggested handling', 'Recommendation']),
+      initialAssessment: fieldValue(block, 'Initial assessment'),
+      clarificationNeeded: fieldValue(block, 'Clarification needed'),
       why: fieldValue(block, 'Why this matters'),
       improves: fieldValue(block, 'What improves if addressed'),
       risk: fieldValue(block, 'Risk if handled badly'),
@@ -218,7 +228,7 @@ function printFeedbackPlanList(result) {
   }
   console.log('concerns:');
   for (const concern of result.concerns) {
-    console.log(`- ${concern.index}. ${concern.severity || '-'} ${concern.recommendation || '-'} [${concern.userDecision || 'pending'}] ${concern.title}`);
+    console.log(`- ${concern.index}. ${concern.severity || '-'} suggested=${concern.recommendation || '-'} decision=${concern.userDecision || 'pending'} ${concern.title}`);
   }
 }
 
@@ -235,10 +245,16 @@ function printFeedbackPlanReview(result) {
   console.log(`Concern ${concern.index} of ${result.total}`);
   console.log(`Type: ${concern.type}`);
   console.log(`Severity: ${concern.severity || '-'}`);
-  console.log(`Recommendation: ${concern.recommendation || '-'}`);
+  console.log(`Suggested handling, not your decision: ${concern.recommendation || '-'}`);
   console.log(`Sources: ${concern.sources || '-'}`);
   console.log('');
   console.log(concern.title);
+  console.log('');
+  console.log('Initial assessment:');
+  console.log(concern.initialAssessment || '-');
+  console.log('');
+  console.log('Clarification needed:');
+  console.log(concern.clarificationNeeded || '-');
   console.log('');
   console.log('Why this matters:');
   console.log(concern.why || '-');
@@ -269,7 +285,7 @@ function printFeedbackPlanReview(result) {
   console.log(`Current decision: ${concern.userDecision || 'pending'}`);
   console.log(`Current constraint: ${concern.userConstraint || 'none'}`);
   console.log('');
-  console.log('Decision options:');
+  console.log('Your decision options:');
   console.log('- approve: accept the proposed handling as written');
   console.log('- modify: accept the concern with an added constraint or instruction');
   console.log('- defer: keep the concern for later and do not apply it in this revision');

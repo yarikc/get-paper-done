@@ -1,10 +1,17 @@
 <purpose>
-Report the paper dashboard inside Claude/Codex: current state, artifact completeness, blockers, suggested next command, why that command is next, and context-clearing guidance. This command is intentionally read-only and should not execute the next stage.
+Report the paper dashboard inside Claude/Codex: current state, blockers, suggested next command, why that command is next, recent completion/revision summary when available, restore path when available, and context-clearing guidance. This command is intentionally read-only and should not execute the next stage.
 </purpose>
 
 <process>
 
 If `--json` is present, return the same status fields in a compact JSON object when the active runtime supports structured output. If structured output is not available, keep the normal Markdown format and include a note that `--json` could not be honored by the slash-command runtime.
+
+Default human output should be concise. Show the paper path, current state,
+review rating if available, export path if available, recent revision summary if
+available, recommended review path with rationale, latest restore command if
+available, suggested next command, and human action hint. Show the full artifact
+inventory only when the user requests `--full`, when validation is running, or
+when diagnosing a missing-artifact problem.
 
 ## 1. Locate Paper Workspace
 
@@ -44,7 +51,7 @@ Do not read `.paper/sources/` by default. Raw source material can be large and s
 
 ## 2. Artifact Health Check
 
-For each artifact, report:
+For `--full` or validation output, report each artifact:
 
 - Exists / Missing
 - Empty / Non-empty
@@ -140,10 +147,18 @@ Treat `STATE.json` `suggested_next_command` as a useful saved recommendation, no
 Users should not need to remember the whole workflow. Always include a short "what you do now" line after the next command:
 
 - If next is `/gpd-export`: "Run export, then review `.paper/exports/FINAL.md`."
-- If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add inline comments there, run `gpd feedback collect`, then `/gpd-feedback`."
-- If next is `/gpd-review` and `exports/FINAL.md` exists: "Review evaluates paper quality. If you added reader comments to the export, run `gpd feedback collect` first."
+- If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add inline comments there, run `gpd feedback` from the paper directory, then `/gpd-feedback`."
+- If next is `/gpd-review` and `exports/FINAL.md` exists: "Review evaluates paper quality. If you added reader comments to the export, run `gpd feedback` first."
 - If next is `/gpd-revise`: "Run `gpd revise` first if no active snapshot exists. Revision edits `.paper/DRAFT.md`; export regenerates `.paper/exports/FINAL.md`."
-- Otherwise: "Run the recommended command, then run `/gpd-status` again."
+- Otherwise: "Run the recommended command. After it finishes, run `gpd next` in the terminal or `/gpd-status` in Claude/Codex."
+
+Also include a review recommendation when the paper is near or after export:
+
+- If feedback exists but is not planned or approved, recommend processing feedback before another review.
+- If the feedback plan is approved but not applied, recommend revision before another review.
+- If the export is stale, recommend export before review.
+- If the export is current after substantive revision, recommend user review first. Explain that the user must confirm intent, voice, posture, and calibration before external review amplifies or redirects the paper.
+- If the user accepts the current export, external review is the next independent check.
 
 ## 6. Context Guidance
 
@@ -179,6 +194,9 @@ Return:
 - **What you do now:** [one sentence from the Human Action Hint section]
 
 ## Artifact Health
+
+Include this table only for `--full`, validation output, or a focused artifact
+health question.
 
 | Artifact | Status | Notes |
 |----------|--------|-------|

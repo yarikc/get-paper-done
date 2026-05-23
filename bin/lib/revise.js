@@ -83,6 +83,8 @@ function printRevisionPreparation(result) {
   console.log(`trigger: ${result.trigger}`);
   console.log(`next: ${result.next}`);
   console.log(`restore: ${result.restoreCommand}`);
+  console.log('after revision: run /gpd-export, then read .paper/exports/FINAL.md before external review.');
+  console.log('why: user review confirms intent, voice, and calibration after substantive edits; external review should test the accepted version, not steer an unapproved one.');
 }
 
 module.exports = {

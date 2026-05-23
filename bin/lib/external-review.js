@@ -1908,6 +1908,9 @@ function printExternalReviewResult(result) {
   console.log(`empty reviews: ${result.reviewsEmpty}`);
   console.log(`review issues: ${result.reviewsFailed}`);
   console.log(`feedback items: ${result.feedbackItems}`);
+  if (result.reviewsCaptured === 0 && result.feedbackItems === 0) {
+    console.log('decision needed: no external review input was captured; /gpd-feedback lets you continue without external review or provide review input and rerun.');
+  }
   if (result.rawFeedbackItems !== undefined && result.rawFeedbackItems !== result.feedbackItems) {
     console.log(`raw feedback items: ${result.rawFeedbackItems}`);
   }

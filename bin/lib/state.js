@@ -293,12 +293,184 @@ function feedbackPlanPending(state) {
   return status ? status.trim().toLowerCase() === 'pending user approval' : false;
 }
 
+function feedbackPlanApprovedForRevision(state) {
+  const feedbackState = state.machineState && state.machineState.feedback
+    ? String(state.machineState.feedback.feedback_plan_status || '').trim().toLowerCase()
+    : '';
+  if (feedbackState === 'applied') return false;
+  const markdown = artifactContent(state.paperDir, 'FEEDBACK-PLAN.md');
+  const statusValue = parseMarkdownField(markdown, 'Status');
+  if (!statusValue || statusValue.trim().toLowerCase() !== 'approved by user') return false;
+  if (!state.artifacts['DRAFT.md']) return true;
+  return artifactNewerThan(state.paperDir, 'FEEDBACK-PLAN.md', 'DRAFT.md');
+}
+
 function factCheckRecommendedAction(state) {
   return parseHeadingValue(artifactContent(state.paperDir, 'FACT-CHECK.md'), 'Recommended Next Action');
 }
 
 function reviewVerdict(state) {
   return parseHeadingValue(artifactContent(state.paperDir, 'REVIEW.md'), 'Verdict');
+}
+
+function reviewRating(state) {
+  const review = artifactContent(state.paperDir, 'REVIEW.md');
+  if (!review) return '';
+  const patterns = [
+    /Estimated quality:\s*([^\n]+)/gi,
+    /\*\*Current rating if given:\*\*\s*([^\n]+)/gi,
+    /Current rating if given:\s*([^\n]+)/gi,
+    /Current rating:\s*([^\n]+)/gi,
+  ];
+  const candidates = [];
+  for (const pattern of patterns) {
+    for (const match of review.matchAll(pattern)) {
+      candidates.push({
+        index: match.index || 0,
+        value: match[1],
+      });
+    }
+  }
+  candidates.sort((a, b) => b.index - a.index);
+  for (const candidate of candidates) {
+    const value = stripMarkdownValue(candidate.value).replace(/\.$/, '').trim();
+    if (!value || /^not stated$/i.test(value) || /^\[/.test(value)) continue;
+    return value.length > 160 ? `${value.slice(0, 157)}...` : value;
+  }
+  return '';
+}
+
+function finalExportPath(state) {
+  return state.artifacts['exports/FINAL.md']
+    ? path.join(state.paperDir, '.paper', 'exports', 'FINAL.md')
+    : '';
+}
+
+function truncateLine(value, maxLength = 150) {
+  const compact = String(value || '').replace(/\s+/g, ' ').trim();
+  return compact.length > maxLength ? `${compact.slice(0, maxLength - 3)}...` : compact;
+}
+
+function parseMarkdownTableRows(section) {
+  const rows = [];
+  for (const line of section.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('|') || !trimmed.endsWith('|')) continue;
+    if (/^\|\s*-+\s*\|/.test(trimmed)) continue;
+    const cells = trimmed
+      .slice(1, -1)
+      .split('|')
+      .map((cell) => stripMarkdownValue(cell));
+    if (cells.length >= 2) rows.push(cells);
+  }
+  return rows;
+}
+
+function revisionSummary(state) {
+  const revisionCheck = artifactContent(state.paperDir, 'REVISION-CHECK.md');
+  const section = sectionBetween(revisionCheck, '## Change Impact');
+  const rows = parseMarkdownTableRows(section);
+  if (rows.length <= 1) return [];
+  const [, ...bodyRows] = rows;
+  const summaries = [];
+  for (const cells of [...bodyRows].reverse()) {
+    const [change, intendedImprovement, , result] = cells;
+    if (!change || /^snapshot$/i.test(change) || /body h1/i.test(change)) continue;
+    if (result && !/(improved|accepted|passed|complete|yes|preserved)/i.test(result)) continue;
+    const summary = intendedImprovement
+      ? `${truncateLine(change, 70)}: ${truncateLine(intendedImprovement, 110)}`
+      : truncateLine(change);
+    if (!summaries.includes(summary)) summaries.push(summary);
+    if (summaries.length >= 5) break;
+  }
+  return summaries.reverse();
+}
+
+function reviewCompletionNote(state) {
+  const review = artifactContent(state.paperDir, 'REVIEW.md');
+  if (!review) return '';
+  if (/validation with semantic gates passed/i.test(review) && /medium[- ]density warnings/i.test(review)) {
+    return 'semantic validation passed; accepted medium list-density warnings are documented in REVIEW.md';
+  }
+  if (/validation with semantic gates passed/i.test(review)) {
+    return 'semantic validation passed according to REVIEW.md';
+  }
+  return '';
+}
+
+function reviewRecommendation(state) {
+  const a = state.artifacts || {};
+  const hasReviewSurface = Boolean(
+    a['DRAFT.md']
+    || a['REVIEW.md']
+    || a['FEEDBACK-READER.md']
+    || a['FEEDBACK-EXTERNAL.md']
+    || a['FEEDBACK-PLAN.md']
+    || a['exports/FINAL.md'],
+  );
+  if (!hasReviewSurface) return null;
+  if (a['FEEDBACK-READER.md'] && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))) {
+    return {
+      recommendation: 'process reader feedback before more review',
+      why: 'Reader comments already exist and need to be captured into an approved feedback plan before another review pass creates more noise.',
+      after: 'Run gpd feedback if comments are still inline, then /gpd-feedback.',
+    };
+  }
+  if (feedbackPlanPending(state)) {
+    return {
+      recommendation: 'approve feedback plan before more review',
+      why: 'A feedback plan is pending user approval; revising or running external review before that decision would mix unresolved concerns with new feedback.',
+      after: 'Run /gpd-feedback.',
+    };
+  }
+  if (feedbackPlanApprovedForRevision(state)) {
+    return {
+      recommendation: 'revise before more review',
+      why: 'The feedback plan is approved but not yet reflected in the draft, so another review would assess a stale version.',
+      after: 'Run /gpd-revise, then /gpd-export.',
+    };
+  }
+  if (!a['exports/FINAL.md'] && state.next !== '/gpd-export') return null;
+  if (!a['exports/FINAL.md']) {
+    return {
+      recommendation: 'finish export before reader review',
+      why: 'The user should review the exported reading copy, not the editable draft, once the paper is ready.',
+      after: 'Run the recommended next stage until .paper/exports/FINAL.md exists.',
+    };
+  }
+  if (state.next === '/gpd-export') {
+    return {
+      recommendation: 'export before review',
+      why: 'The draft, fact-check, or review changed after the current export, so the visible reading copy is stale.',
+      after: 'Run /gpd-export, then review .paper/exports/FINAL.md.',
+    };
+  }
+  if (state.next !== '/gpd-status') {
+    return {
+      recommendation: 'complete the routed stage before review',
+      why: 'The workspace still has an upstream required action; reviewing now would test a known-incomplete paper state.',
+      after: `Run ${state.next}.`,
+    };
+  }
+  if (Array.isArray(state.revisionSummary) && state.revisionSummary.length > 0) {
+    return {
+      recommendation: 'user review first',
+      why: 'The latest export includes substantive revisions. User review should confirm intent, voice, posture, and political calibration before external review amplifies or redirects the paper.',
+      after: 'If the user review passes, run external review. If not, add inline comments to FINAL.md and run gpd feedback.',
+    };
+  }
+  if (!a['FEEDBACK-EXTERNAL.md'] || artifactNewerThan(state.paperDir, 'exports/FINAL.md', 'FEEDBACK-EXTERNAL.md')) {
+    return {
+      recommendation: 'user review first, then external review',
+      why: 'External review is most useful after the user confirms the current export says the intended thing in the intended voice; the external review is missing or older than the export.',
+      after: 'If the user review passes, run gpd review-external with the desired providers.',
+    };
+  }
+  return {
+    recommendation: 'user review before peer sharing',
+    why: 'The export is current and external feedback exists, so the next judgment is whether the user accepts the paper for trusted peer circulation.',
+    after: 'If accepted, share the exported FINAL.md; if not, add inline comments and run gpd feedback.',
+  };
 }
 
 function reviewBelowTargetRequiresRevision(state) {
@@ -314,9 +486,39 @@ function versioningState(state) {
     : {};
 }
 
+function latestSnapshotIdFromDisk(paperDir) {
+  const versionsDir = path.join(paperDir, '.paper', 'versions');
+  if (!fs.existsSync(versionsDir)) return '';
+  const entries = fs.readdirSync(versionsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('REV-'))
+    .map((entry) => {
+      const snapshotDir = path.join(versionsDir, entry.name);
+      const metadata = readJsonIfExists(path.join(snapshotDir, 'VERSION-METADATA.json')).data || {};
+      let timestamp = metadata.created_at || '';
+      if (!timestamp) {
+        try {
+          timestamp = fs.statSync(snapshotDir).mtime.toISOString();
+        } catch (_err) {
+          timestamp = '';
+        }
+      }
+      return {
+        id: entry.name,
+        timestamp,
+      };
+    });
+  if (entries.length === 0) return '';
+  entries.sort((a, b) => {
+    if (a.timestamp === b.timestamp) return a.id.localeCompare(b.id);
+    return a.timestamp.localeCompare(b.timestamp);
+  });
+  return entries[entries.length - 1].id;
+}
+
 function latestSnapshotId(state) {
   const versioning = versioningState(state);
-  return versioning.active_revision_snapshot_id
+  return latestSnapshotIdFromDisk(state.paperDir)
+    || versioning.active_revision_snapshot_id
     || versioning.last_snapshot_id
     || versioning.last_export_snapshot_id
     || versioning.last_restore_snapshot_id
@@ -424,6 +626,7 @@ function suggestedNext(state) {
     return '/gpd-brief';
   }
   if (feedbackPlanPending(state)) return '/gpd-feedback';
+  if (feedbackPlanApprovedForRevision(state)) return '/gpd-revise';
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
     || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
@@ -486,23 +689,45 @@ function status(input = {}) {
   state.userAction = userActionHint(state);
   state.latestSnapshotId = latestSnapshotId(state);
   state.restoreCommand = snapshotRestoreCommand(state);
+  state.reviewRating = reviewRating(state);
+  state.finalExportPath = finalExportPath(state);
+  state.revisionSummary = revisionSummary(state);
+  state.reviewCompletionNote = reviewCompletionNote(state);
+  state.reviewRecommendation = reviewRecommendation(state);
+  state.full = Boolean(input.full);
   return state;
 }
 
 function printStatus(state) {
   console.log(`paper: ${state.paperDir}`);
   console.log(`state source: ${state.stateSource || 'missing'}`);
+  if (state.machineState && state.machineState.current_stage) console.log(`stage: ${state.machineState.current_stage}`);
   console.log(`strategy: ${state.strategyStatus || 'missing'}`);
-  if (state.primaryBlocker) console.log(`primary blocker: ${state.primaryBlocker}`);
-  console.log('artifacts:');
-  for (const [name, exists] of Object.entries(state.artifacts)) {
-    console.log(`- ${exists ? 'ok' : 'missing'} ${name}`);
+  if (state.primaryBlocker && state.primaryBlocker !== 'none') console.log(`primary blocker: ${state.primaryBlocker}`);
+  if (state.reviewRating) console.log(`review rating: ${state.reviewRating}`);
+  if (state.finalExportPath) console.log(`current export: ${state.finalExportPath}`);
+  if (Array.isArray(state.revisionSummary) && state.revisionSummary.length > 0) {
+    console.log('what changed:');
+    for (const item of state.revisionSummary) console.log(`- ${item}`);
+  }
+  if (state.reviewCompletionNote) console.log(`validation note: ${state.reviewCompletionNote}`);
+  if (state.reviewRecommendation) {
+    console.log(`recommended review: ${state.reviewRecommendation.recommendation}`);
+    console.log(`why: ${state.reviewRecommendation.why}`);
+    console.log(`after that: ${state.reviewRecommendation.after}`);
+  }
+  if (state.full) {
+    console.log('artifacts:');
+    for (const [name, exists] of Object.entries(state.artifacts)) {
+      console.log(`- ${exists ? 'ok' : 'missing'} ${name}`);
+    }
   }
   if (state.latestSnapshotId) {
-    console.log(`latest snapshot: ${state.latestSnapshotId}`);
-    console.log(`restore: ${state.restoreCommand}`);
+    console.log('safety:');
+    console.log(`- latest snapshot: ${state.latestSnapshotId}`);
+    console.log(`- restore: ${state.restoreCommand}`);
   }
-  console.log(`next: ${state.next}`);
+  console.log(`next: ${state.next === '/gpd-status' ? 'no required writing stage' : state.next}`);
   console.log(`user action: ${state.userAction}`);
 }
 
@@ -647,7 +872,7 @@ function userActionHint(state) {
   const a = state.artifacts;
   const next = state.next;
   if (a['exports/FINAL.md'] && next === '/gpd-status') {
-    return 'Read .paper/exports/FINAL.md. If you add inline comments there, run gpd feedback collect, then /gpd-feedback; GPD will capture the comments, revise DRAFT.md after approval, and regenerate FINAL.md.';
+    return 'Read .paper/exports/FINAL.md. If you add inline comments, run gpd feedback; it will route approval and revision next.';
   }
   if (next === '/gpd-export') {
     return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';
@@ -656,7 +881,7 @@ function userActionHint(state) {
     return 'Run /gpd-feedback to approve, modify, defer, or reject each feedback-plan concern before revision.';
   }
   if (next === '/gpd-review' && a['exports/FINAL.md']) {
-    return 'If inline comments were added to .paper/exports/FINAL.md, run gpd feedback collect first; /gpd-feedback approves the captured concerns before revision.';
+    return 'If inline comments were added to .paper/exports/FINAL.md, run gpd feedback first; /gpd-feedback approves the captured concerns before revision.';
   }
   if (next === '/gpd-revise') {
     const restore = snapshotRestoreCommand(state);
@@ -665,7 +890,7 @@ function userActionHint(state) {
     }
     return 'Before editing, run gpd revise to snapshot the current paper. Then apply approved feedback to .paper/DRAFT.md; export regenerates FINAL.md.';
   }
-  return 'Run the recommended command. After it finishes, run gpd next or /gpd-status again.';
+  return 'Run the recommended command. After it finishes, run gpd next in the terminal or /gpd-status in Claude/Codex.';
 }
 
 function nextAction(input = {}) {
@@ -681,6 +906,8 @@ function nextAction(input = {}) {
     userAction: state.userAction,
     latestSnapshotId: state.latestSnapshotId,
     restoreCommand: state.restoreCommand,
+    reviewRating: state.reviewRating,
+    reviewRecommendation: state.reviewRecommendation,
   };
 }
 
@@ -690,6 +917,12 @@ function printNext(result) {
   console.log(`why: ${result.why}`);
   if (result.strategyStatus) console.log(`strategy: ${result.strategyStatus}`);
   if (result.primaryBlocker) console.log(`primary blocker: ${result.primaryBlocker}`);
+  if (result.reviewRating) console.log(`review rating: ${result.reviewRating}`);
+  if (result.reviewRecommendation) {
+    console.log(`recommended review: ${result.reviewRecommendation.recommendation}`);
+    console.log(`why: ${result.reviewRecommendation.why}`);
+    console.log(`after that: ${result.reviewRecommendation.after}`);
+  }
   console.log(`clear context: ${result.context.clear_context}`);
   console.log(`read: ${result.context.read.join(', ')}`);
   console.log(`avoid: ${result.context.avoid.join(', ')}`);
@@ -764,7 +997,7 @@ function validate(input = {}) {
 }
 
 function printValidation(result) {
-  printStatus(result);
+  printStatus({ ...result, full: true });
   console.log(`validation: ${result.ok ? 'ok' : 'issues found'}`);
   if (result.semantic) console.log('semantic validation: enabled');
   for (const issue of result.issues) {

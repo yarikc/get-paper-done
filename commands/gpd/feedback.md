@@ -12,11 +12,13 @@ allowed-tools:
 **Flags:**
 - `--list` - Show the current feedback-plan concern queue without deciding anything.
 - `--item N` - Review a specific concern instead of the next pending concern.
-- `collect` - Extract inline human comments into feedback artifacts.
+- `--aggregate` - Force theme-level feedback-plan grouping during capture.
+- `--itemized` - Force one feedback-plan item per captured comment during capture.
+- `collect` - Extract inline human comments into feedback artifacts. This is the default, so `gpd feedback` is enough when run from a paper directory.
 - `clean` - Remove extracted inline comments from the reviewed Markdown after confirming capture.
 
 This command is the user-facing approval loop for `.paper/FEEDBACK-PLAN.md`.
-Use it after `/gpd-review`, `gpd feedback collect`, or `gpd review-external` creates a feedback plan.
+Use it after inline reader comments, `/gpd-review`, or `gpd review-external` creates a feedback plan.
 </context>
 
 <execution_context>
@@ -24,10 +26,16 @@ Use it after `/gpd-review`, `gpd feedback collect`, or `gpd review-external` cre
 </execution_context>
 
 <process>
-If `collect` is present, run:
+If `collect` is present, or if no subcommand is provided, run:
 
 ```bash
-gpd feedback collect --paper <paper-dir>
+gpd feedback
+```
+
+When running from outside the paper directory, use:
+
+```bash
+gpd feedback --paper <paper-dir>
 ```
 
 Use this when the user has added inline comments such as:
@@ -39,7 +47,7 @@ Use this when the user has added inline comments such as:
 //no: reject or disagree with this claim/framing
 ```
 
-The CLI preserves the commented paper, writes `.paper/FEEDBACK-READER.md` and `.paper/FEEDBACK-PLAN.md`, and leaves comments in place by default.
+The CLI preserves the commented paper, writes `.paper/FEEDBACK-READER.md` and `.paper/FEEDBACK-PLAN.md`, leaves comments in place by default, and records a first-pass interpretation. For 8 or fewer comments, the plan is itemized. For more than 8 comments, the plan is grouped into themes by default so the user decides a small set of patterns instead of approving every raw comment. Use `--itemized` only when the user explicitly wants comment-by-comment handling. Do not treat raw capture as approval to revise.
 
 If `clean` is present, run:
 
@@ -66,7 +74,8 @@ gpd feedback-plan review --paper <paper-dir> [--item N]
 Show the concern in plain language:
 
 - concern title
-- severity and recommendation
+- severity and suggested handling
+- your interpretation: agree, disagree, or needs clarification
 - why it matters
 - what improves if addressed
 - risk if handled badly
@@ -74,6 +83,14 @@ Show the concern in plain language:
 - proposed edits
 - reviewer evidence
 - current decision and constraint
+
+Before asking for a decision, read the relevant source context from the paper artifacts and state your judgment. Say "suggested handling" for the generated default; do not say "my recommendation: modify" because `modify` is also a user decision option.
+
+- **Agree** when the comment identifies a real problem in thesis, audience fit, evidence, argument flow, voice, or ask clarity.
+- **Disagree** when applying the comment would weaken the approved paper purpose, dilute voice, introduce false certainty, or expand scope.
+- **Needs clarification** when the comment is valid as reader friction but the required fix is ambiguous.
+
+Then explain what you would change, why it improves the paper, and how you would avoid damaging the current draft. If the concern is broad or indicates a structural failure, say so and route it to brief, research, outline, or major revision instead of pretending it is a sentence edit.
 
 Ask the user for one decision using a single selection list:
 

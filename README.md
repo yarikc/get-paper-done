@@ -223,7 +223,13 @@ gpd review-pack --paper ~/papers/metadata-strategy
 If you add inline comments there, capture them with:
 
 ```bash
-gpd feedback collect --paper ~/papers/metadata-strategy
+gpd feedback
+```
+
+Run that from the paper directory. If you are somewhere else, pass the paper:
+
+```bash
+gpd feedback --paper ~/papers/metadata-strategy
 ```
 
 Then approve the feedback handling in Claude/Codex:
@@ -233,10 +239,14 @@ Then approve the feedback handling in Claude/Codex:
 ```
 
 GPD captures comments into `FEEDBACK-READER.md`, creates a pending
-`FEEDBACK-PLAN.md` with default recommendations, and waits for approval before
-revision. In Claude/Codex, use `/gpd-feedback` to walk through one concern at a
-time and record `approve`, `modify`, `defer`, `reject`, or
-`answered_no_action` decisions. Approved
+`FEEDBACK-PLAN.md` with first-pass interpretation and suggested handling,
+and waits for approval before revision. If there are many comments, GPD groups
+them into theme-level decisions by default so the user reviews a small set of
+patterns instead of every raw comment. Use `gpd feedback --itemized` only when
+comment-by-comment handling is needed. In Claude/Codex, use `/gpd-feedback` to
+review the pending concerns or themes; the agent should explain whether it
+agrees, disagrees, or needs clarification before recording `approve`, `modify`,
+`defer`, `reject`, or `answered_no_action` decisions. Approved
 changes are applied to `.paper/DRAFT.md`; export regenerates `FINAL.md` and
 snapshots the prior export first. You review the final paper; GPD keeps the
 draft as the editable source of truth.
@@ -251,7 +261,7 @@ Use visible comment markers while reading:
 ```
 
 Severity suffixes are supported: `//todo!:` for high severity and `//todo?:`
-for low severity. `gpd feedback collect` leaves comments in place by default;
+for low severity. `gpd feedback` leaves comments in place by default;
 run `gpd feedback clean` only after confirming the extracted feedback is
 complete.
 
@@ -341,6 +351,7 @@ Common CLI commands:
 ```bash
 gpd next
 gpd status
+gpd status --full
 gpd validate
 gpd validate --semantic
 gpd export
@@ -348,19 +359,25 @@ gpd revise --trigger .paper/FEEDBACK-PLAN.md
 gpd snapshot --reason before_substantive_revision
 gpd restore --snapshot REV-20260519T143205123-before-substantive-revision
 gpd review-pack
-gpd feedback collect
+gpd feedback
 gpd feedback clean
 gpd review-external --models claude,codex,gemini --current-runtime codex
 gpd update claude
 gpd update codex
 ```
 
-`/gpd-review` evaluates the paper. `gpd feedback collect` captures reader
+`/gpd-review` evaluates the paper. `gpd feedback` captures reader
 comments into feedback artifacts for planning and revision.
 
-Use `gpd next` for the compact answer. Use `gpd status` when you want full
-artifact presence. Use `gpd validate --semantic` before treating a paper as
-example-quality, publication-ready, or ready for long-term handoff.
+Use `gpd next` for only the next action. Use `gpd status` for a short completion
+narrative: current state, review rating, export path, recent revision summary,
+recommended review path, restore command, and what to do next. Use `gpd status
+--full` only when you need the full artifact inventory. If `REVIEW.md` records
+an estimated quality rating, both `next` and `status` print it as `review
+rating`. Status and export output also recommend whether the next review should
+be the user's own read or external review, with a short reason. Use `gpd validate
+--semantic` before treating a paper as example-quality, publication-ready, or
+ready for long-term handoff.
 When invoking external reviewers, exclude the runtime currently helping you.
 For example, pass `--current-runtime codex` from Codex or `--current-runtime
 claude` from Claude so GPD skips self-review and records the skip.

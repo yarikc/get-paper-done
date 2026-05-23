@@ -82,6 +82,8 @@ Options:
   --timeout-ms MS              External reviewer timeout in milliseconds
   --reviewer NAME              Reviewer name for stdin review input
   --from FILE                  Markdown artifact to collect/clean inline feedback from
+  --aggregate                  Force aggregate feedback-plan mode
+  --itemized                   Force item-by-item feedback-plan mode
   --reason REASON              Snapshot reason, e.g. before_substantive_revision
   --snapshot REV               Snapshot ID or .paper/versions path to restore
   --trigger ARTIFACT           Artifact or event that triggered a snapshot
@@ -93,6 +95,7 @@ Options:
   --paper DIR                  Existing paper directory for next/status/validate
   --path FILE                  Artifact path for validate-artifact
   --json                       Print JSON for list/next/status/validate
+  --full                       Show full artifact inventory in status/validate output
   --semantic                   Include deterministic semantic gates in validate
   --force                      Allow export when REVIEW.md is not Ready
   --dry-run                    Show planned changes without writing
@@ -106,7 +109,8 @@ Examples:
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
   gpd review-pack --paper ~/papers/metadata-strategy
-  gpd feedback collect --paper ~/papers/metadata-strategy
+  gpd feedback
+  gpd feedback --paper ~/papers/metadata-strategy
   gpd feedback clean --paper ~/papers/metadata-strategy
   gpd feedback-plan list --paper ~/papers/metadata-strategy
   gpd feedback-plan review --paper ~/papers/metadata-strategy --item 1
@@ -125,7 +129,7 @@ Examples:
   gpd list-audiences
 
 Review distinction:
-  /gpd-review evaluates the paper. gpd feedback collect captures reader comments.
+  /gpd-review evaluates the paper. gpd feedback captures reader comments.
 `);
 }
 
@@ -158,6 +162,7 @@ function parseWorkspaceOptions(argv) {
     const arg = argv[i];
     if (arg === '--dry-run') args.dryRun = true;
     else if (arg === '--json') args.json = true;
+    else if (arg === '--full') args.full = true;
     else if (arg === '--semantic') args.semantic = true;
     else if (arg === '--force') args.force = true;
     else if (arg === '--stdin') args.stdin = true;
@@ -200,6 +205,10 @@ function parseWorkspaceOptions(argv) {
     } else if (arg === '--from') {
       args.from = argv[i + 1];
       i += 1;
+    } else if (arg === '--aggregate') {
+      args.feedbackMode = 'aggregate';
+    } else if (arg === '--itemized') {
+      args.feedbackMode = 'itemized';
     } else if (arg === '--reason') {
       args.reason = argv[i + 1];
       i += 1;
@@ -423,7 +432,11 @@ async function main(argv) {
     if (args.json) {
       console.log(JSON.stringify(items, null, 2));
     } else {
-      for (const item of items) console.log(`${item.slug}\t${item.title}\t${item.path}`);
+      console.log(command === 'list-audiences' ? 'audiences:' : 'profiles:');
+      for (const item of items) {
+        console.log(`- ${item.slug}: ${item.title}`);
+        console.log(`  path: ${item.path}`);
+      }
     }
     return;
   }

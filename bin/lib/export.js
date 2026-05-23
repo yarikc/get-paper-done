@@ -240,18 +240,21 @@ function exportPaper(input = {}) {
       '',
       '- Internal export created at `.paper/exports/FINAL.md`.',
       '- Review `.paper/exports/FINAL.md` as the reading copy.',
-      '- If you add inline comments to `FINAL.md`, run `gpd feedback collect`, then `/gpd-feedback`; approved changes will be applied to `.paper/DRAFT.md` and exported again.',
+      '- If you add inline comments to `FINAL.md`, run `gpd feedback` from the paper directory, then `/gpd-feedback`; approved changes will be applied to `.paper/DRAFT.md` and exported again.',
       '- Run `/gpd-status` whenever you are unsure what to do next.',
       '',
     ].join('\n'),
     input.dryRun,
   );
 
+  const exportedStatus = input.dryRun ? null : status({ paper: paperDir });
   return {
     paperDir,
     finalPath,
     forced: Boolean(input.force),
     snapshot: overwriteSnapshot,
+    reviewRating: exportedStatus ? exportedStatus.reviewRating : '',
+    reviewRecommendation: exportedStatus ? exportedStatus.reviewRecommendation : null,
   };
 }
 
@@ -260,8 +263,14 @@ function printExport(result) {
   console.log(`export: ${result.finalPath}`);
   if (result.snapshot) console.log(`snapshot before overwrite: ${result.snapshot.relativeSnapshotPath}`);
   if (result.forced) console.log('warning: exported with --force');
+  if (result.reviewRating) console.log(`review rating: ${result.reviewRating}`);
+  if (result.reviewRecommendation) {
+    console.log(`recommended review: ${result.reviewRecommendation.recommendation}`);
+    console.log(`why: ${result.reviewRecommendation.why}`);
+    console.log(`after that: ${result.reviewRecommendation.after}`);
+  }
   console.log('review: read .paper/exports/FINAL.md');
-  console.log('if you add comments: run gpd feedback collect, then /gpd-feedback');
+  console.log('if you add comments: run gpd feedback, then /gpd-feedback');
 }
 
 module.exports = {

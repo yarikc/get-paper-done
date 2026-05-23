@@ -23,9 +23,27 @@
 
 ## Feedback Items
 
-| # | Type | Feedback | Signal | Severity | Recommended Handling | Affected Artifact |
-|---|------|----------|--------|----------|----------------------|-------------------|
-| 1 | [Action / Preservation / Question / Rejection] | [specific feedback] | [Voice / Register / Audience fit / Evidence / Ask clarity] | [HIGH / MEDIUM / LOW] | [Incorporate / Preserve / Answer / Ignore / Defer / Ask user] | [BRIEF.md / RESEARCH.json / OUTLINE.md / DRAFT.md / FACT-CHECK.md / REVIEW.md / exports/FINAL.md] |
+## Captured Comments
+
+### 1. [Action / Preservation / Question / Rejection]: [short title]
+
+- **Location:** [artifact:line]
+- **Signal:** [Voice / Register / Audience fit / Evidence / Ask clarity]
+- **Severity:** [HIGH / MEDIUM / LOW]
+- **Initial interpretation:** [where the agent agrees, disagrees, or needs clarification]
+- **Clarification needed:** [author question or none]
+- **Reader comment:**
+> [specific feedback]
+- **Anchor text:**
+> [nearby paper text]
+
+## Feedback Items
+
+This compact table is retained for validation, search, and tooling. Use `## Captured Comments` for human review.
+
+| # | Feedback | Signal | Severity | Recommended Handling | Affected Artifact |
+|---|----------|--------|----------|----------------------|-------------------|
+| 1 | [specific feedback] | [Voice / Register / Audience fit / Evidence / Ask clarity] | [HIGH / MEDIUM / LOW] | [Incorporate / Preserve / Answer / Ignore / Defer / Ask user] | [BRIEF.md / RESEARCH.json / OUTLINE.md / DRAFT.md / FACT-CHECK.md / REVIEW.md / exports/FINAL.md] |
 
 ## Questions
 

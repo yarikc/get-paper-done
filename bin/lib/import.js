@@ -14,6 +14,7 @@ const {
 } = require('./common');
 const {
   defaultMachineState,
+  status,
 } = require('./state');
 const {
   writeSetupArtifacts,
@@ -788,6 +789,10 @@ function importPaper(input = {}) {
   if (canonicalDraft) console.log(`canonical draft candidate: original/${canonicalDraft.rel}`);
   if (draftExtraction.created) console.log(`draft extraction: .paper/DRAFT.md from ${draftExtraction.sourceBasis}`);
   if (sourceReferences.length > 0) console.log(`source references detected: ${sourceReferences.length}`);
+  console.log('next: /gpd-grill');
+  console.log('why: imported material needs author-intent recovery before GPD compresses it into a brief.');
+  console.log(`from terminal: gpd status --paper ${paperDir}`);
+  if (!dryRun) console.log(`user action: ${status({ paper: paperDir }).userAction}`);
   return { paperDir, copied: scan.files.length, skipped: scan.skipped.length };
 }
 

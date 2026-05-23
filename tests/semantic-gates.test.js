@@ -1137,7 +1137,7 @@ function testUnresolvedExportCommentsFail() {
   assert.strictEqual(result.status, 1);
   assert(result.stdout.includes('exports/FINAL.md'));
   assert(result.stdout.includes('unresolved inline review comment'));
-  assert(result.stdout.includes('gpd feedback collect'));
+  assert(result.stdout.includes('gpd feedback'));
 }
 
 function testStateMarkdownJsonDriftFails() {
