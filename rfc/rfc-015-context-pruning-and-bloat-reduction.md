@@ -8,7 +8,7 @@
 To drastically reduce LLM latency, token cost, and "lost-in-the-middle" context eviction during the revision phase by pruning obsolete metadata from the agent's required reading list. This architectural change must be validated by a strict A/B test to ensure no degradation in output quality.
 
 ## 2. Background
-Analysis of a real imported architecture-paper workspace revealed a severe token-saturation risk. While the UX of approving feedback via `/gpd-feedback` is clean, the underlying artifacts (`FEEDBACK-READER.md`, `FEEDBACK-PLAN.md`, `REVISION-LOG.md`) routinely exceed hundreds of kilobytes.
+Analysis of a real imported enterprise-paper workspace revealed a severe token-saturation risk. While the UX of approving feedback via `/gpd-feedback` is clean, the underlying artifacts (`FEEDBACK-READER.md`, `FEEDBACK-PLAN.md`, `REVISION-LOG.md`) routinely exceed hundreds of kilobytes.
 
 Currently, downstream agents (like `paper-editor` and `paper-drafter`) are instructed to read this entire historical trace. Feeding ~250k tokens of resolved debate into an LLM just to execute a 5-point instruction plan causes massive latency and risks the LLM forgetting foundational constraints (like `PERSONA.md` or `STRATEGY.md`) due to context window saturation.
 

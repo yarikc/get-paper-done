@@ -3,7 +3,7 @@
 **Status**: Proposed
 **Author**: User
 **Date**: 2026-05-24
-**Origin**: Surfaced during external review of an imported architecture strategy paper, where the same core argument needed three audience-specific renderings (leadership ask, architecture-partner long form, senior briefing). The reviewer flagged that GPD currently forces a choice of one rendering or manual duplication across workspaces.
+**Origin**: Surfaced during review of an imported enterprise strategy paper, where the same core argument needed three audience-specific renderings (leadership ask, practitioner long form, senior briefing). The reviewer flagged that GPD currently forces a choice of one rendering or manual duplication across workspaces.
 **Sequencing**: Gated behind RFC-007 (evaluation harness, #32). Multi-format support adds significant artifact and workflow surface; building it before a quality-measurement instrument makes the framework harder to validate, not easier. See "Sequencing" section.
 
 ## Summary
@@ -172,9 +172,9 @@ A state in which a derived format no longer reflects the current argument spine,
 - "Last refreshed" must be an ISO date
 - file must be under the line budget (default 80)
 
-### Example (architecture-paper case)
+### Example (enterprise strategy case)
 
-Drawn from the imported architecture strategy paper that surfaced this RFC.
+Generic example based on a paper that needs leadership, practitioner, and senior-briefing renderings.
 
 ```markdown
 # Argument Spine
@@ -182,47 +182,47 @@ Drawn from the imported architecture strategy paper that surfaced this RFC.
 **Last refreshed:** 2026-05-23
 
 ## Problem
-Agentic delivery accelerates engineering decisions faster than current
-architecture and control processes can keep up. Review becomes a queue;
-controls move post-hoc; accountability erodes.
+The organization needs to change how a cross-functional capability is
+governed, but current review patterns are too slow and too informal.
+Important decisions move through meetings, documents, and exceptions
+without a shared evidence trail.
 
 ## Why now
-First wave of agent-augmented teams is shipping production change at
-1.5-3x baseline velocity, while existing approval and review patterns
-remain synchronous and queue-based. The gap is structural, not procedural.
+Adoption is expanding beyond the original pilot teams. Without a clearer
+operating model, scale will increase inconsistency, review burden, and
+unclear accountability.
 
 ## Thesis
-Architecture should own the operating layer that lets controls execute
-at decision time, with human review reserved for exceptions.
+The organization should treat the capability as a managed operating
+system, not a collection of local practices.
 
 ## Ask
-Authorize architecture to operate this layer as a product, not a
-process, with budget and accountability for its observability and
-exception handling.
+Authorize a single accountable operating model with named owners,
+evidence requirements, review triggers, and success measures.
 
 ## Key mechanisms
-- Shared context, decision memory, reusable skills as platform primitives
-- Controls expressed as executable policy, not gate documents
-- Exception routing with named owners, not unstructured queues
-- Continuous evidence capture for audit and improvement
+- Shared context and decision memory
+- Standard evidence records for material decisions
+- Exception routing with named owners
+- Periodic review of outcomes, risks, and control effectiveness
 
 ## Risks and trade-offs
-- Mis-scoped exceptions: too few, controls leak; too many, queue returns
-- Capability concentration: one team owns load-bearing decision surface
-- Vendor lock-in if primitives bind to specific LLM providers
-- Erosion of human judgment if exception threshold drifts
+- Too much process slows adoption
+- Too little structure creates ungoverned variation
+- Ownership concentration may create bottlenecks
+- Evidence requirements may be resisted as overhead
 
 ## Accountability implications
-- Architecture owns the operating-layer product
-- Control owners express policy executably; review exceptions
-- Engineering teams consume the layer; remain accountable for outcomes
-- Audit gets continuous evidence; no separate compliance capture
+- Executive sponsor owns the mandate
+- Operating team owns the common model and evidence record
+- Delivery teams remain accountable for outcomes
+- Control partners review exceptions and sampled evidence
 
 ## Success measures
-- Time from change initiation to controlled deployment: -50% vs baseline
-- Exception rate stable around target band (e.g., 5-10%)
-- No control regressions caught only post-incident in 12 months
-- Audit completeness rate: 100% on sampled changes
+- Lower cycle time for routine decisions
+- Fewer unresolved ownership questions
+- Complete evidence on sampled material decisions
+- Stable exception volume within an agreed target band
 ```
 
 ## Artifact model
@@ -287,17 +287,17 @@ Each derived format includes a `FORMAT.md` file with:
 
 ### Sketch: how the same spine renders into two formats
 
-Same spine (architecture-paper example above), different formats:
+Same spine (enterprise strategy example above), different formats:
 
 **decision-memo** (target: 1 page, executive ask):
 
-- opens with the ask: "Authorize architecture to operate the operating layer..."
+- opens with the ask: "Authorize a single accountable operating model..."
 - 3-bullet justification (top 3 from key mechanisms)
 - 2-bullet risk acknowledgement
 - 1-bullet ownership statement
 - explicit approve / decline boundary
 
-**strategy-paper** (target: 5-8 pages, architecture and control partners):
+**strategy-paper** (target: 5-8 pages, practitioners and control partners):
 
 - problem framing in full
 - why now with evidence
@@ -471,14 +471,14 @@ Rules:
 
 ## Example use case
 
-Drawn from the imported architecture strategy paper external review.
+Drawn from a generic enterprise strategy paper external review.
 
-**Core topic**: the role of architecture teams in the future agentic operating model.
+**Core topic**: standardizing governance for a cross-functional enterprise capability.
 
 **Required outputs**:
 
 - `decision-memo` for leadership approval (1 page, ask + 3 mechanisms + risk + ownership)
-- `strategy-paper` for architecture and control partners (5-8 pages, full argument + trade-offs + accountability + measurement)
+- `strategy-paper` for practitioner and control partners (5-8 pages, full argument + trade-offs + accountability + measurement)
 - `exec-brief` for senior circulation (2 pages, problem + thesis + ask + implications)
 
 The underlying argument, evidence, decisions, and accountability stays shared. The rendered outputs differ in length, compression, and review expectations.
