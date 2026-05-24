@@ -334,6 +334,225 @@ function semanticJson(paperDir) {
   return JSON.parse(run(['validate', '--paper', paperDir, '--semantic', '--json']));
 }
 
+function feedbackPlanMarkdown({ decisionSets }) {
+  return [
+    '# Feedback Handling Plan',
+    '',
+    '**Created:** 2026-05-24T00:00:00Z',
+    '**Based on:** `.paper/FEEDBACK-READER.md`',
+    '**Status:** Pending user approval',
+    '',
+    '## Summary',
+    '',
+    'Synthetic feedback plan for Decision Sets semantic validation.',
+    '',
+    '## Decision Sets',
+    '',
+    '**Mode:** Aggregate',
+    '',
+    ...decisionSets,
+    '',
+    '## Decision View',
+    '',
+    '| # | Concern | Type | Severity | Suggested handling | User Decision |',
+    '|---|---------|------|----------|--------------------|---------------|',
+    '| 1 | Opening is repetitive | Concern | HIGH | modify | pending |',
+    '| 2 | Ask is unclear | Concern | HIGH | modify | pending |',
+    '',
+    '## Proposed Handling',
+    '',
+    '### 1. Concern: Opening is repetitive',
+    '',
+    '- **Type:** Concern',
+    '- **Severity:** HIGH',
+    '- **Source(s):** reader',
+    '- **Suggested handling:** modify',
+    '- **Why this matters:** It affects reader comprehension.',
+    '- **What improves if addressed:** The paper becomes easier to decide on.',
+    '- **Risk if handled badly:** The revision could over-compress the point.',
+    '- **Proposed handling:** Apply the concern with a bounded edit.',
+    '- **Proposed edits:**',
+    '  1. Tighten the opening.',
+    '- **Reviewer evidence:**',
+    '  - Opening is repetitive.',
+    '- **Affected artifacts:** DRAFT',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '### 2. Concern: Ask is unclear',
+    '',
+    '- **Type:** Concern',
+    '- **Severity:** HIGH',
+    '- **Source(s):** reader',
+    '- **Suggested handling:** modify',
+    '- **Why this matters:** It affects decision usefulness.',
+    '- **What improves if addressed:** The ask becomes explicit.',
+    '- **Risk if handled badly:** The revision could expand scope.',
+    '- **Proposed handling:** Clarify the ask.',
+    '- **Proposed edits:**',
+    '  1. Name the decision requested.',
+    '- **Reviewer evidence:**',
+    '  - Ask is unclear.',
+    '- **Affected artifacts:** DRAFT',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '## Below-Target Items',
+    '',
+    '| # | Issue | Target Bar Impact | Suggested handling | Reason |',
+    '|---|-------|-------------------|--------------------|--------|',
+    '| 1 | None | None | not applicable | None |',
+    '',
+    '## Approved Or Modified',
+    '',
+    '- None yet',
+    '',
+    '## Rejected',
+    '',
+    '- None',
+    '',
+    '## Deferred',
+    '',
+    '- None',
+    '',
+    '## User Decisions Needed',
+    '',
+    '- Record decisions for each concern.',
+    '',
+    '## Approval Gate',
+    '',
+    'Ask the user before changing `.paper/DRAFT.md`.',
+    '',
+  ].join('\n');
+}
+
+function decisionSetMarkdown({
+  index = 1,
+  token = 'MODIFY',
+  title = 'Structural compression',
+  covers = 'concerns 1',
+  why = 'The concern is material.',
+  instruction = 'Apply a bounded edit.',
+  userDecision = 'pending',
+  userConstraint = 'none yet',
+} = {}) {
+  const lines = [
+    `### Set ${index} -- ${token} -- ${title}`,
+    '',
+    `- **Covers:** ${covers}`,
+  ];
+  if (why !== null) lines.push(`- **Why:** ${why}`);
+  if (instruction !== null) lines.push(`- **Instruction:** ${instruction}`);
+  if (userDecision !== null) lines.push(`- **User Decision:** ${userDecision}`);
+  if (userConstraint !== null) lines.push(`- **User Constraint:** ${userConstraint}`);
+  lines.push('');
+  return lines.join('\n');
+}
+
+function testFeedbackDecisionSetsMalformedHeadingFails() {
+  const paperDir = makePaper('semantic-feedback-set-malformed');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ token: 'modify' }),
+    ],
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert(parsed.issues.some((item) => item.id === 'semantic.feedback_decision_set_unsupported_decision'));
+  assert(parsed.issues.some((item) => item.issue.includes('decision token "modify" must be uppercase')));
+}
+
+function testFeedbackDecisionSetsUnknownConcernFails() {
+  const paperDir = makePaper('semantic-feedback-set-unknown-concern');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ covers: 'concerns 1, 99' }),
+    ],
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert(parsed.issues.some((item) => item.id === 'semantic.feedback_decision_set_unknown_concern'));
+  assert(parsed.issues.some((item) => item.issue.includes('covers concern 99')));
+}
+
+function testFeedbackDecisionSetsOverlapFails() {
+  const paperDir = makePaper('semantic-feedback-set-overlap');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ index: 1, covers: 'concerns 1' }),
+      decisionSetMarkdown({ index: 2, title: 'Ask clarity', covers: 'concerns 1, 2' }),
+    ],
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert(parsed.issues.some((item) => item.id === 'semantic.feedback_decision_set_overlap'));
+  assert(parsed.issues.some((item) => item.issue.includes('Concern 1 is covered by multiple Decision Sets')));
+}
+
+function testFeedbackDecisionSetsMissingFieldFails() {
+  const paperDir = makePaper('semantic-feedback-set-missing-field');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ why: null }),
+    ],
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert(parsed.issues.some((item) => item.id === 'semantic.feedback_decision_set_missing_field'));
+  assert(parsed.issues.some((item) => item.issue.includes('missing required field "Why"')));
+}
+
+function testFeedbackDecisionSetsInvalidUserDecisionFails() {
+  const paperDir = makePaper('semantic-feedback-set-invalid-user-decision');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ userDecision: 'pendng' }),
+    ],
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert(parsed.issues.some((item) => item.id === 'semantic.feedback_decision_set_invalid_user_decision'));
+  assert(parsed.issues.some((item) => item.issue.includes('unsupported User Decision "pendng"')));
+}
+
+function testFeedbackDecisionSetsMissingCoverageFails() {
+  const paperDir = makePaper('semantic-feedback-set-missing-coverage');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ covers: '-' }),
+    ],
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  assert(parsed.issues.some((item) => item.id === 'semantic.feedback_decision_set_missing_coverage'));
+  assert(parsed.issues.some((item) => item.issue.includes('must cover at least one concern')));
+}
+
+function testFeedbackDecisionSetsValidPasses() {
+  const paperDir = makePaper('semantic-feedback-set-valid');
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', feedbackPlanMarkdown({
+    decisionSets: [
+      decisionSetMarkdown({ index: 1, covers: 'concerns 1' }),
+      decisionSetMarkdown({ index: 2, token: 'DEFER', title: 'Low-risk polish', covers: 'concerns 2' }),
+    ],
+  }));
+
+  const result = semanticJson(paperDir);
+  assert.strictEqual(result.ok, true);
+}
+
 function testReasoningSpineRestatementWarns() {
   const paperDir = makePaper('semantic-spine');
   writeArtifact(paperDir, 'STRATEGY.md', [
@@ -1200,6 +1419,13 @@ testCounterevidenceWarnsWithoutFailing();
 testExportMetadataLeakFails();
 testUnresolvedExportCommentsFail();
 testStateMarkdownJsonDriftFails();
+testFeedbackDecisionSetsMalformedHeadingFails();
+testFeedbackDecisionSetsUnknownConcernFails();
+testFeedbackDecisionSetsOverlapFails();
+testFeedbackDecisionSetsMissingFieldFails();
+testFeedbackDecisionSetsInvalidUserDecisionFails();
+testFeedbackDecisionSetsMissingCoverageFails();
+testFeedbackDecisionSetsValidPasses();
 testWeakReviewInstructionFails();
 testConcreteReviewInstructionPasses();
 testReadyReviewWithRequiredImprovementFails();

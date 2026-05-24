@@ -156,6 +156,19 @@ function parseNumberedItems(markdown) {
     .filter(Boolean);
 }
 
+function markdownFieldValue(block, field) {
+  const pattern = new RegExp(`^- \\*\\*${field.replace(/[()]/g, '\\$&')}:\\*\\*\\s*(.*)$`, 'im');
+  const match = String(block || '').match(pattern);
+  return match ? match[1].trim() : '';
+}
+
+function parsePositiveIntegers(value) {
+  return String(value || '')
+    .match(/\d+/g)
+    ?.map((item) => Number(item))
+    .filter((item) => Number.isInteger(item) && item > 0) || [];
+}
+
 function sourceIds(value) {
   return [...String(value || '').matchAll(/\bS\d+\b/g)].map((match) => match[0]);
 }
@@ -702,6 +715,150 @@ function validateBelowTargetImprovementGate(paperDir) {
   return issues;
 }
 
+const supportedDecisionSetTokens = new Set(['APPROVE', 'MODIFY', 'DEFER', 'REJECT', 'ANSWERED_NO_ACTION']);
+const supportedUserDecisionValues = new Set(['pending', 'approve', 'modify', 'defer', 'reject', 'answered_no_action']);
+const decisionSetRequiredFields = ['Covers', 'Why', 'Instruction', 'User Decision', 'User Constraint'];
+
+function feedbackPlanDecisionSetsSection(markdown) {
+  if (!markdown) return '';
+  const sectionStart = markdown.search(/^## Decision Sets\s*$/m);
+  if (sectionStart < 0) return '';
+  const sectionRest = markdown.slice(sectionStart);
+  const nextSection = sectionRest.slice(1).search(/\n##\s+/);
+  return nextSection >= 0 ? sectionRest.slice(0, nextSection + 1) : sectionRest;
+}
+
+function parseFeedbackConcernIndexes(markdown) {
+  const indexes = new Set();
+  const handling = sectionBetween(markdown, '## Proposed Handling');
+  const source = handling || markdown || '';
+  const headingPattern = /^###\s+(\d+)\.\s+([^:\n]+):\s*(.+)$/gm;
+  for (const match of source.matchAll(headingPattern)) {
+    indexes.add(Number(match[1]));
+  }
+  return indexes;
+}
+
+function parseDecisionSetBlocks(markdown) {
+  const section = feedbackPlanDecisionSetsSection(markdown);
+  if (!section) return [];
+  const headingPattern = /^###\s+Set\b.*$/gm;
+  const matches = [...section.matchAll(headingPattern)];
+  return matches.map((match, position) => {
+    const end = position + 1 < matches.length ? matches[position + 1].index : section.length;
+    const heading = match[0].trim();
+    const block = section.slice(match.index, end);
+    const parsed = heading.match(/^###\s+Set\s+(\d+)\s+(--|—)\s+([A-Z_]+)\s+(--|—)\s+(.+)$/);
+    const looseParts = heading.match(/^###\s+Set\s+(\d+)\s+(--|—)\s+([A-Za-z_]+)\s+(--|—)\s+(.+)$/);
+    const loose = heading.match(/^###\s+Set\s+(\d+)/i);
+    return {
+      index: loose ? Number(loose[1]) : position + 1,
+      heading,
+      parsed,
+      looseParts,
+      block,
+      covers: parsePositiveIntegers(markdownFieldValue(block, 'Covers')),
+    };
+  });
+}
+
+function validateFeedbackPlanDecisionSets(paperDir) {
+  const feedbackPlan = readIfExists(metaPath(paperDir, 'FEEDBACK-PLAN.md'));
+  if (!feedbackPlan) return [];
+
+  const section = feedbackPlanDecisionSetsSection(feedbackPlan);
+  if (!section) return [];
+
+  const issues = [];
+  const concerns = parseFeedbackConcernIndexes(feedbackPlan);
+  const sets = parseDecisionSetBlocks(feedbackPlan);
+  const coverage = new Map();
+
+  for (const set of sets) {
+    if (!set.parsed && set.looseParts) {
+      const decisionToken = set.looseParts[3];
+      issues.push(issue(
+        'semantic.feedback_decision_set_unsupported_decision',
+        'HIGH',
+        'FEEDBACK-PLAN.md',
+        `Decision Set ${set.index} decision token "${decisionToken}" must be uppercase and one of APPROVE, MODIFY, DEFER, REJECT, or ANSWERED_NO_ACTION`,
+      ));
+    } else if (!set.parsed) {
+      issues.push(issue(
+        'semantic.feedback_decision_set_malformed',
+        'HIGH',
+        'FEEDBACK-PLAN.md',
+        `Decision Set ${set.index} heading is malformed; use "### Set N -- MODIFY -- Title" with an uppercase supported decision token`,
+      ));
+    } else {
+      const decisionToken = set.parsed[3];
+      if (!supportedDecisionSetTokens.has(decisionToken)) {
+        issues.push(issue(
+          'semantic.feedback_decision_set_unsupported_decision',
+          'HIGH',
+          'FEEDBACK-PLAN.md',
+          `Decision Set ${set.index} uses unsupported decision token "${decisionToken}"; use APPROVE, MODIFY, DEFER, REJECT, or ANSWERED_NO_ACTION`,
+        ));
+      }
+    }
+
+    for (const field of decisionSetRequiredFields) {
+      if (!markdownFieldValue(set.block, field)) {
+        issues.push(issue(
+          'semantic.feedback_decision_set_missing_field',
+          'HIGH',
+          'FEEDBACK-PLAN.md',
+          `Decision Set ${set.index} is missing required field "${field}"`,
+        ));
+      }
+    }
+
+    const userDecision = markdownFieldValue(set.block, 'User Decision').toLowerCase();
+    if (userDecision && !supportedUserDecisionValues.has(userDecision)) {
+      issues.push(issue(
+        'semantic.feedback_decision_set_invalid_user_decision',
+        'HIGH',
+        'FEEDBACK-PLAN.md',
+        `Decision Set ${set.index} has unsupported User Decision "${userDecision}"`,
+      ));
+    }
+
+    if (set.covers.length === 0) {
+      issues.push(issue(
+        'semantic.feedback_decision_set_missing_coverage',
+        'HIGH',
+        'FEEDBACK-PLAN.md',
+        `Decision Set ${set.index} must cover at least one concern`,
+      ));
+    }
+
+    for (const concernIndex of set.covers) {
+      if (!concerns.has(concernIndex)) {
+        issues.push(issue(
+          'semantic.feedback_decision_set_unknown_concern',
+          'HIGH',
+          'FEEDBACK-PLAN.md',
+          `Decision Set ${set.index} covers concern ${concernIndex}, but no matching Proposed Handling concern exists`,
+        ));
+      }
+      if (!coverage.has(concernIndex)) coverage.set(concernIndex, []);
+      coverage.get(concernIndex).push(set.index);
+    }
+  }
+
+  for (const [concernIndex, setIndexes] of coverage.entries()) {
+    if (setIndexes.length <= 1) continue;
+    issues.push(issue(
+      'semantic.feedback_decision_set_overlap',
+      'HIGH',
+      'FEEDBACK-PLAN.md',
+      `Concern ${concernIndex} is covered by multiple Decision Sets (${setIndexes.join(', ')}); split or merge the sets before revision`,
+    ));
+  }
+
+  return issues;
+}
+
 function recommendationSection(markdown) {
   const lines = String(markdown || '').split(/\r?\n/);
   for (let i = 0; i < lines.length; i += 1) {
@@ -1089,6 +1246,7 @@ function validateSemanticPaper(paperDir) {
     ...validateExportMetadataLeak(paperDir),
     ...validateUnresolvedExportComments(paperDir),
     ...validateStateDrift(paperDir),
+    ...validateFeedbackPlanDecisionSets(paperDir),
     ...validateReviewRewriteInstructions(paperDir),
     ...validateBelowTargetImprovementGate(paperDir),
     ...validateRecommendationSpecificityInArtifact(paperDir, 'DRAFT.md'),
