@@ -121,4 +121,6 @@ gpd feedback-plan decide --paper <paper-dir> --item <N> --decision <approve|modi
 ```
 
 Then show the next pending concern if one remains. Do not revise `.paper/DRAFT.md`; `/gpd-feedback` only records decisions. `/gpd-revise` applies approved or modified concerns after snapshot protection.
+
+When the final required decision is recorded, `gpd feedback-plan decide` writes `.paper/REVISION-INSTRUCTIONS.md`. Tell the user that `/gpd-revise` will use that compact approved instruction set instead of making them reread the full feedback plan.
 </process>

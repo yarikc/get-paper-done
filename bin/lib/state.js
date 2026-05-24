@@ -688,6 +688,7 @@ function artifactState(paperDir) {
     'FEEDBACK-EXTERNAL.md',
     'EXTERNAL-REVIEW-RUN.json',
     'FEEDBACK-PLAN.md',
+    'REVISION-INSTRUCTIONS.md',
     'REVISION-CHECK.md',
     'REVISION-LOG.md',
     'STATE.md',
@@ -896,7 +897,7 @@ function contextForCommand(command) {
   if (base === '/gpd-revise') {
     return {
       clear_context: 'Yes, after review.',
-      read: ['DRAFT.md', 'REVIEW.md', 'FEEDBACK-PLAN.md if present', 'FEEDBACK-READER.md if present', 'REVISION-LOG.md if present'],
+      read: ['DRAFT.md', 'REVISION-INSTRUCTIONS.md if present', 'REVIEW.md', 'FEEDBACK-PLAN.md if needed', 'FEEDBACK-READER.md if needed', 'REVISION-LOG.md if present'],
       avoid: ['editing without first running gpd revise or gpd snapshot', 'unapproved feedback items', 'editing exports/FINAL.md as the source of truth'],
     };
   }
@@ -986,6 +987,7 @@ function explainNext(state) {
   if (!a['DRAFT.md'] && next === '/gpd-draft') return 'The draft is missing, so drafting is the next stage.';
   if (!a['FACT-CHECK.md'] && next.startsWith('/gpd-fact-check')) return 'Fact-check is missing for an existing draft.';
   if (!a['REVIEW.md'] && next.startsWith('/gpd-review')) return 'Review is missing for an existing draft.';
+  if (a['REVISION-INSTRUCTIONS.md'] && next === '/gpd-revise') return 'Approved feedback has been compiled into REVISION-INSTRUCTIONS.md, so revision has a compact instruction set.';
   if (a['FEEDBACK-PLAN.md'] && next === '/gpd-revise') return 'A feedback plan exists, so approved changes can be applied through revision.';
   if (next === '/gpd-export') return 'The paper has the required reviewed draft artifacts and is ready for export.';
   const nextFromState = savedNextCommand(state);
@@ -1010,10 +1012,13 @@ function userActionHint(state) {
   }
   if (next === '/gpd-revise') {
     const restore = snapshotRestoreCommand(state);
+    const instructionHint = a['REVISION-INSTRUCTIONS.md']
+      ? ' Use .paper/REVISION-INSTRUCTIONS.md as the compact approved instruction set.'
+      : '';
     if (restore) {
-      return `Revise applies approved feedback to .paper/DRAFT.md. Prior state is restorable with: ${restore}`;
+      return `Revise applies approved feedback to .paper/DRAFT.md.${instructionHint} Prior state is restorable with: ${restore}`;
     }
-    return 'Before editing, run gpd revise to snapshot the current paper. Then apply approved feedback to .paper/DRAFT.md; export regenerates FINAL.md.';
+    return `Before editing, run gpd revise to snapshot the current paper. Then apply approved feedback to .paper/DRAFT.md; export regenerates FINAL.md.${instructionHint}`;
   }
   return 'Run the recommended command. After it finishes, run gpd next in the terminal or /gpd-status in Claude/Codex.';
 }

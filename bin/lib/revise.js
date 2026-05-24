@@ -12,6 +12,53 @@ const {
   writeStateJson,
 } = require('./state');
 
+function readIfExists(filePath) {
+  return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
+}
+
+function markdownStatus(markdown) {
+  const match = String(markdown || '').match(/^\*\*Status:\*\*\s*(.+)$/im);
+  return match ? match[1].trim() : '';
+}
+
+function revisionInstructionsUsable(meta) {
+  return revisionInstructionsReadiness(meta).ok;
+}
+
+function revisionInstructionsReadiness(meta) {
+  const instructionsPath = path.join(meta, 'REVISION-INSTRUCTIONS.md');
+  if (!fs.existsSync(instructionsPath)) {
+    return {
+      ok: false,
+      reason: 'missing',
+      message: 'Cannot use .paper/REVISION-INSTRUCTIONS.md because it is missing. Review FEEDBACK-PLAN.md, record decisions, and regenerate revision instructions before revising.',
+    };
+  }
+
+  const feedbackPlanPath = path.join(meta, 'FEEDBACK-PLAN.md');
+  if (!fs.existsSync(feedbackPlanPath)) return { ok: true };
+
+  const planStatus = markdownStatus(readIfExists(feedbackPlanPath));
+  if (planStatus === 'Pending user approval') {
+    return {
+      ok: false,
+      reason: 'pending_feedback_plan',
+      message: 'Cannot use .paper/REVISION-INSTRUCTIONS.md because FEEDBACK-PLAN.md is pending user approval. Finish feedback decisions and regenerate revision instructions before revising.',
+    };
+  }
+
+  const instructionsMtime = fs.statSync(instructionsPath).mtimeMs;
+  const planMtime = fs.statSync(feedbackPlanPath).mtimeMs;
+  if (instructionsMtime < planMtime) {
+    return {
+      ok: false,
+      reason: 'stale',
+      message: 'Cannot use .paper/REVISION-INSTRUCTIONS.md because FEEDBACK-PLAN.md is newer. Regenerate revision instructions before revising.',
+    };
+  }
+  return { ok: true };
+}
+
 function defaultTrigger(meta) {
   const candidates = [
     'FEEDBACK-PLAN.md',
@@ -20,6 +67,7 @@ function defaultTrigger(meta) {
     'REVIEW.md',
     'FACT-CHECK.md',
   ];
+  if (revisionInstructionsUsable(meta)) return '.paper/REVISION-INSTRUCTIONS.md';
   for (const candidate of candidates) {
     if (fs.existsSync(path.join(meta, candidate))) return `.paper/${candidate}`;
   }
@@ -39,6 +87,10 @@ function prepareRevision(input = {}) {
   }
   const current = status({ paper: paperDir });
   const trigger = input.trigger || defaultTrigger(meta);
+  if (trigger === '.paper/REVISION-INSTRUCTIONS.md') {
+    const readiness = revisionInstructionsReadiness(meta);
+    if (!readiness.ok) throw new Error(readiness.message);
+  }
   const reason = input.reason || 'before_substantive_revision';
 
   const snapshot = createSnapshot({
@@ -81,6 +133,9 @@ function printRevisionPreparation(result) {
   console.log(`paper: ${result.paperDir}`);
   console.log(`snapshot before revision: ${result.snapshot.relativeSnapshotPath}`);
   console.log(`trigger: ${result.trigger}`);
+  if (result.trigger === '.paper/REVISION-INSTRUCTIONS.md') {
+    console.log('instructions: read .paper/REVISION-INSTRUCTIONS.md first; inspect FEEDBACK-PLAN.md only when an instruction is ambiguous.');
+  }
   console.log(`next: ${result.next}`);
   console.log(`restore: ${result.restoreCommand}`);
   console.log('after revision: run /gpd-export, then read .paper/exports/FINAL.md before external review.');

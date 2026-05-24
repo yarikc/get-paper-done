@@ -247,7 +247,8 @@ comment-by-comment handling is needed. In Claude/Codex, use `/gpd-feedback` to
 review the pending concerns or themes; the agent should explain whether it
 agrees, disagrees, or needs clarification before recording `approve`, `modify`,
 `defer`, `reject`, or `answered_no_action` decisions. Approved
-changes are applied to `.paper/DRAFT.md`; export regenerates `FINAL.md` and
+decisions compile into `REVISION-INSTRUCTIONS.md`, the compact instruction set
+for `/gpd-revise`. Approved changes are applied to `.paper/DRAFT.md`; export regenerates `FINAL.md` and
 snapshots the prior export first. You review the final paper; GPD keeps the
 draft as the editable source of truth.
 

@@ -15,6 +15,8 @@ allowed-tools:
 <process>
 Run the revise workflow.
 
+If `.paper/REVISION-INSTRUCTIONS.md` exists, read it first and use it as the compact approved instruction set. Read `.paper/FEEDBACK-PLAN.md` only when you need provenance or an instruction is ambiguous.
+
 Before any edit to `.paper/DRAFT.md` or another existing paper artifact, run the CLI preflight and capture the snapshot ID:
 
 ```bash

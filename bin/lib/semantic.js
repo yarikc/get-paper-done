@@ -1261,5 +1261,6 @@ function validateSemanticPaper(paperDir) {
 }
 
 module.exports = {
+  validateFeedbackPlanDecisionSets,
   validateSemanticPaper,
 };

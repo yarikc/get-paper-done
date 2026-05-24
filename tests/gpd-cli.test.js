@@ -926,6 +926,41 @@ function testReviseCommandRequiresDraft() {
   assert(result.stderr.includes('Cannot prepare revision because .paper/DRAFT.md is missing'));
 }
 
+function testReviseCommandRejectsStaleRevisionInstructions() {
+  const dir = tempDir('gpd-revise-stale-instructions-test');
+  run(['init', '--location', dir, '--slug', 'stale-instructions', '--title', 'Stale Instructions']);
+  const paperDir = path.join(dir, 'stale-instructions');
+  const meta = path.join(paperDir, '.paper');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nBody.\n');
+  const instructionsPath = path.join(meta, 'REVISION-INSTRUCTIONS.md');
+  const feedbackPlanPath = path.join(meta, 'FEEDBACK-PLAN.md');
+  fs.writeFileSync(instructionsPath, '# Revision Instructions\n\n**Status:** Ready for revision\n');
+  fs.writeFileSync(feedbackPlanPath, '# Feedback Handling Plan\n\n**Status:** Approved by user\n');
+  const oldTime = new Date(Date.now() - 20000);
+  const newTime = new Date(Date.now() - 10000);
+  fs.utimesSync(instructionsPath, oldTime, oldTime);
+  fs.utimesSync(feedbackPlanPath, newTime, newTime);
+
+  const defaultOutput = run(['revise', '--paper', paperDir]);
+  assert(defaultOutput.includes('trigger: .paper/FEEDBACK-PLAN.md'));
+  assert(!defaultOutput.includes('instructions: read .paper/REVISION-INSTRUCTIONS.md first'));
+
+  const explicit = runFail(['revise', '--paper', paperDir, '--trigger', '.paper/REVISION-INSTRUCTIONS.md']);
+  assert.strictEqual(explicit.status, 1);
+  assert(explicit.stderr.includes('Cannot use .paper/REVISION-INSTRUCTIONS.md because FEEDBACK-PLAN.md is newer'));
+
+  fs.unlinkSync(instructionsPath);
+  const missing = runFail(['revise', '--paper', paperDir, '--trigger', '.paper/REVISION-INSTRUCTIONS.md']);
+  assert.strictEqual(missing.status, 1);
+  assert(missing.stderr.includes('Cannot use .paper/REVISION-INSTRUCTIONS.md because it is missing'));
+
+  fs.writeFileSync(instructionsPath, '# Revision Instructions\n\n**Status:** Ready for revision\n');
+  fs.writeFileSync(feedbackPlanPath, '# Feedback Handling Plan\n\n**Status:** Pending user approval\n');
+  const pending = runFail(['revise', '--paper', paperDir, '--trigger', '.paper/REVISION-INSTRUCTIONS.md']);
+  assert.strictEqual(pending.status, 1);
+  assert(pending.stderr.includes('because FEEDBACK-PLAN.md is pending user approval'));
+}
+
 function testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot() {
   const dir = tempDir('gpd-restore-test');
   run(['init', '--location', dir, '--slug', 'restore-paper', '--title', 'Restore Paper']);
@@ -1271,6 +1306,14 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Approved by user');
   const approvedStatus = run(['status', '--paper', paperDir]);
   assert(approvedStatus.includes('Next: /gpd-revise'));
+  const revisionInstructions = fs.readFileSync(path.join(meta, 'REVISION-INSTRUCTIONS.md'), 'utf8');
+  assert(revisionInstructions.includes('# Revision Instructions'));
+  assert(revisionInstructions.includes('**Compilation basis:** Individual concerns'));
+  assert(revisionInstructions.includes('### Concern 1: The ask is still unclear for the target reader.'));
+  assert(revisionInstructions.includes('- **Decision:** modify'));
+  assert(revisionInstructions.includes('- **Instruction:** Keep the ask concise.'));
+  assert(revisionInstructions.includes('Concern 3 (answered_no_action): Is this supported by the research?'));
+  assert(!revisionInstructions.includes('### Concern 3: Is this supported by the research?'));
 
   const cleanOutput = run(['feedback', 'clean', '--paper', paperDir]);
   assert(cleanOutput.includes('Comments removed: 8'));
@@ -1506,6 +1549,42 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
   assert(planAfterSetDecision.match(/### 3\. Concern: The Conway's law[\s\S]*?- \*\*User Decision:\*\* modify/));
   assert(planAfterSetDecision.includes('- **User Constraint:** Compress without expanding scope.'));
 
+  run([
+    'feedback-plan',
+    'decide',
+    '--paper',
+    paperDir,
+    '--set',
+    '2',
+    '--decision',
+    'modify',
+    '--note',
+    'Show the operating layer with one bounded example.',
+  ]);
+  const finalSetOutput = run([
+    'feedback-plan',
+    'decide',
+    '--paper',
+    paperDir,
+    '--set',
+    '3',
+    '--decision',
+    'approve',
+    '--note',
+    'Defer low-risk polish.',
+  ]);
+  assert(finalSetOutput.includes('status: Approved by user'));
+  assert(finalSetOutput.includes('revision instructions: .paper/REVISION-INSTRUCTIONS.md'));
+  const setInstructions = fs.readFileSync(path.join(meta, 'REVISION-INSTRUCTIONS.md'), 'utf8');
+  assert(setInstructions.includes('**Compilation basis:** Decision Sets'));
+  assert(setInstructions.includes('### Set 1: Structural compression'));
+  assert(setInstructions.includes('- **Decision:** modify'));
+  assert(setInstructions.includes('- **Instruction:** Compress without expanding scope.'));
+  assert(setInstructions.includes('### Set 2: Make the operating layer concrete'));
+  assert(setInstructions.includes('- **Instruction:** Show the operating layer with one bounded example.'));
+  assert(!setInstructions.includes('### Set 3: Low-risk polish'));
+  assert(setInstructions.includes('Decision Set 3 (defer): Low-risk polish. Defer low-risk polish.'));
+
   const ungrouped = createFeedbackCapturePaper('gpd-feedback-ungrouped-many-test');
   fs.writeFileSync(path.join(ungrouped.meta, 'FEEDBACK-PLAN.md'), [
     '# Feedback Handling Plan',
@@ -1522,6 +1601,83 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
   assert(ungroupedOutput.includes('Feedback decision'));
   assert(ungroupedOutput.includes('Concern 1 of 7'));
   assert(!ungroupedOutput.includes('Feedback decision set'));
+}
+
+function testRevisionInstructionsBlockOnInvalidDecisionSets() {
+  const { paperDir, meta } = createFeedbackCapturePaper('gpd-feedback-instruction-block-test');
+  fs.writeFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), [
+    '# Feedback Handling Plan',
+    '',
+    '**Created:** 2026-05-24T00:00:00Z',
+    '**Based on:** `.paper/FEEDBACK-EXTERNAL.md`',
+    '**Status:** Pending user approval',
+    '',
+    '## Decision Sets',
+    '',
+    '**Mode:** Aggregate (2 sets covering 2 concerns)',
+    '',
+    '### Set 1 -- MODIFY -- First set',
+    '',
+    '- **Covers:** concerns 1, 2',
+    '- **Why:** Grouped for revision.',
+    '- **Instruction:** Apply both items.',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '### Set 2 -- MODIFY -- Overlapping set',
+    '',
+    '- **Covers:** concerns 2',
+    '- **Why:** This overlap should block compiled instructions.',
+    '- **Instruction:** Apply the second item differently.',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '## Proposed Handling',
+    '',
+    '### 1. Concern: First concern',
+    '',
+    '- **Type:** Concern',
+    '- **Severity:** HIGH',
+    '- **Source(s):** claude',
+    '- **Recommendation:** modify',
+    '- **Why this matters:** This matters.',
+    '- **What improves if addressed:** Better paper.',
+    '- **Risk if handled badly:** Expansion.',
+    '- **Proposed handling:** Apply it.',
+    '- **Proposed edits:**',
+    '  1. Edit one.',
+    '- **Reviewer evidence:**',
+    '  1. Evidence one.',
+    '- **Affected artifacts:** DRAFT',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '### 2. Concern: Second concern',
+    '',
+    '- **Type:** Concern',
+    '- **Severity:** HIGH',
+    '- **Source(s):** claude',
+    '- **Recommendation:** modify',
+    '- **Why this matters:** This also matters.',
+    '- **What improves if addressed:** Better paper.',
+    '- **Risk if handled badly:** Expansion.',
+    '- **Proposed handling:** Apply it.',
+    '- **Proposed edits:**',
+    '  1. Edit two.',
+    '- **Reviewer evidence:**',
+    '  1. Evidence two.',
+    '- **Affected artifacts:** DRAFT',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+  ].join('\n'));
+
+  run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '1', '--decision', 'modify', '--note', 'Apply the first concern.']);
+  const output = run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '2', '--decision', 'modify', '--note', 'Apply the second concern.']);
+  assert(output.includes('status: Approved by user'));
+  assert(output.includes('revision instructions: blocked by feedback-plan validation issues'));
+  assert(output.includes('semantic.feedback_decision_set_overlap'));
+  assert(!fs.existsSync(path.join(meta, 'REVISION-INSTRUCTIONS.md')));
 }
 
 function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
@@ -2606,6 +2762,7 @@ testNextUsesDraftHashForExportFreshness();
 testSnapshotCommandCreatesVersionAndRevisionLog();
 testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();
 testReviseCommandRequiresDraft();
+testReviseCommandRejectsStaleRevisionInstructions();
 testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot();
 testRestoreCommandRejectsTamperedSnapshot();
 testExportCommandSnapshotsExistingFinalBeforeOverwrite();
@@ -2615,6 +2772,7 @@ testReviewPackAndFeedbackCaptureFinalComments();
 testFeedbackCaptureAggregatesManyInlineCommentsByDefault();
 testFeedbackCaptureCanForceItemizedModeForManyComments();
 testFeedbackPlanReviewGroupsManyConcernsByDefault();
+testRevisionInstructionsBlockOnInvalidDecisionSets();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();

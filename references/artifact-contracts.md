@@ -176,6 +176,20 @@ Required tables:
 
 `Recommendation` is the generated default handling (`approve`, `modify`, `defer`, `reject`, `answer`, or `preserve`). `Why this matters` explains the consequence of accepting or ignoring the concern. `What improves if addressed` states the expected benefit. `Risk if handled badly` names the failure mode to avoid. `Proposed handling` and `Proposed edits` give implementation options, not separate approval decisions. `User Decision` is the explicit approval field (`approve`, `modify`, `defer`, `reject`, or `answered_no_action`); `User Constraint` records any author constraint that revision must follow. Inline `//keep:` feedback must become a preservation constraint, and revision checks must verify that accepted preservation constraints were honored.
 
+### `REVISION-INSTRUCTIONS.md`
+
+Generated after `FEEDBACK-PLAN.md` reaches `Approved by user`. It compiles the approved or modified feedback into the compact instruction set that `/gpd-revise` should apply. It is not a replacement for `FEEDBACK-PLAN.md`; it reduces revision-agent cognitive load while preserving provenance back to the approved concerns or Decision Sets.
+
+Required headings:
+
+- `# Revision Instructions`
+- `## Summary`
+- `## Active Revision Instructions`
+- `## Out Of Scope For This Revision`
+- `## Revision Rules`
+
+Active instructions include only `approve` and `modify` decisions. Deferred, rejected, and answered-no-action items must appear only in the out-of-scope section. When `## Decision Sets` exists in `FEEDBACK-PLAN.md`, the compiled instructions should use those sets as the primary approval surface and cite the covered concern numbers as provenance.
+
 ### `REVISION-CHECK.md`
 
 Required when a substantive revision changes the draft before export or renewed review. The check must compare against a saved baseline, preferably a `.paper/versions/...` snapshot created by `gpd revise` before the revision.

@@ -28,6 +28,7 @@ Later stages create these on demand:
 - `FEEDBACK-EXTERNAL.md`: optional raw and summarized feedback from external AI reviewers
 - `FEEDBACK-READER.md`: structured human or model reader feedback using voice, register, audience fit, evidence, and ask clarity signals
 - `FEEDBACK-PLAN.md`: concern-first approval queue for local, external, and reader feedback before revision, with generated recommendations, proposed edits, explicit user decisions, and user constraints
+- `REVISION-INSTRUCTIONS.md`: compact approved instruction set generated from `FEEDBACK-PLAN.md` after the user decides feedback, used by `/gpd-revise` to reduce rereading and prevent unapproved concerns from leaking into the edit
 
 Import-specific and supporting material:
 
@@ -319,6 +320,8 @@ The review stage has four possible outputs:
 - `.paper/REVISION-LOG.md`: snapshot ledger for paper-local rollback, restore, and comparison
 
 `FEEDBACK-READER.md` uses five signals: voice, register, audience fit, evidence, and ask clarity. The feedback plan must start with a decision view and present a concern-first queue. Each numbered item must identify the type, severity, sources, recommendation, why it matters, what improves if addressed, risk if handled badly, proposed handling, proposed edits, reviewer evidence, affected artifacts, `User Decision`, and `User Constraint`. Proposed edits are implementation options under a concern, not separate approval decisions unless listed as an unmapped suggestion. `FEEDBACK-PLAN.md` must also carry below-target items when review says a paper is below its quality bar. No draft or upstream artifact should be changed until the user approves the proposed handling.
+
+After all feedback decisions are recorded, `REVISION-INSTRUCTIONS.md` compiles only approved or modified items into the active edit instructions and records deferred, rejected, or answered-no-action items as out of scope. Revision agents should read it first and inspect `FEEDBACK-PLAN.md` only for provenance or ambiguity.
 
 `REVISION-CHECK.md` is required for substantive revisions. It compares the revised draft against the snapshot captured before revision and prevents validator-driven or feedback-driven edits from degrading thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, or substance preservation. The recoverable baseline lives under `.paper/versions/`; `REVISION-CHECK.md` is the quality judgment, not the backup. Snapshots include hash metadata, paper-local source notes, external-review captures, and imported originals when present. Use `gpd restore --snapshot REV-...` to restore tracked files from a snapshot; restore first creates a safety snapshot of the current state.
 

@@ -54,6 +54,7 @@ function testTemplateArtifactsPassContracts() {
     'templates/feedback-external.md',
     'templates/feedback-reader.md',
     'templates/feedback-plan.md',
+    'templates/revision-instructions.md',
     'templates/revision-check.md',
     'templates/revision-log.md',
     'templates/paper-context.md',

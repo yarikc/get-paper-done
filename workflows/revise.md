@@ -16,6 +16,7 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 - .paper/FACT-CHECK.md if present
 - .paper/FEEDBACK-EXTERNAL.md if present
 - .paper/FEEDBACK-READER.md if present
+- .paper/REVISION-INSTRUCTIONS.md if present
 - .paper/FEEDBACK-PLAN.md if present
 - .paper/REVISION-LOG.md if present
 - .paper/REVISION-CHECK.md if present
@@ -23,9 +24,11 @@ Apply approved review feedback into a new draft pass, or run a controlled editor
 
 <process>
 
-Read the current draft and review. If `.paper/FEEDBACK-READER.md` exists, read it as input to feedback handling, not as direct edit authority. If `.paper/FEEDBACK-PLAN.md` exists, read it before proposing or applying changes.
+Read the current draft and review. If `.paper/REVISION-INSTRUCTIONS.md` exists, read it before the full feedback plan and treat it as the compact approved instruction set for the next revision. Inspect `.paper/FEEDBACK-PLAN.md` only when an instruction is ambiguous or provenance detail is needed. If `.paper/FEEDBACK-READER.md` exists, read it as input to feedback handling, not as direct edit authority. If `.paper/FEEDBACK-PLAN.md` exists and no revision instructions exist, read it before proposing or applying changes.
 
 If `.paper/FEEDBACK-PLAN.md` has status "Pending user approval", stop and ask the user to decide the concern queue. The `Suggested handling` field is the generated default; `User Decision` and `User Constraint` are the authority for revision. Do not edit `.paper/DRAFT.md` until feedback handling is approved.
+
+If `.paper/FEEDBACK-PLAN.md` is approved but `.paper/REVISION-INSTRUCTIONS.md` is missing, compile the approved concerns into `.paper/REVISION-INSTRUCTIONS.md` before revising. Normally `gpd feedback-plan decide` creates it automatically when the last required decision is recorded.
 
 If `.paper/STRATEGY.md` has status `Revise Before Drafting` or `No-Go`, stop unless the user explicitly overrides the strategy block. Cite the primary blocker from `Strategy Blockers` when present.
 
@@ -54,6 +57,7 @@ Before editing, identify:
 - approved external feedback to incorporate
 - approved reader feedback to incorporate
 - user decisions and constraints in `.paper/FEEDBACK-PLAN.md`
+- compiled active instructions in `.paper/REVISION-INSTRUCTIONS.md` when present
 - feedback explicitly ignored or deferred
 - claims needing support or removal
 - fact-check findings requiring source, softening, removal, reframe, or current verification
@@ -89,6 +93,7 @@ If `.paper/REVIEW.md` contains a `Below-Target Improvement Gate` with `Immediate
 Feedback-plan boundary:
 
 - Apply only concerns whose `User Decision` is `approve` or `modify`.
+- Prefer `.paper/REVISION-INSTRUCTIONS.md` as the active instruction source when it exists.
 - Respect `User Constraint` for every `modify` decision.
 - Do not apply concerns whose `User Decision` is `defer` or `reject`.
 - Treat `Suggested handling` as a generated default, not the user's decision.

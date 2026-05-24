@@ -290,8 +290,11 @@ When you or another model reviews the paper, capture that read before revising:
 
 Feedback goes into `FEEDBACK-READER.md`. Handling goes into
 `FEEDBACK-PLAN.md`. In Claude/Codex, use `/gpd-feedback` to review one concern
-at a time and record `approve`, `modify`, `defer`, or `reject`. Revision should
-happen only after the handling plan is approved.
+at a time or one decision set at a time and record `approve`, `modify`,
+`defer`, `reject`, or `answered_no_action`. When the plan is approved, GPD
+generates `REVISION-INSTRUCTIONS.md` so `/gpd-revise` has one compact set of
+approved instructions. Revision should happen only after the handling plan is
+approved.
 
 ## Paper Types
 

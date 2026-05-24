@@ -40,6 +40,7 @@ Check which artifacts exist:
 - FEEDBACK-EXTERNAL.md
 - FEEDBACK-READER.md
 - FEEDBACK-PLAN.md
+- REVISION-INSTRUCTIONS.md
 - REVISION-CHECK.md
 - REVISION-LOG.md
 - PAPER-CONTEXT.md
@@ -70,6 +71,7 @@ Stale context risks:
 - `FACT-CHECK.md` has HIGH issues or claims marked verify-before-publication: do not export without user acknowledgement.
 - `FEEDBACK-READER.md` exists without `FEEDBACK-PLAN.md`, or is newer than `FEEDBACK-PLAN.md`: synthesize reader feedback through `/gpd-review` before revision.
 - `FEEDBACK-PLAN.md` pending approval: route to `/gpd-feedback`; do not revise until user approves, modifies, defers, or rejects each concern.
+- `FEEDBACK-PLAN.md` approved but `REVISION-INSTRUCTIONS.md` missing: `gpd feedback-plan decide` normally compiles it after the final decision; compile it before revision if it is missing.
 - `REVIEW.md` Below-Target Improvement Gate says immediate improvement is required before export: route to `/gpd-revise`.
 - `DRAFT.md` changed substantively after review/export and no current `REVISION-CHECK.md` exists: require `/gpd-review` or a revision-check pass before export confidence.
 - `STATE.json` `grill.status` is not `Complete`, or required `grill.resolved_decisions` are missing: recommend `/gpd-grill` before `/gpd-brief`.
@@ -150,7 +152,7 @@ Users should not need to remember the whole workflow. Always include a short "wh
 - If next is `/gpd-export`: "Run export, then review `.paper/exports/FINAL.md`."
 - If `exports/FINAL.md` is current and no writing stage is pending: "Read `.paper/exports/FINAL.md`. If you add inline comments there, run `gpd feedback` from the paper directory, then `/gpd-feedback`."
 - If next is `/gpd-review` and `exports/FINAL.md` exists: "Review evaluates paper quality. If you added reader comments to the export, run `gpd feedback` first."
-- If next is `/gpd-revise`: "Run `gpd revise` first if no active snapshot exists. Revision edits `.paper/DRAFT.md`; export regenerates `.paper/exports/FINAL.md`."
+- If next is `/gpd-revise`: "Run `gpd revise` first if no active snapshot exists. Revision reads `.paper/REVISION-INSTRUCTIONS.md` when present, edits `.paper/DRAFT.md`, and export regenerates `.paper/exports/FINAL.md`."
 - Otherwise: "Run the recommended command. After it finishes, run `gpd next` in the terminal or `/gpd-status` in Claude/Codex."
 
 Also include a review recommendation when the paper is near or after export:
@@ -177,7 +179,7 @@ Default guidance:
 - Before `/gpd-draft`: clear context after outline; read `PERSONA.md`, `AUDIENCE.md`, `BRIEF.md`, `RESEARCH.json`, `OUTLINE.md`.
 - Before `/gpd-fact-check`: clear context after drafting; read `DRAFT.md`, compressed `RESEARCH.json`, `BRIEF.md`, `AUDIENCE.md`, and source policy. Avoid raw sources except for specific verification.
 - Before `/gpd-review`: clear context after drafting; read draft, reader feedback if present, and upstream artifacts.
-- Before `/gpd-revise`: clear context after review; read approved feedback plan, reader feedback if present, draft, and revision log if present.
+- Before `/gpd-revise`: clear context after review; read revision instructions if present, approved feedback plan as needed, reader feedback if needed, draft, and revision log if present.
 
 ## 7. Output Format
 

@@ -13,11 +13,18 @@ const {
   writeStateJson,
   writeStateMarkdown,
 } = require('./state');
+const {
+  validateFeedbackPlanDecisionSets,
+} = require('./semantic');
 
 const VALID_DECISIONS = new Set(['approve', 'modify', 'defer', 'reject', 'answered_no_action']);
 
 function feedbackPlanPath(paperDir) {
   return path.join(paperDir, '.paper', 'FEEDBACK-PLAN.md');
+}
+
+function revisionInstructionsPath(paperDir) {
+  return path.join(paperDir, '.paper', 'REVISION-INSTRUCTIONS.md');
 }
 
 function oneLine(value, maxLength = 220) {
@@ -89,6 +96,38 @@ function parseConcernNumbers(value) {
     .match(/\d+/g)
     ?.map((item) => Number(item))
     .filter((item) => Number.isInteger(item) && item > 0) || [];
+}
+
+function normalizedDecision(value) {
+  return String(value || '').toLowerCase().trim();
+}
+
+function effectiveDecisionForSet(set) {
+  const userDecision = normalizedDecision(set.userDecision);
+  if (userDecision === 'approve') return normalizedDecision(set.decision);
+  return userDecision;
+}
+
+function isActiveRevisionDecision(decision) {
+  return decision === 'approve' || decision === 'modify';
+}
+
+function isOutOfScopeDecision(decision) {
+  return decision === 'defer' || decision === 'reject' || decision === 'answered_no_action';
+}
+
+function usefulConstraint(value) {
+  const text = String(value || '').trim();
+  if (!text || /^(none|none yet|-|n\/a)$/i.test(text)) return '';
+  return text;
+}
+
+function usefulInstruction(...values) {
+  for (const value of values) {
+    const text = usefulConstraint(value);
+    if (text) return text;
+  }
+  return '';
 }
 
 function tableCell(value) {
@@ -163,6 +202,133 @@ function parseFeedbackPlanMarkdown(markdown) {
     status: statusMatch ? statusMatch[1].trim() : '',
     decisionSets: parseDecisionSetsMarkdown(markdown),
     concerns,
+  };
+}
+
+function renderRevisionInstructions(plan) {
+  const lines = [
+    '# Revision Instructions',
+    '',
+    `**Created:** ${new Date().toISOString()}`,
+    '**Source:** `.paper/FEEDBACK-PLAN.md`',
+    `**Compilation basis:** ${plan.decisionSets.length > 0 ? 'Decision Sets' : 'Individual concerns'}`,
+    '**Status:** Ready for revision',
+    '',
+    '## Summary',
+    '',
+    'This file compiles approved feedback into the instructions the revision agent should apply next. It is derived from user decisions in `FEEDBACK-PLAN.md`; it does not replace the full feedback plan when detail is needed.',
+    '',
+    '## Active Revision Instructions',
+    '',
+  ];
+
+  let activeCount = 0;
+  const coveredByActiveSets = new Set();
+
+  if (plan.decisionSets.length > 0) {
+    for (const set of plan.decisionSets) {
+      const decision = effectiveDecisionForSet(set);
+      if (!isActiveRevisionDecision(decision)) continue;
+      activeCount += 1;
+      for (const concernIndex of set.covers) coveredByActiveSets.add(concernIndex);
+      const instruction = usefulInstruction(set.userConstraint, set.instruction);
+      lines.push(`### Set ${set.index}: ${set.title}`);
+      lines.push('');
+      lines.push(`- **Decision:** ${decision}`);
+      lines.push(`- **Covers:** concerns ${set.covers.join(', ') || '-'}`);
+      lines.push(`- **Why:** ${set.why || '-'}`);
+      lines.push(`- **Instruction:** ${instruction || set.instruction || '-'}`);
+      if (usefulConstraint(set.userConstraint)) {
+        lines.push(`- **User constraint:** ${set.userConstraint}`);
+      }
+      lines.push(`- **Provenance:** Decision Set ${set.index} in \`.paper/FEEDBACK-PLAN.md\``);
+      lines.push('');
+    }
+  } else {
+    for (const concern of plan.concerns) {
+      const decision = normalizedDecision(concern.userDecision);
+      if (!isActiveRevisionDecision(decision)) continue;
+      activeCount += 1;
+      const primaryEdit = firstUseful(concern.proposedEdits);
+      const instruction = usefulInstruction(concern.userConstraint, concern.proposedHandling, primaryEdit);
+      lines.push(`### Concern ${concern.index}: ${concern.title}`);
+      lines.push('');
+      lines.push(`- **Decision:** ${decision}`);
+      lines.push(`- **Severity:** ${concern.severity || '-'}`);
+      lines.push(`- **Source(s):** ${concern.sources || '-'}`);
+      lines.push(`- **Why:** ${concern.why || '-'}`);
+      lines.push(`- **Instruction:** ${instruction || '-'}`);
+      if (usefulConstraint(concern.userConstraint)) {
+        lines.push(`- **User constraint:** ${concern.userConstraint}`);
+      }
+      lines.push(`- **Affected artifacts:** ${concern.affectedArtifacts || '-'}`);
+      lines.push(`- **Provenance:** Concern ${concern.index} in \`.paper/FEEDBACK-PLAN.md\``);
+      lines.push('');
+    }
+  }
+
+  if (activeCount === 0) {
+    lines.push('- No approved or modified feedback requires draft revision.');
+    lines.push('');
+  }
+
+  const outOfScopeRows = [];
+  if (plan.decisionSets.length > 0) {
+    for (const set of plan.decisionSets) {
+      const decision = effectiveDecisionForSet(set);
+      if (!isOutOfScopeDecision(decision)) continue;
+      outOfScopeRows.push(`- Decision Set ${set.index} (${decision}): ${set.title}. ${usefulInstruction(set.userConstraint, set.instruction) || 'Do not apply in this revision.'}`);
+      for (const concernIndex of set.covers) coveredByActiveSets.add(concernIndex);
+    }
+    for (const concern of plan.concerns) {
+      if (coveredByActiveSets.has(concern.index)) continue;
+      const decision = normalizedDecision(concern.userDecision);
+      if (isOutOfScopeDecision(decision)) {
+        outOfScopeRows.push(`- Concern ${concern.index} (${decision}): ${concern.title}. ${usefulConstraint(concern.userConstraint) || 'Do not apply in this revision.'}`);
+      }
+    }
+  } else {
+    for (const concern of plan.concerns) {
+      const decision = normalizedDecision(concern.userDecision);
+      if (isOutOfScopeDecision(decision)) {
+        outOfScopeRows.push(`- Concern ${concern.index} (${decision}): ${concern.title}. ${usefulConstraint(concern.userConstraint) || 'Do not apply in this revision.'}`);
+      }
+    }
+  }
+
+  lines.push('## Out Of Scope For This Revision');
+  lines.push('');
+  if (outOfScopeRows.length > 0) lines.push(...outOfScopeRows);
+  else lines.push('- None recorded.');
+  lines.push('');
+  lines.push('## Revision Rules');
+  lines.push('');
+  lines.push('- Apply only the active instructions above.');
+  lines.push('- Preserve deferred, rejected, and answered-no-action concerns unless a sentence must change incidentally to apply an active instruction.');
+  lines.push('- If an instruction is ambiguous, inspect the linked concern or decision set in `.paper/FEEDBACK-PLAN.md` before editing.');
+  lines.push('- After revision, write or update `.paper/REVISION-CHECK.md` and verify that accepted constraints were honored.');
+  lines.push('');
+
+  return `${lines.join('\n').trimEnd()}\n`;
+}
+
+function compileRevisionInstructionsIfReady(paperDir, plan, dryRun) {
+  if (plan.status !== 'Approved by user') return null;
+  const decisionSetIssues = validateFeedbackPlanDecisionSets(paperDir);
+  if (decisionSetIssues.length > 0) {
+    return {
+      blocked: true,
+      issues: decisionSetIssues,
+      path: revisionInstructionsPath(paperDir),
+    };
+  }
+
+  const instructionsPath = revisionInstructionsPath(paperDir);
+  writeFile(instructionsPath, renderRevisionInstructions(plan), dryRun);
+  return {
+    blocked: false,
+    issues: [],
+    path: instructionsPath,
   };
 }
 
@@ -376,6 +542,7 @@ function decideFeedbackPlan(input = {}) {
   writeFile(planPath, updated, input.dryRun);
 
   const parsed = parseFeedbackPlanMarkdown(updated);
+  const revisionInstructions = compileRevisionInstructionsIfReady(paperState.paperDir, parsed, input.dryRun);
   const selected = Number.isInteger(input.set)
     ? parsed.decisionSets.find((set) => set.index === input.set)
     : parsed.concerns.find((concern) => concern.index === input.item);
@@ -402,6 +569,7 @@ function decideFeedbackPlan(input = {}) {
     status: parsed.status,
     decision: selected,
     decisionKind: Number.isInteger(input.set) ? 'set' : 'concern',
+    revisionInstructions,
   };
 }
 
@@ -527,11 +695,33 @@ function printFeedbackPlanDecision(result) {
     console.log(`decision: ${result.decision.userDecision}`);
     console.log(`constraint: ${result.decision.userConstraint}`);
     console.log(`covered concerns: ${result.decision.covers.join(', ')}`);
+    if (result.revisionInstructions) {
+      if (result.revisionInstructions.blocked) {
+        console.log('revision instructions: blocked by feedback-plan validation issues');
+        for (const item of result.revisionInstructions.issues) {
+          console.log(`- ${item.id || 'semantic issue'}: ${item.issue}`);
+        }
+      } else {
+        console.log(`revision instructions: ${displayPath(result.paperDir, result.revisionInstructions.path)}`);
+        console.log('next: /gpd-revise will use REVISION-INSTRUCTIONS.md as the compact approved instruction set.');
+      }
+    }
     return;
   }
   console.log(`item: ${result.decision.index}`);
   console.log(`decision: ${result.decision.userDecision}`);
   console.log(`constraint: ${result.decision.userConstraint}`);
+  if (result.revisionInstructions) {
+    if (result.revisionInstructions.blocked) {
+      console.log('revision instructions: blocked by feedback-plan validation issues');
+      for (const item of result.revisionInstructions.issues) {
+        console.log(`- ${item.id || 'semantic issue'}: ${item.issue}`);
+      }
+    } else {
+      console.log(`revision instructions: ${displayPath(result.paperDir, result.revisionInstructions.path)}`);
+      console.log('next: /gpd-revise will use REVISION-INSTRUCTIONS.md as the compact approved instruction set.');
+    }
+  }
 }
 
 module.exports = {
