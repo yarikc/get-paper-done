@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const {
+  basenameLabel,
+  displayPath,
   writeFile,
 } = require('./common');
 const {
@@ -1022,48 +1024,59 @@ function cleanFeedbackComments(input = {}) {
 }
 
 function printReviewPack(result) {
-  console.log(`paper: ${result.paperDir}`);
-  console.log(`review target: ${result.reviewTarget}`);
-  console.log(`review artifact: ${result.reviewArtifact}`);
-  console.log(`editable source: ${result.editableSource}`);
-  console.log(`why: ${result.reason}`);
-  console.log('comment syntax:');
+  console.log('Review pack');
+  console.log('');
+  console.log(`Paper: ${basenameLabel(result.paperDir)}`);
+  console.log(`Review target: ${displayPath(result.paperDir, result.reviewTarget)}`);
+  console.log(`Review artifact: ${result.reviewArtifact}`);
+  console.log(`Editable source: ${result.editableSource}`);
+  console.log(`Why: ${result.reason}`);
+  console.log('');
+  console.log('Comment syntax:');
   for (const syntax of result.commentSyntax) console.log(`- ${syntax}`);
-  console.log(`capture: ${result.captureCommand}`);
-  if (result.alternateCaptureCommand) console.log(`capture from elsewhere: ${result.alternateCaptureCommand}`);
-  console.log(`next: ${result.next}`);
+  console.log('');
+  console.log(`Capture: ${result.captureCommand}`);
+  if (result.alternateCaptureCommand) console.log(`Capture from elsewhere: ${result.alternateCaptureCommand}`);
+  console.log(`Next: ${result.next}`);
 }
 
 function printFeedbackCapture(result) {
-  console.log(`paper: ${result.paperDir}`);
-  console.log(`review target: ${result.reviewTarget}`);
-  console.log(`comments captured: ${result.commentsCaptured}`);
-  console.log(`reader feedback: ${result.readerFeedbackPath}`);
-  console.log(`feedback plan: ${result.feedbackPlanPath}`);
-  if (result.commentedReviewPath) console.log(`commented review preserved: ${result.commentedReviewPath}`);
-  if (result.snapshotId) console.log(`snapshot: ${result.snapshotId}`);
-  if (result.commentsLeftInPlace) console.log('comments: left in review target; run gpd feedback clean after confirming extraction');
-  if (result.feedbackMode) console.log(`feedback plan mode: ${result.feedbackMode}`);
+  console.log('Feedback captured');
+  console.log('');
+  console.log(`Paper: ${basenameLabel(result.paperDir)}`);
+  console.log(`Reviewed file: ${displayPath(result.paperDir, result.reviewTarget)}`);
+  console.log(`Comments found: ${result.commentsCaptured}`);
+  console.log(`Reader feedback: ${displayPath(result.paperDir, result.readerFeedbackPath)}`);
+  console.log(`Feedback plan: ${displayPath(result.paperDir, result.feedbackPlanPath)}`);
+  if (result.commentedReviewPath) console.log(`Preserved copy: ${displayPath(result.paperDir, result.commentedReviewPath)}`);
+  if (result.snapshotId) console.log(`Snapshot: ${result.snapshotId}`);
+  if (result.feedbackMode) console.log(`Plan mode: ${result.feedbackMode}`);
   if (result.commentsCaptured === 0) {
-    console.log('no comments found: add //todo:, //keep:, //qq:, or //no: comments to the review target, then run gpd feedback again');
+    console.log('');
+    console.log('No comments found. Add //todo:, //keep:, //qq:, or //no: comments to the reviewed file, then run gpd feedback again.');
   }
   if (result.commentsCaptured > 0) {
-    console.log('interpretation: written to FEEDBACK-READER.md and FEEDBACK-PLAN.md');
+    console.log('');
+    console.log('Interpretation: FEEDBACK-READER.md captures the raw comments; FEEDBACK-PLAN.md groups them for decision.');
     if (result.feedbackMode === 'aggregate') {
-      console.log('review loop: run /gpd-feedback to approve or modify theme-level decisions; raw comments remain in FEEDBACK-READER.md as evidence');
+      console.log('Suggested handling: Review a small set of theme-level decisions instead of every raw comment.');
     } else {
-      console.log('review loop: run /gpd-feedback to see each concern with assessment, clarification need, proposed handling, and decision options');
+      console.log('Suggested handling: Review each concern with its proposed action before revision.');
     }
+    if (result.commentsLeftInPlace) console.log('Comments: left in reviewed file until you explicitly clean them.');
+    console.log('No draft changes were made.');
   }
-  console.log(`next: ${result.next}`);
+  console.log(`Next: ${result.next}`);
 }
 
 function printFeedbackClean(result) {
-  console.log(`paper: ${result.paperDir}`);
-  console.log(`review target: ${result.reviewTarget}`);
-  console.log(`comments removed: ${result.commentsRemoved}`);
-  if (result.snapshotId) console.log(`snapshot: ${result.snapshotId}`);
-  console.log(`next: ${result.next}`);
+  console.log('Feedback comments cleaned');
+  console.log('');
+  console.log(`Paper: ${basenameLabel(result.paperDir)}`);
+  console.log(`Reviewed file: ${displayPath(result.paperDir, result.reviewTarget)}`);
+  console.log(`Comments removed: ${result.commentsRemoved}`);
+  if (result.snapshotId) console.log(`Snapshot: ${result.snapshotId}`);
+  console.log(`Next: ${result.next}`);
 }
 
 module.exports = {

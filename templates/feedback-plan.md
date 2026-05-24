@@ -8,6 +8,22 @@
 
 [Short summary of the feedback and suggested path. State that suggested handling values are defaults and the user must record a decision before revision.]
 
+## Decision Sets
+
+Use this section only when the plan intentionally groups many concerns into a
+smaller durable approval surface. If present, this section is the default review
+surface; individual concerns remain below as evidence and implementation detail.
+
+**Mode:** Aggregate ([N] sets covering [M] concerns)
+
+### Set 1 -- MODIFY -- [Set title]
+
+- **Covers:** concerns [1, 2, 3]
+- **Why:** [Why these concerns should be decided together]
+- **Instruction:** [User-facing revision instruction for the covered concerns]
+- **User Decision:** pending
+- **User Constraint:** none yet
+
 ## Decision View
 
 Review each concern. Use `approve`, `modify`, `defer`, `reject`, or `answered_no_action`.

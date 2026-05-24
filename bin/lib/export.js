@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const {
+  basenameLabel,
+  displayPath,
   fileSha256IfExists,
   writeFile,
 } = require('./common');
@@ -44,6 +46,15 @@ function parseHeadingValue(markdown, heading) {
     }
   }
   return null;
+}
+
+function validationLabel(note) {
+  if (!note) return '';
+  if (/semantic validation passed/i.test(note) && /list-density/i.test(note)) {
+    return 'Passed. Medium list-density warnings accepted in REVIEW.md.';
+  }
+  if (/semantic validation passed/i.test(note)) return 'Passed.';
+  return note;
 }
 
 function projectTitle(projectMarkdown) {
@@ -255,22 +266,37 @@ function exportPaper(input = {}) {
     snapshot: overwriteSnapshot,
     reviewRating: exportedStatus ? exportedStatus.reviewRating : '',
     reviewRecommendation: exportedStatus ? exportedStatus.reviewRecommendation : null,
+    reviewCompletionNote: exportedStatus ? exportedStatus.reviewCompletionNote : '',
+    revisionSummary: exportedStatus ? exportedStatus.revisionSummary : [],
   };
 }
 
 function printExport(result) {
-  console.log(`paper: ${result.paperDir}`);
-  console.log(`export: ${result.finalPath}`);
-  if (result.snapshot) console.log(`snapshot before overwrite: ${result.snapshot.relativeSnapshotPath}`);
-  if (result.forced) console.log('warning: exported with --force');
-  if (result.reviewRating) console.log(`review rating: ${result.reviewRating}`);
-  if (result.reviewRecommendation) {
-    console.log(`recommended review: ${result.reviewRecommendation.recommendation}`);
-    console.log(`why: ${result.reviewRecommendation.why}`);
-    console.log(`after that: ${result.reviewRecommendation.after}`);
+  console.log('Export complete');
+  console.log('');
+  console.log(`Paper: ${basenameLabel(result.paperDir)}`);
+  console.log(`Final paper: ${displayPath(result.paperDir, result.finalPath)}`);
+  if (result.reviewRating) console.log(`Rating: ${result.reviewRating}`);
+  const validation = validationLabel(result.reviewCompletionNote);
+  if (validation) console.log(`Validation: ${validation}`);
+  if (result.snapshot) console.log(`Snapshot: ${result.snapshot.versionId}`);
+  if (result.forced) console.log('Warning: exported with --force');
+  if (Array.isArray(result.revisionSummary) && result.revisionSummary.length > 0) {
+    console.log('');
+    console.log('What changed:');
+    for (const item of result.revisionSummary) console.log(`- ${item}`);
   }
-  console.log('review: read .paper/exports/FINAL.md');
-  console.log('if you add comments: run gpd feedback, then /gpd-feedback');
+  if (result.reviewRecommendation) {
+    const reviewRecommendation = String(result.reviewRecommendation.recommendation || '');
+    console.log('');
+    console.log(`Next: ${reviewRecommendation.startsWith('user review first') ? 'Read FINAL.md.' : reviewRecommendation}`);
+    console.log(`Why: ${result.reviewRecommendation.why}`);
+    console.log(`After that: ${result.reviewRecommendation.after}`);
+  } else {
+    console.log('');
+    console.log('Next: Read FINAL.md.');
+    console.log('After that: If it needs changes, add inline comments and run gpd feedback.');
+  }
 }
 
 module.exports = {

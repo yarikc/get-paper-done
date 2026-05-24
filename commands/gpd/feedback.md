@@ -1,7 +1,7 @@
 ---
 name: gpd:feedback
-description: Walk through feedback-plan concerns one at a time and record user decisions
-argument-hint: "[collect|clean|--list] [--item N]"
+description: Review feedback-plan decision sets or concerns and record user decisions
+argument-hint: "[collect|clean|--list] [--set N|--item N]"
 allowed-tools:
   - Read
   - Bash
@@ -71,7 +71,15 @@ Otherwise, run:
 gpd feedback-plan review --paper <paper-dir> [--item N]
 ```
 
-Show the concern in plain language:
+If the output shows `Feedback decision set`, present the sets as the approval
+surface and do not force concern-by-concern review unless the user asks to drill
+in. Record a set decision with:
+
+```bash
+gpd feedback-plan decide --paper <paper-dir> --set <N> --decision <approve|modify|defer|reject|answered_no_action> --note "<constraint or reason>"
+```
+
+If the output shows `Feedback decision`, show the concern in plain language:
 
 - concern title
 - severity and suggested handling

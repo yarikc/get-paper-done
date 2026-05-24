@@ -1423,6 +1423,84 @@ ${rows}
 `;
 }
 
+const DECISION_SET_THRESHOLD = 8;
+
+function concernIndexes(concerns, predicate) {
+  return concerns
+    .map((concern, index) => (predicate(concern, index) ? index + 1 : null))
+    .filter(Boolean);
+}
+
+function decisionSetSection(index, decision, title, covers, why, instruction) {
+  return [
+    `### Set ${index} -- ${decision.toUpperCase()} -- ${title}`,
+    '',
+    `- **Covers:** concerns ${covers.join(', ')}`,
+    `- **Why:** ${why}`,
+    `- **Instruction:** ${instruction}`,
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+  ].join('\n');
+}
+
+function decisionSetsMarkdown(concerns) {
+  if (!concerns || concerns.length < DECISION_SET_THRESHOLD) return '';
+
+  const high = concernIndexes(concerns, (concern) => concern.severity === 'HIGH');
+  const medium = concernIndexes(concerns, (concern) => concern.severity === 'MEDIUM');
+  const low = concernIndexes(concerns, (concern) => concern.severity === 'LOW');
+  const other = concernIndexes(concerns, (concern) => !['HIGH', 'MEDIUM', 'LOW'].includes(concern.severity));
+  const sets = [];
+
+  if (high.length > 0) {
+    sets.push(decisionSetSection(
+      sets.length + 1,
+      'modify',
+      'High-priority revision set',
+      high,
+      'These concerns are most likely to block decision usefulness, credibility, or audience trust.',
+      'Address these concerns together before line editing; preserve the paper purpose and avoid expanding scope unless the user explicitly approves it.',
+    ));
+  }
+  if (medium.length > 0) {
+    sets.push(decisionSetSection(
+      sets.length + 1,
+      'modify',
+      'Medium-priority refinement set',
+      medium,
+      'These concerns can weaken clarity, evidence, or persuasion but should not override the approved high-priority direction.',
+      'Apply these as bounded refinements after the high-priority structure is clear; do not let them fragment the revision.',
+    ));
+  }
+  if (low.length > 0) {
+    sets.push(decisionSetSection(
+      sets.length + 1,
+      'defer',
+      'Low-risk polish set',
+      low,
+      'These concerns may improve polish but should not block the next substantive revision.',
+      'Defer by default unless the revision already touches the same sentence or section.',
+    ));
+  }
+  if (other.length > 0) {
+    sets.push(decisionSetSection(
+      sets.length + 1,
+      'defer',
+      'Tooling or unmapped review set',
+      other,
+      'These items need human judgment before they should drive paper changes.',
+      'Resolve tooling issues separately and review unmapped concerns individually before applying them.',
+    ));
+  }
+
+  return `## Decision Sets
+
+**Mode:** Aggregate (${sets.length} sets covering ${concerns.length} concerns)
+
+${sets.join('\n')}`;
+}
+
 function severityFromRank(rank) {
   if (rank >= 4) return 'HIGH';
   if (rank === 3) return 'MEDIUM';
@@ -1749,6 +1827,8 @@ function feedbackPlanMarkdown({ reviews, createdAt, feedbackItems }) {
 \`gpd review-external\` captured external review input, grouped reviewer feedback into the concern-first decision queue below, and stopped at the approval gate. No draft or upstream artifact has been changed.
 
 Review the concerns below in the CLI or in this file. Proposed edits are implementation options under a concern; they are not separate decisions unless listed as an unmapped suggestion. Full reviewer text remains in \`FEEDBACK-EXTERNAL.md\`.
+
+${decisionSetsMarkdown(concerns)}
 
 ${decisionSummaryMarkdown(concerns)}
 

@@ -6,12 +6,13 @@ Report the paper dashboard inside Claude/Codex: current state, blockers, suggest
 
 If `--json` is present, return the same status fields in a compact JSON object when the active runtime supports structured output. If structured output is not available, keep the normal Markdown format and include a note that `--json` could not be honored by the slash-command runtime.
 
-Default human output should be concise. Show the paper path, current state,
-review rating if available, export path if available, recent revision summary if
+Default human output should be concise. Show the paper label, current state,
+rating if available, current paper path if available, recent revision summary if
 available, recommended review path with rationale, latest restore command if
-available, suggested next command, and human action hint. Show the full artifact
-inventory only when the user requests `--full`, when validation is running, or
-when diagnosing a missing-artifact problem.
+available, and suggested next action. Keep one-line values on the same line as
+their label. Show the full artifact inventory only when the user requests
+`--full`, when validation is running, or when diagnosing a missing-artifact
+problem.
 
 ## 1. Locate Paper Workspace
 

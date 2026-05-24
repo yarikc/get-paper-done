@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const {
+  basenameLabel,
+  displayPath,
   expandHome,
   fileSha256IfExists,
   writeFile,
@@ -313,10 +315,39 @@ function reviewVerdict(state) {
   return parseHeadingValue(artifactContent(state.paperDir, 'REVIEW.md'), 'Verdict');
 }
 
+function parseReviewTimestamp(value) {
+  if (!value) return null;
+  const normalized = value
+    .trim()
+    .replace(/([+-]\d{2})(\d{2})$/, '$1:$2');
+  const parsed = Date.parse(normalized);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function latestReviewTimestampBefore(markdown, index) {
+  const before = markdown.slice(0, index);
+  const pattern = /(?:\*\*(?:Added|Reviewed at|Review timestamp):\*\*|(?:Added|Reviewed at|Review timestamp):)\s*([^\n]+)/gi;
+  let latest = null;
+  for (const match of before.matchAll(pattern)) {
+    const timestamp = parseReviewTimestamp(match[1]);
+    if (timestamp !== null) latest = timestamp;
+  }
+  return latest;
+}
+
+function normalizeReviewRatingValue(value) {
+  let normalized = stripMarkdownValue(value).replace(/\.$/, '').trim();
+  if (/^\d+(?:\.\d+)?\s*\/\s*10\b/.test(normalized) && normalized.includes('. ')) {
+    normalized = normalized.split('. ')[0].replace(/\.$/, '').trim();
+  }
+  return normalized;
+}
+
 function reviewRating(state) {
   const review = artifactContent(state.paperDir, 'REVIEW.md');
   if (!review) return '';
   const patterns = [
+    /Quality assessment:\s*([^\n]+)/gi,
     /Estimated quality:\s*([^\n]+)/gi,
     /\*\*Current rating if given:\*\*\s*([^\n]+)/gi,
     /Current rating if given:\s*([^\n]+)/gi,
@@ -325,15 +356,23 @@ function reviewRating(state) {
   const candidates = [];
   for (const pattern of patterns) {
     for (const match of review.matchAll(pattern)) {
+      const index = match.index || 0;
       candidates.push({
-        index: match.index || 0,
+        index,
+        timestamp: latestReviewTimestampBefore(review, index),
         value: match[1],
       });
     }
   }
-  candidates.sort((a, b) => b.index - a.index);
+  candidates.sort((a, b) => {
+    const aHasTimestamp = typeof a.timestamp === 'number';
+    const bHasTimestamp = typeof b.timestamp === 'number';
+    if (aHasTimestamp && bHasTimestamp && a.timestamp !== b.timestamp) return b.timestamp - a.timestamp;
+    if (aHasTimestamp !== bHasTimestamp) return aHasTimestamp ? -1 : 1;
+    return b.index - a.index;
+  });
   for (const candidate of candidates) {
-    const value = stripMarkdownValue(candidate.value).replace(/\.$/, '').trim();
+    const value = normalizeReviewRatingValue(candidate.value);
     if (!value || /^not stated$/i.test(value) || /^\[/.test(value)) continue;
     return value.length > 160 ? `${value.slice(0, 157)}...` : value;
   }
@@ -351,6 +390,29 @@ function truncateLine(value, maxLength = 150) {
   return compact.length > maxLength ? `${compact.slice(0, maxLength - 3)}...` : compact;
 }
 
+function stageLabel(state) {
+  if (state.machineState && state.machineState.status === 'Exported') return 'Exported';
+  if (state.machineState && state.machineState.current_stage) return state.machineState.current_stage;
+  return state.stateSource || 'Unknown';
+}
+
+function validationLabel(state) {
+  if (!state.reviewCompletionNote) return '';
+  if (/semantic validation passed/i.test(state.reviewCompletionNote) && /list-density/i.test(state.reviewCompletionNote)) {
+    return 'Passed. Medium list-density warnings accepted in REVIEW.md.';
+  }
+  if (/semantic validation passed/i.test(state.reviewCompletionNote)) return 'Passed.';
+  return state.reviewCompletionNote;
+}
+
+function stateSummary(state) {
+  if (state.next === '/gpd-status') return 'Ready for user review. No writing stage is blocked.';
+  if (state.next === '/gpd-feedback') return 'Feedback is waiting for user decisions before revision.';
+  if (state.next === '/gpd-revise') return 'Approved feedback is ready to apply through revision.';
+  if (state.next === '/gpd-export') return 'Draft-side artifacts changed; export is stale.';
+  return `Next required stage: ${state.next}.`;
+}
+
 function parseMarkdownTableRows(section) {
   const rows = [];
   for (const line of section.split(/\r?\n/)) {
@@ -366,7 +428,60 @@ function parseMarkdownTableRows(section) {
   return rows;
 }
 
+function latestReviewSection(reviewMarkdown) {
+  if (!reviewMarkdown) return '';
+  const headingPattern = /^##\s+(.+)$/gm;
+  const sections = [];
+  let match;
+  while ((match = headingPattern.exec(reviewMarkdown)) !== null) {
+    sections.push({
+      title: match[1],
+      index: match.index,
+      bodyStart: headingPattern.lastIndex,
+    });
+  }
+  if (sections.length === 0) return '';
+  const sectionBodies = sections.map((section, index) => {
+    const next = sections[index + 1];
+    const body = reviewMarkdown.slice(section.bodyStart, next ? next.index : reviewMarkdown.length);
+    const timestampMatch = body.match(/(?:\*\*(?:Added|Reviewed at|Review timestamp):\*\*|(?:Added|Reviewed at|Review timestamp):)\s*([^\n]+)/i);
+    return {
+      ...section,
+      body,
+      timestamp: timestampMatch ? parseReviewTimestamp(timestampMatch[1]) : null,
+    };
+  });
+  sectionBodies.sort((a, b) => {
+    const aHasTimestamp = typeof a.timestamp === 'number';
+    const bHasTimestamp = typeof b.timestamp === 'number';
+    if (aHasTimestamp && bHasTimestamp && a.timestamp !== b.timestamp) return b.timestamp - a.timestamp;
+    if (aHasTimestamp !== bHasTimestamp) return aHasTimestamp ? -1 : 1;
+    return b.index - a.index;
+  });
+  return sectionBodies[0].body;
+}
+
+function latestReviewSummary(state) {
+  const review = artifactContent(state.paperDir, 'REVIEW.md');
+  const section = latestReviewSection(review);
+  if (!section) return [];
+  const summaries = [];
+  for (const line of section.split(/\r?\n/)) {
+    const match = line.match(/^\s*-\s+(.+)/);
+    if (!match) continue;
+    const value = stripMarkdownValue(match[1]);
+    if (!value || /^snapshot\b/i.test(value) || /^restore\b/i.test(value)) continue;
+    if (/^validation\b/i.test(value) || /^quality\b/i.test(value)) continue;
+    summaries.push(truncateLine(value, 120));
+    if (summaries.length >= 3) break;
+  }
+  return summaries;
+}
+
 function revisionSummary(state) {
+  const reviewSummary = latestReviewSummary(state);
+  if (reviewSummary.length > 0) return reviewSummary;
+
   const revisionCheck = artifactContent(state.paperDir, 'REVISION-CHECK.md');
   const section = sectionBetween(revisionCheck, '## Change Impact');
   const rows = parseMarkdownTableRows(section);
@@ -699,36 +814,46 @@ function status(input = {}) {
 }
 
 function printStatus(state) {
-  console.log(`paper: ${state.paperDir}`);
-  console.log(`state source: ${state.stateSource || 'missing'}`);
-  if (state.machineState && state.machineState.current_stage) console.log(`stage: ${state.machineState.current_stage}`);
-  console.log(`strategy: ${state.strategyStatus || 'missing'}`);
-  if (state.primaryBlocker && state.primaryBlocker !== 'none') console.log(`primary blocker: ${state.primaryBlocker}`);
-  if (state.reviewRating) console.log(`review rating: ${state.reviewRating}`);
-  if (state.finalExportPath) console.log(`current export: ${state.finalExportPath}`);
+  console.log('Paper status');
+  console.log('');
+  console.log(`Paper: ${basenameLabel(state.paperDir)}`);
+  console.log(`Stage: ${stageLabel(state)}`);
+  if (state.finalExportPath) console.log(`Current paper: ${displayPath(state.paperDir, state.finalExportPath)}`);
+  if (state.reviewRating) console.log(`Rating: ${state.reviewRating}`);
+  console.log(`State: ${stateSummary(state)}`);
+  const validation = validationLabel(state);
+  if (validation) console.log(`Validation: ${validation}`);
+  if (state.latestSnapshotId) console.log(`Snapshot: ${state.latestSnapshotId}`);
   if (Array.isArray(state.revisionSummary) && state.revisionSummary.length > 0) {
-    console.log('what changed:');
+    console.log('');
+    console.log('Latest change:');
     for (const item of state.revisionSummary) console.log(`- ${item}`);
   }
-  if (state.reviewCompletionNote) console.log(`validation note: ${state.reviewCompletionNote}`);
   if (state.reviewRecommendation) {
-    console.log(`recommended review: ${state.reviewRecommendation.recommendation}`);
-    console.log(`why: ${state.reviewRecommendation.why}`);
-    console.log(`after that: ${state.reviewRecommendation.after}`);
+    console.log('');
+    console.log(`Recommended review: ${state.reviewRecommendation.recommendation}. Why: ${state.reviewRecommendation.why}`);
+    console.log(`After that: ${state.reviewRecommendation.after}`);
+  }
+  console.log('');
+  console.log(`Next: ${state.next === '/gpd-status' ? 'Read .paper/exports/FINAL.md' : state.next}`);
+  if (!state.reviewRecommendation) {
+    console.log(`User action: ${state.userAction}`);
+  }
+  if (state.latestSnapshotId) console.log(`Restore: ${state.restoreCommand}`);
+  if (state.full && state.reviewRecommendation) {
+    console.log(`Why: ${state.reviewRecommendation.why}`);
+    console.log(`User action: ${state.userAction}`);
   }
   if (state.full) {
+    console.log('');
+    console.log(`State source: ${state.stateSource || 'missing'}`);
+    console.log(`Strategy: ${state.strategyStatus || 'missing'}`);
+    if (state.primaryBlocker && state.primaryBlocker !== 'none') console.log(`Primary blocker: ${state.primaryBlocker}`);
     console.log('artifacts:');
     for (const [name, exists] of Object.entries(state.artifacts)) {
       console.log(`- ${exists ? 'ok' : 'missing'} ${name}`);
     }
   }
-  if (state.latestSnapshotId) {
-    console.log('safety:');
-    console.log(`- latest snapshot: ${state.latestSnapshotId}`);
-    console.log(`- restore: ${state.restoreCommand}`);
-  }
-  console.log(`next: ${state.next === '/gpd-status' ? 'no required writing stage' : state.next}`);
-  console.log(`user action: ${state.userAction}`);
 }
 
 function contextForCommand(command) {
@@ -908,26 +1033,35 @@ function nextAction(input = {}) {
     restoreCommand: state.restoreCommand,
     reviewRating: state.reviewRating,
     reviewRecommendation: state.reviewRecommendation,
+    full: Boolean(input.full),
   };
 }
 
 function printNext(result) {
-  console.log(`paper: ${result.paperDir}`);
-  console.log(`next: ${result.next}`);
-  console.log(`why: ${result.why}`);
-  if (result.strategyStatus) console.log(`strategy: ${result.strategyStatus}`);
-  if (result.primaryBlocker) console.log(`primary blocker: ${result.primaryBlocker}`);
-  if (result.reviewRating) console.log(`review rating: ${result.reviewRating}`);
+  const displayNext = result.next === '/gpd-status'
+    ? 'Read .paper/exports/FINAL.md'
+    : result.next;
+  console.log('Next step');
+  console.log('');
+  console.log(`Paper: ${basenameLabel(result.paperDir)}`);
+  console.log(`Recommended: ${displayNext}`);
+  console.log(`Why: ${result.reviewRecommendation ? result.reviewRecommendation.why : result.why}`);
+  if (result.reviewRating) console.log(`Rating: ${result.reviewRating}`);
   if (result.reviewRecommendation) {
-    console.log(`recommended review: ${result.reviewRecommendation.recommendation}`);
-    console.log(`why: ${result.reviewRecommendation.why}`);
-    console.log(`after that: ${result.reviewRecommendation.after}`);
+    console.log(`Review path: ${result.reviewRecommendation.recommendation}`);
+    console.log(`After that: ${result.reviewRecommendation.after}`);
   }
-  console.log(`clear context: ${result.context.clear_context}`);
-  console.log(`read: ${result.context.read.join(', ')}`);
-  console.log(`avoid: ${result.context.avoid.join(', ')}`);
-  if (result.restoreCommand) console.log(`restore: ${result.restoreCommand}`);
-  console.log(`user action: ${result.userAction}`);
+  if (!result.reviewRecommendation) {
+    console.log('');
+    console.log(`User action: ${result.userAction}`);
+  }
+  if (result.restoreCommand) console.log(`Restore: ${result.restoreCommand}`);
+  if (result.full) {
+    console.log('');
+    console.log(`Context reset: ${result.context.clear_context}`);
+    console.log(`Read: ${result.context.read.join(', ')}`);
+    console.log(`Avoid: ${result.context.avoid.join(', ')}`);
+  }
 }
 
 function validate(input = {}) {

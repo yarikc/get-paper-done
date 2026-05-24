@@ -324,11 +324,11 @@ Inside Claude or Codex:
 ```
 
 Use `gpd next` for only the next action. Use `gpd status` for a short narrative:
-current state, review rating, export path, recent revision summary, recommended
-review path, restore command, and what to do next. Use `gpd status --full` only
-when you need the full artifact list. When `REVIEW.md` includes an estimated
-quality rating, both commands surface it as `review rating` so you can see the
-latest quality signal without opening the review file. Status and export output
-also say whether the next review should be your own read or external review, and
-why. Use `gpd validate --semantic` before treating a paper as example-quality,
+state, current paper, rating, latest change, restore command, and recommended
+review path. Use `gpd status --full` only when you need the full artifact list or
+context-reset details. When `REVIEW.md` includes an estimated quality rating,
+both commands surface it as `Rating` so you can see the latest quality signal
+without opening the review file. Status and export output also say whether the
+next review should be your own read or external review, and why. Use `gpd
+validate --semantic` before treating a paper as example-quality,
 publication-ready, or ready for handoff.

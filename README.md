@@ -370,14 +370,14 @@ gpd update codex
 comments into feedback artifacts for planning and revision.
 
 Use `gpd next` for only the next action. Use `gpd status` for a short completion
-narrative: current state, review rating, export path, recent revision summary,
-recommended review path, restore command, and what to do next. Use `gpd status
---full` only when you need the full artifact inventory. If `REVIEW.md` records
-an estimated quality rating, both `next` and `status` print it as `review
-rating`. Status and export output also recommend whether the next review should
-be the user's own read or external review, with a short reason. Use `gpd validate
---semantic` before treating a paper as example-quality, publication-ready, or
-ready for long-term handoff.
+narrative: state, current paper, rating, latest change, restore command, and
+recommended review path. Use `gpd status --full` only when you need the full
+artifact inventory or context-reset details. If `REVIEW.md` records an estimated
+quality rating, both `next` and `status` print it as `Rating`. Status and export
+output also recommend whether the next review should be the user's own read or
+external review, with a short reason. Use `gpd validate --semantic` before
+treating a paper as example-quality, publication-ready, or ready for long-term
+handoff.
 When invoking external reviewers, exclude the runtime currently helping you.
 For example, pass `--current-runtime codex` from Codex or `--current-runtime
 claude` from Claude so GPD skips self-review and records the skip.

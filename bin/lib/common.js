@@ -96,6 +96,18 @@ function writeFile(filePath, content, dryRun) {
   }
 }
 
+function displayPath(baseDir, filePath) {
+  if (!filePath) return '';
+  const absolute = path.resolve(filePath);
+  const relative = path.relative(baseDir, absolute);
+  if (!relative.startsWith('..') && !path.isAbsolute(relative)) return relative.split(path.sep).join('/');
+  return filePath;
+}
+
+function basenameLabel(dirPath) {
+  return path.basename(dirPath);
+}
+
 function copyFile(src, dest, dryRun) {
   if (dryRun) {
     console.log(`would copy ${src} -> ${dest}`);
@@ -150,6 +162,8 @@ module.exports = {
   readTemplate,
   writeFile,
   copyFile,
+  displayPath,
+  basenameLabel,
   fileSha256,
   fileSha256IfExists,
   templateWithBasics,

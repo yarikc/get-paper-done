@@ -47,7 +47,7 @@ function testBlockedFixtureFailsValidationClearly() {
 
   assert.strictEqual(validation.status, 1);
   assert(validation.stdout.includes('Strategy blocks downstream work: thesis_weak'));
-  assert(validation.stdout.includes('next: /gpd-brief'));
+  assert(validation.stdout.includes('Next: /gpd-brief'));
 }
 
 function testBlockedFixtureSchemaIsOtherwiseValid() {

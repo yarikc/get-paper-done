@@ -200,8 +200,8 @@ function testInitStatusValidate() {
   assert.strictEqual(status.machineState.grill.status, 'Not Started');
 
   const statusOutput = run(['status', '--paper', paperDir]);
-  assert(statusOutput.includes('next: /gpd-grill'));
-  assert(statusOutput.includes('user action: Run the recommended command'));
+  assert(statusOutput.includes('Next: /gpd-grill'));
+  assert(statusOutput.includes('User action: Run the recommended command'));
   assert(!statusOutput.includes('artifacts:'));
   const fullStatusOutput = run(['status', '--paper', paperDir, '--full']);
   assert(fullStatusOutput.includes('artifacts:'));
@@ -351,11 +351,15 @@ function testNextCommandShowsCompactGuidance() {
   const paperDir = path.join(dir, 'guided-next');
 
   const output = run(['next', '--paper', paperDir]);
-  assert(output.includes('next: /gpd-grill'));
-  assert(output.includes('why: The mandatory grill gate is incomplete'));
-  assert(output.includes('clear context:'));
-  assert(output.includes('user action: Run the recommended command'));
+  assert(output.includes('Recommended: /gpd-grill'));
+  assert(output.includes('Why: The mandatory grill gate is incomplete'));
+  assert(output.includes('User action: Run the recommended command'));
   assert(!output.includes('artifacts:'));
+  assert(!output.includes('Context reset:'));
+
+  const fullOutput = run(['next', '--paper', paperDir, '--full']);
+  assert(fullOutput.includes('Context reset:'));
+  assert(fullOutput.includes('Read:'));
 
   const json = JSON.parse(run(['next', '--paper', paperDir, '--json']));
   assert.strictEqual(json.next, '/gpd-grill');
@@ -426,8 +430,8 @@ function testImportDryRunAndCopy() {
   assert(!semanticValidation.stdout.includes('STATE.md: Suggested next command'));
 
   const statusOutput = run(['status', '--paper', paperDir]);
-  assert(statusOutput.includes('next: /gpd-grill'));
-  assert(!statusOutput.includes('recommended review:'), 'imported drafts should not show review guidance before grill is complete');
+  assert(statusOutput.includes('Next: /gpd-grill'));
+  assert(!statusOutput.includes('Recommended review:'), 'imported drafts should not show review guidance before grill is complete');
 }
 
 function testImportClassifications() {
@@ -704,15 +708,27 @@ function testExportCommandWritesFinalAndState() {
     '',
     'Estimated quality: 9.3/10 after revision',
     '',
+    '## Current Review Addendum',
+    '',
+    '**Added:** 2026-05-23T20:07:00-0400',
+    '',
+    'Quality assessment: 9.4/10 for internal user review. This sentence should not be printed as part of the rating.',
+    '',
+    '## Older Review Addendum Appended Later',
+    '',
+    '**Added:** 2026-05-17T01:30:24Z',
+    '',
+    'Current rating: 8.8/10 older note',
+    '',
   ].join('\n'));
 
   const output = run(['export', '--paper', paperDir]);
   assert(output.includes('exports/FINAL.md'));
-  assert(output.includes('review rating: 9.3/10 after revision'));
-  assert(output.includes('recommended review: user review first'));
+  assert(output.includes('Rating: 9.4/10 for internal user review'));
+  assert(output.includes('Next: Read FINAL.md.'));
   assert(output.includes('External review is most useful after the user confirms the current export'));
-  assert(output.includes('review: read .paper/exports/FINAL.md'));
-  assert(output.includes('if you add comments: run gpd feedback, then /gpd-feedback'));
+  assert(output.includes('After that:'));
+  assert(output.includes('external review'));
 
   const finalPath = path.join(meta, 'exports', 'FINAL.md');
   assert(fs.existsSync(finalPath));
@@ -734,15 +750,15 @@ function testExportCommandWritesFinalAndState() {
   const status = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(status.artifacts['exports/FINAL.md'], true);
   assert.strictEqual(status.next, '/gpd-status');
-  assert.strictEqual(status.reviewRating, '9.3/10 after revision');
+  assert.strictEqual(status.reviewRating, '9.4/10 for internal user review');
   assert(status.reviewRecommendation.recommendation.startsWith('user review first'));
   assert(status.userAction.includes('Read .paper/exports/FINAL.md'));
   const statusOutput = run(['status', '--paper', paperDir]);
-  assert(statusOutput.includes('review rating: 9.3/10 after revision'));
-  assert(statusOutput.includes('recommended review: user review first'));
+  assert(statusOutput.includes('Rating: 9.4/10 for internal user review'));
+  assert(statusOutput.includes('Recommended review: user review first'));
   const nextOutput = run(['next', '--paper', paperDir]);
-  assert(nextOutput.includes('review rating: 9.3/10 after revision'));
-  assert(nextOutput.includes('recommended review: user review first'));
+  assert(nextOutput.includes('Rating: 9.4/10 for internal user review'));
+  assert(nextOutput.includes('Review path: user review first'));
 }
 
 function testNextUsesDraftHashForExportFreshness() {
@@ -884,16 +900,16 @@ function testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore() {
   assert.strictEqual(snapshotDraft, '# Draft\n\nStrong version before risky revision.\n');
 
   const statusOutput = run(['status', '--paper', paperDir]);
-  assert(statusOutput.includes(`latest snapshot: ${state.versioning.active_revision_snapshot_id}`));
-  assert(statusOutput.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
+  assert(statusOutput.includes(`Snapshot: ${state.versioning.active_revision_snapshot_id}`));
+  assert(statusOutput.includes(`Restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
 
   const nextOutput = run(['next', '--paper', paperDir]);
-  assert(nextOutput.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
+  assert(nextOutput.includes(`Restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
 
   fs.writeFileSync(draftPath, '# Draft\n\nRisky revised version after preflight.\n');
   const postEditStatusOutput = run(['status', '--paper', paperDir]);
-  assert(postEditStatusOutput.includes(`latest snapshot: ${state.versioning.active_revision_snapshot_id}`));
-  assert(postEditStatusOutput.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
+  assert(postEditStatusOutput.includes(`Snapshot: ${state.versioning.active_revision_snapshot_id}`));
+  assert(postEditStatusOutput.includes(`Restore: gpd restore --paper ${paperDir} --snapshot ${state.versioning.active_revision_snapshot_id}`));
 
   const statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(statusJson.latestSnapshotId, state.versioning.active_revision_snapshot_id);
@@ -1004,7 +1020,7 @@ function testExportCommandSnapshotsExistingFinalBeforeOverwrite() {
   ].join('\n'));
   fs.writeFileSync(path.join(meta, 'REVISION-CHECK.md'), validRevisionCheckMarkdown(baselineSnapshot));
   const output = run(['export', '--paper', paperDir, '--force']);
-  assert(output.includes('snapshot before overwrite: .paper/versions/REV-'));
+  assert(output.includes('Snapshot: REV-'));
 
   const versions = fs.readdirSync(path.join(meta, 'versions'));
   assert.strictEqual(versions.length, 2);
@@ -1148,16 +1164,16 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   ].join('\n'));
 
   const packOutput = run(['review-pack', '--paper', paperDir]);
-  assert(packOutput.includes(`review target: ${finalPath}`));
-  assert(packOutput.includes('editable source: .paper/DRAFT.md'));
-  assert(packOutput.includes('capture: gpd feedback'));
+  assert(packOutput.includes('Review target: .paper/exports/FINAL.md'));
+  assert(packOutput.includes('Editable source: .paper/DRAFT.md'));
+  assert(packOutput.includes('Capture: gpd feedback'));
 
   const captureOutput = run(['feedback', 'collect', '--paper', paperDir]);
-  assert(captureOutput.includes('comments captured: 8'));
-  assert(captureOutput.includes('interpretation: written to FEEDBACK-READER.md and FEEDBACK-PLAN.md'));
-  assert(captureOutput.includes('next: /gpd-feedback'));
-  assert(captureOutput.includes('commented review preserved:'));
-  assert(captureOutput.includes('comments: left in review target'));
+  assert(captureOutput.includes('Comments found: 8'));
+  assert(captureOutput.includes('Interpretation: FEEDBACK-READER.md captures the raw comments; FEEDBACK-PLAN.md groups them for decision.'));
+  assert(captureOutput.includes('Next: /gpd-feedback'));
+  assert(captureOutput.includes('Preserved copy:'));
+  assert(captureOutput.includes('Comments: left in reviewed file until you explicitly clean them.'));
   assert(fs.readFileSync(finalPath, 'utf8').includes('//todo!: The ask is still unclear'));
 
   const reviewsDir = path.join(meta, 'reviews');
@@ -1169,8 +1185,8 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   const snapshotReviewPath = path.join(meta, 'versions', snapshotDirs[0], 'reviews', reviewArtifacts[0]);
   assert(fs.existsSync(snapshotReviewPath), 'snapshot should include preserved review artifacts');
   const statusAfterFeedback = run(['status', '--paper', paperDir]);
-  assert(statusAfterFeedback.includes(`latest snapshot: ${snapshotDirs[0]}`));
-  assert(statusAfterFeedback.includes(`restore: gpd restore --paper ${paperDir} --snapshot ${snapshotDirs[0]}`));
+  assert(statusAfterFeedback.includes(`Snapshot: ${snapshotDirs[0]}`));
+  assert(statusAfterFeedback.includes(`Restore: gpd restore --paper ${paperDir} --snapshot ${snapshotDirs[0]}`));
 
   const readerFeedback = fs.readFileSync(path.join(meta, 'FEEDBACK-READER.md'), 'utf8');
   assert(readerFeedback.includes('**Source:** inline user comments'));
@@ -1218,16 +1234,19 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   assert(listOutput.includes('8. MEDIUM suggested=preserve decision=pending this NIST framing from https://nist.gov/x -- do not dilute'));
   const reviewOutput = run(['feedback-plan', 'review', '--paper', paperDir, '--item', '1']);
   assert(reviewOutput.includes('Concern 1 of 8'));
-  assert(reviewOutput.includes('Initial assessment:'));
-  assert(reviewOutput.includes('Clarification needed:'));
-  assert(reviewOutput.includes('Why this matters:'));
-  assert(reviewOutput.includes('Proposed edits:'));
-  assert(reviewOutput.includes('Reviewer evidence:'));
   assert(reviewOutput.includes('The ask is still unclear for the target reader.'));
-  assert(reviewOutput.includes('Suggested handling, not your decision:'));
-  assert(reviewOutput.includes('Your decision options:'));
-  assert(reviewOutput.includes('- modify: accept the concern with an added constraint or instruction'));
-  assert(reviewOutput.includes('- answered_no_action: answer a question and record that no revision is needed'));
+  assert(reviewOutput.includes('Recommended decision:'));
+  assert(reviewOutput.includes('Decision needed: do you accept this concern?'));
+  assert(reviewOutput.includes('- modify: accept the concern, but provide your instruction for how to handle it'));
+  assert(reviewOutput.includes('- answered_no_action: answer a reviewer question and record that no paper change is needed'));
+  assert(reviewOutput.includes('If you choose modify, include your handling instruction.'));
+  assert(!reviewOutput.includes('Reviewer evidence:'));
+  assert(reviewOutput.includes('More detail: rerun this command with --full.'));
+  const fullReviewOutput = run(['feedback-plan', 'review', '--paper', paperDir, '--item', '1', '--full']);
+  assert(fullReviewOutput.includes('Initial assessment:'));
+  assert(fullReviewOutput.includes('Clarification needed:'));
+  assert(fullReviewOutput.includes('Proposed edits:'));
+  assert(fullReviewOutput.includes('Reviewer evidence:'));
   const decideOutput = run(['feedback-plan', 'decide', '--paper', paperDir, '--item', '1', '--decision', 'modify', '--note', 'Keep the ask concise.']);
   assert(decideOutput.includes('decision: modify'));
   assert(decideOutput.includes('constraint: Keep the ask concise.'));
@@ -1243,15 +1262,18 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   assert(decidedPlan.includes('**User Decision:** modify'));
   assert(decidedPlan.includes('**User Decision:** answered_no_action'));
   assert(decidedPlan.includes('**User Constraint:** Keep the ask concise.'));
+  assert(decidedPlan.includes('| 1 | The ask is still unclear for the target reader. | Action | HIGH | modify | modify |'));
+  assert(decidedPlan.includes('| 3 | Is this supported by the research? | Question | LOW | answer | answered_no_action |'));
+  assert(!decidedPlan.includes('| 1 | The ask is still unclear for the target reader. | Action | HIGH | modify | pending |'));
 
   const updatedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
   assert.strictEqual(updatedState.status, 'Feedback Pending');
   assert.strictEqual(updatedState.feedback.feedback_plan_status, 'Approved by user');
   const approvedStatus = run(['status', '--paper', paperDir]);
-  assert(approvedStatus.includes('next: /gpd-revise'));
+  assert(approvedStatus.includes('Next: /gpd-revise'));
 
   const cleanOutput = run(['feedback', 'clean', '--paper', paperDir]);
-  assert(cleanOutput.includes('comments removed: 8'));
+  assert(cleanOutput.includes('Comments removed: 8'));
   const cleanedFinal = fs.readFileSync(finalPath, 'utf8');
   assert(!cleanedFinal.includes('//todo!:'));
   assert(!cleanedFinal.includes('//keep:'));
@@ -1324,8 +1346,8 @@ function testFeedbackCaptureAggregatesManyInlineCommentsByDefault() {
   ].join('\n'));
 
   const captureOutput = run(['feedback', '--paper', paperDir]);
-  assert(captureOutput.includes('comments captured: 10'));
-  assert(captureOutput.includes('feedback plan mode: aggregate'));
+  assert(captureOutput.includes('Comments found: 10'));
+  assert(captureOutput.includes('Plan mode: aggregate'));
   assert(captureOutput.includes('theme-level decisions'));
 
   const readerFeedback = fs.readFileSync(path.join(meta, 'FEEDBACK-READER.md'), 'utf8');
@@ -1366,12 +1388,140 @@ function testFeedbackCaptureCanForceItemizedModeForManyComments() {
   ].join('\n'));
 
   const captureOutput = run(['feedback', '--itemized', '--paper', paperDir]);
-  assert(captureOutput.includes('comments captured: 10'));
-  assert(captureOutput.includes('feedback plan mode: itemized'));
+  assert(captureOutput.includes('Comments found: 10'));
+  assert(captureOutput.includes('Plan mode: itemized'));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(!feedbackPlan.includes('**Mode:** Aggregate theme review'));
   assert(feedbackPlan.includes('### 10. Action: Measures need validation and baseline language.'));
+}
+
+function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
+  const { paperDir, meta } = createFeedbackCapturePaper('gpd-feedback-decision-set-test');
+  const planItems = [
+    'The opening, executive summary, and Sections 1-2 repeat the same argument',
+    'Sections 4 and 5 are the same content with different headings',
+    "The Conway's law point is the strongest argument and appears once",
+    'The architecture operating layer is described categorically, never shown',
+    'The human by exception model is hollow',
+    'The why architecture answer is asserted, not argued',
+    'References are noisy',
+  ];
+  const itemMarkdown = planItems.map((title, index) => [
+    `### ${index + 1}. Concern: ${title}`,
+    '',
+    '- **Type:** Concern',
+    `- **Severity:** ${index < 6 ? 'HIGH' : 'LOW'}`,
+    '- **Source(s):** claude',
+    `- **Recommendation:** ${index < 6 ? 'modify' : 'defer'}`,
+    '- **Why this matters:** This affects decision usefulness.',
+    '- **What improves if addressed:** The paper becomes clearer.',
+    '- **Risk if handled badly:** Do not expand the paper.',
+    '- **Proposed handling:** Apply the concern with a bounded edit.',
+    '- **Proposed edits:**',
+    '  1. Bounded edit.',
+    '- **Reviewer evidence:**',
+    `  1. ${title}`,
+    '- **Affected artifacts:** DRAFT',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+  ].join('\n')).join('\n');
+  fs.writeFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), [
+    '# Feedback Handling Plan',
+    '',
+    '**Created:** 2026-05-24T00:00:00Z',
+    '**Based on:** `.paper/FEEDBACK-EXTERNAL.md`',
+    '**Status:** Pending user approval',
+    '',
+    '## Decision Sets',
+    '',
+    '**Mode:** Aggregate (3 sets covering 7 concerns)',
+    '',
+    '### Set 1 -- MODIFY -- Structural compression',
+    '',
+    '- **Covers:** concerns 1, 2, 3',
+    '- **Why:** Repetition and duplicate structures are real, but the paper should be compressed without losing the executive spine.',
+    '- **Instruction:** Keep a concise executive summary and merge repeated diagnosis material.',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '### Set 2 -- MODIFY -- Make the operating layer concrete',
+    '',
+    '- **Covers:** concerns 4, 5, 6',
+    '- **Why:** Executives need to see how the layer works before approving the mandate.',
+    '- **Instruction:** Add one short scenario and clarify ownership.',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '### Set 3 -- DEFER -- Low-risk polish',
+    '',
+    '- **Covers:** concerns 7',
+    '- **Why:** Polish should not block structural revision.',
+    '- **Instruction:** Defer unless the next revision touches the same sentence.',
+    '- **User Decision:** pending',
+    '- **User Constraint:** none yet',
+    '',
+    '## Proposed Handling',
+    '',
+    itemMarkdown,
+  ].join('\n'));
+
+  const groupedOutput = run(['feedback-plan', 'review', '--paper', paperDir]);
+  assert(groupedOutput.includes('Feedback decision set'));
+  assert(groupedOutput.includes('MODIFY -- Structural compression'));
+  assert(groupedOutput.includes('MODIFY -- Make the operating layer concrete'));
+  assert(groupedOutput.includes('DEFER -- Low-risk polish'));
+  assert(groupedOutput.includes('Decision needed: approve this decision set, modify the set, or review individual concerns.'));
+  assert(groupedOutput.includes('Next: reply with approve set, modify set, or review individual.'));
+
+  const itemOutput = run(['feedback-plan', 'review', '--paper', paperDir, '--item', '1']);
+  assert(itemOutput.includes('Feedback decision'));
+  assert(itemOutput.includes('Concern 1 of 7'));
+  assert(!itemOutput.includes('Feedback decision set'));
+  assert(itemOutput.includes('modify -- Accept the concern, but handle it with this constraint: <your instruction>.'));
+  assert(!itemOutput.includes('operating layer'));
+  assert(!itemOutput.includes('program authorization'));
+
+  const setDecisionOutput = run([
+    'feedback-plan',
+    'decide',
+    '--paper',
+    paperDir,
+    '--set',
+    '1',
+    '--decision',
+    'approve',
+    '--note',
+    'Compress without expanding scope.',
+  ]);
+  assert(setDecisionOutput.includes('set: 1'));
+  assert(setDecisionOutput.includes('decision: approve'));
+  assert(setDecisionOutput.includes('covered concerns: 1, 2, 3'));
+  const planAfterSetDecision = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
+  assert(planAfterSetDecision.includes('### Set 1 -- MODIFY -- Structural compression'));
+  assert(planAfterSetDecision.includes('- **User Decision:** approve'));
+  assert(planAfterSetDecision.match(/### 1\. Concern: The opening[\s\S]*?- \*\*User Decision:\*\* modify/));
+  assert(planAfterSetDecision.match(/### 2\. Concern: Sections 4 and 5[\s\S]*?- \*\*User Decision:\*\* modify/));
+  assert(planAfterSetDecision.match(/### 3\. Concern: The Conway's law[\s\S]*?- \*\*User Decision:\*\* modify/));
+  assert(planAfterSetDecision.includes('- **User Constraint:** Compress without expanding scope.'));
+
+  const ungrouped = createFeedbackCapturePaper('gpd-feedback-ungrouped-many-test');
+  fs.writeFileSync(path.join(ungrouped.meta, 'FEEDBACK-PLAN.md'), [
+    '# Feedback Handling Plan',
+    '',
+    '**Created:** 2026-05-24T00:00:00Z',
+    '**Based on:** `.paper/FEEDBACK-EXTERNAL.md`',
+    '**Status:** Pending user approval',
+    '',
+    '## Proposed Handling',
+    '',
+    itemMarkdown,
+  ].join('\n'));
+  const ungroupedOutput = run(['feedback-plan', 'review', '--paper', ungrouped.paperDir]);
+  assert(ungroupedOutput.includes('Feedback decision'));
+  assert(ungroupedOutput.includes('Concern 1 of 7'));
+  assert(!ungroupedOutput.includes('Feedback decision set'));
 }
 
 function testExportCommandUsesDraftBodyWhenPreBodySectionsExist() {
@@ -2464,6 +2614,7 @@ testExportCommandRejectsStaleRevisionCheckBeforeOverwritingFinal();
 testReviewPackAndFeedbackCaptureFinalComments();
 testFeedbackCaptureAggregatesManyInlineCommentsByDefault();
 testFeedbackCaptureCanForceItemizedModeForManyComments();
+testFeedbackPlanReviewGroupsManyConcernsByDefault();
 testExportCommandUsesDraftBodyWhenPreBodySectionsExist();
 testExportCommandRequiresReadyReview();
 testExportCommandHonorsStatusRouting();

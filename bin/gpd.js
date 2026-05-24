@@ -89,6 +89,7 @@ Options:
   --trigger ARTIFACT           Artifact or event that triggered a snapshot
   --notes TEXT                 Human note for snapshot metadata
   --item N                     Feedback-plan item number
+  --set N                      Feedback-plan decision-set number
   --decision VALUE             Feedback-plan decision: approve|modify|defer|reject|answered_no_action
   --note TEXT                  Feedback-plan decision constraint/note
   --stdin                      Read one external review from stdin
@@ -115,6 +116,7 @@ Examples:
   gpd feedback-plan list --paper ~/papers/metadata-strategy
   gpd feedback-plan review --paper ~/papers/metadata-strategy --item 1
   gpd feedback-plan decide --paper ~/papers/metadata-strategy --item 1 --decision approve
+  gpd feedback-plan decide --paper ~/papers/metadata-strategy --set 1 --decision modify --note "Keep concise"
   gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md
   gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
   gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
@@ -228,6 +230,12 @@ function parseWorkspaceOptions(argv) {
       args.item = Number(argv[i + 1]);
       if (!Number.isInteger(args.item) || args.item < 1) {
         throw new Error('--item must be a positive integer');
+      }
+      i += 1;
+    } else if (arg === '--set') {
+      args.set = Number(argv[i + 1]);
+      if (!Number.isInteger(args.set) || args.set < 1) {
+        throw new Error('--set must be a positive integer');
       }
       i += 1;
     } else if (arg === '--decision') {
