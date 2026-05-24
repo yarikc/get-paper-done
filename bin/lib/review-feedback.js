@@ -856,7 +856,7 @@ ${themes.map((theme, index) => `| ${index + 1} | ${markdownEscape(theme.title)} 
 
 - Do not mechanically apply every inline comment as a sentence edit.
 - Treat repeated comments as structural signals.
-- Preserve the approved thesis, G-SIB scope, operating-layer mandate, and medium-strength ask unless the user explicitly changes direction.
+- Preserve the approved thesis, stated scope, mandate, and ask strength unless the user explicitly changes direction.
 - Keep raw comments available as evidence, but make the decision at theme level.
 
 ## Proposed Handling

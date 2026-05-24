@@ -1942,11 +1942,11 @@ function testReviewExternalKeepsProposedFixesMappedToConcerns() {
     '',
     '### HIGH — The four-role architect is structurally implausible',
     '',
-    'SME + principal engineer + product owner + product designer is four substantial professions. In a G-SIB hiring context, this profile is rare enough that an executive will ask where these people come from.',
+    'SME + principal engineer + product owner + product designer is four substantial professions. In a regulated-enterprise context, this profile is rare enough that an executive will ask where these people come from.',
     '',
-    '### MEDIUM — G-SIB scope is mostly typography',
+    '### MEDIUM — Regulated-enterprise scope is mostly typography',
     '',
-    'The paper labels the scope G-SIB but many obligations cited are broadly applicable. The fix is to earn the G-SIB framing.',
+    'The paper labels the scope regulated enterprise but many obligations cited are broadly applicable. The fix is to earn the regulated-enterprise framing.',
     '',
   ].join('\n'));
 
@@ -1958,7 +1958,7 @@ function testReviewExternalKeepsProposedFixesMappedToConcerns() {
     '',
     '### HIGH — The Architect as Builder Credibility Gap',
     '',
-    'The paper asks architects to become principal engineers and product designers for the operating layer. In most G-SIBs, the current architecture cohort is culturally and technically detached from building repo management, CI/CD, and executable policy.',
+    'The paper asks architects to become principal engineers and product designers for the operating layer. In many large regulated enterprises, the current architecture cohort is culturally and technically detached from building repo management, CI/CD, and executable policy.',
     '',
     '### MEDIUM — Decision Memory as a Resilience Control',
     '',
@@ -1996,10 +1996,10 @@ function testReviewExternalKeepsProposedFixesMappedToConcerns() {
 
   const builderSection = sectionWith('Architect as Builder Credibility Gap');
   assert(builderSection.includes('builder skills') || builderSection.includes('team capability and development path'));
-  assert(!builderSection.includes('Clarify why G-SIB scope matters'));
+  assert(!builderSection.includes('Clarify why the regulated-enterprise scope matters'));
 
-  const gsibSection = sectionWith('G-SIB scope');
-  assert(gsibSection.includes('Clarify why G-SIB scope matters'));
+  const regulatedScopeSection = sectionWith('Regulated-enterprise scope');
+  assert(regulatedScopeSection.includes('Clarify why the regulated-enterprise scope matters'));
 
   const memorySection = sectionWith('Decision Memory as a Resilience Control');
   assert(memorySection.includes('stale or conflicting memory') || memorySection.includes('Frame decision memory as a resilience control'));

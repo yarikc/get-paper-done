@@ -957,8 +957,8 @@ function proposedFixForItem(item) {
   if (/four-decision|ask.*parallel|decisions are on the table|separate ask/.test(feedback)) {
     return 'Refactor the ask into parallel executive decisions: approve the mandate shift, approve investment in the operating-layer capability, and approve new measures/incentives. Treat enablement-with-evidence as a property of the capability, not a separate decision.';
   }
-  if (/g-sib scope|gsib scope|g-sib.*typography|gsib.*typography|systemically important|cross-jurisdiction|recovery|resolution|heterogeneous business lines/.test(feedback)) {
-    return 'Clarify why G-SIB scope matters: cross-jurisdictional obligations, systemic-importance expectations, heterogenous business lines, resilience and recovery implications, and higher evidentiary burden make the mandate more consequential than in a generic enterprise.';
+  if (/regulated-enterprise scope|regulated enterprise scope|systemic scope|scope.*typography|systemically important|cross-jurisdiction|recovery|resolution|heterogeneous business lines/.test(feedback)) {
+    return 'Clarify why the regulated-enterprise scope matters: cross-jurisdictional obligations, systemic-importance expectations where applicable, heterogeneous business lines, resilience and recovery implications, and higher evidentiary burden make the recommendation more consequential than in a generic enterprise.';
   }
   if (/capability family names|forgettable|taxonomy labels|actionable handles|golden paths/.test(feedback)) {
     return 'Rename or introduce the four capability families with more action-oriented handles, while preserving the precise definitions underneath.';
@@ -1024,8 +1024,8 @@ function whyProposedFixAddressesItem(item) {
   if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision/.test(feedback)) {
     return 'The fix closes the control-loop objection by naming what happens when the operating layer itself produces or permits a bad decision.';
   }
-  if (/g-sib scope|gsib scope|g-sib.*typography|gsib.*typography|systemically important|cross-jurisdiction/.test(feedback)) {
-    return 'The fix earns the G-SIB scope by separating broad regulated-bank obligations from the higher consequence and complexity of systemic institutions.';
+  if (/regulated-enterprise scope|regulated enterprise scope|systemic scope|scope.*typography|systemically important|cross-jurisdiction/.test(feedback)) {
+    return 'The fix earns the regulated-enterprise scope by separating broad regulated obligations from the higher consequence and complexity of systemic or cross-jurisdictional institutions.';
   }
   if (/decision memory.*resilience|stale or conflicting memory|conflicting boundary assumptions|accidental architecture hardens/.test(feedback)) {
     return 'The fix reframes decision memory from documentation into a control that helps prevent, diagnose, and correct conflicting machine-speed decisions.';
@@ -1080,8 +1080,8 @@ function guardrailForItem(item) {
   if (/deliverable overlap|deliverable bloat|artifact catalog/.test(feedback)) {
     return 'Do not delete important regulated-industry evidence needs; compress the framing without losing control substance.';
   }
-  if (/g-sib|gsib|systemic|cross-jurisdiction/.test(feedback)) {
-    return 'Do not overclaim that every cited obligation is uniquely G-SIB-only; separate general regulated-bank obligations from G-SIB-specific stakes.';
+  if (/regulated enterprise|systemic|cross-jurisdiction/.test(feedback)) {
+    return 'Do not overclaim that every cited obligation is unique to the highest-risk institutions; separate general regulated-enterprise obligations from systemic or cross-jurisdictional stakes.';
   }
   if (item.severity === 'HIGH') {
     return 'Address the blocker without broadening the paper into a white paper or implementation plan.';
