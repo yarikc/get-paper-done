@@ -215,6 +215,15 @@ The quality gate must score thesis clarity, argument flow, evidence support, aud
 
 Validation checks the required dimensions, numeric score ranges, score-drop/regression consistency, existence of any referenced `.paper/versions/...` baseline, and baseline snapshot hash metadata.
 
+Semantic validation also runs guarded revision checks when `REVISION-CHECK.md`
+records a substantive revision. These checks catch deterministic false-positive
+signals before a user is asked to review the export as improved: missing
+snapshot baseline, internal GPD or workflow vocabulary leaking into `DRAFT.md`
+or `exports/FINAL.md`, overloaded sentence-level repetition, repeated
+mechanical cadence, suspicious word-count deltas without approval, missed
+preservation constraints, and a `REVISION-CHECK.md` that claims no regression
+while guarded checks fail.
+
 ### `REVISION-LOG.md`
 
 Records paper-local snapshots created before substantive revision, restore, or export overwrite.

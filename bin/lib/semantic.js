@@ -1234,6 +1234,361 @@ function validateQuantitativeClaimSupport(paperDir) {
   return issues;
 }
 
+function substantiveRevisionCheckExists(paperDir) {
+  const revisionCheck = readIfExists(metaPath(paperDir, 'REVISION-CHECK.md'));
+  return Boolean(revisionCheck && /\*\*Substantive revision:\*\*\s*Yes\b/i.test(revisionCheck));
+}
+
+function revisionCheckMarkdown(paperDir) {
+  return readIfExists(metaPath(paperDir, 'REVISION-CHECK.md')) || '';
+}
+
+function revisionBaselineSnapshots(paperDir) {
+  const baseline = parseMarkdownField(revisionCheckMarkdown(paperDir), 'Baseline compared') || '';
+  return (baseline.match(/\.paper\/versions\/[A-Za-z0-9_.-]+/g) || [])
+    .map((relativePath) => ({
+      relativePath,
+      snapshotDir: path.join(paperDir, relativePath.replace(/^\.paper\//, '.paper/')),
+    }));
+}
+
+function activeRevisionSnapshotId(paperDir) {
+  const parsed = readJsonIfExists(metaPath(paperDir, 'STATE.json'));
+  return parsed.data
+    && parsed.data.versioning
+    && parsed.data.versioning.active_revision_snapshot_id
+    ? String(parsed.data.versioning.active_revision_snapshot_id)
+    : '';
+}
+
+function validateRevisionBaselineReference(paperDir) {
+  const snapshots = revisionBaselineSnapshots(paperDir);
+  if (snapshots.length === 0) {
+    return [issue(
+      'semantic.revision_baseline_snapshot_missing',
+      'HIGH',
+      'REVISION-CHECK.md',
+      'substantive revision must compare against a .paper/versions/ baseline snapshot before claiming improvement',
+    )];
+  }
+
+  const issues = [];
+  const activeSnapshotId = activeRevisionSnapshotId(paperDir);
+  if (activeSnapshotId && !snapshots.some((snapshot) => snapshot.relativePath.includes(activeSnapshotId))) {
+    issues.push(issue(
+      'semantic.revision_baseline_snapshot_mismatch',
+      'MEDIUM',
+      'REVISION-CHECK.md',
+      `baseline snapshot does not reference active revision snapshot ${activeSnapshotId}; confirm the accepted baseline is intentional`,
+    ));
+  }
+  return issues;
+}
+
+function stripMarkdownForRevisionLint(markdown) {
+  return String(markdown || '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/\[[^\]]+\]\([^)]+\)/g, ' ')
+    .replace(/\[[A-Z]?\d+(?:[,\-/][A-Z]?\d+)*\]/g, ' ')
+    .replace(/^#+\s+.*$/gm, ' ')
+    .replace(/^\s*[-*+]\s+/gm, ' ')
+    .replace(/^\s*\d+\.\s+/gm, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function sentencesForRevisionLint(markdown) {
+  return stripMarkdownForRevisionLint(markdown)
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length >= 40 && sentence.length <= 500);
+}
+
+function wordCount(markdown) {
+  return stripMarkdownForRevisionLint(markdown)
+    .split(/\s+/)
+    .filter(Boolean)
+    .length;
+}
+
+function revisionWordCountAuthorization(paperDir) {
+  const approvalText = [
+    readIfExists(metaPath(paperDir, 'FEEDBACK-PLAN.md')),
+    readIfExists(metaPath(paperDir, 'REVISION-INSTRUCTIONS.md')),
+    revisionCheckMarkdown(paperDir),
+  ].filter(Boolean).join('\n');
+  return /\b(word count|length|shorten|compress|condense|trim|expand|extend|merge|split|restructure|major rewrite|substantial rewrite)\b/i
+    .test(approvalText);
+}
+
+function validateRevisionWordCountDelta(paperDir) {
+  const baseline = revisionBaselineSnapshots(paperDir)[0];
+  if (!baseline) return [];
+  const baselineDraft = readIfExists(path.join(baseline.snapshotDir, 'DRAFT.md'));
+  const currentDraft = readIfExists(metaPath(paperDir, 'DRAFT.md'));
+  if (!baselineDraft || !currentDraft) return [];
+
+  const before = wordCount(baselineDraft);
+  const after = wordCount(currentDraft);
+  if (before < 80 || after < 80) return [];
+  const delta = Math.abs(after - before) / before;
+  if (delta <= 0.30 || revisionWordCountAuthorization(paperDir)) return [];
+
+  return [issue(
+    'semantic.revision_word_count_delta',
+    delta > 0.50 ? 'HIGH' : 'MEDIUM',
+    'DRAFT.md',
+    `substantive revision changed draft word count from ${before} to ${after} without an approved length/structure instruction`,
+  )];
+}
+
+const repeatedTermIgnore = new Set([
+  'architecture',
+  'architectures',
+  'architect',
+  'architects',
+  'enterprise',
+  'enterprises',
+  'paper',
+  'section',
+  'teams',
+  'agents',
+  'systems',
+]);
+
+function normalizedRepetitionToken(token) {
+  const normalized = normalizeText(token);
+  if (!normalized || normalized.length < 5 || stopwords.has(normalized) || repeatedTermIgnore.has(normalized)) return null;
+  if (normalized.endsWith('ies') && normalized.length > 5) return `${normalized.slice(0, -3)}y`;
+  if (normalized.endsWith('s') && normalized.length > 5) return normalized.slice(0, -1);
+  return normalized;
+}
+
+function repeatedTermsInSentence(sentence) {
+  const counts = new Map();
+  for (const rawToken of String(sentence || '').match(/\b[A-Za-z][A-Za-z-]*\b/g) || []) {
+    const token = normalizedRepetitionToken(rawToken);
+    if (!token) continue;
+    counts.set(token, (counts.get(token) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .filter(([, count]) => count >= 3)
+    .map(([token, count]) => ({ token, count }));
+}
+
+function excerpt(value, max = 180) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  return text.length <= max ? text : `${text.slice(0, max - 3)}...`;
+}
+
+// Reader-facing exports should not expose GPD's internal process vocabulary.
+// Expand this list only for terms that come from GPD artifacts, commands,
+// prompts, or review mechanics, not for one-off wording dislikes in a paper.
+const internalWorkflowLeakPatterns = [
+  { phrase: 'decision set', pattern: /\bdecision sets?\b/i },
+  { phrase: 'feedback plan', pattern: /\bfeedback plan\b/i },
+  { phrase: 'proposed handling', pattern: /\bproposed handling\b/i },
+  { phrase: 'reviewer evidence', pattern: /\breviewer evidence\b/i },
+  { phrase: 'user decision', pattern: /\buser decision\b/i },
+  { phrase: 'user constraint', pattern: /\buser constraint\b/i },
+  { phrase: 'revision instruction', pattern: /\brevision instructions?\b/i },
+  { phrase: 'below-target improvement gate', pattern: /\bbelow-target improvement gate\b/i },
+];
+
+function approvedPreservationConstraints(paperDir) {
+  const plan = readIfExists(metaPath(paperDir, 'FEEDBACK-PLAN.md'));
+  if (!plan) return [];
+  return plan
+    .split(/\n(?=###\s+)/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const heading = block.split(/\r?\n/)[0] || '';
+      return {
+        heading,
+        recommendation: markdownFieldValue(block, 'Recommendation').toLowerCase(),
+        decision: markdownFieldValue(block, 'User Decision').toLowerCase(),
+        constraint: markdownFieldValue(block, 'User Constraint'),
+      };
+    })
+    .filter((item) => ['approve', 'modify'].includes(item.decision))
+    .filter((item) => (
+      /\b(preservation|preserve|keep)\b/i.test(item.heading)
+      || item.recommendation === 'preserve'
+    ))
+    .filter((item) => item.constraint && !/^(none|none yet|n\/a|-)\.?$/i.test(item.constraint));
+}
+
+function validateRevisionPreservationConstraints(paperDir) {
+  const constraints = approvedPreservationConstraints(paperDir);
+  if (constraints.length === 0) return [];
+
+  const revisionCheck = revisionCheckMarkdown(paperDir);
+  const present = parseMarkdownField(revisionCheck, 'Preservation constraints present');
+  const honored = parseMarkdownField(revisionCheck, 'Preservation constraints honored');
+  const evidence = parseMarkdownField(revisionCheck, 'Evidence');
+  const override = parseMarkdownField(revisionCheck, 'User override');
+  const hasOverride = override && !/^(none|n\/a|-)\.?$/i.test(override);
+  const issues = [];
+
+  if (!/^yes\b/i.test(present || '')) {
+    issues.push(issue(
+      'semantic.revision_preservation_unverified',
+      'HIGH',
+      'REVISION-CHECK.md',
+      'approved preservation constraints exist in FEEDBACK-PLAN.md but REVISION-CHECK.md does not mark them present',
+    ));
+  }
+  if (!/^yes\b/i.test(honored || '') && !hasOverride) {
+    issues.push(issue(
+      'semantic.revision_preservation_unverified',
+      'HIGH',
+      'REVISION-CHECK.md',
+      'approved preservation constraints must be honored or explicitly overridden by the user before revision can pass',
+    ));
+  }
+  if ((!evidence || /^(none|n\/a|-|\[)/i.test(evidence.trim())) && !hasOverride) {
+    issues.push(issue(
+      'semantic.revision_preservation_evidence_missing',
+      'HIGH',
+      'REVISION-CHECK.md',
+      'preservation constraints require evidence showing what wording, idea, specificity, or voice was preserved',
+    ));
+  }
+  return issues;
+}
+
+function validateRevisionInternalVocabularyLeak(paperDir, artifactName) {
+  const markdown = readIfExists(metaPath(paperDir, artifactName));
+  if (!markdown) return [];
+
+  const hits = internalWorkflowLeakPatterns
+    .filter(({ pattern }) => pattern.test(markdown))
+    .map(({ phrase }) => phrase);
+  if (hits.length === 0) return [];
+
+  return [issue(
+    'semantic.revision_internal_vocabulary_leak',
+    'HIGH',
+    artifactName,
+    `substantive revision left GPD/workflow vocabulary in reader-facing text: ${hits.join(', ')}`,
+  )];
+}
+
+function validateRevisionSentenceRepetition(paperDir, artifactName) {
+  const markdown = readIfExists(metaPath(paperDir, artifactName));
+  if (!markdown) return [];
+
+  for (const sentence of sentencesForRevisionLint(markdown)) {
+    const repeated = repeatedTermsInSentence(sentence);
+    if (repeated.length === 0) continue;
+    const details = repeated.map(({ token, count }) => `${token} x${count}`).join(', ');
+    return [issue(
+      'semantic.revision_sentence_repetition',
+      'HIGH',
+      artifactName,
+      `substantive revision has overloaded sentence-level repetition (${details}); rewrite before claiming the revision improved: "${excerpt(sentence)}"`,
+    )];
+  }
+  return [];
+}
+
+function sentenceOpening(sentence) {
+  const tokens = tokenize(sentence).slice(0, 3);
+  return tokens.length >= 2 ? tokens.join(' ') : '';
+}
+
+function validateRevisionRepeatedOpenings(paperDir, artifactName) {
+  const markdown = readIfExists(metaPath(paperDir, artifactName));
+  if (!markdown) return [];
+
+  const openings = sentencesForRevisionLint(markdown).map(sentenceOpening);
+  for (let i = 0; i < openings.length - 2; i += 1) {
+    if (!openings[i] || openings[i] !== openings[i + 1] || openings[i] !== openings[i + 2]) continue;
+    return [issue(
+      'semantic.revision_repeated_sentence_opening',
+      'MEDIUM',
+      artifactName,
+      `substantive revision repeats the sentence opening "${openings[i]}" three times in a row; check for flattened or mechanical prose cadence`,
+    )];
+  }
+  return [];
+}
+
+function parseRevisionQualityGateRows(markdown) {
+  const expected = new Set([
+    'Thesis clarity',
+    'Argument flow',
+    'Evidence support',
+    'Audience fit',
+    'Persona and voice',
+    'Ask clarity',
+    'Substance preservation',
+  ]);
+  const rows = [];
+  const lines = String(markdown || '').split(/\r?\n/);
+  for (let i = 0; i < lines.length - 2; i += 1) {
+    if (!lines[i].trim().startsWith('| Dimension |')) continue;
+    if (!/^\|[\s:-]+\|/.test(lines[i + 1].trim())) continue;
+    for (let j = i + 2; j < lines.length; j += 1) {
+      const line = lines[j].trim();
+      if (!line.startsWith('|') || !line.endsWith('|')) break;
+      const cells = line.slice(1, -1).split('|').map(normalizeTableCell);
+      if (expected.has(cells[0])) rows.push(cells);
+    }
+  }
+  return rows;
+}
+
+function revisionCheckClaimsNoRegression(paperDir) {
+  const revisionCheck = readIfExists(metaPath(paperDir, 'REVISION-CHECK.md'));
+  if (!revisionCheck) return false;
+  const rows = parseRevisionQualityGateRows(revisionCheck);
+  if (rows.length === 0) return false;
+  return rows.every((row) => {
+    const baseline = Number(row[1]);
+    const revised = Number(row[2]);
+    const regression = String(row[3] || '').trim();
+    return Number.isInteger(baseline)
+      && Number.isInteger(revised)
+      && revised >= baseline
+      && regression === 'No';
+  });
+}
+
+function validateRevisionFalsePositiveRisk(paperDir, deterministicIssues) {
+  if (deterministicIssues.length === 0 || !revisionCheckClaimsNoRegression(paperDir)) return [];
+  const ids = [...new Set(deterministicIssues.map((item) => item.id))];
+  return [issue(
+    'semantic.revision_check_false_positive_risk',
+    'HIGH',
+    'REVISION-CHECK.md',
+    `revision check reports no regression while deterministic guarded checks found ${ids.join(', ')}; do not raise rating or ask for user review until resolved`,
+  )];
+}
+
+function validateGuardedRevisionRegression(paperDir) {
+  if (!substantiveRevisionCheckExists(paperDir)) return [];
+
+  const deterministicIssues = [
+    ...validateRevisionBaselineReference(paperDir),
+    ...validateRevisionInternalVocabularyLeak(paperDir, 'DRAFT.md'),
+    ...validateRevisionInternalVocabularyLeak(paperDir, 'exports/FINAL.md'),
+    ...validateRevisionSentenceRepetition(paperDir, 'DRAFT.md'),
+    ...validateRevisionSentenceRepetition(paperDir, 'exports/FINAL.md'),
+    ...validateRevisionRepeatedOpenings(paperDir, 'DRAFT.md'),
+    ...validateRevisionRepeatedOpenings(paperDir, 'exports/FINAL.md'),
+    ...validateRevisionWordCountDelta(paperDir),
+    ...validateRevisionPreservationConstraints(paperDir),
+  ];
+
+  return [
+    ...deterministicIssues,
+    ...validateRevisionFalsePositiveRisk(paperDir, deterministicIssues),
+  ];
+}
+
 function validateSemanticPaper(paperDir) {
   return [
     ...validateBriefClaimEvidence(paperDir),
@@ -1257,10 +1612,12 @@ function validateSemanticPaper(paperDir) {
     ...validateFactCheckSafeSourceAlignment(paperDir),
     ...validateFactCheckClaimSupportMetadata(paperDir),
     ...validateQuantitativeClaimSupport(paperDir),
+    ...validateGuardedRevisionRegression(paperDir),
   ];
 }
 
 module.exports = {
   validateFeedbackPlanDecisionSets,
+  validateGuardedRevisionRegression,
   validateSemanticPaper,
 };

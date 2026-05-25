@@ -1412,6 +1412,200 @@ function testReadyReviewWithRequiredImprovementFails() {
   assert(result.stdout.includes('Verdict is Ready but Below-Target Improvement Gate requires immediate improvement before export'));
 }
 
+function validNoRegressionRevisionCheck(baseline = 'prior exported draft', preservation = {}) {
+  const preservationPresent = preservation.present || 'No';
+  const preservationHonored = preservation.honored || 'Not applicable';
+  const preservationEvidence = preservation.evidence || 'No preservation constraints.';
+  const preservationOverride = preservation.override || 'None';
+  return [
+    '# Revision Check',
+    '',
+    '## Revision Classification',
+    '',
+    '- **Revision timestamp:** 2026-05-24T20:00:00Z',
+    '- **Revision source:** Approved feedback plan',
+    `- **Baseline compared:** ${baseline}`,
+    '- **Current draft:** `.paper/DRAFT.md`',
+    '- **Substantive revision:** Yes',
+    '- **Reason:** Substantive revision for test fixture.',
+    '',
+    '## Substantive Revision Definition',
+    '',
+    'A revision is substantive when it changes paper job, argument flow, evidence use, audience handling, persona, voice, or more than local copyediting.',
+    '',
+    '## Before / After Quality Gate',
+    '',
+    '| Dimension | Baseline Score | Revised Score | Regression? | Evidence / Notes |',
+    '|-----------|----------------|---------------|-------------|------------------|',
+    '| Thesis clarity | 4 | 5 | No | Test self-assessment says improved. |',
+    '| Argument flow | 4 | 5 | No | Test self-assessment says improved. |',
+    '| Evidence support | 4 | 4 | No | Test self-assessment says unchanged. |',
+    '| Audience fit | 4 | 5 | No | Test self-assessment says improved. |',
+    '| Persona and voice | 4 | 5 | No | Test self-assessment says improved. |',
+    '| Ask clarity | 4 | 5 | No | Test self-assessment says improved. |',
+    '| Substance preservation | 4 | 5 | No | Test self-assessment says improved. |',
+    '',
+    '## Preservation Constraints',
+    '',
+    `- **Preservation constraints present:** ${preservationPresent}`,
+    `- **Preservation constraints honored:** ${preservationHonored}`,
+    `- **Evidence:** ${preservationEvidence}`,
+    `- **User override:** ${preservationOverride}`,
+    '',
+    '## Change Impact',
+    '',
+    '| Change | Intended Improvement | Regression Risk | Result |',
+    '|--------|----------------------|-----------------|--------|',
+    '| Rewrite opening | Improve flow | Could lose hook | improved |',
+    '',
+    '## Validator Interpretation',
+    '',
+    '- **Structural validation result:** ok',
+    '- **Semantic validation result:** ok',
+    '- **Snapshot hash validation:** ok',
+    '- **Validator-driven edits made:** None',
+    '- **Meaning-preservation check:** Preserved.',
+    '',
+    '## Decision',
+    '',
+    '- **Revision verdict:** Accept',
+    '- **Reason:** Self-assessed as improved.',
+    '- **User approval required before export:** No',
+    '- **Next action:** ask user',
+    '',
+  ].join('\n');
+}
+
+function writeRevisionBaseline(paperDir, snapshotId, draftMarkdown) {
+  const snapshotDir = path.join(paperDir, '.paper', 'versions', snapshotId);
+  fs.mkdirSync(snapshotDir, { recursive: true });
+  fs.writeFileSync(path.join(snapshotDir, 'DRAFT.md'), draftMarkdown);
+  const state = readState(paperDir);
+  state.versioning = {
+    ...(state.versioning || {}),
+    active_revision_snapshot_id: snapshotId,
+    last_snapshot_id: snapshotId,
+  };
+  writeState(paperDir, state);
+  return `.paper/versions/${snapshotId}`;
+}
+
+function testGuardedRevisionChecksCatchFalsePositive() {
+  const paperDir = makePaper('semantic-guarded-revision');
+  const regressed = [
+    '# Draft',
+    '',
+    'The feedback plan says the internal decision set should carry the argument before the reader understands the point.',
+    '',
+    'If teams can produce more design and implementation decisions faster, who owns the decision environment that keeps those decisions accountable?',
+    '',
+  ].join('\n');
+  writeArtifact(paperDir, 'DRAFT.md', regressed);
+  writeArtifact(paperDir, 'exports/FINAL.md', regressed);
+  writeArtifact(paperDir, 'REVISION-CHECK.md', validNoRegressionRevisionCheck());
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  const issueIds = new Set(parsed.issues.map((item) => item.id));
+  assert(issueIds.has('semantic.revision_internal_vocabulary_leak'));
+  assert(issueIds.has('semantic.revision_sentence_repetition'));
+  assert(issueIds.has('semantic.revision_baseline_snapshot_missing'));
+  assert(issueIds.has('semantic.revision_check_false_positive_risk'));
+}
+
+function testStatusRoutesGuardedRevisionFailureAwayFromUserReview() {
+  const paperDir = makePaper('semantic-guarded-status');
+  const regressed = [
+    '# Draft',
+    '',
+    'The feedback plan says the internal decision set should carry the argument before the reader understands the point.',
+    '',
+    'If teams can produce more design and implementation decisions faster, who owns the decision environment that keeps those decisions accountable? //todo: this got worse and lost the hook',
+    '',
+  ].join('\n');
+  writeArtifact(paperDir, 'DRAFT.md', regressed);
+  writeArtifact(paperDir, 'exports/FINAL.md', regressed);
+  writeArtifact(paperDir, 'REVIEW.md', [
+    '# Review',
+    '',
+    '## Verdict',
+    '',
+    'Ready',
+    '',
+    'Current rating: 9.3/10 for user review',
+    '',
+  ].join('\n'));
+  writeArtifact(paperDir, 'REVISION-CHECK.md', validNoRegressionRevisionCheck());
+
+  const next = JSON.parse(run(['next', '--paper', paperDir, '--json']));
+  assert.strictEqual(next.next, '/gpd-feedback');
+  assert(next.reviewRecommendation.why.includes('Guarded revision checks'));
+  assert(next.userAction.includes('capture the inline regression comments'));
+  assert.strictEqual(next.reviewRatingUsable, false);
+  assert.strictEqual(next.reviewRatingProvenance, 'blocked_guarded_revision');
+  assert(next.reviewRatingDisplay.includes('blocked: guarded revision failed'));
+
+  const statusOutput = run(['status', '--paper', paperDir]);
+  assert(statusOutput.includes('Rating: 9.3/10 for user review (blocked: guarded revision failed; do not treat as current quality)'));
+  assert(statusOutput.includes('Rating source: blocked_guarded_revision'));
+
+  const exportResult = runFail(['export', '--paper', paperDir]);
+  assert.notStrictEqual(exportResult.status, 0);
+  assert(exportResult.stderr.includes('Guarded revision checks failed'));
+  assert(exportResult.stderr.includes('Next: run /gpd-feedback'));
+}
+
+function repeatedSentence(seed, count) {
+  return Array.from({ length: count }, (_, index) => (
+    `${seed} ${index + 1} keeps the explanation concrete enough for a reader to follow without importing a second paper or changing the paper purpose.`
+  )).join(' ');
+}
+
+function testGuardedRevisionExplainerChecksBaselineWordCountAndPreservation() {
+  const paperDir = makePaper('semantic-guarded-explainer');
+  writeJsonArtifact(paperDir, 'config.json', {
+    paper: { slug: 'semantic-guarded-explainer', title: 'Semantic Guarded Explainer' },
+    classification: {
+      purpose: 'explainer',
+      channel: 'internal',
+      risk: 'internal_low',
+      complexity: 'standard',
+      audience_shape: 'single',
+    },
+    mode: 'standard',
+  });
+
+  const baselineDraft = `# Draft\n\n${repeatedSentence('Baseline paragraph', 9)}\n`;
+  const baseline = writeRevisionBaseline(paperDir, 'REV-explainer-baseline', baselineDraft);
+  const revisedDraft = `# Draft\n\n${repeatedSentence('Revised paragraph', 15)}\n`;
+  writeArtifact(paperDir, 'DRAFT.md', revisedDraft);
+  writeArtifact(paperDir, 'exports/FINAL.md', revisedDraft);
+  writeArtifact(paperDir, 'FEEDBACK-PLAN.md', [
+    '# Feedback Plan',
+    '',
+    '### 1. Preservation: preserve the simple definition',
+    '',
+    '- **Recommendation:** preserve',
+    '- **User Decision:** approve',
+    '- **User Constraint:** Keep the simple definition intact.',
+    '',
+  ].join('\n'));
+  writeArtifact(paperDir, 'REVISION-CHECK.md', validNoRegressionRevisionCheck(baseline, {
+    present: 'No',
+    honored: 'Not applicable',
+    evidence: 'None',
+  }));
+
+  const result = runFail(['validate', '--paper', paperDir, '--semantic', '--json']);
+  assert.strictEqual(result.status, 1);
+  const parsed = JSON.parse(result.stdout);
+  const issueIds = new Set(parsed.issues.map((item) => item.id));
+  assert(issueIds.has('semantic.revision_word_count_delta'));
+  assert(issueIds.has('semantic.revision_preservation_unverified'));
+  assert(issueIds.has('semantic.revision_preservation_evidence_missing'));
+}
+
 testBriefEvidencePlaceholdersFailAfterResearch();
 testBriefEvidenceSourceIdsPass();
 testSourceCoverageWarnsWithoutFailing();
@@ -1429,6 +1623,9 @@ testFeedbackDecisionSetsValidPasses();
 testWeakReviewInstructionFails();
 testConcreteReviewInstructionPasses();
 testReadyReviewWithRequiredImprovementFails();
+testGuardedRevisionChecksCatchFalsePositive();
+testStatusRoutesGuardedRevisionFailureAwayFromUserReview();
+testGuardedRevisionExplainerChecksBaselineWordCountAndPreservation();
 testReasoningSpineRestatementWarns();
 testGenericAudienceConflictWarns();
 testFactCheckSafeSourceAlignmentWarns();

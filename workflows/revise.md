@@ -147,6 +147,13 @@ If a needed change is substantive and not already approved, stop and ask before 
 
 After every substantive revision, write or update `.paper/REVISION-CHECK.md` from `templates/revision-check.md` before export. The check must compare the revised draft to the snapshot created before the revision and score thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, and substance preservation. If `.paper/FEEDBACK-PLAN.md` includes approved or modified `//keep:` preservation constraints, the revision check must explicitly say whether those constraints were honored and cite evidence.
 
+Run guarded validation before asking the user to review the export as improved.
+If deterministic guarded checks find a missing baseline snapshot, internal
+workflow vocabulary in the paper, overloaded sentence-level repetition,
+unapproved word-count delta, missed preservation constraint, or a false-positive
+`REVISION-CHECK.md`, do not claim the revision improved. Preserve the candidate
+and route to recovery, feedback capture, or another controlled revision.
+
 The revision fails if any score drops unless the user explicitly accepts the tradeoff in `.paper/REVISION-CHECK.md`. Do not treat `gpd validate` or semantic validation as readiness by itself. Validators are advisory; never fix a validator warning by deleting specificity, weakening evidence, flattening persona/voice, or reducing persuasive force.
 
 If a revision degrades the paper, use `gpd restore --paper <paper-dir> --snapshot REV-...` to recover the prior tracked files. Restore creates a safety snapshot of the current state before copying files back.

@@ -239,6 +239,14 @@ snapshot preserves the known-good state before the edit, while
 revision regresses, restore the saved version instead of trying to rebuild it
 from memory.
 
+GPD also runs guarded checks after substantive revisions. If the revised draft
+contains deterministic regression signals, such as a missing snapshot baseline,
+internal workflow language leaking into the paper, overloaded sentence
+repetition, unapproved word-count swings, or missed preservation constraints,
+`gpd status` and `gpd next` stop recommending user review and route the paper
+back to feedback or revision recovery. In that state, any rating is displayed as
+blocked rather than current quality.
+
 To recover a prior paper state:
 
 ```bash
@@ -335,3 +343,5 @@ without opening the review file. Status and export output also say whether the
 next review should be your own read or external review, and why. Use `gpd
 validate --semantic` before treating a paper as example-quality,
 publication-ready, or ready for handoff.
+If guarded revision checks fail, `status` and `next` will say so directly and
+will not present the export as ready for review.

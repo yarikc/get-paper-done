@@ -15,6 +15,7 @@ const {
 } = require('./validate');
 const {
   validateSemanticPaper,
+  validateGuardedRevisionRegression,
 } = require('./semantic');
 const {
   CURRENT_STATE_VERSION,
@@ -379,6 +380,32 @@ function reviewRating(state) {
   return '';
 }
 
+function reviewRatingProvenance(state) {
+  if (!state.reviewRating) return '';
+  if (hasGuardedRevisionBlocker(state)) return 'blocked_guarded_revision';
+  const review = artifactContent(state.paperDir, 'REVIEW.md');
+  if (/\b(human|user)\s+(accepted|approved)|accepted\s+by\s+(human|user)\b/i.test(review)) {
+    return 'human_accepted';
+  }
+  if (/\b(independent|external)\s+review|review-external|external reviewer\b/i.test(review)) {
+    return 'independently_assessed';
+  }
+  if (artifactContent(state.paperDir, 'REVISION-CHECK.md')) return 'self_assessed';
+  return 'unverified_local_review';
+}
+
+function reviewRatingUsable(state) {
+  return state.reviewRating && !hasGuardedRevisionBlocker(state);
+}
+
+function reviewRatingDisplay(state) {
+  if (!state.reviewRating) return '';
+  if (hasGuardedRevisionBlocker(state)) {
+    return `${state.reviewRating} (blocked: guarded revision failed; do not treat as current quality)`;
+  }
+  return state.reviewRating;
+}
+
 function finalExportPath(state) {
   return state.artifacts['exports/FINAL.md']
     ? path.join(state.paperDir, '.paper', 'exports', 'FINAL.md')
@@ -397,6 +424,7 @@ function stageLabel(state) {
 }
 
 function validationLabel(state) {
+  if (hasGuardedRevisionBlocker(state)) return 'Blocked by guarded revision checks.';
   if (!state.reviewCompletionNote) return '';
   if (/semantic validation passed/i.test(state.reviewCompletionNote) && /list-density/i.test(state.reviewCompletionNote)) {
     return 'Passed. Medium list-density warnings accepted in REVIEW.md.';
@@ -406,6 +434,7 @@ function validationLabel(state) {
 }
 
 function stateSummary(state) {
+  if (hasGuardedRevisionBlocker(state)) return 'Guarded revision checks found a possible regression. Do not ask for user review yet.';
   if (state.next === '/gpd-status') return 'Ready for user review. No writing stage is blocked.';
   if (state.next === '/gpd-feedback') return 'Feedback is waiting for user decisions before revision.';
   if (state.next === '/gpd-revise') return 'Approved feedback is ready to apply through revision.';
@@ -513,8 +542,36 @@ function reviewCompletionNote(state) {
   return '';
 }
 
+function hasGuardedRevisionBlocker(state) {
+  return Array.isArray(state.guardedRevisionIssues)
+    && state.guardedRevisionIssues.some((item) => item.severity === 'HIGH');
+}
+
+function exportHasInlineReviewComments(paperDir) {
+  const final = artifactContent(paperDir, 'exports/FINAL.md');
+  if (!final) return false;
+  let inFence = false;
+  for (const line of final.split(/\r?\n/)) {
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence && /\/\/\s*(?:(review)\s+)?(todo|keep|qq|no|question|preserve|reject)[!?]?:\s*/i.test(line)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function reviewRecommendation(state) {
   const a = state.artifacts || {};
+  if (hasGuardedRevisionBlocker(state)) {
+    return {
+      recommendation: 'recover before user review',
+      why: 'Guarded revision checks found deterministic regression signals after a substantive revision, so the paper should not be treated as improved or ready for human review.',
+      after: 'Process inline comments with gpd feedback if present; otherwise revise from the accepted baseline or restore the prior snapshot.',
+    };
+  }
   const hasReviewSurface = Boolean(
     a['DRAFT.md']
     || a['REVIEW.md']
@@ -743,6 +800,10 @@ function suggestedNext(state) {
   }
   if (feedbackPlanPending(state)) return '/gpd-feedback';
   if (feedbackPlanApprovedForRevision(state)) return '/gpd-revise';
+  if (hasGuardedRevisionBlocker(state)) {
+    if (a['exports/FINAL.md'] && exportHasInlineReviewComments(state.paperDir)) return '/gpd-feedback';
+    return '/gpd-revise';
+  }
   if (
     artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
     || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
@@ -801,11 +862,15 @@ function status(input = {}) {
   const paperDir = findPaperDir(input.paper || process.cwd());
   if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
   const state = artifactState(paperDir);
+  state.guardedRevisionIssues = validateGuardedRevisionRegression(paperDir);
   state.next = suggestedNext(state);
   state.userAction = userActionHint(state);
   state.latestSnapshotId = latestSnapshotId(state);
   state.restoreCommand = snapshotRestoreCommand(state);
   state.reviewRating = reviewRating(state);
+  state.reviewRatingProvenance = reviewRatingProvenance(state);
+  state.reviewRatingUsable = reviewRatingUsable(state);
+  state.reviewRatingDisplay = reviewRatingDisplay(state);
   state.finalExportPath = finalExportPath(state);
   state.revisionSummary = revisionSummary(state);
   state.reviewCompletionNote = reviewCompletionNote(state);
@@ -820,10 +885,17 @@ function printStatus(state) {
   console.log(`Paper: ${basenameLabel(state.paperDir)}`);
   console.log(`Stage: ${stageLabel(state)}`);
   if (state.finalExportPath) console.log(`Current paper: ${displayPath(state.paperDir, state.finalExportPath)}`);
-  if (state.reviewRating) console.log(`Rating: ${state.reviewRating}`);
+  if (state.reviewRatingDisplay) console.log(`Rating: ${state.reviewRatingDisplay}`);
+  if (state.reviewRatingProvenance) console.log(`Rating source: ${state.reviewRatingProvenance}`);
   console.log(`State: ${stateSummary(state)}`);
   const validation = validationLabel(state);
   if (validation) console.log(`Validation: ${validation}`);
+  if (hasGuardedRevisionBlocker(state)) {
+    console.log('Guarded revision: failed');
+    for (const item of state.guardedRevisionIssues.filter((issueItem) => issueItem.severity === 'HIGH').slice(0, 3)) {
+      console.log(`- ${item.issue}`);
+    }
+  }
   if (state.latestSnapshotId) console.log(`Snapshot: ${state.latestSnapshotId}`);
   if (Array.isArray(state.revisionSummary) && state.revisionSummary.length > 0) {
     console.log('');
@@ -932,6 +1004,9 @@ function contextForCommand(command) {
 function explainNext(state) {
   const a = state.artifacts;
   const next = state.next;
+  if (hasGuardedRevisionBlocker(state)) {
+    return 'Guarded revision checks found deterministic regression signals after a substantive revision, so recover or revise before asking the user to review the export.';
+  }
   if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) {
     return 'One or more setup artifacts are missing, so the paper needs intake/brief repair before downstream work.';
   }
@@ -998,6 +1073,12 @@ function explainNext(state) {
 function userActionHint(state) {
   const a = state.artifacts;
   const next = state.next;
+  if (hasGuardedRevisionBlocker(state)) {
+    if (next === '/gpd-feedback') {
+      return 'Run gpd feedback to capture the inline regression comments, then approve a recovery-oriented plan before another revision.';
+    }
+    return 'Do not ask the user to review this export as improved. Revise from the accepted baseline or restore the prior snapshot before external review.';
+  }
   if (a['exports/FINAL.md'] && next === '/gpd-status') {
     return 'Read .paper/exports/FINAL.md. If you add inline comments, run gpd feedback; it will route approval and revision next.';
   }
@@ -1037,6 +1118,9 @@ function nextAction(input = {}) {
     latestSnapshotId: state.latestSnapshotId,
     restoreCommand: state.restoreCommand,
     reviewRating: state.reviewRating,
+    reviewRatingProvenance: state.reviewRatingProvenance,
+    reviewRatingUsable: state.reviewRatingUsable,
+    reviewRatingDisplay: state.reviewRatingDisplay,
     reviewRecommendation: state.reviewRecommendation,
     full: Boolean(input.full),
   };
@@ -1051,7 +1135,8 @@ function printNext(result) {
   console.log(`Paper: ${basenameLabel(result.paperDir)}`);
   console.log(`Recommended: ${displayNext}`);
   console.log(`Why: ${result.reviewRecommendation ? result.reviewRecommendation.why : result.why}`);
-  if (result.reviewRating) console.log(`Rating: ${result.reviewRating}`);
+  if (result.reviewRatingDisplay) console.log(`Rating: ${result.reviewRatingDisplay}`);
+  if (result.reviewRatingProvenance) console.log(`Rating source: ${result.reviewRatingProvenance}`);
   if (result.reviewRecommendation) {
     console.log(`Review path: ${result.reviewRecommendation.recommendation}`);
     console.log(`After that: ${result.reviewRecommendation.after}`);

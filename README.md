@@ -196,6 +196,13 @@ evidence, structure, ask, audience handling, persona, or voice, GPD requires a
 snapshot plus `REVISION-CHECK.md` before export so fixes do not quietly make
 the paper worse. Snapshots include the paper artifacts, source notes, external
 review captures, imported originals, and hash metadata for integrity checks.
+GPD also runs guarded revision checks for substantive revisions. These are
+framework-level mechanical checks, not paper-specific heuristics: they require a
+snapshot baseline, flag internal workflow vocabulary leaking into reader-facing
+text, overloaded sentence repetition, suspicious word-count changes without
+approval, missed preservation constraints, and false-positive
+`REVISION-CHECK.md` claims. When they fail, `status` and `next` route away from
+user review until the paper is recovered.
 The benefit is practical: before a risky revision starts, GPD preserves the
 known-good paper state, prints the restore command, and keeps rollback separate
 from the quality review. If the new draft regresses, you can recover the prior
@@ -379,6 +386,10 @@ output also recommend whether the next review should be the user's own read or
 external review, with a short reason. Use `gpd validate --semantic` before
 treating a paper as example-quality, publication-ready, or ready for long-term
 handoff.
+If guarded revision checks fail, `status` and `next` should recommend recovery
+or feedback capture instead of telling the user to read the export as improved.
+Any displayed rating is marked blocked and must not be treated as current
+quality until the revision is recovered or accepted.
 When invoking external reviewers, exclude the runtime currently helping you.
 For example, pass `--current-runtime codex` from Codex or `--current-runtime
 claude` from Claude so GPD skips self-review and records the skip.

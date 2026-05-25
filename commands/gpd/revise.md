@@ -31,6 +31,12 @@ After the edit, report the restore command printed by the CLI:
 Restore with gpd restore --paper <paper-dir> --snapshot <SNAPSHOT_ID> if this revision regresses quality.
 ```
 
+Before presenting the revision as improved, run guarded validation. If it flags
+a missing baseline snapshot, internal workflow vocabulary, overloaded sentence
+repetition, unapproved word-count delta, missed preservation constraint, or
+false-positive `REVISION-CHECK.md` risk, stop and report recovery is required
+instead of asking the user to review the export as improved.
+
 Accepted intent flags:
 
 - `--section <name>` - revise or edit only a named section.

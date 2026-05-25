@@ -166,6 +166,22 @@ function ensureRevisionSafetyForOverwrite(meta, draftPath, finalPath, stateResul
   }
 }
 
+function guardedRevisionFailureMessage(stateResult) {
+  const issues = Array.isArray(stateResult.guardedRevisionIssues)
+    ? stateResult.guardedRevisionIssues.filter((item) => item.severity === 'HIGH')
+    : [];
+  if (issues.length === 0) return '';
+  const next = stateResult.next || '/gpd-status';
+  return [
+    'Guarded revision checks failed. Do not export this revision as improved.',
+    '',
+    'Highest-impact findings:',
+    ...issues.slice(0, 3).map((item) => `- ${item.issue}`),
+    '',
+    `Next: run ${next} to recover before user review.`,
+  ].join('\n');
+}
+
 function exportPaper(input = {}) {
   const paperDir = findPaperDir(input.paper || process.cwd());
   if (!paperDir) throw new Error('No .paper workspace found. Run from a paper directory or pass --paper DIR.');
@@ -185,6 +201,10 @@ function exportPaper(input = {}) {
   }
 
   const stateResult = status({ paper: paperDir });
+  const guardedFailure = guardedRevisionFailureMessage(stateResult);
+  if (!input.force && guardedFailure) {
+    throw new Error(guardedFailure);
+  }
   if (
     !input.force
     && stateResult.next !== '/gpd-export'
@@ -265,6 +285,8 @@ function exportPaper(input = {}) {
     forced: Boolean(input.force),
     snapshot: overwriteSnapshot,
     reviewRating: exportedStatus ? exportedStatus.reviewRating : '',
+    reviewRatingDisplay: exportedStatus ? exportedStatus.reviewRatingDisplay : '',
+    reviewRatingProvenance: exportedStatus ? exportedStatus.reviewRatingProvenance : '',
     reviewRecommendation: exportedStatus ? exportedStatus.reviewRecommendation : null,
     reviewCompletionNote: exportedStatus ? exportedStatus.reviewCompletionNote : '',
     revisionSummary: exportedStatus ? exportedStatus.revisionSummary : [],
@@ -276,7 +298,8 @@ function printExport(result) {
   console.log('');
   console.log(`Paper: ${basenameLabel(result.paperDir)}`);
   console.log(`Final paper: ${displayPath(result.paperDir, result.finalPath)}`);
-  if (result.reviewRating) console.log(`Rating: ${result.reviewRating}`);
+  if (result.reviewRatingDisplay || result.reviewRating) console.log(`Rating: ${result.reviewRatingDisplay || result.reviewRating}`);
+  if (result.reviewRatingProvenance) console.log(`Rating source: ${result.reviewRatingProvenance}`);
   const validation = validationLabel(result.reviewCompletionNote);
   if (validation) console.log(`Validation: ${validation}`);
   if (result.snapshot) console.log(`Snapshot: ${result.snapshot.versionId}`);

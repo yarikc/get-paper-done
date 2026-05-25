@@ -161,6 +161,7 @@ Also include a review recommendation when the paper is near or after export:
 - If the feedback plan is approved but not applied, recommend revision before another review.
 - If the export is stale, recommend export before review.
 - If the export is current after substantive revision, recommend user review first. Explain that the user must confirm intent, voice, posture, and calibration before external review amplifies or redirects the paper.
+- If guarded revision checks fail, do not recommend user review. Say the revision may have regressed, show the highest-impact guarded findings, and route to feedback capture or revision recovery.
 - If the user accepts the current export, external review is the next independent check.
 
 ## 6. Context Guidance
