@@ -986,6 +986,9 @@ function testRestoreCommandRestoresSnapshotAndCreatesSafetySnapshot() {
   assert.strictEqual(versions.length, 2);
   const restoredState = JSON.parse(fs.readFileSync(path.join(meta, 'STATE.json'), 'utf8'));
   assert.strictEqual(restoredState.versioning.last_restore_snapshot_id, firstSnapshot);
+  const restoredStateMarkdown = fs.readFileSync(path.join(meta, 'STATE.md'), 'utf8');
+  assert(restoredStateMarkdown.includes('- **Status:** Restored'));
+  assert(restoredStateMarkdown.includes('- **Suggested next command:** `/gpd-status`'));
   assert(fs.readFileSync(path.join(meta, 'REVISION-LOG.md'), 'utf8').includes(`Restored ${firstSnapshot}`));
 }
 
@@ -1204,11 +1207,13 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   assert(packOutput.includes('Capture: gpd feedback'));
 
   const captureOutput = run(['feedback', 'collect', '--paper', paperDir]);
-  assert(captureOutput.includes('Comments found: 8'));
-  assert(captureOutput.includes('Interpretation: FEEDBACK-READER.md captures the raw comments; FEEDBACK-PLAN.md groups them for decision.'));
-  assert(captureOutput.includes('Next: /gpd-feedback'));
+  assert(captureOutput.includes('Feedback captured: 8 comments'));
+  assert(captureOutput.includes('GPD read:'));
+  assert(captureOutput.includes('Recommendation:'));
+  assert(captureOutput.includes('Top concerns:'));
+  assert(captureOutput.includes('Next action: /gpd-feedback'));
   assert(captureOutput.includes('Preserved copy:'));
-  assert(captureOutput.includes('Comments: left in reviewed file until you explicitly clean them.'));
+  assert(captureOutput.includes('Comments remain in the reviewed file until you run gpd feedback clean.'));
   assert(fs.readFileSync(finalPath, 'utf8').includes('//todo!: The ask is still unclear'));
 
   const reviewsDir = path.join(meta, 'reviews');
@@ -1389,9 +1394,9 @@ function testFeedbackCaptureAggregatesManyInlineCommentsByDefault() {
   ].join('\n'));
 
   const captureOutput = run(['feedback', '--paper', paperDir]);
-  assert(captureOutput.includes('Comments found: 10'));
-  assert(captureOutput.includes('Plan mode: aggregate'));
-  assert(captureOutput.includes('theme-level decisions'));
+  assert(captureOutput.includes('Feedback captured: 10 comments'));
+  assert(captureOutput.includes('Decision needed: approve, modify, defer, or reject'));
+  assert(captureOutput.includes('Top themes:'));
 
   const readerFeedback = fs.readFileSync(path.join(meta, 'FEEDBACK-READER.md'), 'utf8');
   assert(readerFeedback.includes('Opening does not state the ask clearly enough.'));
@@ -1431,8 +1436,9 @@ function testFeedbackCaptureCanForceItemizedModeForManyComments() {
   ].join('\n'));
 
   const captureOutput = run(['feedback', '--itemized', '--paper', paperDir]);
-  assert(captureOutput.includes('Comments found: 10'));
-  assert(captureOutput.includes('Plan mode: itemized'));
+  assert(captureOutput.includes('Feedback captured: 10 comments'));
+  assert(captureOutput.includes('Decision needed: approve, modify, defer, or reject'));
+  assert(captureOutput.includes('Top concerns:'));
 
   const feedbackPlan = fs.readFileSync(path.join(meta, 'FEEDBACK-PLAN.md'), 'utf8');
   assert(!feedbackPlan.includes('**Mode:** Aggregate theme review'));

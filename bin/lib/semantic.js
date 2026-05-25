@@ -1377,6 +1377,36 @@ function repeatedTermsInSentence(sentence) {
     .map(([token, count]) => ({ token, count }));
 }
 
+function normalizedWords(value) {
+  return String(value || '')
+    .match(/\b[A-Za-z][A-Za-z-]*\b/g)
+    ?.map((token) => normalizedRepetitionToken(token))
+    .filter(Boolean) || [];
+}
+
+function bridgeTokenOccurrences(sentence, token) {
+  const parts = String(sentence || '').split(/\s*[;:]\s*/);
+  if (parts.length < 2) return 0;
+
+  let occurrences = 0;
+  for (let i = 0; i < parts.length - 1; i += 1) {
+    const left = normalizedWords(parts[i]);
+    const right = normalizedWords(parts[i + 1]);
+    if (left.length === 0 || right.length === 0) continue;
+    let seamTokenCount = 0;
+    for (let size = 1; size <= 4; size += 1) {
+      if (left.length < size || right.length < size) continue;
+      const leftTail = left.slice(-size);
+      const rightHead = right.slice(0, size);
+      if (leftTail.join(' ') !== rightHead.join(' ')) continue;
+      const tokenCount = leftTail.filter((word) => word === token).length;
+      if (tokenCount > 0) seamTokenCount = tokenCount;
+    }
+    occurrences += seamTokenCount * 2;
+  }
+  return occurrences;
+}
+
 function excerpt(value, max = 180) {
   const text = String(value || '').replace(/\s+/g, ' ').trim();
   return text.length <= max ? text : `${text.slice(0, max - 3)}...`;
@@ -1481,14 +1511,21 @@ function validateRevisionSentenceRepetition(paperDir, artifactName) {
   if (!markdown) return [];
 
   for (const sentence of sentencesForRevisionLint(markdown)) {
-    const repeated = repeatedTermsInSentence(sentence);
+    const repeated = repeatedTermsInSentence(sentence)
+      .map(({ token, count }) => ({
+        token,
+        count: count - bridgeTokenOccurrences(sentence, token),
+      }))
+      .filter(({ count }) => count >= 3);
     if (repeated.length === 0) continue;
     const details = repeated.map(({ token, count }) => `${token} x${count}`).join(', ');
+    // Repetition can be intentional voice, definition, or rhythm. Surface it as a calibration warning,
+    // not a hard regression blocker.
     return [issue(
       'semantic.revision_sentence_repetition',
-      'HIGH',
+      'MEDIUM',
       artifactName,
-      `substantive revision has overloaded sentence-level repetition (${details}); rewrite before claiming the revision improved: "${excerpt(sentence)}"`,
+      `possible mechanical sentence-level repetition (${details}); check whether this is intentional rhetorical repetition, a necessary definition/list, or accidental model prose before claiming the revision improved: "${excerpt(sentence)}"`,
     )];
   }
   return [];
@@ -1558,8 +1595,9 @@ function revisionCheckClaimsNoRegression(paperDir) {
 }
 
 function validateRevisionFalsePositiveRisk(paperDir, deterministicIssues) {
-  if (deterministicIssues.length === 0 || !revisionCheckClaimsNoRegression(paperDir)) return [];
-  const ids = [...new Set(deterministicIssues.map((item) => item.id))];
+  const blockingIssues = deterministicIssues.filter((item) => item.severity === 'HIGH');
+  if (blockingIssues.length === 0 || !revisionCheckClaimsNoRegression(paperDir)) return [];
+  const ids = [...new Set(blockingIssues.map((item) => item.id))];
   return [issue(
     'semantic.revision_check_false_positive_risk',
     'HIGH',

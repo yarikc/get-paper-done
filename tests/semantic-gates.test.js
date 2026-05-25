@@ -1512,6 +1512,68 @@ function testGuardedRevisionChecksCatchFalsePositive() {
   assert(issueIds.has('semantic.revision_sentence_repetition'));
   assert(issueIds.has('semantic.revision_baseline_snapshot_missing'));
   assert(issueIds.has('semantic.revision_check_false_positive_risk'));
+  const repetition = parsed.issues.find((item) => item.id === 'semantic.revision_sentence_repetition');
+  assert.strictEqual(repetition.severity, 'MEDIUM');
+}
+
+function testGuardedRevisionAllowsBridgeRepetition() {
+  const paperDir = makePaper('semantic-guarded-bridge');
+  const draft = [
+    '# Draft',
+    '',
+    'Local context produces local optimization; local optimization at scale becomes enterprise drift.',
+    '',
+  ].join('\n');
+  writeRevisionBaseline(paperDir, 'REV-bridge-baseline', `${draft}\n`);
+  writeArtifact(paperDir, 'DRAFT.md', draft);
+  writeArtifact(paperDir, 'exports/FINAL.md', draft);
+  writeArtifact(paperDir, 'REVISION-CHECK.md', validNoRegressionRevisionCheck('.paper/versions/REV-bridge-baseline'));
+
+  const result = validateSemanticPaper(paperDir);
+  const issueIds = new Set(result.map((item) => item.id));
+  assert(!issueIds.has('semantic.revision_sentence_repetition'));
+  assert(!issueIds.has('semantic.revision_check_false_positive_risk'));
+}
+
+function testGuardedRevisionWarnsWhenBridgeRepetitionHasExtraSlop() {
+  const paperDir = makePaper('semantic-guarded-bridge-extra');
+  const draft = [
+    '# Draft',
+    '',
+    'Local context produces local optimization; local optimization survives when local teams repeat assumptions and local reports.',
+    '',
+  ].join('\n');
+  writeRevisionBaseline(paperDir, 'REV-bridge-extra-baseline', `${draft}\n`);
+  writeArtifact(paperDir, 'DRAFT.md', draft);
+  writeArtifact(paperDir, 'exports/FINAL.md', draft);
+  writeArtifact(paperDir, 'REVISION-CHECK.md', validNoRegressionRevisionCheck('.paper/versions/REV-bridge-extra-baseline'));
+
+  const result = validateSemanticPaper(paperDir);
+  const repetitionIssues = result.filter((item) => item.id === 'semantic.revision_sentence_repetition');
+  assert(repetitionIssues.length > 0);
+  assert(repetitionIssues.every((item) => item.severity === 'MEDIUM'));
+  assert(repetitionIssues.some((item) => item.issue.includes('local x3')));
+  assert(!result.some((item) => item.id === 'semantic.revision_check_false_positive_risk'));
+}
+
+function testGuardedRevisionListRepetitionWarnsWithoutBlocking() {
+  const paperDir = makePaper('semantic-guarded-list-repetition');
+  const draft = [
+    '# Draft',
+    '',
+    'Regulation changes, platform constraints change, model providers change, tools change, incidents happen, dependencies move, and audit findings appear.',
+    '',
+  ].join('\n');
+  writeRevisionBaseline(paperDir, 'REV-list-baseline', `${draft}\n`);
+  writeArtifact(paperDir, 'DRAFT.md', draft);
+  writeArtifact(paperDir, 'exports/FINAL.md', draft);
+  writeArtifact(paperDir, 'REVISION-CHECK.md', validNoRegressionRevisionCheck('.paper/versions/REV-list-baseline'));
+
+  const result = validateSemanticPaper(paperDir);
+  const repetitionIssues = result.filter((item) => item.id === 'semantic.revision_sentence_repetition');
+  assert(repetitionIssues.length > 0);
+  assert(repetitionIssues.every((item) => item.severity === 'MEDIUM'));
+  assert(!result.some((item) => item.id === 'semantic.revision_check_false_positive_risk'));
 }
 
 function testStatusRoutesGuardedRevisionFailureAwayFromUserReview() {
@@ -1624,6 +1686,9 @@ testWeakReviewInstructionFails();
 testConcreteReviewInstructionPasses();
 testReadyReviewWithRequiredImprovementFails();
 testGuardedRevisionChecksCatchFalsePositive();
+testGuardedRevisionAllowsBridgeRepetition();
+testGuardedRevisionWarnsWhenBridgeRepetitionHasExtraSlop();
+testGuardedRevisionListRepetitionWarnsWithoutBlocking();
 testStatusRoutesGuardedRevisionFailureAwayFromUserReview();
 testGuardedRevisionExplainerChecksBaselineWordCountAndPreservation();
 testReasoningSpineRestatementWarns();

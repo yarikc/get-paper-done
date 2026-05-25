@@ -7,3 +7,8 @@ docs/feedback*.md
 docs/WORKFLOW-SIMULATION.md
 *.feedback
 .codex-handoff.md
+.codex-handoff.*.md
+.codex-handoff.backups/
+.codex-handoff.state.json
+latest-handoff.md
+latest-handoff.json

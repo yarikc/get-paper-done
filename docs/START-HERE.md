@@ -241,11 +241,12 @@ from memory.
 
 GPD also runs guarded checks after substantive revisions. If the revised draft
 contains deterministic regression signals, such as a missing snapshot baseline,
-internal workflow language leaking into the paper, overloaded sentence
-repetition, unapproved word-count swings, or missed preservation constraints,
-`gpd status` and `gpd next` stop recommending user review and route the paper
-back to feedback or revision recovery. In that state, any rating is displayed as
-blocked rather than current quality.
+internal workflow language leaking into the paper, unapproved word-count swings,
+or missed preservation constraints, `gpd status` and `gpd next` stop
+recommending user review and route the paper back to feedback or revision
+recovery. Possible mechanical sentence repetition is shown as a medium warning
+to inspect, not an automatic failure. In a blocked state, any rating is displayed
+as blocked rather than current quality.
 
 To recover a prior paper state:
 

@@ -891,6 +891,54 @@ Before changing \`.paper/DRAFT.md\` or upstream artifacts, present this theme pl
 `;
 }
 
+function feedbackCaptureSummary(comments, input = {}) {
+  if (!Array.isArray(comments) || comments.length === 0) return null;
+  const aggregate = shouldUseAggregateFeedbackPlan(comments, input);
+  if (aggregate) {
+    const themes = aggregateComments(comments);
+    const highCount = themes.filter((theme) => theme.severity === 'HIGH').length;
+    return {
+      mode: 'aggregate',
+      total: comments.length,
+      decisionCount: themes.length,
+      highCount,
+      read: highCount > 0
+        ? 'GPD reads this as substantive reader friction, not a cleanup pass.'
+        : 'GPD reads this as mostly local revision work.',
+      recommendation: highCount > 0
+        ? 'Decide the theme-level handling before revision; structural and audience themes should guide the rewrite.'
+        : 'Approve or modify the themes, then revise with the raw comments as a checklist.',
+      decisions: themes.map((theme, index) => ({
+        index: index + 1,
+        title: theme.title,
+        severity: theme.severity,
+        count: theme.comments.length,
+        recommendation: 'modify',
+        why: theme.assessment,
+        action: theme.handling,
+      })),
+    };
+  }
+
+  return {
+    mode: 'itemized',
+    total: comments.length,
+    decisionCount: comments.length,
+    highCount: comments.filter((comment) => (comment.severity || inferSeverity(comment.feedback)) === 'HIGH').length,
+    read: 'GPD reads this as a small enough set to decide comment by comment.',
+    recommendation: 'Approve, modify, defer, or reject each concern before revision.',
+    decisions: comments.map((comment, index) => ({
+      index: index + 1,
+      title: commentTitle(comment, index),
+      severity: comment.severity || inferSeverity(comment.feedback),
+      count: 1,
+      recommendation: recommendationForComment(comment),
+      why: initialAssessmentForComment(comment),
+      action: handlingForComment(comment),
+    })),
+  };
+}
+
 function updateFeedbackState(paperDir, dryRun) {
   const current = status({ paper: paperDir });
   const state = current.machineState;
@@ -986,6 +1034,7 @@ function captureFeedback(input = {}) {
     commentedReviewPath,
     snapshotId: snapshot.versionId,
     feedbackMode,
+    summary: feedbackCaptureSummary(comments, input),
     commentsLeftInPlace: true,
     next: '/gpd-feedback',
   };
@@ -1041,32 +1090,40 @@ function printReviewPack(result) {
 }
 
 function printFeedbackCapture(result) {
-  console.log('Feedback captured');
-  console.log('');
-  console.log(`Paper: ${basenameLabel(result.paperDir)}`);
-  console.log(`Reviewed file: ${displayPath(result.paperDir, result.reviewTarget)}`);
-  console.log(`Comments found: ${result.commentsCaptured}`);
-  console.log(`Reader feedback: ${displayPath(result.paperDir, result.readerFeedbackPath)}`);
-  console.log(`Feedback plan: ${displayPath(result.paperDir, result.feedbackPlanPath)}`);
-  if (result.commentedReviewPath) console.log(`Preserved copy: ${displayPath(result.paperDir, result.commentedReviewPath)}`);
-  if (result.snapshotId) console.log(`Snapshot: ${result.snapshotId}`);
-  if (result.feedbackMode) console.log(`Plan mode: ${result.feedbackMode}`);
+  console.log(`Feedback captured: ${result.commentsCaptured} comment${result.commentsCaptured === 1 ? '' : 's'} from ${displayPath(result.paperDir, result.reviewTarget)}`);
   if (result.commentsCaptured === 0) {
     console.log('');
     console.log('No comments found. Add //todo:, //keep:, //qq:, or //no: comments to the reviewed file, then run gpd feedback again.');
+    console.log(`Next: ${result.next}`);
+    return;
   }
-  if (result.commentsCaptured > 0) {
+  if (result.summary) {
     console.log('');
-    console.log('Interpretation: FEEDBACK-READER.md captures the raw comments; FEEDBACK-PLAN.md groups them for decision.');
-    if (result.feedbackMode === 'aggregate') {
-      console.log('Suggested handling: Review a small set of theme-level decisions instead of every raw comment.');
-    } else {
-      console.log('Suggested handling: Review each concern with its proposed action before revision.');
+    console.log(`GPD read: ${result.summary.read}`);
+    console.log(`Recommendation: ${result.summary.recommendation}`);
+    console.log(`Decision needed: ${result.summary.mode === 'aggregate' ? `approve, modify, defer, or reject ${result.summary.decisionCount} theme decisions` : `approve, modify, defer, or reject ${result.summary.decisionCount} concerns`}.`);
+    console.log('Suggested reply: approve');
+    console.log('');
+    console.log(`Top ${result.summary.mode === 'aggregate' ? 'themes' : 'concerns'}:`);
+    for (const decision of result.summary.decisions.slice(0, 5)) {
+      console.log(`${decision.index}. ${decision.severity} ${decision.title} (${decision.count} comment${decision.count === 1 ? '' : 's'}) -> ${decision.recommendation}: ${decision.action}`);
     }
-    if (result.commentsLeftInPlace) console.log('Comments: left in reviewed file until you explicitly clean them.');
-    console.log('No draft changes were made.');
+    if (result.summary.decisions.length > 5) {
+      console.log(`... ${result.summary.decisions.length - 5} more in ${displayPath(result.paperDir, result.feedbackPlanPath)}`);
+    }
+  } else {
+    console.log('');
+    console.log('GPD read: FEEDBACK-READER.md captures the raw comments; FEEDBACK-PLAN.md groups them for decision.');
+    console.log('Recommendation: Review the feedback plan before revision.');
   }
-  console.log(`Next: ${result.next}`);
+  console.log('');
+  console.log(`Next action: ${result.next}`);
+  console.log('No draft changes were made.');
+  if (result.commentsLeftInPlace) console.log('Comments remain in the reviewed file until you run gpd feedback clean.');
+  console.log('');
+  console.log(`Artifacts: ${displayPath(result.paperDir, result.readerFeedbackPath)}, ${displayPath(result.paperDir, result.feedbackPlanPath)}`);
+  if (result.commentedReviewPath) console.log(`Preserved copy: ${displayPath(result.paperDir, result.commentedReviewPath)}`);
+  if (result.snapshotId) console.log(`Snapshot: ${result.snapshotId}`);
 }
 
 function printFeedbackClean(result) {

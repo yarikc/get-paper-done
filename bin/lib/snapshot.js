@@ -10,6 +10,7 @@ const {
 const {
   findPaperDir,
   status,
+  writeStateMarkdown,
   writeStateJson,
 } = require('./state');
 
@@ -334,6 +335,7 @@ function restoreSnapshot(input = {}) {
       },
     };
     writeStateJson(paperDir, nextState, input.dryRun);
+    writeStateMarkdown(paperDir, nextState, input.dryRun);
   }
 
   return {

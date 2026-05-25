@@ -149,10 +149,12 @@ After every substantive revision, write or update `.paper/REVISION-CHECK.md` fro
 
 Run guarded validation before asking the user to review the export as improved.
 If deterministic guarded checks find a missing baseline snapshot, internal
-workflow vocabulary in the paper, overloaded sentence-level repetition,
-unapproved word-count delta, missed preservation constraint, or a false-positive
-`REVISION-CHECK.md`, do not claim the revision improved. Preserve the candidate
-and route to recovery, feedback capture, or another controlled revision.
+workflow vocabulary in the paper, unapproved word-count delta, missed
+preservation constraint, or a false-positive `REVISION-CHECK.md`, do not claim
+the revision improved. Possible mechanical sentence repetition is a medium
+warning to inspect, not a hard blocker by itself. Preserve the candidate and
+route to recovery, feedback capture, or another controlled revision when
+blocking guarded checks fail.
 
 The revision fails if any score drops unless the user explicitly accepts the tradeoff in `.paper/REVISION-CHECK.md`. Do not treat `gpd validate` or semantic validation as readiness by itself. Validators are advisory; never fix a validator warning by deleting specificity, weakening evidence, flattening persona/voice, or reducing persuasive force.
 

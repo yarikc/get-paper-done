@@ -32,10 +32,11 @@ Restore with gpd restore --paper <paper-dir> --snapshot <SNAPSHOT_ID> if this re
 ```
 
 Before presenting the revision as improved, run guarded validation. If it flags
-a missing baseline snapshot, internal workflow vocabulary, overloaded sentence
-repetition, unapproved word-count delta, missed preservation constraint, or
-false-positive `REVISION-CHECK.md` risk, stop and report recovery is required
-instead of asking the user to review the export as improved.
+a missing baseline snapshot, internal workflow vocabulary, unapproved word-count
+delta, missed preservation constraint, or false-positive `REVISION-CHECK.md`
+risk, stop and report recovery is required instead of asking the user to review
+the export as improved. Treat possible mechanical sentence repetition as a
+medium warning to inspect, not as an automatic revision failure.
 
 Accepted intent flags:
 

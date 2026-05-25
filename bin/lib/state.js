@@ -178,6 +178,11 @@ function artifactNewerThan(paperDir, upstream, downstream) {
   return upstreamMtime !== null && downstreamMtime !== null && upstreamMtime > downstreamMtime;
 }
 
+function artifactChangedAfterStateAndNewerThan(state, upstream, downstream) {
+  return artifactNewerThan(state.paperDir, upstream, downstream)
+    && artifactNewerThan(state.paperDir, upstream, 'STATE.json');
+}
+
 function savedNextCommand(state) {
   if (
     state.machineState
@@ -792,9 +797,18 @@ function suggestedNext(state) {
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
     return '/gpd-brief';
   }
+  if (state.machineState && state.machineState.status === 'Restored') return '/gpd-status';
   if (
-    artifactNewerThan(state.paperDir, 'PAPER-CONTEXT.md', 'BRIEF.md')
-    || artifactNewerThan(state.paperDir, 'DECISIONS.md', 'BRIEF.md')
+    state.machineState
+    && state.machineState.current_stage === 'Revision'
+    && artifactNewerThan(state.paperDir, 'DRAFT.md', 'STATE.json')
+    && artifactNewerThan(state.paperDir, 'REVISION-CHECK.md', 'STATE.json')
+  ) {
+    return '/gpd-export';
+  }
+  if (
+    artifactChangedAfterStateAndNewerThan(state, 'PAPER-CONTEXT.md', 'BRIEF.md')
+    || artifactChangedAfterStateAndNewerThan(state, 'DECISIONS.md', 'BRIEF.md')
   ) {
     return '/gpd-brief';
   }
@@ -805,13 +819,13 @@ function suggestedNext(state) {
     return '/gpd-revise';
   }
   if (
-    artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
-    || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
+    artifactChangedAfterStateAndNewerThan(state, 'BRIEF.md', 'RESEARCH.json')
+    || artifactChangedAfterStateAndNewerThan(state, 'STRATEGY.md', 'RESEARCH.json')
   ) {
     return '/gpd-research';
   }
-  if (artifactNewerThan(state.paperDir, 'RESEARCH.json', 'OUTLINE.md')) return '/gpd-outline --deep';
-  if (artifactNewerThan(state.paperDir, 'OUTLINE.md', 'DRAFT.md')) return '/gpd-draft';
+  if (artifactChangedAfterStateAndNewerThan(state, 'RESEARCH.json', 'OUTLINE.md')) return '/gpd-outline --deep';
+  if (artifactChangedAfterStateAndNewerThan(state, 'OUTLINE.md', 'DRAFT.md')) return '/gpd-draft';
   if (draftNewerThanWithContentChange(state, 'FACT-CHECK.md')) return '/gpd-fact-check --full';
 
   const factCheckAction = factCheckRecommendedAction(state);
@@ -820,13 +834,13 @@ function suggestedNext(state) {
 
   if (
     draftNewerThanWithContentChange(state, 'REVIEW.md')
-    || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
+    || artifactChangedAfterStateAndNewerThan(state, 'FACT-CHECK.md', 'REVIEW.md')
   ) {
     return '/gpd-review --deep';
   }
   if (
     a['FEEDBACK-READER.md']
-    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))
+    && (!a['FEEDBACK-PLAN.md'] || artifactChangedAfterStateAndNewerThan(state, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))
   ) {
     return '/gpd-review';
   }
@@ -837,8 +851,8 @@ function suggestedNext(state) {
   if (a['exports/FINAL.md']) {
     if (
       draftChangedSinceExport(state)
-      || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'exports/FINAL.md')
-      || artifactNewerThan(state.paperDir, 'REVIEW.md', 'exports/FINAL.md')
+      || artifactChangedAfterStateAndNewerThan(state, 'FACT-CHECK.md', 'exports/FINAL.md')
+      || artifactChangedAfterStateAndNewerThan(state, 'REVIEW.md', 'exports/FINAL.md')
     ) {
       return '/gpd-export';
     }
@@ -908,7 +922,10 @@ function printStatus(state) {
     console.log(`After that: ${state.reviewRecommendation.after}`);
   }
   console.log('');
-  console.log(`Next: ${state.next === '/gpd-status' ? 'Read .paper/exports/FINAL.md' : state.next}`);
+  const nextLabel = state.next === '/gpd-status' && state.finalExportPath
+    ? 'Read .paper/exports/FINAL.md'
+    : state.next;
+  console.log(`Next: ${nextLabel}`);
   if (!state.reviewRecommendation) {
     console.log(`User action: ${state.userAction}`);
   }
@@ -1018,32 +1035,32 @@ function explainNext(state) {
     return `The strategy gate is ${state.strategyStatus}; fix the primary blocker (${state.primaryBlocker || 'unknown'}) before downstream work.`;
   }
   if (
-    artifactNewerThan(state.paperDir, 'PAPER-CONTEXT.md', 'BRIEF.md')
-    || artifactNewerThan(state.paperDir, 'DECISIONS.md', 'BRIEF.md')
+    artifactChangedAfterStateAndNewerThan(state, 'PAPER-CONTEXT.md', 'BRIEF.md')
+    || artifactChangedAfterStateAndNewerThan(state, 'DECISIONS.md', 'BRIEF.md')
   ) {
     return 'Paper context or decision records changed after the brief, so the formal brief must absorb the clarified intent before downstream work continues.';
   }
   if (feedbackPlanPending(state)) return 'A feedback plan is pending approval, so /gpd-feedback should walk through the concerns before revision.';
   if (
-    artifactNewerThan(state.paperDir, 'BRIEF.md', 'RESEARCH.json')
-    || artifactNewerThan(state.paperDir, 'STRATEGY.md', 'RESEARCH.json')
+    artifactChangedAfterStateAndNewerThan(state, 'BRIEF.md', 'RESEARCH.json')
+    || artifactChangedAfterStateAndNewerThan(state, 'STRATEGY.md', 'RESEARCH.json')
   ) {
     return 'The brief or strategy changed after research, so research needs an incremental refresh.';
   }
-  if (artifactNewerThan(state.paperDir, 'RESEARCH.json', 'OUTLINE.md')) return 'Research is newer than the outline, so the outline needs to be refreshed.';
-  if (artifactNewerThan(state.paperDir, 'OUTLINE.md', 'DRAFT.md')) return 'The outline is newer than the draft, so drafting should resume from the updated structure.';
-  if (artifactNewerThan(state.paperDir, 'DRAFT.md', 'FACT-CHECK.md')) return 'The draft is newer than the fact-check, so material claims need a fresh check.';
+  if (artifactChangedAfterStateAndNewerThan(state, 'RESEARCH.json', 'OUTLINE.md')) return 'Research is newer than the outline, so the outline needs to be refreshed.';
+  if (artifactChangedAfterStateAndNewerThan(state, 'OUTLINE.md', 'DRAFT.md')) return 'The outline is newer than the draft, so drafting should resume from the updated structure.';
+  if (draftNewerThanWithContentChange(state, 'FACT-CHECK.md')) return 'The draft is newer than the fact-check, so material claims need a fresh check.';
   const factCheckAction = factCheckRecommendedAction(state);
   if (factCheckAction === next) return `FACT-CHECK.md recommends ${next}, so follow the documented fact-check routing.`;
   if (
-    artifactNewerThan(state.paperDir, 'DRAFT.md', 'REVIEW.md')
-    || artifactNewerThan(state.paperDir, 'FACT-CHECK.md', 'REVIEW.md')
+    draftNewerThanWithContentChange(state, 'REVIEW.md')
+    || artifactChangedAfterStateAndNewerThan(state, 'FACT-CHECK.md', 'REVIEW.md')
   ) {
     return 'The draft or fact-check changed after review, so review needs a refresh.';
   }
   if (
     a['FEEDBACK-READER.md']
-    && (!a['FEEDBACK-PLAN.md'] || artifactNewerThan(state.paperDir, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))
+    && (!a['FEEDBACK-PLAN.md'] || artifactChangedAfterStateAndNewerThan(state, 'FEEDBACK-READER.md', 'FEEDBACK-PLAN.md'))
   ) {
     return 'Reader feedback exists without a current feedback plan, so review should synthesize it before revision.';
   }

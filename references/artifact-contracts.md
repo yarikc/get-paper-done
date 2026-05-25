@@ -219,10 +219,12 @@ Semantic validation also runs guarded revision checks when `REVISION-CHECK.md`
 records a substantive revision. These checks catch deterministic false-positive
 signals before a user is asked to review the export as improved: missing
 snapshot baseline, internal GPD or workflow vocabulary leaking into `DRAFT.md`
-or `exports/FINAL.md`, overloaded sentence-level repetition, repeated
-mechanical cadence, suspicious word-count deltas without approval, missed
-preservation constraints, and a `REVISION-CHECK.md` that claims no regression
-while guarded checks fail.
+or `exports/FINAL.md`, repeated mechanical cadence, suspicious word-count
+deltas without approval, missed preservation constraints, and a
+`REVISION-CHECK.md` that claims no regression while guarded checks fail.
+Possible mechanical sentence repetition is a medium calibration warning, not a
+hard blocker by itself, because repetition may be intentional rhythm,
+definition, or necessary scope language.
 
 ### `REVISION-LOG.md`
 
