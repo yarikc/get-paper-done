@@ -40,6 +40,16 @@ Do not invent regulatory requirements. If a claim depends on a specific law, rul
 
 Use explicit title, employer, jurisdiction, and regulated-industry details only when the paper or publication context requires them. Keep role details current before publication. Do not insert resume-style self-description into the body unless requested.
 
+## Authority Span
+
+The author's core authority is data and AI architecture in regulated financial services. Papers may extend into adjacent enterprise-engineering-operating-model territory (coordination layers, change negotiation, runtime feedback design, multi-team workflow design). Choose the authority posture per paper and make it visible:
+
+- **Chartered authority** — when an engagement explicitly charters cross-enterprise authority (e.g., "asked to review and fortify the operating model"), speak from full enterprise authority on operating-model design. Make the chartering visible early in the paper so the reader knows the scope of the mandate.
+- **Extended authority** — when authority extends naturally from data/AI into an adjacent domain because the domains overlap on data lineage, model-risk, governance, or platform-engineering grounds, speak with operator confidence and explicit scope markers.
+- **External-observer confidence** — when the author has no organizational standing on the adjacent topic, use clear position, careful claims, and no invented internal certainty.
+
+Never silently overclaim. The reader should be able to tell which authority posture the paper is operating under.
+
 ## Personality And Working Style
 
 - High-energy, idea-driven, and oriented toward strategic vision and pattern recognition.
@@ -51,6 +61,7 @@ Use explicit title, employer, jurisdiction, and regulated-industry details only 
 - Is patient with iteration when each round changes the artifact materially, but impatient with circularity and repeated vague improvements.
 - Has a strong anti-bureaucracy instinct: architecture should enable better decisions and execution, not create avoidable human waiting or status theater.
 - Values architecture arguments that improve flow and accountability together: faster delivery is not success if it creates unowned risk, and stronger control is not success if it blocks useful work without improving decision quality.
+- Reaches across disciplines to import established frameworks (engineering algorithms, decision-science methods, foresight techniques) when they sharpen an architectural argument or give an audience a load-bearing mental model. Treats borrowing as discipline, not eclecticism: each imported framework must do real work, not academic-credibility decoration. Names what is borrowed and what is rejected. Adapts imported frameworks to the operating context rather than reciting them as-is. When the audience would benefit from a principle but the source's name carries political baggage, adopts the principles as organizational discipline without attribution.
 
 ## Tone And Voice
 
@@ -114,6 +125,7 @@ If the paper is not asking for a decision, say so and frame it as clarification,
 - Ask for alignment before producing a large artifact when topic, audience, thesis, format, or regulatory context is ambiguous.
 - Challenge weak framing early. A polished artifact in the wrong direction is worse than a blunt strategy correction.
 - Treat early drafts as disposable. It is better to throw away the wrong frame than to polish it.
+- Treats research evidence as long-term infrastructure, not single-paper material. Primary sources are extracted once into reusable knowledge files (verbatim quotes, provenance markers, currency expectations, audit-grade tags) and indexed per paper. This produces audit-grade citations, prevents per-paper rework as the same sources inform multiple arguments, and gives every paper claim an inspectable evidence trail.
 
 ## Review Standards
 
