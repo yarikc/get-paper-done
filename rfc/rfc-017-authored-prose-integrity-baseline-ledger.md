@@ -845,3 +845,29 @@ This test converts §12's "external feedback as diagnostics" principle into a ha
 - If the critic keeps moving the target, GPD should stop, keep the accepted baseline, and offer to harvest only selected local improvements.
 
 This is why `gpd improve` must be a guided baseline-protection workflow, not an autonomous external-review convergence loop.
+
+---
+
+# Validation Record
+
+*(Naming: `R#` is reserved for Resolutions / design decisions. `V#` records validation events. Newest on top.)*
+
+## V1. 2026-05-27 — Cross-runtime cold validation passed; RFC-017 promoted from provisional to "design rationale of record"
+
+**Validators**: Claude (Explore subagent, isolated context, no shared conversation history) + Codex CLI (`codex exec`, separate session).
+
+**Rubric**: 15 questions across 5 categories (core thesis & modes / schema correctness / loop discipline / UX / evidence + sequencing); 10 marked critical (must pass 100% for the strict claim). Rubric stored at `/tmp/rfc17-rubric.txt` during the run; the question set is reproducible.
+
+**Result**:
+- Claude: 15/15 total, 10/10 critical
+- Codex: 14/15 total, 10/10 critical
+- Single non-critical divergence on Q4 was a **rubric-wording issue**, not a spec gap: the question used handoff-spec terminology ("Tier 1 fact file frontmatter") rather than RFC-017's own POSITIONS.json language. Codex strictly marked it NOT IN SPEC; Claude charitably mapped it to §18. The content Claude found is in fact present in the spec at §18.
+- Substantive answer convergence across runtimes on all other 14 questions, including all critical ones.
+
+**Outcome**: RFC-017 promoted from *provisional* to *"design rationale of record"*. Both required conditions met: (1) strict cold validation passes 100% on critical questions; (2) cross-runtime with convergent answers.
+
+**Cost**: Codex `exec` reported ~45K tokens for its session; Claude subagent ~same order. Total round-trip ~80–100K tokens, ~$0.30–1.00 at frontier-model pricing.
+
+**Lesson for future runs**: cold-validation rubrics must use the target spec's own vocabulary; do not cross-import terminology between specs (the Q4 mismatch above is the exemplar).
+
+**Next required validation**: at next structural change to the spec, OR by ~2026-07-08 (6 weeks).
