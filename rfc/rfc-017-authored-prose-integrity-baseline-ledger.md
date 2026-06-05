@@ -160,6 +160,7 @@ The diff makes **removal visible** — the failure that destroyed Paper A (silen
 
 - External review (and any model review) produces **objections, risks, missing-evidence flags, confusing-passage flags, suggested tests** — **never a rewrite plan**. It is routed through the same diff-proposal + compare gate as any change.
 - **Feedback trust hierarchy** (higher dominates unless explicitly overridden): **user > peer human > external model > validator > agent self-review.** Weak signals may not silently override strong ones. External-model feedback that conflicts with an author position is surfaced as a question, not applied.
+- **Disposition required before effect.** No review finding may affect a change set until the author dispositions it (see R26). Auto-application of review notes — including verbatim suggested fixes — is forbidden; the finding tells GPD *where* a problem might be, never *how* to fix it.
 
 ## 12A. Scoped external review and convergence discipline
 
@@ -171,6 +172,15 @@ The research-backed correction to the failed loop is: **external review must be 
 |---|---|---|---|
 | **Full diagnostic review** | Explicit checkpoint before a change set, or user asks for a fresh review | Objections, missing evidence, audience/genre risks, confusing passages, issue candidates | Direct prose rewrite authority |
 | **Follow-up verification review** | After a bounded change set | Did approved issues land? Did the candidate regress vs accepted? Did evidence/claims break? Did scope expand without approval? | New unrelated HIGH queue, broad style preferences, renewed whole-paper critique |
+
+Review also has a second axis: **purpose**.
+
+| Review purpose | Job | Best used for | Not for |
+|---|---|---|---|
+| **Cold review** | Bug-catch: claim/evidence/internal-logic/audience read by a fresh reader | Pre-handoff hygiene; catching contradictions, missing cost/risk arguments, unsupported claims, and unclear mechanisms | Reopening the whole paper after every small change |
+| **Cross-family review** | Framing-bet challenge by a different model family/runtime | Major reframe, publication checkpoint, or disputed strategic bet | Style convergence, prose authority, or replacing author judgment |
+
+Scope and purpose compose: a full cold review may surface new issues; a follow-up cold review verifies only approved fixes and regressions. A cross-family review is not "more authoritative" than the author; it is a stress test for a framing bet.
 
 This prevents the failure mode observed in the convergence test: each external pass found new or reframed HIGH issues, including items previously treated as medium/polish, so the loop moved the target instead of converging.
 
@@ -222,6 +232,17 @@ Cheap, deterministic checks computed **against the accepted baseline** (Part IV.
 - density increase (long-list sentences) vs. baseline;
 - vocabulary drift (author term replaced by non-author synonym; house coinage introduced).
 
+**Tier-2b — prose-pattern advisory** runs deterministic plain-language scans where the signal is pattern-matchable rather than taste-based. These differ from Tier-2a (position-backed) guards: they require no confirmed claim/vocab set, only a pattern catalog. The categories below are **open classes** with representative examples, not closed regex sets — the implementer maintains a per-class pattern catalog and an author can extend it per paper:
+
+- **drafting-scaffold leak** — prose that talks about the artifact instead of making the argument. Examples: `this paper explains`, `this section shows`, `the point most often missed`; rhetorical pointers to paper structure rather than to its content;
+- **repeated restatement** — the same image, claim, or example repeated locally without adding a new decision-useful dimension;
+- **defended jargon** — coined terms/metaphors that require immediate defense or explanation when a functional phrase would do;
+- **undefined load-bearing term** — recurring term used before a definition or used inconsistently after definition;
+- **multi-clause overload** — sentences whose clause count makes the reader re-parse rather than decide;
+- **abandoned terminology** — a term dropped between revisions without a consistent replacement (detected by diffing the vocabulary registry across snapshots).
+
+These are surfaced as warnings in the change report, not blocking failures. A style regex should never hold the pen; the author decides whether the warning matters.
+
 **Self-rating as workflow authority is removed.** A false "9.2" is worse than no number. The only quality judgment in the system is the human's, at the gate.
 
 ## 15. History and discoverability
@@ -256,6 +277,11 @@ gpd improve
 Accepted: v-peak (5,026w, position paper, approved by user)
 Candidate: none yet
 
+Pass type:
+[compression] [structural] [comment pass] [expansion]
+
+Selected by the author. GPD may recommend a pass type, but it must not silently infer one.
+
 Diagnostics:
 - 3 material issues found
 - 2 are evidence/claim issues
@@ -283,6 +309,15 @@ Regression risk:
 Decision:
 [apply candidate] [modify change set] [reject] [ask external critic]
 ```
+
+Pass type changes guard interpretation:
+
+- **compression**: expect net shrinkage; growth is suspicious unless explicitly approved;
+- **structural**: expect heading/section movement; prose churn outside touched sections is suspicious;
+- **comment pass**: expect targeted edits only; section regeneration is suspicious;
+- **expansion**: expect growth; structure change still requires approval.
+
+**Behavior on pass-type mismatch.** When the actual change set contradicts the declared pass type (e.g. compression declared but the change set adds words; comment-pass declared but a section is regenerated), the gate **refuses to apply by default** and surfaces a single override prompt: `pass type was <X> but change set is <Y>; reclassify pass type, scope the change set, or override`. The author can reclassify, narrow the change set, or override with a one-line reason that is logged to the change report. Silent reinterpretation is not allowed — the declared pass type is sovereign until the author changes it.
 
 After the candidate is produced:
 
@@ -353,11 +388,14 @@ Stored at `.paper/POSITIONS.json` (machine) with a `.paper/POSITIONS.md` human v
   ],
   "positions": [
     { "claim_id": "clm_3f9a…", "stance": "accepted", "since": "v-peak" }
+  ],
+  "section_claims": [                       // optional; supports R23 export-gate binding
+    { "section": "Why now", "claim_ids": ["clm_3f9a…", "clm_b14e…"] }
   ]
 }
 ```
 
-The objective guards (§14) read `claims[]` (asserted-claim loss), `vocabulary[]` (drift/coinage), and `load_bearing` flags directly. The revision contract (§13) reads `genre`, `audience`, and `positions`.
+The objective guards (§14) read `claims[]` (asserted-claim loss), `vocabulary[]` (drift/coinage), and `load_bearing` flags directly. The revision contract (§13) reads `genre`, `audience`, and `positions`. The export gate (R23) reads `section_claims[]` if present — when omitted, the gate falls back to inline-marker matching (`<!-- claim:Cn -->`) or treats the section as covering no specific claims (prose-strength warnings still fire on direct-quote matches against the claim statement).
 
 ## 19. Claim identity — the expensive hinge
 
@@ -434,6 +472,8 @@ All are deterministic, baseline-relative, and immune to LLM bias. Output is a st
 
 Signals for **authored-prose-with-voice** (→ preserve-and-strengthen): high prose-to-bullet ratio; complete sectioned argument; figurative/memorable phrasing; first-person or distinctive register markers; low boilerplate; coherent thesis present. Signals for **raw-material** (→ generate-from-brief): notes/bullets/specs, fragments, TODO scaffolding, low prose ratio. The classifier is advisory and **always confirmed by the user**; it never silently transforms.
 
+Phase-0 v1 deliberately treats these as **advisory signals, not a locked scoring algorithm**. The safety property is the confirmation gate, not classifier precision. Implementation may start with simple deterministic hints (prose ratio, bullet ratio, section count, first-body-paragraph thesis signal), but it must not silently route authored prose into generation or conversion based on a score. Calibrate thresholds only after the first real imports produce false-positive/false-negative data.
+
 ## 25. Pruning / bloat elimination
 
 - Feedback plans and reader feedback are **non-recursive**: live content + a `prior: history/<name>` pointer. Bloat is O(1) per cycle.
@@ -467,12 +507,21 @@ Signals for **authored-prose-with-voice** (→ preserve-and-strengthen): high pr
 
 ## 28. Build sequencing
 
+- **Phase 0 precondition — freeze falsification fixtures**: before changing import/mode-routing behavior, capture the R14 sanitized private fixtures for Test #1 (three paper versions + self-grade artifact) so the root-cause proof remains reproducible after the old loop changes.
 - **Phase 0 — stop the bleeding**: mode detection + safe default + confirmation gate.
 - **Phase 1 — baseline protection**: accepted/candidate/history (semantic), diff + compare gate, kill self-rating authority, non-recursive feedback storage.
 - **Phase 2 — diagnostics discipline**: external-as-diagnostics, scoped follow-up review, trust hierarchy, revision contract (incl. genre), objective guards vs baseline, stop conditions for non-converging loops.
 - **Phase 3 — per-paper position record**: claims (with stable IDs), evidence bindings, vocabulary, genre, audience.
 - **Phase 4 — cross-paper hinge**: claim-identity matching + generic edge store; human-annotated + trivial fingerprint edges only.
 - **Deferred (gated by Tests 7–8)**: cross-paper relation taxonomy + automated conflict/supersession detection; cross-paper *source* reuse (re-scoped RFC-016 Phase 2); external-segment generalization.
+
+**Phase 0 acceptance criteria**:
+
+- import records the detected mode and user-confirmed mode in state;
+- authored prose defaults to `preserve-and-strengthen`;
+- `generate-from-brief` and `convert-format` require interactive confirmation or `--confirm-transform` when authored prose is detected;
+- the original failure mode — silent transform/regeneration of authored prose — is unreachable without explicit user action;
+- Test #1 fixtures are frozen before Phase 0 code lands.
 
 ## 29. Open questions and risks
 
@@ -671,8 +720,10 @@ No NLP deps. Normalize by lowercasing, stripping markdown/citations/punctuation,
 
 **R2 — Two guard tiers + claim-loss determinism (§14/§18/§23).** Be honest about what is zero-touch:
 - **Tier 1 — structural, fully deterministic, no position record required:** `length_delta`, `structure_loss`, `baseline_relative_prose_saturation_delta`. These alone are immune to LLM bias.
-- **Tier 2 — position-backed, deterministic only over a *frozen, human-confirmed* claim/vocab set:** `claim_loss`, `load_bearing_phrase_loss`, `vocabulary_drift`. Extraction is advisory (model/heuristic); the guard runs on the confirmed set.
-- **Anti-toil rule:** claim/vocab confirmation is **incremental — only the deltas, at accept-time** — never a separate heavy step. (Otherwise the ledger becomes the new chore.)
+- **Tier 2 — advisory, deterministic, surfaced as warnings (never blocking unless explicitly promoted):** two subcategories with different inputs:
+  - **Tier-2a position-backed** — `claim_loss`, `load_bearing_phrase_loss`, `vocabulary_drift`. Runs over a *frozen, human-confirmed* claim/vocab set. Extraction is advisory (model/heuristic); the guard runs on the confirmed set.
+  - **Tier-2b prose-pattern** — drafting-scaffold leak, repeated restatement, defended jargon, undefined load-bearing term, multi-clause overload, abandoned terminology. Runs over an open-class pattern catalog. Requires no confirmed claim/vocab set. Always advisory (see R21).
+- **Anti-toil rule:** claim/vocab confirmation (Tier-2a) is **incremental — only the deltas, at accept-time** — never a separate heavy step. (Otherwise the ledger becomes the new chore.) Tier-2b requires no per-paper setup.
 
 **R3 — Genre taxonomy (§18/§22): no enum war.** Keep the existing `classification.purpose` workflow enum **unchanged**. Add display/voice fields: `genre.label` (e.g., `position_paper`, `white_paper`, `executive_briefing`) and `genre.optimization_target` (`conviction | defensibility | explanation | alignment | update`). Do **not** add new values to `classification.purpose` unless routing behavior changes intentionally. *(Verify the live enum values before coding.)*
 
@@ -692,7 +743,11 @@ No NLP deps. Normalize by lowercasing, stripping markdown/citations/punctuation,
 
 **R9 — Reuse the density validator (§23).** Do not build a second density system. Reuse the existing list-density/prose-saturation validator; name the baseline-relative guard `baseline_relative_prose_saturation_delta`.
 
-**R10 — Split Phase 2 (§28).** **Phase 2a** (after Phase 1, before Phase 3): Tier-1 structural guards. **Phase 2b** (after Phase 3 position record): Tier-2 position-backed guards. Structural protection ships without waiting on the ledger.
+**R10 — Split Phase 2 (§28).** **Phase 2a** runs in two independent slices that can ship in either order or in parallel:
+- **Phase 2a.1 structural guards** — Tier-1 (`length_delta`, `structure_loss`, `baseline_relative_prose_saturation_delta`). No position record dependency.
+- **Phase 2a.2 prose-pattern advisory** — Tier-2b (drafting-scaffold leak, repeated restatement, defended jargon, undefined load-bearing term, multi-clause overload, abandoned terminology). Open-class pattern catalog; no position record dependency.
+
+**Phase 2b** (after Phase 3 position record): Tier-2a position-backed guards (`claim_loss`, `load_bearing_phrase_loss`, `vocabulary_drift`). Only position-backed claim/vocab guards wait on the ledger; structural protection and prose-pattern advisory ship independently.
 
 **R11 — Mode detection: explicit non-interactive behavior (§9/§24).** CLI records the detected mode and defaults to `preserve-and-strengthen`. Add `--mode preserve-and-strengthen|generate-from-brief|convert-format`. If authored prose is detected and the user passes `generate-from-brief`/`convert-format`, require `--confirm-transform`. Slash commands (`/gpd-import`) ask interactively.
 
@@ -714,7 +769,37 @@ Follow-up verification must not generate a fresh unrelated HIGH queue. New issue
 
 **R18 — Pairwise baseline comparison replaces absolute rating (§12A/§14).** Do not surface a numeric paper score as workflow authority during improve/revise flows. The primary verdict is pairwise: `better than accepted | worse than accepted | inconclusive`, with concrete improved/regressed bullets. External critics and model evaluators may contribute evidence, but the accepted baseline and human decision remain sovereign.
 
-**Implementer schemas to produce before build:** `POSITIONS.json`, `ACCEPTED.meta.json`, `COMPARE.json`, `CHANGESET.json`, `edges.jsonl`.
+**R19 — Do-not-reintroduce ledger (§13/§16A).** Every accepted user feedback item becomes a soft constraint in the revision contract. If a later change touches the same locus or reintroduces the same rejected pattern, the change report must say so: `may reintroduce previously rejected pattern: <summary>`. This is **SUSPECT, not BLOCKING**. Legitimate scope changes remain possible, but the agent must surface the risk instead of making the author rediscover it.
+
+**R19.1 — Ledger storage, locus, and matching.** The ledger is `LEDGER.json` under the paper-root workspace (not `POSITIONS.json` — different lifecycle: ledger is append-only feedback log; positions is the live model). Each entry:
+
+```json
+{ "id": "L-<short>",
+  "accepted_at": "<iso8601>",
+  "feedback_text": "<verbatim author phrasing>",
+  "tags": ["<author-asserted at accept-time>"],
+  "locus": { "section": "<heading>", "sentence_neighborhood": "<first-3-words..last-3-words>" },
+  "status": "active | superseded | retired",
+  "superseded_by": "L-<id> | null" }
+```
+
+Matching is **author-asserted tags + locus overlap**, not embeddings or fuzzy similarity. Tag set is asserted at accept-time (the moment a feedback item is approved); the change-set gate flags any edit whose touched locus overlaps an active ledger entry's locus, or whose proposed prose contains a pattern previously tagged on an active entry. Tag taxonomy is open per-paper; recommended seed tags: `voice`, `evidence-overreach`, `scaffolding`, `terminology`, `audience-drift`, `redundancy`. The author can supersede or retire an entry explicitly; gates never auto-retire. Heavier matching (embeddings, fuzzy) is out of scope — reintroduces the unreliable-rater problem this whole spec removes.
+
+**R20 — Author-declared pass type drives Tier-1 guards (§14/§16A).** `gpd improve` starts by asking the author for the pass type: `compression | structural | comment pass | expansion`. GPD may recommend a pass type from context, but it must not silently infer one. Tier-1 guards interpret deltas through that declaration: compression expects shrinkage; structural expects heading movement with bounded prose churn; comment pass expects targeted edits; expansion expects growth but still requires explicit approval for structure change.
+
+**R21 — Tier-2b prose-pattern guards are deterministic and advisory (§14).** Include pattern-matchable prose risks in the change report: drafting-scaffold leak, repeated restatement, defended jargon, undefined load-bearing terms, multi-clause overload, and abandoned terminology without a replacement vocabulary. They are advisory because author voice remains sovereign; do not block export solely on a style regex.
+
+**R22 — Review taxonomy has two axes (§12A).** Keep scope (`full diagnostic` vs `follow-up verification`) separate from purpose (`cold review` vs `cross-family review`). Cold review catches claim/evidence/internal-logic/audience bugs. Cross-family review challenges framing bets. A follow-up review, regardless of purpose, may not create a fresh unrelated HIGH queue.
+
+**R23 — Source-confidence state belongs to RFC-016, consumed here (§18/§30).** Claim/evidence records carry manual evidence state (`proven | supported | unverified | disputed`) and a derived `allowed_prose_strength` (see RFC-016). RFC-017 consumes that signal in the compare/export gate as an **advisory warning, not a mechanical block** — the gate flags any prose passage whose detected strength exceeds the allowed strength of any claim it references and includes the offending excerpt in the change report; the author decides whether to qualify, recite, or override. Prose↔claim binding is **heuristic** (per-section claim coverage declared in the position record, plus inline marker support `<!-- claim:Cn -->` for authors who want stricter binding); no LLM-classifier is used at the gate. RFC-016 owns the research-room/corpus schema; RFC-017 owns the export-gate behavior.
+
+**R24 — Companion-paper relation is an example, not a built-in type (§20/R15).** The position ledger uses generic typed cross-paper edges (see §20). `companion-defers-depth-to` (one paper sells the why, the other specifies the how) is a representative edge type that emerged from the user's real workflow; it is **documented as an example**, not enumerated as a required built-in. Enumerating a closed relation taxonomy is deferred until validated against more than one companion-pair (R15 scope discipline).
+
+**R25 — Voice baseline by passage marking is rejected for now (§5/§14).** Considered: an author marks a short passage as voice-baseline and any rewrite that crosses the passage boundary requires explicit confirmation. **Rejected** because the existing §5 mode-detect (preserve-and-strengthen default refusing prose regeneration) plus Tier-2a `vocabulary_drift` already cover the failure mode without adding an author-facing marking step. Revisit if Tier-2a misses recurring voice-loss cases in real use; documented here so a future reviewer does not reopen without new evidence.
+
+**R26 — Review findings require explicit disposition before effect (§12/§12A, Phase 2).** Every external review finding (cold or cross-family, full or follow-up) carries one of: `accept | reject-with-reason | downgrade | defer`. Only `accept`-dispositioned findings enter the revision contract / CHANGESET. Reviewer-asserted factual claims must be verified against the cited source before they can be `accept`-dispositioned (consistent with the trust hierarchy: reviewer < primary source). The reviewer's implied fix is **advisory, not the revision instruction** — the author chooses cut, reframe, or accept; a finding tells GPD where a problem might be, never how to fix it. If a review-driven revision pass increases net words or hedge density vs accepted baseline, the gate flags it for a paired compression scan (per R20 pass-type semantics). Full disposition-queue UX is Phase 2 design; the rule is binding from spec.
+
+**Implementer schemas to produce before build:** `POSITIONS.json`, `ACCEPTED.meta.json`, `COMPARE.json`, `CHANGESET.json`, `LEDGER.json`, `edges.jsonl`. Pattern-catalog config for Tier-2b (`tier2b-patterns.json`) ships with default classes; per-paper extensions live alongside `POSITIONS.json`.
 
 ---
 

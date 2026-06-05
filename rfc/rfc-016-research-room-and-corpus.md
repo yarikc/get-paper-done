@@ -269,11 +269,11 @@ Thin lanes that block drafting: [list or "none"]
 
 ## Claim Coverage
 
-| Claim ID | Claim | Supporting sources | Status |
-|---|---|---|---|
-| C1 | [Claim text] | S1, S3 | Covered |
-| C2 | [Claim text] | — | **Uncovered** |
-| C3 | [Claim text] | S2 (partial) | Partial |
+| Claim ID | Claim | Supporting sources | Status | Evidence state |
+|---|---|---|---|---|
+| C1 | [Claim text] | S1, S3 | Covered | Supported |
+| C2 | [Claim text] | — | **Uncovered** | Unverified |
+| C3 | [Claim text] | S2 (partial) | Partial | Supported |
 
 ## Approval
 
@@ -435,7 +435,10 @@ The JSON companion drives validators and downstream agent reads. Schema borrows 
       "claim_id": "C1",
       "claim": "",
       "supporting_source_ids": ["S1", "S3"],
-      "status": "covered"
+      "status": "covered",
+      "evidence_state": "proven",
+      "evidence_state_source": "user",
+      "allowed_prose_strength": "direct"
     }
   ],
 
@@ -786,6 +789,9 @@ Claims are cross-paper too — when the same factual claim appears in multiple p
 
   "supported_by_sources": ["S-abc123", "S-def456"],
   "contested_by_sources": ["S-ghi789"],
+  "evidence_state": "proven",
+  "evidence_state_source": "user",
+  "allowed_prose_strength": "direct",
 
   "used_in_papers": [
     {
@@ -809,6 +815,26 @@ Claims are cross-paper too — when the same factual claim appears in multiple p
   "current_recommendation": "support_directly"
 }
 ```
+
+`evidence_state` is a manual or user-confirmed claim attribute, not an automatic model grade:
+
+- `proven` — direct, high-authority evidence supports the claim as stated;
+- `supported` — evidence supports the direction but the prose should stay qualified;
+- `unverified` — the claim is plausible or useful context, but must not be stated as fact;
+- `disputed` — sources conflict or a stronger source contests the claim.
+
+GPD may propose an evidence state during research, but the state used by export/compare gates is the user-confirmed value. This prevents the research corpus from recreating the unreliable-rater problem that RFC-017 removes from paper quality scoring.
+
+`allowed_prose_strength` is **derived** from `evidence_state` and constrains how the claim may be stated in exported prose. Default mapping (author may override per claim):
+
+| evidence_state | allowed_prose_strength | Prose effect |
+|---|---|---|
+| proven | `direct` | May be stated as fact, no required hedge |
+| supported | `qualified` | Must carry a hedge (`appears to`, `early evidence suggests`, `in available cases`) |
+| unverified | `contextual` | May appear only with explicit framing as context/illustration, not as fact (`we use X as a working assumption`, `practitioner reports suggest`) |
+| disputed | `contested` | Must acknowledge the dispute and cite both sides (`sources conflict on X; A claims …, B disputes …`) |
+
+The mapping default is settable per claim by the user (e.g. a `supported` claim where the supporting source is direct-quotable can be marked `direct`). RFC-017's export gate consumes `allowed_prose_strength` as an advisory warning when prose exceeds it (R23) — never as a mechanical block.
 
 When a new paper's research surfaces a claim that semantically matches an existing claim in the corpus (matched via fuzzy text comparison + topic overlap), the framework proposes linking. User decides whether to link, fork, or treat as distinct.
 
