@@ -1124,6 +1124,11 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
   assert.strictEqual(renamedChangeSet.metrics.renamed_headings.length, 1);
   assert.strictEqual(renamedChangeSet.metrics.renamed_headings[0].from, 'Accepted Paper');
   assert.strictEqual(renamedChangeSet.metrics.renamed_headings[0].to, 'Accepted Paper Revised');
+  statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.changeSetSummary.renamed_heading_count, 1);
+  assert.strictEqual(statusJson.changeSetSummary.removed_heading_count, 0);
+  const renamedStatusOutput = run(['status', '--paper', paperDir]);
+  assert(renamedStatusOutput.includes('Compare structure: added 0; removed 0; renamed 1'));
   assert(run(['validate-artifact', '--path', changeSetPath]).includes('validation: ok'));
 
   fs.writeFileSync(
@@ -1156,7 +1161,7 @@ function testCompareReportsProsePatternAdvisories() {
     [
       '# Prose Advisories',
       '',
-      'The operating layer keeps accountability visible. The operating layer keeps sequencing visible. The operating layer keeps ownership visible.',
+      'The decision substrate keeps accountability visible. The decision substrate keeps sequencing visible. The decision substrate keeps ownership visible.',
       '',
       'The agent-ready change lane keeps governance close to delivery. The agent-ready change lane keeps decisions close to delivery. The agent-ready change lane keeps review close to delivery.',
       '',
@@ -1774,7 +1779,7 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
     '',
     '//todo!: The ask is still unclear for the target reader.',
     'This sentence has a source URL https://example.com/path and should not become feedback.',
-    'This sentence includes a protected phrase //keep: preserve the operating-layer ownership language // that must remain readable.',
+    'This sentence includes a protected phrase //keep: preserve the capability ownership language // that must remain readable.',
     'This sentence asks a question. //qq?: Is this supported by the research?',
     'This sentence uses scoped syntax. //review todo: The mechanism is unsupported and weak. //',
     'This sentence uses untyped scoped syntax //review this should not be captured // and should stay untouched.',
@@ -1808,7 +1813,7 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   const reviewsDir = path.join(meta, 'reviews');
   const reviewArtifacts = fs.readdirSync(reviewsDir).filter((name) => name.startsWith('inline-feedback-'));
   assert.strictEqual(reviewArtifacts.length, 1);
-  assert(fs.readFileSync(path.join(reviewsDir, reviewArtifacts[0]), 'utf8').includes('//keep: preserve the operating-layer ownership language'));
+  assert(fs.readFileSync(path.join(reviewsDir, reviewArtifacts[0]), 'utf8').includes('//keep: preserve the capability ownership language'));
   const snapshotDirs = fs.readdirSync(path.join(meta, 'versions')).filter((name) => name.includes('inline-feedback-collect'));
   assert(snapshotDirs.length >= 1);
   const snapshotReviewPath = path.join(meta, 'versions', snapshotDirs[0], 'reviews', reviewArtifacts[0]);
@@ -1820,7 +1825,7 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   const readerFeedback = fs.readFileSync(path.join(meta, 'FEEDBACK-READER.md'), 'utf8');
   assert(readerFeedback.includes('**Source:** inline user comments'));
   assert(readerFeedback.includes('The ask is still unclear for the target reader.'));
-  assert(readerFeedback.includes('preserve the operating-layer ownership language'));
+  assert(readerFeedback.includes('preserve the capability ownership language'));
   assert(readerFeedback.includes('Is this supported by the research?'));
   assert(readerFeedback.includes('The mechanism is unsupported and weak.'));
   assert(readerFeedback.includes('see https://example.com for details'));
@@ -1837,7 +1842,7 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   assert(feedbackPlan.includes('**Status:** Pending user approval'));
   assert(feedbackPlan.includes('No draft or upstream artifact has been changed.'));
   assert(feedbackPlan.includes('### 1. Action: The ask is still unclear for the target reader.'));
-  assert(feedbackPlan.includes('### 2. Preservation: preserve the operating-layer ownership language'));
+  assert(feedbackPlan.includes('### 2. Preservation: preserve the capability ownership language'));
   assert(feedbackPlan.includes('### 3. Question: Is this supported by the research?'));
   assert(feedbackPlan.includes('### 4. Action: The mechanism is unsupported and weak.'));
   assert(feedbackPlan.includes('### 5. Action: see https://example.com for details'));
@@ -1849,12 +1854,12 @@ function testReviewPackAndFeedbackCaptureFinalComments() {
   assert(feedbackPlan.includes('**Severity:** HIGH'));
   assert(feedbackPlan.includes('**Severity:** LOW'));
   assert(feedbackPlan.includes('**User Decision:** pending'));
-  assert(feedbackPlan.includes('**User Constraint:** preserve the operating-layer ownership language'));
+  assert(feedbackPlan.includes('**User Constraint:** preserve the capability ownership language'));
   assert(feedbackPlan.includes('The ask is still unclear for the target reader.'));
 
   const listOutput = run(['feedback-plan', 'list', '--paper', paperDir]);
   assert(listOutput.includes('1. HIGH suggested=modify decision=pending The ask is still unclear for the target reader.'));
-  assert(listOutput.includes('2. MEDIUM suggested=preserve decision=pending preserve the operating-layer ownership language'));
+  assert(listOutput.includes('2. MEDIUM suggested=preserve decision=pending preserve the capability ownership language'));
   assert(listOutput.includes('3. LOW suggested=answer decision=pending Is this supported by the research?'));
   assert(listOutput.includes('4. HIGH suggested=modify decision=pending The mechanism is unsupported and weak.'));
   assert(listOutput.includes('5. MEDIUM suggested=modify decision=pending see https://example.com for details'));
@@ -2040,7 +2045,7 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
     'The opening, executive summary, and Sections 1-2 repeat the same argument',
     'Sections 4 and 5 are the same content with different headings',
     "The Conway's law point is the strongest argument and appears once",
-    'The architecture operating layer is described categorically, never shown',
+    'The decision substrate is described categorically, never shown',
     'The human by exception model is hollow',
     'The why architecture answer is asserted, not argued',
     'References are noisy',
@@ -2084,10 +2089,10 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
     '- **User Decision:** pending',
     '- **User Constraint:** none yet',
     '',
-    '### Set 2 -- MODIFY -- Make the operating layer concrete',
+    '### Set 2 -- MODIFY -- Make the decision substrate concrete',
     '',
     '- **Covers:** concerns 4, 5, 6',
-    '- **Why:** Executives need to see how the layer works before approving the mandate.',
+    '- **Why:** Executives need to see how the capability works before approving the mandate.',
     '- **Instruction:** Add one short scenario and clarify ownership.',
     '- **User Decision:** pending',
     '- **User Constraint:** none yet',
@@ -2108,7 +2113,7 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
   const groupedOutput = run(['feedback-plan', 'review', '--paper', paperDir]);
   assert(groupedOutput.includes('Feedback decision set'));
   assert(groupedOutput.includes('MODIFY -- Structural compression'));
-  assert(groupedOutput.includes('MODIFY -- Make the operating layer concrete'));
+  assert(groupedOutput.includes('MODIFY -- Make the decision substrate concrete'));
   assert(groupedOutput.includes('DEFER -- Low-risk polish'));
   assert(groupedOutput.includes('Decision needed: approve this decision set, modify the set, or review individual concerns.'));
   assert(groupedOutput.includes('Next: reply with approve set, modify set, or review individual.'));
@@ -2118,7 +2123,7 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
   assert(itemOutput.includes('Concern 1 of 7'));
   assert(!itemOutput.includes('Feedback decision set'));
   assert(itemOutput.includes('modify -- Accept the concern, but handle it with this constraint: <your instruction>.'));
-  assert(!itemOutput.includes('operating layer'));
+  assert(!itemOutput.includes('decision substrate'));
   assert(!itemOutput.includes('program authorization'));
 
   const setDecisionOutput = run([
@@ -2154,7 +2159,7 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
     '--decision',
     'modify',
     '--note',
-    'Show the operating layer with one bounded example.',
+    'Show the decision substrate with one bounded example.',
   ]);
   const finalSetOutput = run([
     'feedback-plan',
@@ -2175,8 +2180,8 @@ function testFeedbackPlanReviewGroupsManyConcernsByDefault() {
   assert(setInstructions.includes('### Set 1: Structural compression'));
   assert(setInstructions.includes('- **Decision:** modify'));
   assert(setInstructions.includes('- **Instruction:** Compress without expanding scope.'));
-  assert(setInstructions.includes('### Set 2: Make the operating layer concrete'));
-  assert(setInstructions.includes('- **Instruction:** Show the operating layer with one bounded example.'));
+  assert(setInstructions.includes('### Set 2: Make the decision substrate concrete'));
+  assert(setInstructions.includes('- **Instruction:** Show the decision substrate with one bounded example.'));
   assert(!setInstructions.includes('### Set 3: Low-risk polish'));
   assert(setInstructions.includes('Decision Set 3 (defer): Low-risk polish. Defer low-risk polish.'));
 
@@ -2555,7 +2560,7 @@ function testReviewExternalParsesGeminiSeverityFormat() {
   run(['init', '--location', dir, '--slug', 'gemini-format-review', '--title', 'Gemini Format Review']);
   const paperDir = path.join(dir, 'gemini-format-review');
   const meta = path.join(paperDir, '.paper');
-  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe operating layer is abstract.\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nThe decision substrate is abstract.\n');
 
   const reviewDir = tempDir('gpd-gemini-review-source');
   const reviewPath = path.join(reviewDir, 'gemini-review.md');
@@ -2566,7 +2571,7 @@ function testReviewExternalParsesGeminiSeverityFormat() {
     '',
     '### 1. The Recursive Ownership Gap (Severity: HIGH)',
     '**Issue:** Who governs the governor?',
-    '**Critique:** The operating layer can become the new bottleneck.',
+    '**Critique:** The decision substrate can become the new bottleneck.',
     '',
     '### 2. Deliverable Overlap (Severity: MEDIUM)',
     '**Issue:** Context packs and decision records overlap.',
@@ -2574,7 +2579,7 @@ function testReviewExternalParsesGeminiSeverityFormat() {
     '',
     '## Specific Suggested Changes',
     '',
-    '### Section 4: Operating Layer',
+    '### Section 4: Decision Substrate',
     '',
     '* **Section 4:** Define the human-by-exception trigger.',
     '* **Section 5:** Collapse the deliverables into product families.',
@@ -2678,7 +2683,7 @@ function testReviewExternalKeepsProposedFixesMappedToConcerns() {
   run(['init', '--location', dir, '--slug', 'fix-mapping-review', '--title', 'Fix Mapping Review']);
   const paperDir = path.join(dir, 'fix-mapping-review');
   const meta = path.join(paperDir, '.paper');
-  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nArchitecture owns the operating layer.\n');
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\nArchitecture owns the decision substrate.\n');
 
   const reviewDir = tempDir('gpd-fix-mapping-review-source');
   const claudePath = path.join(reviewDir, 'claude-review.md');
@@ -2709,7 +2714,7 @@ function testReviewExternalKeepsProposedFixesMappedToConcerns() {
     '',
     '### HIGH — The Architect as Builder Credibility Gap',
     '',
-    'The paper asks architects to become principal engineers and product designers for the operating layer. In many large regulated enterprises, the current architecture cohort is culturally and technically detached from building repo management, CI/CD, and executable policy.',
+    'The paper asks architects to become principal engineers and product designers for the decision substrate. In many large regulated enterprises, the current architecture cohort is culturally and technically detached from building repo management, CI/CD, and executable policy.',
     '',
     '### MEDIUM — Decision Memory as a Resilience Control',
     '',
@@ -2781,8 +2786,8 @@ function testReviewExternalInvokesProviderModel() {
   fs.writeFileSync(path.join(meta, 'PROJECT.md'), '# Project\n\nProvider invocation test.\n');
   fs.writeFileSync(path.join(meta, 'STATE.md'), '# State\n\nStatus: Draft Complete.\n');
   fs.writeFileSync(path.join(meta, 'config.json'), '{"classification":{"purpose":"strategy_paper"}}\n');
-  fs.writeFileSync(path.join(meta, 'PAPER-CONTEXT.md'), '# Paper Context\n\nCanonical term: operating layer.\n');
-  fs.writeFileSync(path.join(meta, 'DECISIONS.md'), '# Decisions\n\n## PDR-001\n\nStatus: accepted\nDate: 2026-05-17\nDecision: Use operating layer.\n');
+  fs.writeFileSync(path.join(meta, 'PAPER-CONTEXT.md'), '# Paper Context\n\nCanonical term: decision substrate.\n');
+  fs.writeFileSync(path.join(meta, 'DECISIONS.md'), '# Decisions\n\n## PDR-001\n\nStatus: accepted\nDate: 2026-05-17\nDecision: Use decision substrate.\n');
   fs.writeFileSync(path.join(meta, 'STRATEGY.md'), '# Strategy\n\nStatus: Go.\n');
   fs.writeFileSync(path.join(meta, 'RESEARCH.md'), '# Research\n\nResearch summary.\n');
   fs.writeFileSync(path.join(meta, 'RESEARCH.json'), '{"research_plan":{"question":"test"},"source_registry":[],"evidence_matrix":[]}\n');

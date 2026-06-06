@@ -390,6 +390,9 @@ function changeSetSummary(paperDir) {
     recommendation: report.verdict && report.verdict.recommendation ? report.verdict.recommendation : '',
     changed_span_count: Array.isArray(report.changed_spans) ? report.changed_spans.length : 0,
     advisory_count: Array.isArray(report.advisory_findings) ? report.advisory_findings.length : 0,
+    added_heading_count: report.metrics && Array.isArray(report.metrics.added_headings) ? report.metrics.added_headings.length : 0,
+    removed_heading_count: report.metrics && Array.isArray(report.metrics.removed_headings) ? report.metrics.removed_headings.length : 0,
+    renamed_heading_count: report.metrics && Array.isArray(report.metrics.renamed_headings) ? report.metrics.renamed_headings.length : 0,
     word_count_delta: report.metrics && Number.isFinite(report.metrics.word_count_delta) ? report.metrics.word_count_delta : 0,
     baseline_sha256: baselineSha,
     current_accepted_sha256: currentAcceptedSha,
@@ -1054,6 +1057,9 @@ function printStatus(state) {
   }
   if (state.changeSetSummary && state.changeSetSummary.exists) {
     console.log(`Compare: ${state.changeSetSummary.label}; spans ${state.changeSetSummary.changed_span_count}; advisories ${state.changeSetSummary.advisory_count}; word delta ${state.changeSetSummary.word_count_delta}`);
+    if (state.changeSetSummary.added_heading_count || state.changeSetSummary.removed_heading_count || state.changeSetSummary.renamed_heading_count) {
+      console.log(`Compare structure: added ${state.changeSetSummary.added_heading_count}; removed ${state.changeSetSummary.removed_heading_count}; renamed ${state.changeSetSummary.renamed_heading_count}`);
+    }
   }
   if (state.reviewRatingDisplay) console.log(`Rating: ${state.reviewRatingDisplay}`);
   if (state.reviewRatingProvenance) console.log(`Rating source: ${state.reviewRatingProvenance}`);

@@ -808,7 +808,7 @@ function affectedArtifactForFeedback(text) {
   if (/(outline|structure|section|narrative|argument flow|deliverable|famil)/.test(value)) artifacts.push('OUTLINE', 'DRAFT');
   if (/(audience|executive|reader|sponsor|c-level|cxo)/.test(value)) artifacts.push('AUDIENCE', 'DRAFT');
   if (/(persona|voice|tone|register|style|concision)/.test(value)) artifacts.push('PERSONA', 'DRAFT');
-  if (/(context|term|definition|decision record|operating layer|mechanism)/.test(value)) artifacts.push('PAPER-CONTEXT', 'DECISIONS', 'DRAFT');
+  if (/(context|term|definition|decision record|mechanism|model|capability)/.test(value)) artifacts.push('PAPER-CONTEXT', 'DECISIONS', 'DRAFT');
   if (artifacts.length === 0) artifacts.push('DRAFT');
   return [...new Set(artifacts)].join(' / ');
 }
@@ -916,7 +916,7 @@ function proposedFixForItem(item) {
     return 'Anchor safe acceleration in a small set of baselineable measures, such as design/integration cycle time, routine escalation rate, reuse of context packs, traceability evidence completeness, and issues caught by validation harnesses before human review. State that exact targets belong in the follow-on capability charter.';
   }
   if (/section 4.*too much|eight distinct sub-topics|lost the thread|too much in one section/.test(feedback)) {
-    return 'Split or tighten Section 4 so it first defines the operating layer, then separately handles how it works, how it avoids bureaucracy, and how it is governed. Move secondary detail into shorter paragraphs or the capability section.';
+    return 'Split or tighten Section 4 so it first defines the proposed capability, then separately handles how it works, how it avoids bureaucracy, and how it is governed. Move secondary detail into shorter paragraphs or the capability section.';
   }
   if (/platform engineering objection|why architecture and not engineering platforms|platform.*objection|delivery substrate|cross-domain decision semantics|cross-domain interaction contract/.test(feedback)) {
     return 'Answer the ownership objection directly: platform and engineering own delivery substrate and tool integration; architecture owns cross-domain decision semantics, constraints, evidence logic, and exception rules. Add one causal example showing why platform automation alone cannot decide cross-domain business, risk, data, and resilience trade-offs.';
@@ -927,8 +927,8 @@ function proposedFixForItem(item) {
   if (/talent gap|unrealistically broad|where these people come from|staffing|four-role architect|four substantial professions/.test(feedback)) {
     return 'Add a credibility note that the role requires a changed staffing and development model: some capability must be built from senior engineering, platform, product, and domain talent, and architects should not be expected to be equally strong in every mode on day one.';
   }
-  if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision|three lines of defense/.test(feedback)) {
-    return 'Add a failure-accountability paragraph: when the operating layer is wrong, ownership remains with the accountable human function; incidents should trigger evidence review, constraint/context updates, rollback or remediation, and periodic independent validation proportionate to risk.';
+  if (/accountability when the proposed capability is wrong|when the capability is wrong|when the model is wrong|constraint passes.*bad outcome|stale context.*incorrect decision|three lines of defense/.test(feedback)) {
+    return 'Add a failure-accountability paragraph: when the proposed capability is wrong, ownership remains with the accountable human function; incidents should trigger evidence review, constraint/context updates, rollback or remediation, and periodic independent validation proportionate to risk.';
   }
   if (/decision memory.*resilience|stale or conflicting memory|conflicting boundary assumptions|accidental architecture hardens/.test(feedback)) {
     return 'Frame decision memory as a resilience control: current, versioned, and reviewable decision memory helps prevent conflicting agent assumptions, supports diagnosis and rollback, and creates a feedback loop when stale context causes failure.';
@@ -940,22 +940,22 @@ function proposedFixForItem(item) {
     return 'Move the anti-bureaucracy test into the executive summary or opening ask so readers see early that the proposal is meant to reduce repeated ambiguity and routine review overhead, not add ceremony.';
   }
   if (/bureaucracy|overhead|approval ceremon|larger, more durable|governance/.test(feedback)) {
-    return 'Add a comparative overhead argument: the operating layer is not less control; it replaces repeated meeting-based review for routine decisions with reusable constraints, context, evidence, and human exception review. Name the concrete overhead it should reduce, such as re-litigation of settled decisions and bespoke review of routine integration choices.';
+    return 'Add a comparative overhead argument: the proposed capability is not less control; it replaces repeated meeting-based review for routine decisions with reusable constraints, context, evidence, and human exception review. Name the concrete overhead it should reduce, such as re-litigation of settled decisions and bespoke review of routine integration choices.';
   }
   if (/transition|current state|existing.*forum|review board|legacy gate|escalation/.test(feedback)) {
     return 'Add a short transition paragraph: existing architecture forums remain for material, high-risk, and exception decisions while routine decisions migrate only after context packs, executable constraints, evidence capture, and escalation paths are mature enough to trust.';
   }
   if (/cost|funding|investment|re-?org|multi-year|multi-million|capability shift|program/.test(feedback)) {
-    return 'Add a bounded scope paragraph and reflect it in the ask: this paper seeks agreement on the future architecture mandate and operating-layer direction, not approval of a full re-org, budget, or implementation plan. Name that a phased capability buildout and separate investment case would follow.';
+    return 'Add a bounded scope paragraph and reflect it in the ask: this paper seeks agreement on the future mandate and capability direction, not approval of a full re-org, budget, or implementation plan. Name that a phased capability buildout and separate investment case would follow.';
   }
   if (/sonar|code review|verification bottleneck|per-commit|architecture review|different bottleneck/.test(feedback)) {
     return 'Reframe the source as evidence of a broader verification-capacity problem, then bridge explicitly to architecture through decision volume: agents increase design proposals, integration choices, dependency decisions, and AI-runtime configuration decisions faster than human review forums can absorb.';
   }
   if (/mental model|abstract|what is this|versioned git|platform with an api|policy-as-code|knowledge base/.test(feedback)) {
-    return 'Add one concrete mental model for the architecture operating layer, such as a policy-as-code and curated-knowledge platform that engineers and agents query at decision time, while keeping implementation choices open.';
+    return 'Add one concrete mental model for the proposed capability, such as a policy-as-code and curated-knowledge platform that users query at decision time, while keeping implementation choices open.';
   }
   if (/four-decision|ask.*parallel|decisions are on the table|separate ask/.test(feedback)) {
-    return 'Refactor the ask into parallel executive decisions: approve the mandate shift, approve investment in the operating-layer capability, and approve new measures/incentives. Treat enablement-with-evidence as a property of the capability, not a separate decision.';
+    return 'Refactor the ask into parallel executive decisions: approve the mandate shift, approve investment in the proposed capability, and approve new measures/incentives. Treat enablement-with-evidence as a property of the capability, not a separate decision.';
   }
   if (/regulated-enterprise scope|regulated enterprise scope|systemic scope|scope.*typography|systemically important|cross-jurisdiction|recovery|resolution|heterogeneous business lines/.test(feedback)) {
     return 'Clarify why the regulated-enterprise scope matters: cross-jurisdictional obligations, systemic-importance expectations where applicable, heterogeneous business lines, resilience and recovery implications, and higher evidentiary burden make the recommendation more consequential than in a generic enterprise.';
@@ -963,17 +963,17 @@ function proposedFixForItem(item) {
   if (/capability family names|forgettable|taxonomy labels|actionable handles|golden paths/.test(feedback)) {
     return 'Rename or introduce the four capability families with more action-oriented handles, while preserving the precise definitions underneath.';
   }
-  if (/adlc.*acronym|acronym that does no work|barely appears|drop the acronym/.test(feedback)) {
-    return 'Either use ADLC consistently as the named delivery model or remove the acronym and use plain "agentic delivery" language so the reader is not asked to carry unused terminology.';
+  if (/unused acronym|acronym that does no work|barely appears|drop the acronym/.test(feedback)) {
+    return 'Either use the acronym consistently as the named delivery model or remove it and use plain language so the reader is not asked to carry unused terminology.';
   }
   if (/citation rigor|bracketed source ids|cannot click|per-citation links/.test(feedback)) {
     return 'Make source lookup easier by adding per-source links or a compact source-id map for cited IDs, at least for the most important references used in body prose.';
   }
   if (/deliverable overlap|deliverable bloat|togaf|artifact catalog|product description|product families/.test(feedback)) {
-    return 'Recast the deliverables as a smaller set of operating-layer capabilities with outcomes, then list artifacts as examples under those capabilities instead of presenting a long taxonomy.';
+    return 'Recast the deliverables as a smaller set of capabilities with outcomes, then list artifacts as examples under those capabilities instead of presenting a long taxonomy.';
   }
   if (/governor|recursive accountability|who governs|governs the harnesses/.test(feedback)) {
-    return 'Add an accountability paragraph for the operating layer itself: name ownership, change control, evidence review, and periodic validation of constraints, harnesses, context packs, and decision memory.';
+    return 'Add an accountability paragraph for the proposed capability itself: name ownership, change control, evidence review, and periodic validation of constraints, harnesses, context packs, and decision memory.';
   }
   if (/accidental architecture|shadow context|context packs|hallucinating|infer/.test(feedback)) {
     return 'Add the shadow-context risk: if architects do not provide authoritative context packs and decision memory, agents will infer boundaries from local code and create accidental architecture at machine speed.';
@@ -982,7 +982,7 @@ function proposedFixForItem(item) {
     return 'Add cross-agent coordination to the decision-memory capability: shared memory should prevent separate agents from making conflicting boundary or integration decisions in isolation.';
   }
   if (/harness effectiveness|productivity metric|caught by.*harness/.test(feedback)) {
-    return 'Add a metric for operating-layer quality: percentage of design flaws caught by automated harnesses versus human exception review.';
+    return 'Add a metric for capability quality: percentage of design flaws caught by automated harnesses versus human exception review.';
   }
   if (item.severity === 'ACTION') {
     return 'Apply this only if it supports an approved higher-level feedback item; otherwise leave it as a tactical suggestion.';
@@ -1021,8 +1021,8 @@ function whyProposedFixAddressesItem(item) {
   if (/architect as builder|builder credibility|principal engineer|product designer|repo management|ci\/cd|executable policy|talent gap|four-role architect/.test(feedback)) {
     return 'The fix makes the capability credible by framing it as a team development path rather than pretending every current architect already has all required skills.';
   }
-  if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision/.test(feedback)) {
-    return 'The fix closes the control-loop objection by naming what happens when the operating layer itself produces or permits a bad decision.';
+  if (/accountability when the proposed capability is wrong|when the capability is wrong|when the model is wrong|constraint passes.*bad outcome|stale context.*incorrect decision/.test(feedback)) {
+    return 'The fix closes the control-loop objection by naming what happens when the proposed capability itself produces or permits a bad decision.';
   }
   if (/regulated-enterprise scope|regulated enterprise scope|systemic scope|scope.*typography|systemically important|cross-jurisdiction/.test(feedback)) {
     return 'The fix earns the regulated-enterprise scope by separating broad regulated obligations from the higher consequence and complexity of systemic or cross-jurisdictional institutions.';
@@ -1044,8 +1044,8 @@ function whyProposedFixAddressesItem(item) {
 
 function guardrailForItem(item) {
   const feedback = String(item.feedback || '').toLowerCase();
-  if (/accountability when the operating layer is wrong|when the layer is wrong|constraint passes.*bad outcome|stale context.*incorrect decision|three lines of defense/.test(feedback)) {
-    return 'Do not imply the operating layer eliminates accountable ownership; keep failure handling explicit, inspectable, and proportionate to risk.';
+  if (/accountability when the proposed capability is wrong|when the capability is wrong|when the model is wrong|constraint passes.*bad outcome|stale context.*incorrect decision|three lines of defense/.test(feedback)) {
+    return 'Do not imply the proposed capability eliminates accountable ownership; keep failure handling explicit, inspectable, and proportionate to risk.';
   }
   if (/vendor reliance|vendor-affiliated|anti-vendor|direction of travel|independent measurement/.test(feedback)) {
     return 'Do not overcorrect by removing useful current-practice signals; qualify them instead.';

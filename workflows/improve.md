@@ -44,5 +44,5 @@ Do not rewrite prose. Do not call external review. Do not run `gpd accept` autom
 <success_criteria>
 - The output names the current stage and one concrete next action.
 - The guidance never bypasses the accepted baseline.
-- The command remains read-only.
+- Default `--action guide` remains read-only; writes happen only through explicit `--action compare` or `--action accept`.
 </success_criteria>
