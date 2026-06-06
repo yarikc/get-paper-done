@@ -50,6 +50,8 @@ function normalizeWorkflowMtimes(paperDir) {
     'OUTLINE.md',
     'DRAFT.md',
     'FACT-CHECK.md',
+    'FEEDBACK-READER.md',
+    'FEEDBACK-PLAN.md',
     'REVIEW.md',
     'exports/FINAL.md',
     'STATE.json',
