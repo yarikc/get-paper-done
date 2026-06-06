@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://get-paper-done.local/schemas/changeset.schema.json",
+  "title": "GPD Change Set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "created_at",
+    "baseline",
+    "candidate",
+    "metrics",
+    "verdict",
+    "changed_spans"
+  ],
+  "properties": {
+    "version": { "type": "integer", "enum": [1] },
+    "created_at": { "type": "string", "minLength": 1 },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "word_count", "headings"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "minLength": 1 },
+        "word_count": { "type": "integer", "minimum": 0 },
+        "headings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["level", "text"],
+            "properties": {
+              "level": { "type": "integer", "minimum": 1 },
+              "text": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "word_count", "headings"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "minLength": 1 },
+        "word_count": { "type": "integer", "minimum": 0 },
+        "headings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["level", "text"],
+            "properties": {
+              "level": { "type": "integer", "minimum": 1 },
+              "text": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "word_count_delta",
+        "word_count_delta_pct",
+        "removed_headings",
+        "added_headings",
+        "changed_span_count"
+      ],
+      "properties": {
+        "word_count_delta": { "type": "integer" },
+        "word_count_delta_pct": { "type": "number" },
+        "removed_headings": { "type": "array", "items": { "type": "string" } },
+        "added_headings": { "type": "array", "items": { "type": "string" } },
+        "changed_span_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pairwise", "recommendation", "summary"],
+      "properties": {
+        "pairwise": { "type": "string", "enum": ["unchanged", "changed_inconclusive", "regression_risk"] },
+        "recommendation": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "changed_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "reason",
+          "source",
+          "expected_benefit",
+          "risk",
+          "before_excerpt",
+          "after_excerpt"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^CS-[0-9]{3}$" },
+          "kind": { "type": "string", "enum": ["added", "removed", "changed"] },
+          "status": { "type": "string", "enum": ["proposed", "approved", "rejected", "applied"] },
+          "reason": { "type": "string", "minLength": 1 },
+          "source": { "type": "string", "minLength": 1 },
+          "expected_benefit": { "type": "string", "minLength": 1 },
+          "risk": { "type": "string", "minLength": 1 },
+          "before_excerpt": { "type": "string" },
+          "after_excerpt": { "type": "string" }
+        }
+      }
+    }
+  }
+}

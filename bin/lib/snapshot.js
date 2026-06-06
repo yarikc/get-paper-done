@@ -18,6 +18,8 @@ const coreArtifacts = [
   'DRAFT.md',
   'exports/FINAL.md',
   'FEEDBACK-PLAN.md',
+  'CHANGESET.md',
+  'CHANGESET.json',
   'REVISION-INSTRUCTIONS.md',
   'FEEDBACK-READER.md',
   'FEEDBACK-EXTERNAL.md',

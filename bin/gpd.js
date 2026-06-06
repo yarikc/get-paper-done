@@ -43,6 +43,8 @@ const {
   printRevisionPreparation,
   acceptPaper,
   printAccept,
+  comparePaper,
+  printCompare,
 } = require('./lib/workspace');
 
 function printHelp() {
@@ -60,6 +62,7 @@ Commands:
   feedback-plan                List/review/decide feedback-plan concerns
   revise                       Prepare revision by snapshotting current paper state
   accept                       Promote current draft/export to accepted baseline
+  compare                      Compare current draft against accepted baseline
   snapshot                     Preserve current paper artifacts before risky work
   restore                      Restore paper artifacts from a snapshot
   review-external              Collect external review text into review artifacts
@@ -125,6 +128,7 @@ Examples:
   gpd feedback-plan decide --paper ~/papers/metadata-strategy --set 1 --decision modify --note "Keep concise"
   gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md
   gpd accept --paper ~/papers/metadata-strategy --source final
+  gpd compare --paper ~/papers/metadata-strategy
   gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
   gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
@@ -386,6 +390,14 @@ async function main(argv) {
     const result = acceptPaper(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printAccept(result);
+    return;
+  }
+
+  if (command === 'compare') {
+    const args = parseWorkspaceOptions(rest);
+    const result = comparePaper(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printCompare(result);
     return;
   }
 

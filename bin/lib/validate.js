@@ -19,6 +19,7 @@ const jsonArtifactSchemas = {
   'config.json': 'config.schema.json',
   'RESEARCH.json': 'research.schema.json',
   'research.json': 'research.schema.json',
+  'CHANGESET.json': 'changeset.schema.json',
 };
 
 const artifactNameAliases = {
@@ -273,6 +274,16 @@ const markdownContracts = {
     tables: [
       ['ID', 'Status', 'Decision', 'Why It Matters'],
     ],
+  },
+  'CHANGESET.md': {
+    headings: [
+      '# Change Set',
+      '## Verdict',
+      '## Baseline',
+      '## Structural Delta',
+      '## Changed Spans',
+    ],
+    tables: [],
   },
 };
 

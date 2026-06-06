@@ -1017,7 +1017,10 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
   state.strategy.required_unblock_action = 'none';
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 
-  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nAccepted body.\n');
+  fs.writeFileSync(
+    path.join(meta, 'DRAFT.md'),
+    '# Draft\n\n## Draft Body\n\nAccepted baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
+  );
   fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
   run(['export', '--paper', paperDir, '--force']);
 
@@ -1029,7 +1032,10 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
 
   const acceptedPath = path.join(meta, 'accepted', 'ACCEPTED.md');
   const metadataPath = path.join(meta, 'accepted', 'ACCEPTED.meta.json');
-  assert.strictEqual(fs.readFileSync(acceptedPath, 'utf8'), '# Accepted Paper\n\nAccepted body.\n');
+  assert.strictEqual(
+    fs.readFileSync(acceptedPath, 'utf8'),
+    '# Accepted Paper\n\nAccepted baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
+  );
   const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
   assert.strictEqual(metadata.version, 1);
   assert.strictEqual(metadata.source_artifact, '.paper/exports/FINAL.md');
@@ -1054,9 +1060,61 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
   assert(statusOutput.includes('Accepted baseline: .paper/accepted/ACCEPTED.md (draft unchanged since accept)'));
   assert(statusOutput.includes('Accepted baseline is set'));
 
-  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nCandidate changed after acceptance.\n');
+  fs.writeFileSync(
+    path.join(meta, 'DRAFT.md'),
+    '# Accepted Paper\n\nCandidate baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
+  );
   statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.next, '/gpd-compare');
   assert.strictEqual(statusJson.acceptedSummary.draft_status_since_accept, 'draft changed since accept');
+
+  const compareOutput = run(['compare', '--paper', paperDir]);
+  assert(compareOutput.includes('Change set updated'));
+  assert(compareOutput.includes('Verdict: changed_inconclusive'));
+  assert(compareOutput.includes('Changed spans: 1'));
+  assert(compareOutput.includes('Next: review CHANGESET.md before accepting'));
+  const changeSetPath = path.join(meta, 'CHANGESET.json');
+  const changeSetMarkdownPath = path.join(meta, 'CHANGESET.md');
+  const changeSet = JSON.parse(fs.readFileSync(changeSetPath, 'utf8'));
+  assert.strictEqual(changeSet.version, 1);
+  assert.strictEqual(changeSet.baseline.path, '.paper/accepted/ACCEPTED.md');
+  assert.strictEqual(changeSet.candidate.path, '.paper/DRAFT.md');
+  assert.strictEqual(changeSet.verdict.pairwise, 'changed_inconclusive');
+  assert.strictEqual(changeSet.changed_spans.length, 1);
+  assert.strictEqual(changeSet.changed_spans[0].status, 'proposed');
+  const changeSetMarkdown = fs.readFileSync(changeSetMarkdownPath, 'utf8');
+  assert(changeSetMarkdown.includes('## Changed Spans'));
+  assert(changeSetMarkdown.includes('- **Candidate SHA-256:**'));
+  assert(run(['validate-artifact', '--path', changeSetPath]).includes('validation: ok'));
+
+  statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.next, '/gpd-status');
+  assert.strictEqual(statusJson.changeSetSummary.exists, true);
+  assert.strictEqual(statusJson.changeSetSummary.current, true);
+  assert.strictEqual(statusJson.changeSetSummary.pairwise, 'changed_inconclusive');
+
+  fs.writeFileSync(
+    path.join(meta, 'DRAFT.md'),
+    '# Accepted Paper\n\nCandidate baseline explains the paper with enough stable words for a fair compare gate and changes after compare.\n',
+  );
+  statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.next, '/gpd-compare');
+  assert.strictEqual(statusJson.changeSetSummary.current, false);
+
+  fs.writeFileSync(
+    path.join(meta, 'DRAFT.md'),
+    '# Accepted Paper\n\nCandidate baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n\nOne additional short sentence clarifies the point for review.\n',
+  );
+  const smallDeltaCompare = run(['compare', '--paper', paperDir]);
+  assert(smallDeltaCompare.includes('Verdict: changed_inconclusive'));
+
+  fs.writeFileSync(
+    path.join(meta, 'DRAFT.md'),
+    '# Different Title\n\nCandidate baseline explains the paper with enough stable words for a fair compare gate and changes the accepted heading.\n',
+  );
+  const regressionCompare = run(['compare', '--paper', paperDir]);
+  assert(regressionCompare.includes('Verdict: regression_risk'));
+  assert(regressionCompare.includes('Removed headings: Accepted Paper'));
 
   const snapshotOutput = run(['snapshot', '--paper', paperDir, '--reason', 'accepted_baseline_check']);
   assert(snapshotOutput.includes('accepted/ACCEPTED.md'));
@@ -1064,7 +1122,7 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
   assert(snapshotId);
   assert.strictEqual(
     fs.readFileSync(path.join(meta, 'versions', snapshotId, 'accepted', 'ACCEPTED.md'), 'utf8'),
-    '# Accepted Paper\n\nAccepted body.\n',
+    '# Accepted Paper\n\nAccepted baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
   );
 }
 
@@ -1081,6 +1139,10 @@ function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
   let missing = runFail(['accept', '--paper', paperDir]);
   assert.strictEqual(missing.status, 1);
   assert(missing.stderr.includes('Cannot accept missing source artifact: .paper/DRAFT.md'));
+
+  const compareBeforeAccept = runFail(['compare', '--paper', paperDir]);
+  assert.strictEqual(compareBeforeAccept.status, 1);
+  assert(compareBeforeAccept.stderr.includes('No accepted baseline found'));
 
   const draftPath = path.join(meta, 'DRAFT.md');
   fs.writeFileSync(draftPath, '# Draft Paper\n\nDraft baseline.\n');

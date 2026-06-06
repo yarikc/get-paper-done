@@ -229,6 +229,8 @@ function savedNextCommandIsPlausible(command, artifacts) {
     case '/gpd-review':
     case '/gpd-fact-check':
       return artifacts['DRAFT.md'];
+    case '/gpd-compare':
+      return artifacts['DRAFT.md'] && artifacts['accepted/ACCEPTED.md'];
     case '/gpd-draft':
       return artifacts['OUTLINE.md'];
     default:
@@ -347,6 +349,50 @@ function acceptedSummary(paperDir) {
     candidate_status: draftStatusSinceAccept,
     label: `${metadata.source_artifact || '.paper/accepted/ACCEPTED.md'} accepted ${metadata.accepted_at || ''}`.trim(),
   };
+}
+
+function changeSetSummary(paperDir) {
+  const meta = path.join(paperDir, '.paper');
+  const changeSetPath = path.join(meta, 'CHANGESET.json');
+  if (!fs.existsSync(changeSetPath)) {
+    return {
+      exists: false,
+      label: 'none',
+      current: false,
+    };
+  }
+  const parsed = readJsonIfExists(changeSetPath);
+  if (!parsed.data) {
+    return {
+      exists: false,
+      label: 'metadata malformed',
+      current: false,
+    };
+  }
+  const report = parsed.data;
+  const currentDraftSha = artifactSha256(paperDir, 'DRAFT.md');
+  const candidateSha = report.candidate && report.candidate.sha256 ? report.candidate.sha256 : '';
+  const current = Boolean(currentDraftSha && candidateSha && currentDraftSha === candidateSha);
+  return {
+    exists: true,
+    current,
+    created_at: report.created_at || '',
+    pairwise: report.verdict && report.verdict.pairwise ? report.verdict.pairwise : 'unknown',
+    recommendation: report.verdict && report.verdict.recommendation ? report.verdict.recommendation : '',
+    changed_span_count: Array.isArray(report.changed_spans) ? report.changed_spans.length : 0,
+    word_count_delta: report.metrics && Number.isFinite(report.metrics.word_count_delta) ? report.metrics.word_count_delta : 0,
+    candidate_sha256: candidateSha,
+    current_draft_sha256: currentDraftSha,
+    label: `${current ? 'current' : 'stale'} ${report.verdict && report.verdict.pairwise ? report.verdict.pairwise : 'unknown'}`,
+  };
+}
+
+function changeSetCurrentForDraft(state) {
+  const meta = path.join(state.paperDir, '.paper');
+  const parsed = readJsonIfExists(path.join(meta, 'CHANGESET.json'));
+  if (!parsed.data || !parsed.data.candidate || !parsed.data.candidate.sha256) return false;
+  const currentDraftSha = artifactSha256(state.paperDir, 'DRAFT.md');
+  return Boolean(currentDraftSha && currentDraftSha === parsed.data.candidate.sha256);
 }
 
 function feedbackPlanPending(state) {
@@ -814,6 +860,8 @@ function artifactState(paperDir) {
     'FEEDBACK-EXTERNAL.md',
     'EXTERNAL-REVIEW-RUN.json',
     'FEEDBACK-PLAN.md',
+    'CHANGESET.md',
+    'CHANGESET.json',
     'REVISION-INSTRUCTIONS.md',
     'REVISION-CHECK.md',
     'REVISION-LOG.md',
@@ -865,7 +913,14 @@ function suggestedNext(state) {
     if (a['exports/FINAL.md'] && exportHasInlineReviewComments(state.paperDir)) return '/gpd-feedback';
     return '/gpd-revise';
   }
-  if (state.machineState && state.machineState.status === 'Accepted') return '/gpd-status';
+  if (state.machineState && state.machineState.status === 'Accepted') {
+    const accepted = state.machineState.accepted || {};
+    const currentDraftSha = artifactSha256(state.paperDir, 'DRAFT.md');
+    if (currentDraftSha && accepted.draft_sha256 && currentDraftSha !== accepted.draft_sha256) {
+      if (!a['CHANGESET.json'] || !changeSetCurrentForDraft(state)) return '/gpd-compare';
+    }
+    return '/gpd-status';
+  }
   if (!grillComplete(state.machineState)) return '/gpd-grill';
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
     return '/gpd-brief';
@@ -957,6 +1012,7 @@ function status(input = {}) {
   state.reviewCompletionNote = reviewCompletionNote(state);
   state.reviewRecommendation = reviewRecommendation(state);
   state.acceptedSummary = acceptedSummary(paperDir);
+  state.changeSetSummary = changeSetSummary(paperDir);
   state.full = Boolean(input.full);
   return state;
 }
@@ -971,6 +1027,9 @@ function printStatus(state) {
     console.log(`Accepted baseline: ${state.acceptedSummary.accepted_path} (${state.acceptedSummary.draft_status_since_accept})`);
   } else {
     console.log('Accepted baseline: none');
+  }
+  if (state.changeSetSummary && state.changeSetSummary.exists) {
+    console.log(`Compare: ${state.changeSetSummary.label}; spans ${state.changeSetSummary.changed_span_count}; word delta ${state.changeSetSummary.word_count_delta}`);
   }
   if (state.reviewRatingDisplay) console.log(`Rating: ${state.reviewRatingDisplay}`);
   if (state.reviewRatingProvenance) console.log(`Rating source: ${state.reviewRatingProvenance}`);
@@ -1068,6 +1127,13 @@ function contextForCommand(command) {
       clear_context: 'No.',
       read: ['DRAFT.md', 'REVIEW.md', 'FACT-CHECK.md if present'],
       avoid: ['internal notes that should not appear in FINAL.md'],
+    };
+  }
+  if (base === '/gpd-compare') {
+    return {
+      clear_context: 'No.',
+      read: ['accepted/ACCEPTED.md', 'DRAFT.md', 'CHANGESET.md if present'],
+      avoid: ['external review before reviewing the baseline-relative change set'],
     };
   }
   if (base === '/gpd-status') {
@@ -1174,6 +1240,9 @@ function userActionHint(state) {
   }
   if (next === '/gpd-export') {
     return 'Run /gpd-export, then review .paper/exports/FINAL.md rather than DRAFT.md.';
+  }
+  if (next === '/gpd-compare') {
+    return 'Run gpd compare or /gpd-compare to create the baseline-aware CHANGESET before accepting, revising, or exporting this candidate.';
   }
   if (next === '/gpd-feedback') {
     return 'Run /gpd-feedback to approve, modify, defer, or reject each feedback-plan concern before revision.';
