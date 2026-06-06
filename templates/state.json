@@ -34,5 +34,6 @@
     "last_exported_draft_sha256": "",
     "last_exported_final_sha256": ""
   },
+  "import_mode": null,
   "post_import_choices": []
 }

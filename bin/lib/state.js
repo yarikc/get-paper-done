@@ -63,6 +63,7 @@ function defaultMachineState(input = {}) {
       last_exported_draft_sha256: '',
       last_exported_final_sha256: '',
     },
+    import_mode: input.importMode || null,
     post_import_choices: input.postImportChoices || [],
   };
 }
@@ -83,6 +84,7 @@ function stateMarkdown(state) {
     ? state.post_import_choices.map((choice) => `- \`${choice}\``).join('\n')
     : '- None';
   const feedback = state.feedback || {};
+  const importMode = state.import_mode || {};
   return [
     '# Paper State',
     '',
@@ -115,6 +117,12 @@ function stateMarkdown(state) {
     '',
     `- **Feedback plan status:** ${feedback.feedback_plan_status || 'Not created'}`,
     `- **Approved handling:** ${feedback.approved_handling || ''}`,
+    '',
+    '## Import Mode',
+    '',
+    `- **Detected mode:** ${importMode.detected || 'Not recorded'}`,
+    `- **Confirmed mode:** ${importMode.confirmed || 'Not recorded'}`,
+    `- **Authored prose detected:** ${importMode.authored_prose_detected === true ? 'yes' : importMode.authored_prose_detected === false ? 'no' : 'Not recorded'}`,
     '',
     '## Post-Import Choices',
     '',

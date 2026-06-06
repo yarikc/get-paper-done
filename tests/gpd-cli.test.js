@@ -478,6 +478,200 @@ function testSingleMarkdownImportIsCanonicalDraft() {
   assert(report.includes('Single imported Markdown/text file treated as the working draft.'));
 }
 
+function authoredDraftText() {
+  return [
+    '# The Bottleneck Moved',
+    '',
+    'The bottleneck moved from generating more options to deciding which options deserve organizational trust. That change matters because the work no longer fails at the moment a team asks for ideas. It fails when the organization cannot tell which decision is safe, reversible, funded, and accountable.',
+    '',
+    'The old delivery model treated architecture as review after a design existed. That posture is too slow for AI-assisted work because agents can produce plausible alternatives faster than teams can inspect them. The scarce capability is judgment before generation, not another approval meeting after generation.',
+    '',
+    'A useful operating model makes the decision conditions visible before the work starts. It names who owns the constraint, what evidence proves the constraint was met, and which exceptions require human review. That is authored prose with a thesis, not raw notes waiting for a ghostwriter.',
+  ].join('\n');
+}
+
+function testImportModeDefaultsAuthoredProseToPreserve() {
+  const sourceDir = tempDir('gpd-import-mode-preserve-source');
+  const source = path.join(sourceDir, 'current-draft.md');
+  fs.writeFileSync(source, authoredDraftText());
+
+  const target = tempDir('gpd-import-mode-preserve-target');
+  const output = run(['import', '--source', source, '--location', target, '--slug', 'mode-preserve']);
+  const paperDir = path.join(target, 'mode-preserve');
+  const meta = path.join(paperDir, '.paper');
+
+  assert(output.includes('import mode: preserve-and-strengthen (authored prose detected)'));
+  const state = JSON.parse(fs.readFileSync(path.join(meta, 'STATE.json'), 'utf8'));
+  assert.strictEqual(state.import_mode.detected, 'preserve-and-strengthen');
+  assert.strictEqual(state.import_mode.confirmed, 'preserve-and-strengthen');
+  assert.strictEqual(state.import_mode.authored_prose_detected, true);
+  assert.strictEqual(state.import_mode.confirmation_required, false);
+
+  const report = fs.readFileSync(path.join(meta, 'IMPORT.md'), 'utf8');
+  assert(report.includes('## Import Mode'));
+  assert(report.includes('| Detected mode | preserve-and-strengthen |'));
+  assert(report.includes('| Confirmed mode | preserve-and-strengthen |'));
+  assert(report.includes('| Authored prose detected | yes |'));
+}
+
+function testImportModeBlocksTransformOfAuthoredProseWithoutConfirmation() {
+  const sourceDir = tempDir('gpd-import-mode-block-source');
+  const source = path.join(sourceDir, 'current-draft.md');
+  fs.writeFileSync(source, authoredDraftText());
+
+  const target = tempDir('gpd-import-mode-block-target');
+  const failed = runFail([
+    'import',
+    '--source',
+    source,
+    '--location',
+    target,
+    '--slug',
+    'mode-block',
+    '--mode',
+    'generate-from-brief',
+  ]);
+
+  assert.strictEqual(failed.status, 1);
+  assert(failed.stderr.includes('Import detected authored prose'));
+  assert(failed.stderr.includes('--confirm-transform'));
+  assert(!fs.existsSync(path.join(target, 'mode-block', '.paper', 'STATE.json')));
+}
+
+function testImportModeAllowsConfirmedTransformOfAuthoredProse() {
+  const sourceDir = tempDir('gpd-import-mode-confirm-source');
+  const source = path.join(sourceDir, 'current-draft.md');
+  fs.writeFileSync(source, authoredDraftText());
+
+  const target = tempDir('gpd-import-mode-confirm-target');
+  const output = run([
+    'import',
+    '--source',
+    source,
+    '--location',
+    target,
+    '--slug',
+    'mode-confirm',
+    '--mode',
+    'convert-format',
+    '--confirm-transform',
+  ]);
+  const state = JSON.parse(fs.readFileSync(path.join(target, 'mode-confirm', '.paper', 'STATE.json'), 'utf8'));
+
+  assert(output.includes('import mode: convert-format (authored prose detected)'));
+  assert.strictEqual(state.import_mode.detected, 'preserve-and-strengthen');
+  assert.strictEqual(state.import_mode.confirmed, 'convert-format');
+  assert.strictEqual(state.import_mode.authored_prose_detected, true);
+  assert.strictEqual(state.import_mode.confirmation_required, true);
+  assert.strictEqual(state.import_mode.confirmation, 'confirmed_by_flag');
+}
+
+function rawMaterialText() {
+  return [
+    '# Notes',
+    '',
+    '- audience: operating executive',
+    '- possible topic: evidence gate',
+    '- TODO: pick the strongest thesis',
+    '- source candidates: NIST, internal control notes',
+    '- maybe compare two options',
+  ].join('\n');
+}
+
+function testImportModeDefaultsRawMaterialToGenerateFromBrief() {
+  const sourceDir = tempDir('gpd-import-mode-raw-source');
+  const source = path.join(sourceDir, 'notes.md');
+  fs.writeFileSync(source, rawMaterialText());
+
+  const target = tempDir('gpd-import-mode-raw-target');
+  const output = run(['import', '--source', source, '--location', target, '--slug', 'mode-raw']);
+  const state = JSON.parse(fs.readFileSync(path.join(target, 'mode-raw', '.paper', 'STATE.json'), 'utf8'));
+
+  assert(output.includes('import mode: generate-from-brief'));
+  assert(!output.includes('(authored prose detected)'));
+  assert.strictEqual(state.import_mode.detected, 'generate-from-brief');
+  assert.strictEqual(state.import_mode.confirmed, 'generate-from-brief');
+  assert.strictEqual(state.import_mode.authored_prose_detected, false);
+  assert.strictEqual(state.import_mode.confirmation_required, false);
+}
+
+function testImportModeAllowsPreserveOnRawMaterial() {
+  const sourceDir = tempDir('gpd-import-mode-raw-preserve-source');
+  const source = path.join(sourceDir, 'notes.md');
+  fs.writeFileSync(source, rawMaterialText());
+
+  const target = tempDir('gpd-import-mode-raw-preserve-target');
+  const output = run([
+    'import',
+    '--source',
+    source,
+    '--location',
+    target,
+    '--slug',
+    'mode-raw-preserve',
+    '--mode',
+    'preserve-and-strengthen',
+  ]);
+  const state = JSON.parse(fs.readFileSync(path.join(target, 'mode-raw-preserve', '.paper', 'STATE.json'), 'utf8'));
+
+  assert(output.includes('import mode: preserve-and-strengthen'));
+  assert(!output.includes('(authored prose detected)'));
+  assert.strictEqual(state.import_mode.detected, 'generate-from-brief');
+  assert.strictEqual(state.import_mode.confirmed, 'preserve-and-strengthen');
+  assert.strictEqual(state.import_mode.authored_prose_detected, false);
+  assert.strictEqual(state.import_mode.confirmation_required, false);
+}
+
+function testImportModePrivateFixtureWhenConfigured() {
+  const fixtureRoot = process.env.GPD_TEST_PAPER;
+  if (!fixtureRoot) return;
+
+  const source = fs.existsSync(path.join(fixtureRoot, 'peak', 'DRAFT.md'))
+    ? path.join(fixtureRoot, 'peak', 'DRAFT.md')
+    : path.join(fixtureRoot, 'fixtures', 'test-1-rca', 'peak', 'DRAFT.md');
+  if (!fs.existsSync(source)) {
+    throw new Error(`GPD_TEST_PAPER is set but no R14 peak fixture was found under: ${fixtureRoot}`);
+  }
+
+  const target = tempDir('gpd-import-mode-private-fixture');
+  try {
+    const positiveOutput = run([
+      'import',
+      '--source',
+      source,
+      '--location',
+      target,
+      '--slug',
+      'acceptance-peak',
+    ]);
+    const state = JSON.parse(fs.readFileSync(path.join(target, 'acceptance-peak', '.paper', 'STATE.json'), 'utf8'));
+
+    assert(positiveOutput.includes('import mode: preserve-and-strengthen (authored prose detected)'));
+    assert.strictEqual(state.import_mode.detected, 'preserve-and-strengthen');
+    assert.strictEqual(state.import_mode.confirmed, 'preserve-and-strengthen');
+    assert.strictEqual(state.import_mode.authored_prose_detected, true);
+
+    const negative = runFail([
+      'import',
+      '--source',
+      source,
+      '--location',
+      target,
+      '--slug',
+      'acceptance-peak-blocked',
+      '--mode',
+      'generate-from-brief',
+    ]);
+
+    assert.strictEqual(negative.status, 1);
+    assert(negative.stderr.includes('Import detected authored prose'));
+    assert(negative.stderr.includes('--confirm-transform'));
+    assert(!fs.existsSync(path.join(target, 'acceptance-peak-blocked', '.paper', 'STATE.json')));
+  } finally {
+    fs.rmSync(target, { recursive: true, force: true });
+  }
+}
+
 function testImportDocxCanonicalDraftExtraction() {
   const source = tempDir('gpd-import-docx-source');
   const docxPath = path.join(source, 'current-draft.docx');
@@ -2757,6 +2951,12 @@ testInitWithoutSlugOrLocationUsesSubdirectory();
 testImportDryRunAndCopy();
 testImportClassifications();
 testSingleMarkdownImportIsCanonicalDraft();
+testImportModeDefaultsAuthoredProseToPreserve();
+testImportModeBlocksTransformOfAuthoredProseWithoutConfirmation();
+testImportModeAllowsConfirmedTransformOfAuthoredProse();
+testImportModeDefaultsRawMaterialToGenerateFromBrief();
+testImportModeAllowsPreserveOnRawMaterial();
+testImportModePrivateFixtureWhenConfigured();
 testImportDocxCanonicalDraftExtraction();
 testImportDetectsSourceReferencesWithoutGeneratingResearch();
 testImportDraftSelectionUsesFilenameSignalsBeforeMtime();

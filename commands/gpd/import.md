@@ -14,6 +14,8 @@ allowed-tools:
 - `--source <path>` - Existing draft file or source directory to import.
 - `--location <path>` - Create the new paper directory under this location.
 - `--slug <name>` - Use this directory name for the imported paper.
+- `--mode <mode>` - Optional explicit mode: `preserve-and-strengthen`, `generate-from-brief`, or `convert-format`.
+- `--confirm-transform` - Required if authored prose is detected and the user explicitly chooses a transform/generation mode.
 - `--profile <name>` - Import `profiles/<name>.md` into the paper-scoped persona.
 </context>
 
@@ -28,4 +30,9 @@ Run the import workflow end to end. Preserve original source material unchanged
 in `original/` before creating framework artifacts, including a lightweight
 `STRATEGY.md` gate. Finish by presenting the post-import menu instead of
 revising or executing another stage.
+
+If the imported source contains authored prose with a coherent draft, default to
+`preserve-and-strengthen`. Do not transform, regenerate, or convert that prose
+unless the user explicitly confirms the risk. If a transform mode is requested,
+ask before passing `--confirm-transform`.
 </process>

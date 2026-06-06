@@ -24,6 +24,8 @@ Parse flags:
 - `--source <path>`: existing draft file or directory to import
 - `--location <path>`: destination parent directory
 - `--slug <name>`: destination paper directory name
+- `--mode <mode>`: optional import mode, one of `preserve-and-strengthen`, `generate-from-brief`, or `convert-format`
+- `--confirm-transform`: explicit user confirmation that transform/regeneration risk is accepted for imported authored prose
 - `--profile <name>`: reusable author profile to adapt into `.paper/PERSONA.md`
 
 If `--source` is missing, ask for the source path.
@@ -132,6 +134,8 @@ CLI import also detects likely source-reference candidates from Markdown, text, 
 
 CLI import also writes a `Version / Source Index` section in `.paper/IMPORT.md`. Group copied files by likely role, include a deterministic ranking signal, modified time, downstream stage that should inspect it, and a short rationale. This is an import triage aid only; it must not bypass brief, research, outline, review, or fact-check gates.
 
+CLI import also records import mode. If the selected canonical draft looks like authored prose, default to `preserve-and-strengthen`. Treat detection as advisory; the safety property is the confirmation gate. If the user requests `generate-from-brief` or `convert-format` for authored prose, require explicit confirmation through interactive approval or `--confirm-transform`. Without that confirmation, stop before creating the paper workspace.
+
 ## 5. Derive Minimal GPD Artifacts
 
 From original material, infer and write:
@@ -175,7 +179,7 @@ Artifact derivation rules:
 - `.paper/STRATEGY.md`: run the strategy gate from imported context. Status must be `Go`, `Revise Before Drafting`, or `No-Go`. If thesis, reader promise, paper job, scope, or desired outcome is unclear, set status to `Revise Before Drafting` and populate `Strategy Blockers` with the normalized blocker list and primary blocker.
 - `.paper/PAPER-CONTEXT.md` and `.paper/DECISIONS.md`: do not create these during import unless the imported material already contains explicit terminology and decision records. Route to `/gpd-grill` to recover author intent before compressing imported material into a brief.
 - `.paper/PROJECT.md`: state what this paper appears to be and what outcome it appears to seek. Keep it short; do not duplicate the full thesis, claims, or objections from `BRIEF.md`.
-- `.paper/STATE.md` and `.paper/STATE.json`: set current position based on import quality and record post-import choices plus any suggested choice.
+- `.paper/STATE.md` and `.paper/STATE.json`: set current position based on import quality, record detected and confirmed import mode, and record post-import choices plus any suggested choice.
 - `.paper/IMPORT.md`: record copied files, skipped files, canonical draft, classification, assumptions, and post-import options.
 
 Do not silently invent missing information. Mark unknowns as open questions.

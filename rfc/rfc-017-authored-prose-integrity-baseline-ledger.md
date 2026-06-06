@@ -651,7 +651,7 @@ Objective guards in Phase 2 currently include checks that depend on claims/vocab
 
 Current CLI commands are non-interactive. "Asks for confirmation" must define both TUI and CLI behavior:
 
-- CLI import records detected mode and defaults to `preserve-and-strengthen`
+- CLI import records detected mode and confirmed mode; authored prose defaults to `preserve-and-strengthen`, raw notes/specs default to `generate-from-brief`
 - add `--mode preserve-and-strengthen|generate-from-brief|convert-format`
 - if authored prose is detected and user passes `generate-from-brief` or `convert-format`, require `--confirm-transform`
 - `/gpd-import` can ask interactively in Claude/Codex
@@ -749,13 +749,15 @@ No NLP deps. Normalize by lowercasing, stripping markdown/citations/punctuation,
 
 **Phase 2b** (after Phase 3 position record): Tier-2a position-backed guards (`claim_loss`, `load_bearing_phrase_loss`, `vocabulary_drift`). Only position-backed claim/vocab guards wait on the ledger; structural protection and prose-pattern advisory ship independently.
 
-**R11 — Mode detection: explicit non-interactive behavior (§9/§24).** CLI records the detected mode and defaults to `preserve-and-strengthen`. Add `--mode preserve-and-strengthen|generate-from-brief|convert-format`. If authored prose is detected and the user passes `generate-from-brief`/`convert-format`, require `--confirm-transform`. Slash commands (`/gpd-import`) ask interactively.
+**R11 — Mode detection: explicit non-interactive behavior (§9/§24).** CLI records the detected mode and confirmed mode. If authored prose is detected, default to `preserve-and-strengthen`; if raw material is detected, default to `generate-from-brief`. Add `--mode preserve-and-strengthen|generate-from-brief|convert-format`. If authored prose is detected and the user passes `generate-from-brief`/`convert-format`, require `--confirm-transform`. Slash commands (`/gpd-import`) ask interactively.
 
 **R12 — Concrete diff artifact (§11).** The diff loop operates on `.paper/CHANGESET.md` + `.paper/CHANGESET.json`: `{ changed_spans, reason, source (diagnostic/feedback ref), expected_benefit, risk, before/after excerpt, status: proposed|approved|rejected|applied }`.
 
 **R13 — Ledger storage/privacy (§20).** Store under the paper-root **workspace**, not the package repo; no absolute private paths; entries reference `paper_id` + `claim_id` + relative artifact refs; **local/private by default**; snapshot include/exclude is explicit.
 
 **R14 — Freeze Test #1 fixtures (§27).** Capture **sanitized** fixtures of the three test-paper versions + the self-grade artifact under a private fixtures dir **before** any loop change. The falsification test must not depend on a mutable private workspace. (See Appendix A.)
+
+Phase 0 detector durability: CI uses public synthetic fixtures by default. When `GPD_TEST_PAPER` points at either the private `.paper` workspace containing `fixtures/test-1-rca/` or directly at the private R14 fixture root, `tests/gpd-cli.test.js` also runs the frozen peak-draft acceptance check: authored prose must default to `preserve-and-strengthen`, and transform mode must fail without `--confirm-transform`.
 
 **R15 — External review scope discipline (§12A).** Split model review into two modes:
 - **full diagnostic review**: explicit user-requested checkpoint; may surface new objections and risks;

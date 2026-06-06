@@ -347,4 +347,6 @@ The grill gate is re-enterable. After `grill.status` is `Complete`, `/gpd-grill`
 
 New examples created after the mandatory grill gate should include both companion artifacts. Older examples may be grandfathered with retroactive `STATE.json.grill` compatibility when backfilling would create artificial records. The canonical demonstration is `examples/software-supply-chain-evidence-pack/.paper/`.
 
+Imported papers may also carry `STATE.json.import_mode`. When present, it records the advisory detected mode, confirmed mode, authored-prose detection result, transform confirmation state, and detector signals. This is a workflow guard, not a paper-quality rating.
+
 `gpd validate` checks the structural contracts for these artifacts. `gpd validate --semantic` runs those structural checks first, then adds semantic lint-style checks from `bin/lib/semantic.js`.

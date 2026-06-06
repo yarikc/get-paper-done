@@ -17,6 +17,9 @@ const {
   status,
 } = require('./state');
 const {
+  resolveImportMode,
+} = require('./import-mode');
+const {
   writeSetupArtifacts,
 } = require('./init');
 
@@ -568,7 +571,24 @@ function importIndexRows(files, canonicalDraft) {
     .join('\n') || '| - | - | - | - | - | - |';
 }
 
-function importReport(input, copied, skipped, canonicalDraft, draftExtraction, sourceReferences) {
+function importModeRows(importMode) {
+  if (!importMode) return '| - | - | - | - |';
+  return [
+    `| Detected mode | ${importMode.detected} | Advisory classifier | Not a quality judgment; confirmation gate is the safety control. |`,
+    `| Confirmed mode | ${importMode.confirmed} | Import routing | Stored in STATE.json for downstream commands. |`,
+    `| Authored prose detected | ${importMode.authored_prose_detected ? 'yes' : 'no'} | Deterministic signals | Transform modes require explicit confirmation when yes. |`,
+    `| Transform confirmation | ${importMode.confirmation} | CLI flag or not required | Use --confirm-transform only when the author accepts transformation risk. |`,
+  ].join('\n');
+}
+
+function importSignalRows(importMode) {
+  if (!importMode || !importMode.signals) return '| - | - |';
+  return Object.entries(importMode.signals)
+    .map(([key, value]) => `| ${key} | ${value} |`)
+    .join('\n');
+}
+
+function importReport(input, copied, skipped, canonicalDraft, draftExtraction, sourceReferences, importMode) {
   const inventory = importInventory(copied, skipped, input.maxFileBytes || maxDefaultFileBytes);
   const copiedRows = copied.length === 0
     ? '| - | - | - | - |'
@@ -659,6 +679,20 @@ ${draftCandidateRows(inventory, canonicalDraft)}
 |----------|--------|--------------|-------|
 ${draftExtractionRows(draftExtraction)}
 
+## Import Mode
+
+GPD stores the import mode so downstream stages know whether they are protecting authored prose or generating from weak inputs.
+
+| Field | Value | Basis | Notes |
+|-------|-------|-------|-------|
+${importModeRows(importMode)}
+
+Signals:
+
+| Signal | Value |
+|--------|-------|
+${importSignalRows(importMode)}
+
 ## Detected Source References
 
 These are unverified import-time triage candidates. They are not evidence until \`/gpd-research\` or \`/gpd-fact-check\` verifies source relevance and claim support.
@@ -738,6 +772,11 @@ function importPaper(input = {}) {
   const sourceIsFile = fs.statSync(scan.source).isFile();
   const canonicalDraft = selectCanonicalDraft(scan.files, sourceIsFile);
   const draftExtraction = planDraftExtraction(canonicalDraft);
+  const importMode = resolveImportMode({
+    draftText: draftExtraction.created ? draftExtraction.content : '',
+    requestedMode: input.mode || null,
+    confirmTransform: Boolean(input.confirmTransform),
+  });
   const sourceReferences = detectSourceReferences(scan.files);
   const inventory = importInventory(scan.files, scan.skipped, input.maxFileBytes || maxDefaultFileBytes);
 
@@ -754,6 +793,7 @@ function importPaper(input = {}) {
   const title = input.title || input.slug || path.basename(paperDir);
   const machineState = defaultMachineState({
     suggestedNextCommand: '/gpd-grill',
+    importMode,
     postImportChoices: [
       '/gpd-research',
       '/gpd-outline --lite',
@@ -769,7 +809,7 @@ function importPaper(input = {}) {
   );
   writeFile(
     path.join(paperDir, '.paper', 'IMPORT.md'),
-    importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft, draftExtraction, sourceReferences),
+    importReport({ ...input, source: scan.source, paperDir }, scan.files, scan.skipped, canonicalDraft, draftExtraction, sourceReferences, importMode),
     dryRun,
   );
 
@@ -788,6 +828,7 @@ function importPaper(input = {}) {
   }
   if (canonicalDraft) console.log(`canonical draft candidate: original/${canonicalDraft.rel}`);
   if (draftExtraction.created) console.log(`draft extraction: .paper/DRAFT.md from ${draftExtraction.sourceBasis}`);
+  console.log(`import mode: ${importMode.confirmed}${importMode.authored_prose_detected ? ' (authored prose detected)' : ''}`);
   if (sourceReferences.length > 0) console.log(`source references detected: ${sourceReferences.length}`);
   console.log('next: /gpd-grill');
   console.log('why: imported material needs author-intent recovery before GPD compresses it into a brief.');

@@ -163,6 +163,54 @@
         "last_exported_final_sha256": { "type": "string" }
       }
     },
+    "import_mode": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "detected",
+        "confirmed",
+        "authored_prose_detected",
+        "confirmation_required",
+        "confirmation",
+        "signals"
+      ],
+      "properties": {
+        "detected": {
+          "type": "string",
+          "enum": ["preserve-and-strengthen", "generate-from-brief", "convert-format"]
+        },
+        "confirmed": {
+          "type": "string",
+          "enum": ["preserve-and-strengthen", "generate-from-brief", "convert-format"]
+        },
+        "authored_prose_detected": { "type": "boolean" },
+        "confirmation_required": { "type": "boolean" },
+        "confirmation": {
+          "type": "string",
+          "enum": ["not_required", "confirmed_by_flag"]
+        },
+        "signals": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "prose_words",
+            "bullet_words",
+            "prose_ratio",
+            "heading_count",
+            "non_list_paragraphs",
+            "thesis_like_opening"
+          ],
+          "properties": {
+            "prose_words": { "type": "integer" },
+            "bullet_words": { "type": "integer" },
+            "prose_ratio": { "type": "number" },
+            "heading_count": { "type": "integer" },
+            "non_list_paragraphs": { "type": "integer" },
+            "thesis_like_opening": { "type": "boolean" }
+          }
+        }
+      }
+    },
     "post_import_choices": {
       "type": "array",
       "items": { "type": "string" }

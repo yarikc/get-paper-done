@@ -72,6 +72,28 @@ Draft candidates:
 |----------|--------|--------------|-------|
 | DRAFT.md | [Created/Deferred] | [original/path or -] | [Copied text from Markdown/text draft, extracted plain paragraph text from DOCX, or deferred with reason] |
 
+## Import Mode
+
+GPD stores the import mode so downstream stages know whether they are protecting authored prose or generating from weak inputs.
+
+| Field | Value | Basis | Notes |
+|-------|-------|-------|-------|
+| Detected mode | [preserve-and-strengthen/generate-from-brief/convert-format] | Advisory classifier | Not a quality judgment; confirmation gate is the safety control. |
+| Confirmed mode | [preserve-and-strengthen/generate-from-brief/convert-format] | Import routing | Stored in STATE.json for downstream commands. |
+| Authored prose detected | [yes/no] | Deterministic signals | Transform modes require explicit confirmation when yes. |
+| Transform confirmation | [not_required/confirmed_by_flag] | CLI flag or not required | Use --confirm-transform only when the author accepts transformation risk. |
+
+Signals:
+
+| Signal | Value |
+|--------|-------|
+| prose_words | [count] |
+| bullet_words | [count] |
+| prose_ratio | [0.000] |
+| heading_count | [count] |
+| non_list_paragraphs | [count] |
+| thesis_like_opening | [true/false] |
+
 ## Detected Source References
 
 These are unverified import-time triage candidates. They are not evidence until `/gpd-research` or `/gpd-fact-check` verifies source relevance and claim support.

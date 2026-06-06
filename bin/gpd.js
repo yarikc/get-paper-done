@@ -75,6 +75,8 @@ Options:
   --slug NAME                  Paper directory name
   --title TITLE                Paper title for init/import
   --source PATH                Source folder/file for import
+  --mode MODE                  Import mode: preserve-and-strengthen|generate-from-brief|convert-format
+  --confirm-transform          Confirm transform/regeneration risk for authored prose imports
   --max-file-bytes BYTES       Import skip threshold for individual source files
   --review-file REVIEWER=FILE  External review file to collect; repeatable
   --models LIST                Invoke external reviewer CLIs, comma-separated
@@ -109,6 +111,7 @@ Examples:
   gpd doctor codex
   gpd init --location ~/papers --slug metadata-strategy --title "Metadata Strategy"
   gpd import --source ~/drafts/paper --location ~/papers --slug metadata-strategy
+  gpd import --source ~/drafts/paper --location ~/papers --mode preserve-and-strengthen
   gpd review-pack --paper ~/papers/metadata-strategy
   gpd feedback
   gpd feedback --paper ~/papers/metadata-strategy
@@ -168,6 +171,7 @@ function parseWorkspaceOptions(argv) {
     else if (arg === '--semantic') args.semantic = true;
     else if (arg === '--force') args.force = true;
     else if (arg === '--stdin') args.stdin = true;
+    else if (arg === '--confirm-transform') args.confirmTransform = true;
     else if (arg === '--location') {
       args.location = argv[i + 1];
       i += 1;
@@ -179,6 +183,9 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--source') {
       args.source = argv[i + 1];
+      i += 1;
+    } else if (arg === '--mode') {
+      args.mode = argv[i + 1];
       i += 1;
     } else if (arg === '--max-file-bytes') {
       args.maxFileBytes = Number(argv[i + 1]);
