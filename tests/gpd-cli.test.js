@@ -36,6 +36,8 @@ function testHelpShowsCalibratedExternalReviewProviders() {
   assert(output.includes('gpd review-external --paper ~/papers/metadata-strategy --models claude,codex,gemini --current-runtime codex'));
   assert(output.includes('revise                       Prepare revision by snapshotting current paper state'));
   assert(output.includes('gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md'));
+  assert(output.includes('improve                      Guide the accepted-baseline improvement loop'));
+  assert(output.includes('gpd improve --paper ~/papers/metadata-strategy'));
   assert(output.includes('next                         Show only the next recommended action and why'));
   assert(output.includes('gpd next --paper ~/papers/metadata-strategy'));
 }
@@ -1238,6 +1240,53 @@ function testChangeSetCurrentRequiresCurrentAcceptedBaseline() {
   statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(statusJson.changeSetSummary.current, true);
   assert.strictEqual(statusJson.changeSetSummary.pairwise, 'unchanged');
+}
+
+function testImproveCommandGuidesAcceptedBaselineLoop() {
+  const dir = tempDir('gpd-improve-loop');
+  run(['init', '--location', dir, '--slug', 'improve-paper', '--title', 'Improve Paper']);
+  const paperDir = path.join(dir, 'improve-paper');
+  const meta = path.join(paperDir, '.paper');
+  const draftPath = path.join(meta, 'DRAFT.md');
+
+  fs.writeFileSync(
+    draftPath,
+    '# Improve Paper\n\nAccepted baseline keeps the argument stable before any candidate change.\n',
+  );
+
+  let output = run(['improve', '--paper', paperDir]);
+  assert(output.includes('Stage: needs accepted baseline'));
+  assert(output.includes(`Next: run gpd accept --paper ${paperDir} --source draft`));
+  let json = JSON.parse(run(['improve', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.stage, 'needs_accepted_baseline');
+  assert.strictEqual(json.next_command, `gpd accept --paper ${paperDir} --source draft`);
+
+  run(['accept', '--paper', paperDir, '--source', 'draft']);
+  output = run(['improve', '--paper', paperDir]);
+  assert(output.includes('Stage: accepted current'));
+  assert(output.includes('Candidate: draft unchanged since accept'));
+
+  fs.writeFileSync(
+    draftPath,
+    '# Improve Paper\n\nCandidate baseline keeps the argument stable before any candidate change and adds a clearer author-owned sentence.\n',
+  );
+  output = run(['improve', '--paper', paperDir]);
+  assert(output.includes('Stage: needs compare'));
+  assert(output.includes(`Next: run gpd compare --paper ${paperDir}`));
+  json = JSON.parse(run(['improve', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.stage, 'needs_compare');
+  assert.strictEqual(json.next_command, `gpd compare --paper ${paperDir}`);
+
+  run(['compare', '--paper', paperDir]);
+  output = run(['improve', '--paper', paperDir]);
+  assert(output.includes('Stage: review change set'));
+  assert(output.includes('Compare: current changed_inconclusive'));
+  assert(output.includes('Next: review '));
+  assert(output.includes('Recommendation: Review CHANGESET.md'));
+  json = JSON.parse(run(['improve', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.stage, 'review_change_set');
+  assert.strictEqual(json.changeSet.current, true);
+  assert.strictEqual(json.next_command, '');
 }
 
 function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
@@ -3265,6 +3314,7 @@ testNextUsesDraftHashForExportFreshness();
 testAcceptCommandPromotesFinalToAcceptedBaseline();
 testCompareReportsProsePatternAdvisories();
 testChangeSetCurrentRequiresCurrentAcceptedBaseline();
+testImproveCommandGuidesAcceptedBaselineLoop();
 testAcceptCommandCoversDraftDefaultErrorsAndValidation();
 testSnapshotCommandCreatesVersionAndRevisionLog();
 testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();

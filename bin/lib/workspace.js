@@ -46,6 +46,10 @@ const {
   printCompare,
 } = require('./compare');
 const {
+  improvePaper,
+  printImprove,
+} = require('./improve');
+const {
   decideFeedbackPlan,
   listFeedbackPlan,
   printFeedbackPlanDecision,
@@ -91,6 +95,8 @@ module.exports = {
   printAccept,
   comparePaper,
   printCompare,
+  improvePaper,
+  printImprove,
   decideFeedbackPlan,
   listFeedbackPlan,
   printFeedbackPlanDecision,
