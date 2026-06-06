@@ -1,6 +1,6 @@
 # Get Paper Done Upgrade Plan
 
-Goal: raise the project to **9/10 as a writing framework** and **9/10 as an installable tool**.
+Goal: implement the RFC-017 pivot: protect authored prose, preserve accepted baselines, and turn GPD into a research-and-integrity engine rather than a ghostwriter.
 
 Last reviewed: 2026-05-19
 
@@ -9,8 +9,8 @@ This file is the forward plan. The current ratings, risk snapshot, and review fi
 ## Current Assessment
 
 - Current snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md)
-- Current rating: 9.25/10 as a writing framework and 9.1/10 as an installable private-repo tool as of 2026-05-19
-- Target: 9/10 as a writing framework and 9/10 as an installable tool
+- Latest historical rating snapshot: [docs/PROJECT-REVIEW.md](docs/PROJECT-REVIEW.md). Treat numeric ratings there as dated calibration notes, not workflow authority or product targets.
+- Current target: RFC-017 acceptance evidence, especially authored-prose mode safety, accepted-baseline protection, candidate-vs-baseline comparison, and removal of self-rating as a routing authority.
 
 The artifact model, command surface, install/update/export CLI, workspace helpers, artifact contracts, first-pass semantic validation, seven realistic completed examples, workflow consistency tests, routing scenario tests, content-aware status routing, hash-aware export freshness, export-state detection, quantitative-claim semantic coverage, live public-source claim-support coverage, reusable reader feedback capture, reusable governance/control-paper guidance, messy-import fixture coverage, mandatory and re-enterable `/gpd-grill` with machine-readable completion state, reusable sanitized context packs, import preview/draft-ranking hardening, `.docx` canonical-draft text extraction, import-time source-reference triage, import version/source indexing, external-review collection, Claude/Codex/Gemini provider invocation, external-review provider progress output, reviewer-specific external-review storage, combined-review deduplication, current-runtime self-review skipping, full-workspace external-review prompt context, external-review provenance, concern-first feedback plans, CLI feedback-plan review/decision commands, compiled `REVISION-INSTRUCTIONS.md` for revision agents, guarded revision checks for deterministic regression signals, release/update guidance, and package-boundary hygiene checks are in place. The system still needs broader real-world validation, deeper PDF/spreadsheet extraction for imports, deeper semantic validation, local HTTP provider support, and one-by-one agent calibration against real papers.
 
@@ -26,7 +26,7 @@ To avoid spreading todos across docs and issues:
 |---------|------|--------------|
 | GitHub issues | Execution tracking, acceptance checklists, closure state | Narrative project health or long-form design rationale |
 | `ROADMAP.md` | Milestone order, next slices, dependency reasoning | Detailed ratings or issue-by-issue status logs |
-| `docs/PROJECT-REVIEW.md` | Current rating, risk snapshot, review findings | Forward execution backlog |
+| `docs/PROJECT-REVIEW.md` | Historical calibration snapshots, risk snapshot, review findings | Forward execution backlog or workflow authority |
 | GitHub Issue #2 | Active one-paper diagnostic checklist and friction-log execution | Long-term roadmap or design rationale |
 | `rfc/*.md` | Design decisions and accepted/deferred scope | Day-to-day task tracking after implementation starts |
 
@@ -415,7 +415,7 @@ Reviewed so far:
 - `paper-fact-checker`: upgraded into an editorial fact-checker and claims-risk auditor with `risk_scan`, `full_claim_check`, `publication_check`, and `source_audit` modes. It creates `FACT-CHECK.md`, inventories material claims, checks source alignment, distinguishes unsupported/false/not-checked/current-verification-needed/misleading-in-context, evaluates support/freshness/precision/context/risk/quantitative integrity, assesses whether the conclusion outruns verified support, reports systemic factual risk patterns, respects audience proof standards and source policy, and routes fixes to research or revision.
 - `opposition-reviewer`: upgraded into a steelman opposition reviewer with Lite/Deep modes, scope modes, strongest good-faith opposition framing, opposition model, strongest fair opposing case, fatal/serious/moderate/minor objection audit, argument resilience scorecard, audience-impact mapping, claim stress tests, existing-defense check, weak-assumption table, overclaiming/strawman risks, alternative explanations, deep-mode opposition map, assumption failure test, alternative strategy test, pre-mortem, narrowing plan, and routing to brief/research/fact-check/outline/revision.
 
-Current ratings:
+Historical agent calibration notes:
 
 - `audience-reviewer`: 8.8/10 pending real multi-audience calibration
 - `paper-researcher`: 9.0/10 pending messy-import calibration
@@ -423,8 +423,8 @@ Current ratings:
 - `paper-outliner`: 9.3/10 pending calibration on a real imported or strategy-heavy paper
 - `paper-drafter`: 9.1/10 pending real-use calibration
 - `paper-editor`: 9.1/10 pending real-use calibration
-- `paper-fact-checker`: 9.2/10 pending real-use calibration
-- `opposition-reviewer`: 9.2/10 pending real adversarial-review calibration
+- `paper-fact-checker`: historical 9.2/10 calibration note pending real-use calibration
+- `opposition-reviewer`: historical 9.2/10 calibration note pending real adversarial-review calibration
 
 Remaining one-by-one agent reviews:
 

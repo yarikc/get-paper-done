@@ -463,6 +463,89 @@ function validateJsonArtifact(filePath) {
   return validateJsonSchemaValue(parsed.data, schema).map((message) => issue('HIGH', artifact, message));
 }
 
+function validateAcceptedArtifacts(meta) {
+  const acceptedPath = path.join(meta, 'accepted', 'ACCEPTED.md');
+  const metadataPath = path.join(meta, 'accepted', 'ACCEPTED.meta.json');
+  const acceptedExists = fs.existsSync(acceptedPath);
+  const metadataExists = fs.existsSync(metadataPath);
+  const issues = [];
+
+  if (!acceptedExists && !metadataExists) return issues;
+  if (!acceptedExists) issues.push(issue('HIGH', 'accepted/ACCEPTED.md', 'accepted metadata exists but accepted baseline file is missing'));
+  if (!metadataExists) issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', 'accepted baseline exists but metadata file is missing'));
+  if (!acceptedExists || !metadataExists) return issues;
+
+  const accepted = fs.readFileSync(acceptedPath, 'utf8');
+  if (!accepted.trim()) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.md', 'accepted baseline must not be empty'));
+  }
+
+  const parsed = readJson(metadataPath);
+  if (parsed.error) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', `Malformed JSON: ${parsed.error}`));
+    return issues;
+  }
+
+  const metadata = parsed.data;
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', 'metadata must be a JSON object'));
+    return issues;
+  }
+
+  const requiredFields = [
+    'version',
+    'accepted_at',
+    'source_artifact',
+    'accepted_path',
+    'accepted_sha256',
+    'source_sha256',
+    'draft_sha256',
+    'final_sha256',
+  ];
+  for (const field of requiredFields) {
+    if (!Object.prototype.hasOwnProperty.call(metadata, field)) {
+      issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', `$.${field} is required`));
+    }
+  }
+
+  if (metadata.version !== 1) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.version must be 1'));
+  }
+  if (metadata.accepted_path !== '.paper/accepted/ACCEPTED.md') {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.accepted_path must be .paper/accepted/ACCEPTED.md'));
+  }
+  if (typeof metadata.accepted_at !== 'string' || !metadata.accepted_at.trim()) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.accepted_at must be non-empty'));
+  }
+
+  const acceptedSha = fileSha256(acceptedPath);
+  if (metadata.accepted_sha256 && metadata.accepted_sha256 !== acceptedSha) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.accepted_sha256 does not match accepted/ACCEPTED.md'));
+  }
+
+  const sourceArtifact = typeof metadata.source_artifact === 'string'
+    ? metadata.source_artifact.replace(/^\.paper\//, '')
+    : '';
+  if (!['DRAFT.md', 'exports/FINAL.md'].includes(sourceArtifact)) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_artifact must be .paper/DRAFT.md or .paper/exports/FINAL.md'));
+  } else {
+    const sourcePath = path.join(meta, sourceArtifact);
+    if (!fs.existsSync(sourcePath)) {
+      issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', `source artifact is missing: .paper/${sourceArtifact}`));
+    } else {
+      const sourceSha = fileSha256(sourcePath);
+      if (metadata.source_sha256 !== sourceSha) {
+        issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_sha256 does not match source_artifact'));
+      }
+      if (metadata.source_sha256 !== metadata.accepted_sha256) {
+        issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_sha256 must match $.accepted_sha256'));
+      }
+    }
+  }
+
+  return issues;
+}
+
 function normalizeTableCell(value) {
   return value.trim().replace(/^\*\*/, '').replace(/\*\*$/, '').trim();
 }
@@ -1012,6 +1095,10 @@ function validateArtifact(inputPath) {
   const filePath = path.resolve(expandHome(inputPath));
   const basename = path.basename(filePath);
   const artifact = artifactNameForFile(filePath);
+  if (basename === 'ACCEPTED.meta.json') return validateAcceptedArtifacts(path.dirname(path.dirname(filePath)));
+  if (basename === 'ACCEPTED.md' && path.basename(path.dirname(filePath)) === 'accepted') {
+    return validateAcceptedArtifacts(path.dirname(path.dirname(filePath)));
+  }
   if (jsonArtifactSchemas[basename]) return validateJsonArtifact(filePath);
   if (markdownContracts[artifact]) return validateMarkdownArtifact(filePath);
   return [issue('MEDIUM', basename, 'No artifact contract found')];
@@ -1034,6 +1121,7 @@ function validatePaperArtifacts(paperDir, artifacts) {
   }
 
   issues.push(...validatePaperContextTermsUsedInDraft(meta));
+  issues.push(...validateAcceptedArtifacts(meta));
 
   return issues;
 }

@@ -163,6 +163,30 @@
         "last_exported_final_sha256": { "type": "string" }
       }
     },
+    "accepted": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "accepted_at",
+        "source_artifact",
+        "accepted_path",
+        "accepted_sha256",
+        "source_sha256",
+        "draft_sha256",
+        "final_sha256"
+      ],
+      "properties": {
+        "version": { "type": "integer", "enum": [1] },
+        "accepted_at": { "type": "string" },
+        "source_artifact": { "type": "string" },
+        "accepted_path": { "type": "string" },
+        "accepted_sha256": { "type": "string" },
+        "source_sha256": { "type": "string" },
+        "draft_sha256": { "type": "string" },
+        "final_sha256": { "type": "string" }
+      }
+    },
     "import_mode": {
       "type": ["object", "null"],
       "additionalProperties": false,

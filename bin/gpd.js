@@ -41,6 +41,8 @@ const {
   printRestore,
   prepareRevision,
   printRevisionPreparation,
+  acceptPaper,
+  printAccept,
 } = require('./lib/workspace');
 
 function printHelp() {
@@ -57,6 +59,7 @@ Commands:
   feedback [collect|clean]     Capture or clean inline reader comments; /gpd-review evaluates paper quality
   feedback-plan                List/review/decide feedback-plan concerns
   revise                       Prepare revision by snapshotting current paper state
+  accept                       Promote current draft/export to accepted baseline
   snapshot                     Preserve current paper artifacts before risky work
   restore                      Restore paper artifacts from a snapshot
   review-external              Collect external review text into review artifacts
@@ -121,6 +124,7 @@ Examples:
   gpd feedback-plan decide --paper ~/papers/metadata-strategy --item 1 --decision approve
   gpd feedback-plan decide --paper ~/papers/metadata-strategy --set 1 --decision modify --note "Keep concise"
   gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md
+  gpd accept --paper ~/papers/metadata-strategy --source final
   gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
   gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
@@ -374,6 +378,14 @@ async function main(argv) {
     const result = prepareRevision(args);
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else printRevisionPreparation(result);
+    return;
+  }
+
+  if (command === 'accept') {
+    const args = parseWorkspaceOptions(rest);
+    const result = acceptPaper(args);
+    if (args.json) console.log(JSON.stringify(result, null, 2));
+    else printAccept(result);
     return;
   }
 

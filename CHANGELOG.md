@@ -2,6 +2,18 @@
 
 All notable changes to Get Paper Done are documented here.
 
+## Unreleased
+
+### Added
+
+- Authored-prose import-mode gate: `gpd import` detects authored prose, defaults to preserve-and-strengthen, and blocks generate/convert modes unless the user explicitly confirms transformation risk.
+- `gpd accept` baseline promotion command, with `.paper/accepted/ACCEPTED.md`, `.paper/accepted/ACCEPTED.meta.json`, `STATE.json.accepted`, snapshot coverage, and status output showing whether `DRAFT.md` has changed since acceptance.
+- Accepted-baseline artifact validation for metadata/file pairing, required fields, accepted/source hashes, and promoted source consistency.
+
+### Changed
+
+- CI now runs on Node 24 with Node 24-compatible GitHub Actions.
+
 ## 0.1.0 - 2026-05-10
 
 Initial working release.

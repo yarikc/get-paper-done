@@ -997,6 +997,127 @@ function testNextUsesDraftHashForExportFreshness() {
   assert(status.userAction.includes('Run /gpd-export'));
 }
 
+function testAcceptCommandPromotesFinalToAcceptedBaseline() {
+  const dir = tempDir('gpd-accept-test');
+  run(['init', '--location', dir, '--slug', 'accepted-paper', '--title', 'Accepted Paper']);
+  const paperDir = path.join(dir, 'accepted-paper');
+  const meta = path.join(paperDir, '.paper');
+  const statePath = path.join(meta, 'STATE.json');
+  const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  state.status = 'Ready For Export';
+  state.current_stage = 'Review';
+  state.last_completed_stage = 'Review';
+  state.suggested_next_command = '/gpd-export';
+  state.blocked_by = [];
+  completeGrill(state);
+  state.strategy.status = 'Go';
+  state.strategy.blocking_issues = [];
+  state.strategy.primary_blocker = 'none';
+  state.strategy.block_severity = 'None';
+  state.strategy.required_unblock_action = 'none';
+  fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nAccepted body.\n');
+  fs.writeFileSync(path.join(meta, 'REVIEW.md'), '# Review\n\n## Verdict\n\nReady\n');
+  run(['export', '--paper', paperDir, '--force']);
+
+  const acceptOutput = run(['accept', '--paper', paperDir, '--source', 'final', '--note', 'User accepted reading copy.']);
+  assert(acceptOutput.includes('Accepted baseline updated'));
+  assert(acceptOutput.includes('Source: .paper/exports/FINAL.md'));
+  assert(acceptOutput.includes('Accepted: .paper/accepted/ACCEPTED.md'));
+  assert(acceptOutput.includes('Next: gpd status'));
+
+  const acceptedPath = path.join(meta, 'accepted', 'ACCEPTED.md');
+  const metadataPath = path.join(meta, 'accepted', 'ACCEPTED.meta.json');
+  assert.strictEqual(fs.readFileSync(acceptedPath, 'utf8'), '# Accepted Paper\n\nAccepted body.\n');
+  const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+  assert.strictEqual(metadata.version, 1);
+  assert.strictEqual(metadata.source_artifact, '.paper/exports/FINAL.md');
+  assert.strictEqual(metadata.accepted_path, '.paper/accepted/ACCEPTED.md');
+  assert.strictEqual(metadata.accepted_sha256, metadata.source_sha256);
+  assert(metadata.source_sha256);
+  assert(metadata.draft_sha256);
+  assert(metadata.final_sha256);
+  assert.strictEqual(metadata.note, 'User accepted reading copy.');
+
+  const acceptedState = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+  assert.strictEqual(acceptedState.status, 'Accepted');
+  assert.strictEqual(acceptedState.accepted.version, 1);
+  assert.strictEqual(acceptedState.accepted.source_artifact, '.paper/exports/FINAL.md');
+  assert.strictEqual(acceptedState.accepted.accepted_sha256, metadata.accepted_sha256);
+
+  let statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.next, '/gpd-status');
+  assert.strictEqual(statusJson.acceptedSummary.exists, true);
+  assert.strictEqual(statusJson.acceptedSummary.draft_status_since_accept, 'draft unchanged since accept');
+  const statusOutput = run(['status', '--paper', paperDir]);
+  assert(statusOutput.includes('Accepted baseline: .paper/accepted/ACCEPTED.md (draft unchanged since accept)'));
+  assert(statusOutput.includes('Accepted baseline is set'));
+
+  fs.writeFileSync(path.join(meta, 'DRAFT.md'), '# Draft\n\n## Draft Body\n\nCandidate changed after acceptance.\n');
+  statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.acceptedSummary.draft_status_since_accept, 'draft changed since accept');
+
+  const snapshotOutput = run(['snapshot', '--paper', paperDir, '--reason', 'accepted_baseline_check']);
+  assert(snapshotOutput.includes('accepted/ACCEPTED.md'));
+  const snapshotId = fs.readdirSync(path.join(meta, 'versions')).find((name) => name.includes('accepted-baseline-check'));
+  assert(snapshotId);
+  assert.strictEqual(
+    fs.readFileSync(path.join(meta, 'versions', snapshotId, 'accepted', 'ACCEPTED.md'), 'utf8'),
+    '# Accepted Paper\n\nAccepted body.\n',
+  );
+}
+
+function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
+  const dir = tempDir('gpd-accept-coverage');
+  const outsideWorkspace = runFail(['accept'], { cwd: dir });
+  assert.strictEqual(outsideWorkspace.status, 1);
+  assert(outsideWorkspace.stderr.includes('No .paper workspace found'));
+
+  run(['init', '--location', dir, '--slug', 'draft-paper', '--title', 'Draft Paper']);
+  const paperDir = path.join(dir, 'draft-paper');
+  const meta = path.join(paperDir, '.paper');
+
+  let missing = runFail(['accept', '--paper', paperDir]);
+  assert.strictEqual(missing.status, 1);
+  assert(missing.stderr.includes('Cannot accept missing source artifact: .paper/DRAFT.md'));
+
+  const draftPath = path.join(meta, 'DRAFT.md');
+  fs.writeFileSync(draftPath, '# Draft Paper\n\nDraft baseline.\n');
+  const dryRunOutput = run(['accept', '--paper', paperDir, '--dry-run']);
+  assert(dryRunOutput.includes('Accepted baseline would be updated'));
+  assert(dryRunOutput.includes('Next: rerun without --dry-run to update the accepted baseline'));
+  assert(!fs.existsSync(path.join(meta, 'accepted', 'ACCEPTED.md')));
+
+  const acceptDefault = run(['accept', '--paper', paperDir]);
+  assert(acceptDefault.includes('Source: .paper/DRAFT.md'));
+  let accepted = fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.md'), 'utf8');
+  assert.strictEqual(accepted, '# Draft Paper\n\nDraft baseline.\n');
+  let metadata = JSON.parse(fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.meta.json'), 'utf8'));
+  assert.strictEqual(metadata.note, '');
+  assert.strictEqual(metadata.source_artifact, '.paper/DRAFT.md');
+  assert.strictEqual(metadata.accepted_sha256, metadata.source_sha256);
+  assert(run(['validate-artifact', '--path', path.join(meta, 'accepted', 'ACCEPTED.meta.json')]).includes('validation: ok'));
+
+  fs.writeFileSync(draftPath, '# Draft Paper\n\nSecond accepted baseline.\n');
+  const acceptDraft = run(['accept', '--paper', paperDir, '--source', 'draft', '--note', 'Second pass.']);
+  assert(acceptDraft.includes('Source: .paper/DRAFT.md'));
+  accepted = fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.md'), 'utf8');
+  assert.strictEqual(accepted, '# Draft Paper\n\nSecond accepted baseline.\n');
+  metadata = JSON.parse(fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.meta.json'), 'utf8'));
+  assert.strictEqual(metadata.note, 'Second pass.');
+
+  const invalid = runFail(['accept', '--paper', paperDir, '--source', 'review']);
+  assert.strictEqual(invalid.status, 1);
+  assert(invalid.stderr.includes('--source must be draft or final'));
+
+  metadata.accepted_sha256 = 'bad-hash';
+  fs.writeFileSync(path.join(meta, 'accepted', 'ACCEPTED.meta.json'), JSON.stringify(metadata, null, 2));
+  const badMetadata = runFail(['validate-artifact', '--path', path.join(meta, 'accepted', 'ACCEPTED.meta.json')]);
+  assert.strictEqual(badMetadata.status, 1);
+  assert(badMetadata.stdout.includes('$.accepted_sha256 does not match accepted/ACCEPTED.md'));
+}
+
 function testSnapshotCommandCreatesVersionAndRevisionLog() {
   const dir = tempDir('gpd-snapshot-test');
   run(['init', '--location', dir, '--slug', 'snapshot-paper', '--title', 'Snapshot Paper']);
@@ -2965,6 +3086,8 @@ testImportMaxFileBytesSkipsLargeFiles();
 testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
 testNextUsesDraftHashForExportFreshness();
+testAcceptCommandPromotesFinalToAcceptedBaseline();
+testAcceptCommandCoversDraftDefaultErrorsAndValidation();
 testSnapshotCommandCreatesVersionAndRevisionLog();
 testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();
 testReviseCommandRequiresDraft();

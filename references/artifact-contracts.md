@@ -349,4 +349,6 @@ New examples created after the mandatory grill gate should include both companio
 
 Imported papers may also carry `STATE.json.import_mode`. When present, it records the advisory detected mode, confirmed mode, authored-prose detection result, transform confirmation state, and detector signals. This is a workflow guard, not a paper-quality rating.
 
+Accepted papers may carry `.paper/accepted/ACCEPTED.md` plus `.paper/accepted/ACCEPTED.meta.json`. The accepted copy is the sovereign human-approved baseline. `STATE.json.accepted` records when it was accepted, which artifact was promoted, the accepted path, the accepted-file hash, and draft/final/source hashes. Until the compare/CHANGESET gate exists, status may say whether `DRAFT.md` changed since acceptance, but it must not claim the candidate has been proven better than the accepted baseline.
+
 `gpd validate` checks the structural contracts for these artifacts. `gpd validate --semantic` runs those structural checks first, then adds semantic lint-style checks from `bin/lib/semantic.js`.

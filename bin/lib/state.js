@@ -63,6 +63,7 @@ function defaultMachineState(input = {}) {
       last_exported_draft_sha256: '',
       last_exported_final_sha256: '',
     },
+    accepted: input.accepted || null,
     import_mode: input.importMode || null,
     post_import_choices: input.postImportChoices || [],
   };
@@ -85,6 +86,7 @@ function stateMarkdown(state) {
     : '- None';
   const feedback = state.feedback || {};
   const importMode = state.import_mode || {};
+  const accepted = state.accepted || {};
   return [
     '# Paper State',
     '',
@@ -117,6 +119,13 @@ function stateMarkdown(state) {
     '',
     `- **Feedback plan status:** ${feedback.feedback_plan_status || 'Not created'}`,
     `- **Approved handling:** ${feedback.approved_handling || ''}`,
+    '',
+    '## Accepted Baseline',
+    '',
+    `- **Accepted at:** ${accepted.accepted_at || 'Not recorded'}`,
+    `- **Source artifact:** ${accepted.source_artifact || 'Not recorded'}`,
+    `- **Accepted path:** ${accepted.accepted_path || 'Not recorded'}`,
+    `- **Accepted hash:** ${accepted.accepted_sha256 || 'Not recorded'}`,
     '',
     '## Import Mode',
     '',
@@ -294,6 +303,52 @@ function artifactContent(paperDir, artifactName) {
   return readIfExists(artifactPath(paperDir, artifactName));
 }
 
+function acceptedSummary(paperDir) {
+  const meta = path.join(paperDir, '.paper');
+  const acceptedPath = path.join(meta, 'accepted', 'ACCEPTED.md');
+  const metadataPath = path.join(meta, 'accepted', 'ACCEPTED.meta.json');
+  if (!fs.existsSync(acceptedPath) || !fs.existsSync(metadataPath)) {
+    return {
+      exists: false,
+      label: 'none',
+      candidate_status: 'no accepted baseline',
+    };
+  }
+  const parsed = readJsonIfExists(metadataPath);
+  if (!parsed.data) {
+    return {
+      exists: false,
+      label: 'metadata malformed',
+      candidate_status: 'accepted metadata malformed',
+    };
+  }
+  const metadata = parsed.data;
+  const currentDraftSha = artifactSha256(paperDir, 'DRAFT.md');
+  let draftStatusSinceAccept = 'no draft candidate';
+  if (currentDraftSha && metadata.draft_sha256) {
+    draftStatusSinceAccept = currentDraftSha === metadata.draft_sha256
+      ? 'draft unchanged since accept'
+      : 'draft changed since accept';
+  } else if (currentDraftSha) {
+    draftStatusSinceAccept = 'draft exists; accepted metadata has no draft hash';
+  }
+  return {
+    exists: true,
+    version: metadata.version || 1,
+    accepted_at: metadata.accepted_at || '',
+    source_artifact: metadata.source_artifact || '',
+    accepted_path: metadata.accepted_path || '.paper/accepted/ACCEPTED.md',
+    accepted_sha256: metadata.accepted_sha256 || '',
+    source_sha256: metadata.source_sha256 || '',
+    draft_sha256: metadata.draft_sha256 || '',
+    final_sha256: metadata.final_sha256 || '',
+    current_draft_sha256: currentDraftSha,
+    draft_status_since_accept: draftStatusSinceAccept,
+    candidate_status: draftStatusSinceAccept,
+    label: `${metadata.source_artifact || '.paper/accepted/ACCEPTED.md'} accepted ${metadata.accepted_at || ''}`.trim(),
+  };
+}
+
 function feedbackPlanPending(state) {
   const feedback = state.machineState ? state.machineState.feedback : null;
   if (
@@ -448,6 +503,7 @@ function validationLabel(state) {
 
 function stateSummary(state) {
   if (hasGuardedRevisionBlocker(state)) return 'Guarded revision checks found a possible regression. Do not ask for user review yet.';
+  if (state.machineState && state.machineState.status === 'Accepted') return 'Accepted baseline is set. Future candidate changes should compare against it.';
   if (state.next === '/gpd-status') return 'Ready for user review. No writing stage is blocked.';
   if (state.next === '/gpd-feedback') return 'Feedback is waiting for user decisions before revision.';
   if (state.next === '/gpd-revise') return 'Approved feedback is ready to apply through revision.';
@@ -761,6 +817,8 @@ function artifactState(paperDir) {
     'REVISION-INSTRUCTIONS.md',
     'REVISION-CHECK.md',
     'REVISION-LOG.md',
+    'accepted/ACCEPTED.md',
+    'accepted/ACCEPTED.meta.json',
     'STATE.md',
     'STATE.json',
     'config.json',
@@ -801,6 +859,13 @@ function suggestedNext(state) {
   const a = state.artifacts;
   if (!a['PROJECT.md'] || !a['PERSONA.md'] || !a['AUDIENCE.md'] || !a['BRIEF.md']) return '/gpd-brief';
   if (!a['STRATEGY.md']) return '/gpd-brief';
+  if (feedbackPlanPending(state)) return '/gpd-feedback';
+  if (feedbackPlanApprovedForRevision(state)) return '/gpd-revise';
+  if (hasGuardedRevisionBlocker(state)) {
+    if (a['exports/FINAL.md'] && exportHasInlineReviewComments(state.paperDir)) return '/gpd-feedback';
+    return '/gpd-revise';
+  }
+  if (state.machineState && state.machineState.status === 'Accepted') return '/gpd-status';
   if (!grillComplete(state.machineState)) return '/gpd-grill';
   if (state.strategyStatus === 'Revise Before Drafting' || state.strategyStatus === 'No-Go') {
     return '/gpd-brief';
@@ -819,12 +884,6 @@ function suggestedNext(state) {
     || artifactChangedAfterStateAndNewerThan(state, 'DECISIONS.md', 'BRIEF.md')
   ) {
     return '/gpd-brief';
-  }
-  if (feedbackPlanPending(state)) return '/gpd-feedback';
-  if (feedbackPlanApprovedForRevision(state)) return '/gpd-revise';
-  if (hasGuardedRevisionBlocker(state)) {
-    if (a['exports/FINAL.md'] && exportHasInlineReviewComments(state.paperDir)) return '/gpd-feedback';
-    return '/gpd-revise';
   }
   if (
     artifactChangedAfterStateAndNewerThan(state, 'BRIEF.md', 'RESEARCH.json')
@@ -897,6 +956,7 @@ function status(input = {}) {
   state.revisionSummary = revisionSummary(state);
   state.reviewCompletionNote = reviewCompletionNote(state);
   state.reviewRecommendation = reviewRecommendation(state);
+  state.acceptedSummary = acceptedSummary(paperDir);
   state.full = Boolean(input.full);
   return state;
 }
@@ -907,6 +967,11 @@ function printStatus(state) {
   console.log(`Paper: ${basenameLabel(state.paperDir)}`);
   console.log(`Stage: ${stageLabel(state)}`);
   if (state.finalExportPath) console.log(`Current paper: ${displayPath(state.paperDir, state.finalExportPath)}`);
+  if (state.acceptedSummary && state.acceptedSummary.exists) {
+    console.log(`Accepted baseline: ${state.acceptedSummary.accepted_path} (${state.acceptedSummary.draft_status_since_accept})`);
+  } else {
+    console.log('Accepted baseline: none');
+  }
   if (state.reviewRatingDisplay) console.log(`Rating: ${state.reviewRatingDisplay}`);
   if (state.reviewRatingProvenance) console.log(`Rating source: ${state.reviewRatingProvenance}`);
   console.log(`State: ${stateSummary(state)}`);

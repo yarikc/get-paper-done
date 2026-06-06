@@ -36,6 +36,8 @@ const coreArtifacts = [
   'STATE.json',
   'STATE.md',
   'config.json',
+  'accepted/ACCEPTED.md',
+  'accepted/ACCEPTED.meta.json',
 ];
 
 const directoryArtifacts = [

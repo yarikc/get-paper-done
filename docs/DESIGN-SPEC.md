@@ -505,8 +505,8 @@ Tool acceptance:
 - `paper-outliner`: 9.3/10 pending calibration on a real imported or strategy-heavy paper
 - `paper-drafter`: 9.1/10 pending real-use calibration
 - `paper-editor`: 9.1/10 pending real-use calibration
-- `paper-fact-checker`: 9.2/10 pending real-use calibration
-- `opposition-reviewer`: 9.2/10 pending real adversarial-review calibration
+- `paper-fact-checker`: historical 9.2/10 calibration note pending real-use calibration
+- `opposition-reviewer`: historical 9.2/10 calibration note pending real adversarial-review calibration
 
 ## Open Work
 
