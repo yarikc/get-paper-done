@@ -1110,6 +1110,20 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
 
   fs.writeFileSync(
     path.join(meta, 'DRAFT.md'),
+    '# Accepted Paper Revised\n\nAccepted baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
+  );
+  const renamedCompare = run(['compare', '--paper', paperDir]);
+  assert(renamedCompare.includes('Verdict: changed_inconclusive'));
+  assert(renamedCompare.includes('Renamed headings: Accepted Paper -> Accepted Paper Revised'));
+  const renamedChangeSet = JSON.parse(fs.readFileSync(changeSetPath, 'utf8'));
+  assert.strictEqual(renamedChangeSet.metrics.removed_headings.length, 0);
+  assert.strictEqual(renamedChangeSet.metrics.renamed_headings.length, 1);
+  assert.strictEqual(renamedChangeSet.metrics.renamed_headings[0].from, 'Accepted Paper');
+  assert.strictEqual(renamedChangeSet.metrics.renamed_headings[0].to, 'Accepted Paper Revised');
+  assert(run(['validate-artifact', '--path', changeSetPath]).includes('validation: ok'));
+
+  fs.writeFileSync(
+    path.join(meta, 'DRAFT.md'),
     '# Different Title\n\nCandidate baseline explains the paper with enough stable words for a fair compare gate and changes the accepted heading.\n',
   );
   const regressionCompare = run(['compare', '--paper', paperDir]);
@@ -1124,6 +1138,38 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
     fs.readFileSync(path.join(meta, 'versions', snapshotId, 'accepted', 'ACCEPTED.md'), 'utf8'),
     '# Accepted Paper\n\nAccepted baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
   );
+}
+
+function testChangeSetCurrentRequiresCurrentAcceptedBaseline() {
+  const dir = tempDir('gpd-changeset-baseline-current');
+  run(['init', '--location', dir, '--slug', 'compare-currentness', '--title', 'Compare Currentness']);
+  const paperDir = path.join(dir, 'compare-currentness');
+  const meta = path.join(paperDir, '.paper');
+  const draftPath = path.join(meta, 'DRAFT.md');
+  const changeSetPath = path.join(meta, 'CHANGESET.json');
+
+  fs.writeFileSync(draftPath, '# Baseline\n\nStable accepted body for the first baseline.\n');
+  run(['accept', '--paper', paperDir, '--source', 'draft']);
+
+  fs.writeFileSync(draftPath, '# Baseline\n\nCandidate body for the second baseline.\n');
+  run(['compare', '--paper', paperDir]);
+  let statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.changeSetSummary.current, true);
+
+  const oldChangeSet = JSON.parse(fs.readFileSync(changeSetPath, 'utf8'));
+  run(['accept', '--paper', paperDir, '--source', 'draft']);
+  statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.next, '/gpd-status');
+  assert.strictEqual(statusJson.acceptedSummary.draft_status_since_accept, 'draft unchanged since accept');
+  assert.strictEqual(statusJson.changeSetSummary.exists, true);
+  assert.strictEqual(statusJson.changeSetSummary.current, false);
+  assert.strictEqual(statusJson.changeSetSummary.baseline_sha256, oldChangeSet.baseline.sha256);
+  assert.notStrictEqual(statusJson.changeSetSummary.current_accepted_sha256, oldChangeSet.baseline.sha256);
+
+  run(['compare', '--paper', paperDir]);
+  statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.changeSetSummary.current, true);
+  assert.strictEqual(statusJson.changeSetSummary.pairwise, 'unchanged');
 }
 
 function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
@@ -3149,6 +3195,7 @@ testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
 testNextUsesDraftHashForExportFreshness();
 testAcceptCommandPromotesFinalToAcceptedBaseline();
+testChangeSetCurrentRequiresCurrentAcceptedBaseline();
 testAcceptCommandCoversDraftDefaultErrorsAndValidation();
 testSnapshotCommandCreatesVersionAndRevisionLog();
 testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();

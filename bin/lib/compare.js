@@ -26,6 +26,22 @@ function normalizeHeading(value) {
   return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
+function tokenize(value) {
+  const words = String(value || '').toLowerCase().match(/[a-z0-9]+(?:[-'][a-z0-9]+)*/g) || [];
+  return new Set(words.filter((word) => word.length > 2));
+}
+
+function tokenSimilarity(left, right) {
+  const leftTokens = tokenize(left);
+  const rightTokens = tokenize(right);
+  if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
+  let shared = 0;
+  for (const token of leftTokens) {
+    if (rightTokens.has(token)) shared += 1;
+  }
+  return shared / Math.max(leftTokens.size, rightTokens.size);
+}
+
 function headings(markdown) {
   const found = [];
   const re = /^(#{1,6})\s+(.+)$/gm;
@@ -38,6 +54,41 @@ function headings(markdown) {
     });
   }
   return found;
+}
+
+function firstParagraph(markdown) {
+  const paragraphs = String(markdown || '')
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .filter((block) => !/^#{1,6}\s+/.test(block));
+  return paragraphs[0] || '';
+}
+
+function sections(markdown) {
+  const found = [];
+  const re = /^(#{1,6})\s+(.+)$/gm;
+  let match;
+  while ((match = re.exec(markdown)) !== null) {
+    found.push({
+      level: match[1].length,
+      text: match[2].trim(),
+      normalized: normalizeHeading(match[2]),
+      start: match.index,
+      bodyStart: re.lastIndex,
+    });
+  }
+  return found.map((section, index) => {
+    const next = found[index + 1];
+    const body = String(markdown || '').slice(section.bodyStart, next ? next.start : undefined);
+    return {
+      level: section.level,
+      text: section.text,
+      normalized: section.normalized,
+      index,
+      first_paragraph: firstParagraph(body),
+    };
+  });
 }
 
 function excerpt(value) {
@@ -118,12 +169,67 @@ function changedSpans(accepted, candidate) {
   return spans;
 }
 
-function headingDiff(acceptedHeadings, candidateHeadings) {
+function comparableRenamedSection(acceptedSection, candidateSections, usedCandidateIndexes) {
+  let best = null;
+  for (const candidateSection of candidateSections) {
+    if (usedCandidateIndexes.has(candidateSection.index)) continue;
+    if (candidateSection.level !== acceptedSection.level) continue;
+    if (candidateSection.normalized === acceptedSection.normalized) continue;
+    const sameOrder = candidateSection.index === acceptedSection.index;
+    if (!sameOrder) continue;
+    const heading_similarity = tokenSimilarity(acceptedSection.text, candidateSection.text);
+    const body_similarity = tokenSimilarity(acceptedSection.first_paragraph, candidateSection.first_paragraph);
+    if (heading_similarity < 0.4 || body_similarity < 0.6) continue;
+    if (!best || body_similarity > best.body_similarity || (
+      body_similarity === best.body_similarity && heading_similarity > best.heading_similarity
+    )) {
+      best = {
+        from: acceptedSection.text,
+        to: candidateSection.text,
+        heading_similarity: Math.round(heading_similarity * 100) / 100,
+        body_similarity: Math.round(body_similarity * 100) / 100,
+        order: acceptedSection.index,
+        candidateIndex: candidateSection.index,
+      };
+    }
+  }
+  return best;
+}
+
+function headingDiff(acceptedHeadings, candidateHeadings, acceptedSections, candidateSections) {
   const candidateSet = new Set(candidateHeadings.map((heading) => heading.normalized));
   const acceptedSet = new Set(acceptedHeadings.map((heading) => heading.normalized));
+  const usedRenamedCandidateIndexes = new Set();
+  const renamed = [];
+  const removed = [];
+
+  for (const heading of acceptedHeadings) {
+    if (candidateSet.has(heading.normalized)) continue;
+    const acceptedSection = acceptedSections.find((section) => section.normalized === heading.normalized);
+    const rename = acceptedSection
+      ? comparableRenamedSection(acceptedSection, candidateSections, usedRenamedCandidateIndexes)
+      : null;
+    if (rename) {
+      usedRenamedCandidateIndexes.add(rename.candidateIndex);
+      renamed.push({
+        from: rename.from,
+        to: rename.to,
+        heading_similarity: rename.heading_similarity,
+        body_similarity: rename.body_similarity,
+        order: rename.order,
+      });
+    } else {
+      removed.push(heading.text);
+    }
+  }
+
   return {
-    removed: acceptedHeadings.filter((heading) => !candidateSet.has(heading.normalized)).map((heading) => heading.text),
-    added: candidateHeadings.filter((heading) => !acceptedSet.has(heading.normalized)).map((heading) => heading.text),
+    removed,
+    renamed,
+    added: candidateHeadings
+      .filter((heading) => !acceptedSet.has(heading.normalized))
+      .filter((heading) => !usedRenamedCandidateIndexes.has(candidateSections.find((section) => section.normalized === heading.normalized)?.index))
+      .map((heading) => heading.text),
   };
 }
 
@@ -174,6 +280,7 @@ function renderChangeSetMarkdown(report) {
     '## Structural Delta',
     '',
     `- **Removed headings:** ${report.metrics.removed_headings.length ? report.metrics.removed_headings.join('; ') : 'None'}`,
+    `- **Renamed headings:** ${report.metrics.renamed_headings.length ? report.metrics.renamed_headings.map((heading) => `${heading.from} -> ${heading.to}`).join('; ') : 'None'}`,
     `- **Added headings:** ${report.metrics.added_headings.length ? report.metrics.added_headings.join('; ') : 'None'}`,
     '',
     '## Changed Spans',
@@ -212,7 +319,9 @@ function comparePaper(input = {}) {
   const candidate = fs.readFileSync(candidatePath, 'utf8');
   const acceptedHeadings = headings(accepted);
   const candidateHeadings = headings(candidate);
-  const headingChanges = headingDiff(acceptedHeadings, candidateHeadings);
+  const acceptedSections = sections(accepted);
+  const candidateSections = sections(candidate);
+  const headingChanges = headingDiff(acceptedHeadings, candidateHeadings, acceptedSections, candidateSections);
   const acceptedWords = wordCount(accepted);
   const candidateWords = wordCount(candidate);
   const wordDelta = candidateWords - acceptedWords;
@@ -222,6 +331,7 @@ function comparePaper(input = {}) {
     word_count_delta: wordDelta,
     word_count_delta_pct: wordDeltaPct,
     removed_headings: headingChanges.removed,
+    renamed_headings: headingChanges.renamed,
     added_headings: headingChanges.added,
     changed_span_count: spans.length,
   };
@@ -270,6 +380,9 @@ function printCompare(result) {
   console.log(`Changed spans: ${report.changed_spans.length}`);
   if (report.metrics.removed_headings.length > 0) {
     console.log(`Removed headings: ${report.metrics.removed_headings.join('; ')}`);
+  }
+  if (report.metrics.renamed_headings.length > 0) {
+    console.log(`Renamed headings: ${report.metrics.renamed_headings.map((heading) => `${heading.from} -> ${heading.to}`).join('; ')}`);
   }
   console.log(`Report: ${displayPath(result.paperDir, result.markdownPath)}`);
   console.log(`JSON: ${displayPath(result.paperDir, result.jsonPath)}`);

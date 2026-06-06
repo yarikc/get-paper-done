@@ -67,6 +67,7 @@
         "word_count_delta",
         "word_count_delta_pct",
         "removed_headings",
+        "renamed_headings",
         "added_headings",
         "changed_span_count"
       ],
@@ -74,6 +75,21 @@
         "word_count_delta": { "type": "integer" },
         "word_count_delta_pct": { "type": "number" },
         "removed_headings": { "type": "array", "items": { "type": "string" } },
+        "renamed_headings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to", "heading_similarity", "body_similarity", "order"],
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "heading_similarity": { "type": "number" },
+              "body_similarity": { "type": "number" },
+              "order": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
         "added_headings": { "type": "array", "items": { "type": "string" } },
         "changed_span_count": { "type": "integer", "minimum": 0 }
       }

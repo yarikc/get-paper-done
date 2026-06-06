@@ -10,6 +10,7 @@ All notable changes to Get Paper Done are documented here.
 - `gpd accept` baseline promotion command, with `.paper/accepted/ACCEPTED.md`, `.paper/accepted/ACCEPTED.meta.json`, `STATE.json.accepted`, snapshot coverage, and status output showing whether `DRAFT.md` has changed since acceptance.
 - Accepted-baseline artifact validation for metadata/file pairing, required fields, accepted/source hashes, and promoted source consistency.
 - `gpd compare` baseline gate, generating `.paper/CHANGESET.md` and `.paper/CHANGESET.json` from accepted baseline versus current `DRAFT.md`, with word delta, heading delta, changed spans, and pairwise verdict.
+- `gpd compare` heading-fingerprint calibration, reporting same-order similar headings as renamed instead of removed so harmless heading edits do not trigger structure-loss risk.
 
 ### Changed
 

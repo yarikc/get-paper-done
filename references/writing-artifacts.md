@@ -325,7 +325,7 @@ After all feedback decisions are recorded, `REVISION-INSTRUCTIONS.md` compiles o
 
 `REVISION-CHECK.md` is required for substantive revisions. It compares the revised draft against the snapshot captured before revision and prevents validator-driven or feedback-driven edits from degrading thesis clarity, argument flow, evidence support, audience fit, persona and voice, ask clarity, or substance preservation. The recoverable baseline lives under `.paper/versions/`; `REVISION-CHECK.md` is the quality judgment, not the backup. Snapshots include hash metadata, paper-local source notes, external-review captures, and imported originals when present. Use `gpd restore --snapshot REV-...` to restore tracked files from a snapshot; restore first creates a safety snapshot of the current state.
 
-`CHANGESET.md` / `CHANGESET.json` are the accepted-baseline compare artifacts. They compare `.paper/accepted/ACCEPTED.md` to the candidate working copy in `.paper/DRAFT.md`, make removals visible, stamp baseline/candidate hashes, and route accepted papers with changed drafts through `/gpd-compare` before further acceptance decisions. The change set does not prove the candidate is better; it gives the author a concrete pairwise report.
+`CHANGESET.md` / `CHANGESET.json` are the accepted-baseline compare artifacts. They compare `.paper/accepted/ACCEPTED.md` to the candidate working copy in `.paper/DRAFT.md`, make removals visible, stamp baseline/candidate hashes, distinguish renamed headings from removed headings, and route accepted papers with changed drafts through `/gpd-compare` before further acceptance decisions. The change set does not prove the candidate is better; it gives the author a concrete pairwise report.
 
 ## Fast Intake
 

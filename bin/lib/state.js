@@ -371,8 +371,17 @@ function changeSetSummary(paperDir) {
   }
   const report = parsed.data;
   const currentDraftSha = artifactSha256(paperDir, 'DRAFT.md');
+  const currentAcceptedSha = artifactSha256(paperDir, 'accepted/ACCEPTED.md');
   const candidateSha = report.candidate && report.candidate.sha256 ? report.candidate.sha256 : '';
-  const current = Boolean(currentDraftSha && candidateSha && currentDraftSha === candidateSha);
+  const baselineSha = report.baseline && report.baseline.sha256 ? report.baseline.sha256 : '';
+  const current = Boolean(
+    currentDraftSha
+    && candidateSha
+    && currentDraftSha === candidateSha
+    && currentAcceptedSha
+    && baselineSha
+    && currentAcceptedSha === baselineSha,
+  );
   return {
     exists: true,
     current,
@@ -381,6 +390,8 @@ function changeSetSummary(paperDir) {
     recommendation: report.verdict && report.verdict.recommendation ? report.verdict.recommendation : '',
     changed_span_count: Array.isArray(report.changed_spans) ? report.changed_spans.length : 0,
     word_count_delta: report.metrics && Number.isFinite(report.metrics.word_count_delta) ? report.metrics.word_count_delta : 0,
+    baseline_sha256: baselineSha,
+    current_accepted_sha256: currentAcceptedSha,
     candidate_sha256: candidateSha,
     current_draft_sha256: currentDraftSha,
     label: `${current ? 'current' : 'stale'} ${report.verdict && report.verdict.pairwise ? report.verdict.pairwise : 'unknown'}`,
@@ -390,9 +401,21 @@ function changeSetSummary(paperDir) {
 function changeSetCurrentForDraft(state) {
   const meta = path.join(state.paperDir, '.paper');
   const parsed = readJsonIfExists(path.join(meta, 'CHANGESET.json'));
-  if (!parsed.data || !parsed.data.candidate || !parsed.data.candidate.sha256) return false;
+  if (
+    !parsed.data
+    || !parsed.data.baseline
+    || !parsed.data.baseline.sha256
+    || !parsed.data.candidate
+    || !parsed.data.candidate.sha256
+  ) return false;
   const currentDraftSha = artifactSha256(state.paperDir, 'DRAFT.md');
-  return Boolean(currentDraftSha && currentDraftSha === parsed.data.candidate.sha256);
+  const currentAcceptedSha = artifactSha256(state.paperDir, 'accepted/ACCEPTED.md');
+  return Boolean(
+    currentDraftSha
+    && currentDraftSha === parsed.data.candidate.sha256
+    && currentAcceptedSha
+    && currentAcceptedSha === parsed.data.baseline.sha256,
+  );
 }
 
 function feedbackPlanPending(state) {
