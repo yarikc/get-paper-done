@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "categories": {
+    "drafting_scaffold_leak": {
+      "patterns": [
+        "\\b(this paper|this section|this article|the following section)\\s+(argues|explains|shows|describes|sets out|examines)\\b",
+        "\\b(the point most often missed|what is often missed|the key point)\\b",
+        "\\b(two|three|four|five)\\s+(supports|reasons|parts|moves|claims)\\b"
+      ]
+    },
+    "repeated_restatement": {
+      "similarity_threshold": 0.72,
+      "min_words": 12
+    },
+    "defended_jargon": {
+      "patterns": [
+        "\\bby\\s+[^.,;:]{3,60},?\\s+i\\s+mean\\b",
+        "\\bwhat\\s+[^.,;:]{3,60}\\s+means\\b",
+        "\\bthe\\s+term\\s+[^.,;:]{3,60}\\s+means\\b",
+        "\\bnot\\s+just\\s+[^.,;:]{3,60},?\\s+but\\b"
+      ]
+    },
+    "undefined_load_bearing_term": {
+      "min_count": 2
+    },
+    "multi_clause_overload": {
+      "min_words": 35,
+      "min_clause_signals": 5
+    },
+    "abandoned_terminology": {
+      "min_count": 3,
+      "ngram_min": 2,
+      "ngram_max": 3
+    }
+  }
+}

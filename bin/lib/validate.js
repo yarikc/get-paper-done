@@ -281,6 +281,7 @@ const markdownContracts = {
       '## Verdict',
       '## Baseline',
       '## Structural Delta',
+      '## Advisory Findings',
       '## Changed Spans',
     ],
     tables: [],

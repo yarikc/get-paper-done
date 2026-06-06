@@ -11,6 +11,7 @@
     "candidate",
     "metrics",
     "verdict",
+    "advisory_findings",
     "changed_spans"
   ],
   "properties": {
@@ -130,6 +131,41 @@
           "risk": { "type": "string", "minLength": 1 },
           "before_excerpt": { "type": "string" },
           "after_excerpt": { "type": "string" }
+        }
+      }
+    },
+    "advisory_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "category",
+          "severity",
+          "message",
+          "evidence",
+          "location",
+          "recommendation"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^PA-[0-9]{3}$" },
+          "category": {
+            "type": "string",
+            "enum": [
+              "drafting_scaffold_leak",
+              "repeated_restatement",
+              "defended_jargon",
+              "undefined_load_bearing_term",
+              "multi_clause_overload",
+              "abandoned_terminology"
+            ]
+          },
+          "severity": { "type": "string", "enum": ["advisory"] },
+          "message": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string" },
+          "location": { "type": "string", "minLength": 1 },
+          "recommendation": { "type": "string", "minLength": 1 }
         }
       }
     }

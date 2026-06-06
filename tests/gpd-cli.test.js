@@ -1084,6 +1084,7 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
   assert.strictEqual(changeSet.changed_spans[0].status, 'proposed');
   const changeSetMarkdown = fs.readFileSync(changeSetMarkdownPath, 'utf8');
   assert(changeSetMarkdown.includes('## Changed Spans'));
+  assert(changeSetMarkdown.includes('## Advisory Findings'));
   assert(changeSetMarkdown.includes('- **Candidate SHA-256:**'));
   assert(run(['validate-artifact', '--path', changeSetPath]).includes('validation: ok'));
 
@@ -1138,6 +1139,73 @@ function testAcceptCommandPromotesFinalToAcceptedBaseline() {
     fs.readFileSync(path.join(meta, 'versions', snapshotId, 'accepted', 'ACCEPTED.md'), 'utf8'),
     '# Accepted Paper\n\nAccepted baseline explains the paper with enough stable words for a fair compare gate and preserves the same section shape.\n',
   );
+}
+
+function testCompareReportsProsePatternAdvisories() {
+  const dir = tempDir('gpd-compare-prose-advisories');
+  run(['init', '--location', dir, '--slug', 'prose-advisories', '--title', 'Prose Advisories']);
+  const paperDir = path.join(dir, 'prose-advisories');
+  const meta = path.join(paperDir, '.paper');
+  const draftPath = path.join(meta, 'DRAFT.md');
+
+  fs.writeFileSync(
+    draftPath,
+    [
+      '# Prose Advisories',
+      '',
+      'The operating layer keeps accountability visible. The operating layer keeps sequencing visible. The operating layer keeps ownership visible.',
+      '',
+      'The agent-ready change lane keeps governance close to delivery. The agent-ready change lane keeps decisions close to delivery. The agent-ready change lane keeps review close to delivery.',
+      '',
+    ].join('\n'),
+  );
+  run(['accept', '--paper', paperDir, '--source', 'draft']);
+  fs.writeFileSync(path.join(meta, 'tier2b-patterns.json'), JSON.stringify({
+    version: 1,
+    categories: {
+      drafting_scaffold_leak: {
+        patterns: ['\\bcustom local scaffold\\b'],
+      },
+    },
+  }, null, 2));
+
+  fs.writeFileSync(
+    draftPath,
+    [
+      '# Prose Advisories',
+      '',
+      'This paper explains why teams need a new model. The point most often missed is that the new model has two supports.',
+      '',
+      'Custom local scaffold should be caught by the paper-local pattern catalog.',
+      '',
+      'Teams can improve coordination because the process can support better alignment across the enterprise.',
+      '',
+      'Teams can improve coordination because the process can support better alignment across the enterprise.',
+      '',
+      'By Control Surface, I mean the interface where every team can see the same queue, which is not just a dashboard, but a complete way to govern work, align leaders, sequence changes, reduce ambiguity, and prevent surprises across many dependencies.',
+      '',
+      'The decision-fabric shapes the flow. The decision-fabric clarifies ownership. The decision-fabric keeps escalation visible.',
+      '',
+    ].join('\n'),
+  );
+
+  const output = run(['compare', '--paper', paperDir]);
+  assert(output.includes('Advisories:'));
+  const changeSetPath = path.join(meta, 'CHANGESET.json');
+  const changeSet = JSON.parse(fs.readFileSync(changeSetPath, 'utf8'));
+  const categories = new Set(changeSet.advisory_findings.map((finding) => finding.category));
+  assert(categories.has('drafting_scaffold_leak'));
+  assert(categories.has('repeated_restatement'));
+  assert(categories.has('defended_jargon'));
+  assert(categories.has('undefined_load_bearing_term'));
+  assert(categories.has('multi_clause_overload'));
+  assert(categories.has('abandoned_terminology'));
+  assert(changeSet.advisory_findings.some((finding) => finding.evidence.toLowerCase().includes('custom local scaffold')));
+  assert.strictEqual(changeSet.advisory_findings.every((finding) => finding.severity === 'advisory'), true);
+  assert.strictEqual(changeSet.verdict.pairwise, 'changed_inconclusive');
+  assert(run(['validate-artifact', '--path', changeSetPath]).includes('validation: ok'));
+  const statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.changeSetSummary.advisory_count, changeSet.advisory_findings.length);
 }
 
 function testChangeSetCurrentRequiresCurrentAcceptedBaseline() {
@@ -3195,6 +3263,7 @@ testImportWithoutSlugUsesSourceName();
 testExportCommandWritesFinalAndState();
 testNextUsesDraftHashForExportFreshness();
 testAcceptCommandPromotesFinalToAcceptedBaseline();
+testCompareReportsProsePatternAdvisories();
 testChangeSetCurrentRequiresCurrentAcceptedBaseline();
 testAcceptCommandCoversDraftDefaultErrorsAndValidation();
 testSnapshotCommandCreatesVersionAndRevisionLog();
