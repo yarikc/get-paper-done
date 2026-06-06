@@ -12,7 +12,7 @@ All notable changes to Get Paper Done are documented here.
 - `gpd compare` baseline gate, generating `.paper/CHANGESET.md` and `.paper/CHANGESET.json` from accepted baseline versus current `DRAFT.md`, with word delta, heading delta, changed spans, and pairwise verdict.
 - `gpd compare` heading-fingerprint calibration, reporting same-order similar headings as renamed instead of removed so harmless heading edits do not trigger structure-loss risk.
 - `gpd compare` prose-pattern advisories for deterministic, non-blocking risks such as drafting scaffolding, repeated restatement, defended jargon, undefined load-bearing terms, multi-clause overload, and abandoned baseline terminology, backed by a default `references/tier2b-patterns.json` catalog with optional `.paper/tier2b-patterns.json` extensions.
-- `gpd improve` guided loop command, which reads accepted-baseline and CHANGESET state and tells the author whether to accept a baseline, run compare, or review current candidate changes without rewriting prose.
+- `gpd improve` guided loop command, which reads accepted-baseline and CHANGESET state and tells the author whether to accept a baseline, run compare, or review current candidate changes without rewriting prose; `--action compare` refreshes CHANGESET artifacts and `--action accept` promotes only explicitly accepted baselines/candidates.
 
 ### Changed
 

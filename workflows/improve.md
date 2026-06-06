@@ -8,10 +8,13 @@ Parse flags:
 
 - `--paper <path>`: existing paper workspace.
 - `--json`: print the machine-readable guidance result.
+- `--action guide|compare|accept`: default `guide`. `compare` refreshes `.paper/CHANGESET.*`; `accept` promotes a reviewed baseline or candidate.
+- `--force`: required with `--note` before accepting a candidate with `regression_risk`.
+- `--note <text>`: acceptance note or forced-risk rationale.
 
 Use `gpd improve` when the author wants to know what to do next after accepting a baseline or editing the candidate draft.
 
-The command is read-only. It inspects:
+With default `--action guide`, the command is read-only. It inspects:
 
 - accepted baseline state from `.paper/accepted/ACCEPTED.md` and `.paper/accepted/ACCEPTED.meta.json`
 - draft freshness since accept
@@ -25,6 +28,14 @@ Guidance rules:
 - If a current CHANGESET exists, tell the author to review `CHANGESET.md` and decide whether to accept, revise, or continue manually.
 - If the current CHANGESET reports `regression_risk`, tell the author not to accept yet.
 - If `DRAFT.md` has not changed since accept, tell the author no candidate change is pending.
+
+Action rules:
+
+- `--action compare` may write `.paper/CHANGESET.md` and `.paper/CHANGESET.json`; it does not edit prose.
+- `--action accept` with no accepted baseline promotes the current `draft` or `final` source only after user approval.
+- `--action accept` with a current CHANGESET promotes the candidate draft only after user approval.
+- `--action accept` refuses stale/missing CHANGESET reports.
+- `--action accept` refuses `regression_risk` unless the user passes both `--force` and `--note`.
 
 Do not rewrite prose. Do not call external review. Do not run `gpd accept` automatically. Do not treat `changed_inconclusive` as approval.
 

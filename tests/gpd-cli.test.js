@@ -38,6 +38,7 @@ function testHelpShowsCalibratedExternalReviewProviders() {
   assert(output.includes('gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md'));
   assert(output.includes('improve                      Guide the accepted-baseline improvement loop'));
   assert(output.includes('gpd improve --paper ~/papers/metadata-strategy'));
+  assert(output.includes('gpd improve --paper ~/papers/metadata-strategy --action compare'));
   assert(output.includes('next                         Show only the next recommended action and why'));
   assert(output.includes('gpd next --paper ~/papers/metadata-strategy'));
 }
@@ -1277,7 +1278,11 @@ function testImproveCommandGuidesAcceptedBaselineLoop() {
   assert.strictEqual(json.stage, 'needs_compare');
   assert.strictEqual(json.next_command, `gpd compare --paper ${paperDir}`);
 
-  run(['compare', '--paper', paperDir]);
+  output = run(['improve', '--paper', paperDir, '--action', 'compare']);
+  assert(output.includes('Action: Compare updated CHANGESET.md and CHANGESET.json.'));
+  assert(output.includes('Stage: review change set'));
+  assert(fs.existsSync(path.join(meta, 'CHANGESET.json')));
+
   output = run(['improve', '--paper', paperDir]);
   assert(output.includes('Stage: review change set'));
   assert(output.includes('Compare: current changed_inconclusive'));
@@ -1287,6 +1292,50 @@ function testImproveCommandGuidesAcceptedBaselineLoop() {
   assert.strictEqual(json.stage, 'review_change_set');
   assert.strictEqual(json.changeSet.current, true);
   assert.strictEqual(json.next_command, '');
+
+  const finalSource = runFail(['improve', '--paper', paperDir, '--action', 'accept', '--source', 'final', '--note', 'Wrong source.']);
+  assert.strictEqual(finalSource.status, 1);
+  assert(finalSource.stderr.includes('CHANGESET compares accepted baseline to DRAFT.md'));
+
+  output = run(['improve', '--paper', paperDir, '--action', 'accept', '--note', 'Candidate approved by author.']);
+  assert(output.includes('Action: Candidate accepted as the new baseline.'));
+  assert(output.includes('Stage: accepted current'));
+  json = JSON.parse(run(['improve', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.stage, 'accepted_current');
+}
+
+function testImproveCommandBlocksRegressionRiskAcceptWithoutOverride() {
+  const dir = tempDir('gpd-improve-risk');
+  run(['init', '--location', dir, '--slug', 'risk-paper', '--title', 'Risk Paper']);
+  const paperDir = path.join(dir, 'risk-paper');
+  const meta = path.join(paperDir, '.paper');
+  const draftPath = path.join(meta, 'DRAFT.md');
+
+  fs.writeFileSync(
+    draftPath,
+    '# Risk Paper\n\n## Keep This Section\n\nAccepted baseline keeps a load-bearing section visible.\n',
+  );
+  run(['accept', '--paper', paperDir, '--source', 'draft']);
+  fs.writeFileSync(
+    draftPath,
+    '# Risk Paper\n\nCandidate removes the load-bearing section.\n',
+  );
+  run(['improve', '--paper', paperDir, '--action', 'compare']);
+  let json = JSON.parse(run(['improve', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.changeSet.pairwise, 'regression_risk');
+
+  let blocked = runFail(['improve', '--paper', paperDir, '--action', 'accept']);
+  assert.strictEqual(blocked.status, 1);
+  assert(blocked.stderr.includes('Cannot accept a regression-risk candidate without --force and --note'));
+
+  blocked = runFail(['improve', '--paper', paperDir, '--action', 'accept', '--force']);
+  assert.strictEqual(blocked.status, 1);
+  assert(blocked.stderr.includes('Cannot accept a regression-risk candidate without --force and --note'));
+
+  const output = run(['improve', '--paper', paperDir, '--action', 'accept', '--force', '--note', 'Author accepts removal for this test.']);
+  assert(output.includes('Action: Candidate accepted as the new baseline.'));
+  json = JSON.parse(run(['improve', '--paper', paperDir, '--json']));
+  assert.strictEqual(json.stage, 'accepted_current');
 }
 
 function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
@@ -3315,6 +3364,7 @@ testAcceptCommandPromotesFinalToAcceptedBaseline();
 testCompareReportsProsePatternAdvisories();
 testChangeSetCurrentRequiresCurrentAcceptedBaseline();
 testImproveCommandGuidesAcceptedBaselineLoop();
+testImproveCommandBlocksRegressionRiskAcceptWithoutOverride();
 testAcceptCommandCoversDraftDefaultErrorsAndValidation();
 testSnapshotCommandCreatesVersionAndRevisionLog();
 testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();

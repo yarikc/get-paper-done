@@ -7,8 +7,16 @@ const {
   basenameLabel,
 } = require('./common');
 const {
+  acceptPaper,
+} = require('./accepted');
+const {
+  comparePaper,
+} = require('./compare');
+const {
   status,
 } = require('./state');
+
+const actions = new Set(['guide', 'compare', 'accept']);
 
 function readJsonIfExists(filePath) {
   if (!fs.existsSync(filePath)) return null;
@@ -23,6 +31,11 @@ function preferredAcceptSource(paperDir) {
   const meta = path.join(paperDir, '.paper');
   if (fs.existsSync(path.join(meta, 'exports', 'FINAL.md'))) return 'final';
   return 'draft';
+}
+
+function isDraftSource(value) {
+  if (!value) return true;
+  return new Set(['draft', 'DRAFT.md', '.paper/DRAFT.md']).has(String(value).trim());
 }
 
 function readChangeSetDetails(paperDir) {
@@ -43,6 +56,16 @@ function readChangeSetDetails(paperDir) {
 }
 
 function improvePaper(input = {}) {
+  const action = input.action || 'guide';
+  if (!actions.has(action)) {
+    throw new Error('--action must be guide, compare, or accept');
+  }
+  if (action === 'compare') return improveWithCompare(input);
+  if (action === 'accept') return improveWithAccept(input);
+  return improveGuide(input);
+}
+
+function improveGuide(input = {}) {
   const state = status(input);
   const paperDir = state.paperDir;
   const accepted = state.acceptedSummary || { exists: false };
@@ -117,11 +140,99 @@ function improvePaper(input = {}) {
   };
 }
 
+function improveWithCompare(input = {}) {
+  const before = improveGuide({ ...input, action: 'guide' });
+  if (!before.accepted || !before.accepted.exists) {
+    throw new Error('Cannot compare before an accepted baseline exists. Run gpd improve --action accept after reading the paper.');
+  }
+  if (before.accepted.draft_status_since_accept !== 'draft changed since accept') {
+    return {
+      ...before,
+      action: {
+        performed: false,
+        type: 'compare',
+        message: 'No compare needed because DRAFT.md has not changed since accept.',
+      },
+    };
+  }
+  const compare = comparePaper({ paper: before.paperDir, dryRun: input.dryRun });
+  const after = improveGuide({ ...input, action: 'guide', paper: before.paperDir });
+  return {
+    ...after,
+    action: {
+      performed: !input.dryRun,
+      type: 'compare',
+      dryRun: Boolean(input.dryRun),
+      message: input.dryRun ? 'Compare dry run completed; CHANGESET was not updated.' : 'Compare updated CHANGESET.md and CHANGESET.json.',
+      result: compare,
+    },
+  };
+}
+
+function improveWithAccept(input = {}) {
+  const before = improveGuide({ ...input, action: 'guide' });
+  const note = input.note || input.notes || '';
+  if (!before.accepted || !before.accepted.exists) {
+    const source = input.source || preferredAcceptSource(before.paperDir);
+    const accept = acceptPaper({
+      paper: before.paperDir,
+      source,
+      note,
+      dryRun: input.dryRun,
+    });
+    const after = input.dryRun ? before : improveGuide({ ...input, action: 'guide', paper: before.paperDir });
+    return {
+      ...after,
+      action: {
+        performed: !input.dryRun,
+        type: 'accept',
+        dryRun: Boolean(input.dryRun),
+        message: input.dryRun ? 'Accepted-baseline dry run completed.' : 'Accepted baseline updated.',
+        result: accept,
+      },
+    };
+  }
+
+  if (before.accepted.draft_status_since_accept !== 'draft changed since accept') {
+    throw new Error('Cannot accept: DRAFT.md has not changed since the accepted baseline.');
+  }
+  if (!before.changeSet || !before.changeSet.exists || !before.changeSet.current) {
+    throw new Error('Cannot accept candidate before a current CHANGESET exists. Run gpd improve --action compare first.');
+  }
+  if (before.changeSet.pairwise === 'regression_risk' && (!input.force || !note.trim())) {
+    throw new Error('Cannot accept a regression-risk candidate without --force and --note explaining the accepted tradeoff.');
+  }
+  if (!isDraftSource(input.source)) {
+    throw new Error('Cannot accept candidate from --source final because CHANGESET compares accepted baseline to DRAFT.md. Omit --source or use --source draft.');
+  }
+
+  const accept = acceptPaper({
+    paper: before.paperDir,
+    source: 'draft',
+    note,
+    dryRun: input.dryRun,
+  });
+  const after = input.dryRun ? before : improveGuide({ ...input, action: 'guide', paper: before.paperDir });
+  return {
+    ...after,
+    action: {
+      performed: !input.dryRun,
+      type: 'accept',
+      dryRun: Boolean(input.dryRun),
+      message: input.dryRun ? 'Candidate accept dry run completed.' : 'Candidate accepted as the new baseline.',
+      result: accept,
+    },
+  };
+}
+
 function printImprove(result) {
   const changeSet = result.changeSet || {};
   const details = result.changeSetDetails || {};
   console.log('Improve');
   console.log('');
+  if (result.action) {
+    console.log(`Action: ${result.action.message}`);
+  }
   console.log(`Paper: ${basenameLabel(result.paperDir)}`);
   console.log(`Stage: ${result.stage_label}`);
   console.log(`Accepted baseline: ${result.accepted && result.accepted.exists ? result.accepted.accepted_path : 'none'}`);

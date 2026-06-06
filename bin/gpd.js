@@ -85,6 +85,7 @@ Options:
   --title TITLE                Paper title for init/import
   --source PATH                Source folder/file for import
   --mode MODE                  Import mode: preserve-and-strengthen|generate-from-brief|convert-format
+  --action VALUE               Improve action: guide|compare|accept
   --confirm-transform          Confirm transform/regeneration risk for authored prose imports
   --max-file-bytes BYTES       Import skip threshold for individual source files
   --review-file REVIEWER=FILE  External review file to collect; repeatable
@@ -133,6 +134,7 @@ Examples:
   gpd accept --paper ~/papers/metadata-strategy --source final
   gpd compare --paper ~/papers/metadata-strategy
   gpd improve --paper ~/papers/metadata-strategy
+  gpd improve --paper ~/papers/metadata-strategy --action compare
   gpd snapshot --paper ~/papers/metadata-strategy --reason before_substantive_revision
   gpd restore --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision
   gpd review-external --paper ~/papers/metadata-strategy --review-file claude=/tmp/claude-review.md
@@ -198,6 +200,9 @@ function parseWorkspaceOptions(argv) {
       i += 1;
     } else if (arg === '--mode') {
       args.mode = argv[i + 1];
+      i += 1;
+    } else if (arg === '--action') {
+      args.action = argv[i + 1];
       i += 1;
     } else if (arg === '--max-file-bytes') {
       args.maxFileBytes = Number(argv[i + 1]);

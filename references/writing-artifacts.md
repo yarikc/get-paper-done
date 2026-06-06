@@ -327,7 +327,7 @@ After all feedback decisions are recorded, `REVISION-INSTRUCTIONS.md` compiles o
 
 `CHANGESET.md` / `CHANGESET.json` are the accepted-baseline compare artifacts. They compare `.paper/accepted/ACCEPTED.md` to the candidate working copy in `.paper/DRAFT.md`, make removals visible, stamp baseline/candidate hashes, distinguish renamed headings from removed headings, surface prose-pattern advisories, and route accepted papers with changed drafts through `/gpd-compare` before further acceptance decisions. Default prose-pattern rules live in `references/tier2b-patterns.json`; a paper can add local patterns or threshold overrides in `.paper/tier2b-patterns.json`. The change set does not prove the candidate is better; it gives the author a concrete pairwise report.
 
-`gpd improve` is the read-only orchestration surface for the accepted-baseline loop. It does not rewrite prose, run external review, or accept a candidate. It tells the author whether the paper needs a human-accepted baseline, needs a fresh `gpd compare`, or is ready for author review of `CHANGESET.md`.
+`gpd improve` is the orchestration surface for the accepted-baseline loop. With no action flag it is read-only: it tells the author whether the paper needs a human-accepted baseline, needs a fresh `gpd compare`, or is ready for author review of `CHANGESET.md`. `--action compare` refreshes `CHANGESET.md` / `CHANGESET.json` without editing prose. `--action accept` promotes only the reviewed baseline or candidate; if the current CHANGESET reports `regression_risk`, acceptance requires `--force` plus a human note explaining the tradeoff.
 
 ## Fast Intake
 
