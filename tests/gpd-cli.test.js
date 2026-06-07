@@ -1386,6 +1386,9 @@ function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
   metadata = JSON.parse(fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.meta.json'), 'utf8'));
   assert.strictEqual(metadata.note, 'Second pass.');
 
+  fs.writeFileSync(draftPath, '# Draft Paper\n\nCandidate changed after accept.\n');
+  assert(run(['validate-artifact', '--path', path.join(meta, 'accepted', 'ACCEPTED.meta.json')]).includes('validation: ok'));
+
   const invalid = runFail(['accept', '--paper', paperDir, '--source', 'review']);
   assert.strictEqual(invalid.status, 1);
   assert(invalid.stderr.includes('--source must be draft or final'));
@@ -1446,6 +1449,9 @@ function testAcceptCommandCanPromoteSnapshotArtifact() {
   const statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
   assert.strictEqual(statusJson.acceptedSummary.source_artifact, `.paper/versions/${snapshotId}/exports/FINAL.md`);
   assert.strictEqual(statusJson.acceptedSummary.draft_status_since_accept, 'draft changed since accept');
+
+  fs.rmSync(path.join(meta, 'versions', snapshotId), { recursive: true, force: true });
+  assert(run(['validate-artifact', '--path', path.join(meta, 'accepted', 'ACCEPTED.meta.json')]).includes('validation: ok'));
 }
 
 function testSnapshotCommandCreatesVersionAndRevisionLog() {

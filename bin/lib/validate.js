@@ -543,19 +543,6 @@ function validateAcceptedArtifacts(meta) {
   const snapshotSource = /^versions\/[^/]+\/(?:DRAFT\.md|exports\/FINAL\.md)$/.test(sourceArtifact);
   if (!liveSource && !snapshotSource) {
     issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_artifact must be .paper/DRAFT.md, .paper/exports/FINAL.md, or a .paper/versions/<snapshot>/ draft/final artifact'));
-  } else {
-    const sourcePath = path.join(meta, sourceArtifact);
-    if (!fs.existsSync(sourcePath)) {
-      issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', `source artifact is missing: .paper/${sourceArtifact}`));
-    } else {
-      const sourceSha = fileSha256(sourcePath);
-      if (metadata.source_sha256 !== sourceSha) {
-        issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_sha256 does not match source_artifact'));
-      }
-      if (metadata.source_sha256 !== metadata.accepted_sha256) {
-        issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_sha256 must match $.accepted_sha256'));
-      }
-    }
   }
 
   return issues;

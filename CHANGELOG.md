@@ -19,6 +19,7 @@ All notable changes to Get Paper Done are documented here.
 
 - CI now runs on Node 24 with Node 24-compatible GitHub Actions.
 - `gpd next` routes accepted papers with changed draft candidates to `/gpd-compare` until the change set matches the current draft hash.
+- Accepted-baseline validation now treats source artifact hashes as acceptance-time provenance; candidate edits no longer make `gpd validate` fail when `ACCEPTED.md` itself is intact.
 
 ## 0.1.0 - 2026-05-10
 

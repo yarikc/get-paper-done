@@ -29,5 +29,6 @@ Do not rewrite `.paper/DRAFT.md` or `.paper/exports/FINAL.md`.
 <success_criteria>
 - `.paper/accepted/ACCEPTED.md` contains the promoted source content.
 - `.paper/accepted/ACCEPTED.meta.json` records accepted time, source artifact, source/draft/final hashes, and snapshot provenance when applicable.
+- Validation treats source hashes as acceptance-time provenance; the hard integrity check is `accepted_sha256` against `.paper/accepted/ACCEPTED.md`.
 - `gpd status` shows the accepted baseline and whether `DRAFT.md` has changed since acceptance.
 </success_criteria>
