@@ -376,5 +376,7 @@ module.exports = {
   printRestore,
   coreArtifacts,
   directoryArtifacts,
+  resolveSnapshotDir,
+  loadSnapshotMetadata,
   validateSnapshotHashes,
 };

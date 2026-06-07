@@ -83,7 +83,7 @@ Options:
   --location DIR               Parent location for init/import
   --slug NAME                  Paper directory name
   --title TITLE                Paper title for init/import
-  --source PATH                Source folder/file for import
+  --source PATH                Source folder/file for import, or draft|final for accept
   --mode MODE                  Import mode: preserve-and-strengthen|generate-from-brief|convert-format
   --action VALUE               Improve action: guide|compare|accept
   --confirm-transform          Confirm transform/regeneration risk for authored prose imports
@@ -132,6 +132,7 @@ Examples:
   gpd feedback-plan decide --paper ~/papers/metadata-strategy --set 1 --decision modify --note "Keep concise"
   gpd revise --paper ~/papers/metadata-strategy --trigger .paper/FEEDBACK-PLAN.md
   gpd accept --paper ~/papers/metadata-strategy --source final
+  gpd accept --paper ~/papers/metadata-strategy --snapshot REV-20260519T143205123-before-substantive-revision --source final
   gpd compare --paper ~/papers/metadata-strategy
   gpd improve --paper ~/papers/metadata-strategy
   gpd improve --paper ~/papers/metadata-strategy --action compare

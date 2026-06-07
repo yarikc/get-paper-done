@@ -1397,6 +1397,57 @@ function testAcceptCommandCoversDraftDefaultErrorsAndValidation() {
   assert(badMetadata.stdout.includes('$.accepted_sha256 does not match accepted/ACCEPTED.md'));
 }
 
+function testAcceptCommandCanPromoteSnapshotArtifact() {
+  const dir = tempDir('gpd-accept-snapshot');
+  run(['init', '--location', dir, '--slug', 'snapshot-accept-paper', '--title', 'Snapshot Accept Paper']);
+  const paperDir = path.join(dir, 'snapshot-accept-paper');
+  const meta = path.join(paperDir, '.paper');
+  const draftPath = path.join(meta, 'DRAFT.md');
+  const finalPath = path.join(meta, 'exports', 'FINAL.md');
+
+  fs.writeFileSync(draftPath, '# Snapshot Accept\n\nRollback draft baseline.\n');
+  fs.mkdirSync(path.dirname(finalPath), { recursive: true });
+  fs.writeFileSync(finalPath, '# Snapshot Accept\n\nRollback final baseline.\n');
+  run(['snapshot', '--paper', paperDir, '--reason', 'rollback_peak']);
+  const snapshotId = fs.readdirSync(path.join(meta, 'versions')).find((name) => name.includes('rollback-peak'));
+  assert(snapshotId);
+
+  fs.writeFileSync(draftPath, '# Snapshot Accept\n\nCurrent candidate changed after rollback.\n');
+  fs.writeFileSync(finalPath, '# Snapshot Accept\n\nCurrent export should not become baseline.\n');
+
+  const output = run([
+    'accept',
+    '--paper',
+    paperDir,
+    '--snapshot',
+    snapshotId,
+    '--source',
+    'final',
+    '--note',
+    'Accepted rollback peak.',
+  ]);
+  assert(output.includes(`Snapshot: ${snapshotId}`));
+  assert(output.includes(`Source: .paper/versions/${snapshotId}/exports/FINAL.md`));
+
+  const accepted = fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.md'), 'utf8');
+  assert.strictEqual(accepted, '# Snapshot Accept\n\nRollback final baseline.\n');
+  assert.strictEqual(fs.readFileSync(draftPath, 'utf8'), '# Snapshot Accept\n\nCurrent candidate changed after rollback.\n');
+  assert.strictEqual(fs.readFileSync(finalPath, 'utf8'), '# Snapshot Accept\n\nCurrent export should not become baseline.\n');
+
+  const metadata = JSON.parse(fs.readFileSync(path.join(meta, 'accepted', 'ACCEPTED.meta.json'), 'utf8'));
+  assert.strictEqual(metadata.source_artifact, `.paper/versions/${snapshotId}/exports/FINAL.md`);
+  assert.strictEqual(metadata.source_snapshot_id, snapshotId);
+  assert.strictEqual(metadata.source_snapshot_path, `.paper/versions/${snapshotId}`);
+  assert.strictEqual(metadata.note, 'Accepted rollback peak.');
+  assert.strictEqual(metadata.accepted_sha256, metadata.source_sha256);
+  assert.notStrictEqual(metadata.draft_sha256, metadata.final_sha256);
+  assert(run(['validate-artifact', '--path', path.join(meta, 'accepted', 'ACCEPTED.meta.json')]).includes('validation: ok'));
+
+  const statusJson = JSON.parse(run(['status', '--paper', paperDir, '--json']));
+  assert.strictEqual(statusJson.acceptedSummary.source_artifact, `.paper/versions/${snapshotId}/exports/FINAL.md`);
+  assert.strictEqual(statusJson.acceptedSummary.draft_status_since_accept, 'draft changed since accept');
+}
+
 function testSnapshotCommandCreatesVersionAndRevisionLog() {
   const dir = tempDir('gpd-snapshot-test');
   run(['init', '--location', dir, '--slug', 'snapshot-paper', '--title', 'Snapshot Paper']);
@@ -3371,6 +3422,7 @@ testChangeSetCurrentRequiresCurrentAcceptedBaseline();
 testImproveCommandGuidesAcceptedBaselineLoop();
 testImproveCommandBlocksRegressionRiskAcceptWithoutOverride();
 testAcceptCommandCoversDraftDefaultErrorsAndValidation();
+testAcceptCommandCanPromoteSnapshotArtifact();
 testSnapshotCommandCreatesVersionAndRevisionLog();
 testReviseCommandCreatesPreRevisionSnapshotAndSurfacesRestore();
 testReviseCommandRequiresDraft();

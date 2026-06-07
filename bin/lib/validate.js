@@ -535,11 +535,14 @@ function validateAcceptedArtifacts(meta) {
     issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.accepted_sha256 does not match accepted/ACCEPTED.md'));
   }
 
-  const sourceArtifact = typeof metadata.source_artifact === 'string'
-    ? metadata.source_artifact.replace(/^\.paper\//, '')
+  const sourceArtifactValue = typeof metadata.source_artifact === 'string'
+    ? metadata.source_artifact
     : '';
-  if (!['DRAFT.md', 'exports/FINAL.md'].includes(sourceArtifact)) {
-    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_artifact must be .paper/DRAFT.md or .paper/exports/FINAL.md'));
+  const sourceArtifact = sourceArtifactValue.replace(/^\.paper\//, '');
+  const liveSource = ['DRAFT.md', 'exports/FINAL.md'].includes(sourceArtifact);
+  const snapshotSource = /^versions\/[^/]+\/(?:DRAFT\.md|exports\/FINAL\.md)$/.test(sourceArtifact);
+  if (!liveSource && !snapshotSource) {
+    issues.push(issue('HIGH', 'accepted/ACCEPTED.meta.json', '$.source_artifact must be .paper/DRAFT.md, .paper/exports/FINAL.md, or a .paper/versions/<snapshot>/ draft/final artifact'));
   } else {
     const sourcePath = path.join(meta, sourceArtifact);
     if (!fs.existsSync(sourcePath)) {
