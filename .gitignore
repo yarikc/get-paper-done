@@ -10,5 +10,7 @@ docs/WORKFLOW-SIMULATION.md
 .codex-handoff.*.md
 .codex-handoff.backups/
 .codex-handoff.state.json
+.claude-handoff.md
+.claude-handoff.*.md
 latest-handoff.md
 latest-handoff.json
